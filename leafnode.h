@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.59 2002/07/06 08:55:11 ralf Exp $ */
+/* $Id: leafnode.h,v 1.60 2002/07/06 08:57:48 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -429,6 +429,9 @@ extern "C" {
 	int timeout;		/* timeout in seconds before we give up */
 	char active;
     };
+
+    /*@only@*/ struct serverlist *
+      create_server(/*@observer@*/ const char *name, unsigned short port);
 
     extern /*@null@*/ struct expire_entry *expire_base;
 

@@ -391,20 +391,8 @@ readconfig(char *configfile)
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: server is %s", value);
-		    p = (struct serverlist *)
-			critmalloc(sizeof(struct serverlist),
-				   "allocating space for server name");
-
-		    p->name = critstrdup(value, "readconfig");
-		    p->descriptions = TRUE;
+		    p = create_server(value, 0);
 		    p->next = NULL;
-		    p->timeout = 30;	/* default 30 seconds */
-		    p->port = 0;
-		    p->usexhdr = 0;	/* default: use XOVER */
-		    p->username = NULL;
-		    p->password = NULL;
-		    p->active = TRUE;
-		    p->dontpost = FALSE;
 		    if (!servers)
 			servers = serverlist = p;
 		    else
@@ -444,6 +432,28 @@ readconfig(char *configfile)
     free(param);
     free(value);
     return 0;
+}
+
+/*@only@*/ struct serverlist *
+create_server(/*@observer@*/ const char *name, unsigned short port)
+{
+    struct serverlist *p;
+
+    p = (struct serverlist *)
+	critmalloc(sizeof(struct serverlist),
+		"allocating space for server name");
+
+    p->name = critstrdup(name, "readconfig");
+    p->descriptions = TRUE;
+    p->next = NULL;
+    p->timeout = 30;	/* default 30 seconds */
+    p->port = port;
+    p->usexhdr = 0;	/* default: use XOVER */
+    p->username = NULL;
+    p->password = NULL;
+    p->active = TRUE;
+    p->dontpost = FALSE;
+    return p;
 }
 
 static void
