@@ -398,7 +398,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	(void)chdirgroup(group->name, FALSE);
 	sprintf(s, "%lu", *artno);
 	f = fopen(s, "r");
-	if (!f && allowsubscribe())
+	if (!f && is_pseudogroup(group->name) && allowsubscribe())
 	    f = fopenpseudoart(group, s, *artno);
 	if (!f && errno != ENOENT)
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s in %s: %m", arg, group->name);
