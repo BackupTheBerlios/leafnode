@@ -79,7 +79,9 @@ authenticate(const struct serverlist *current_server)
     if (reply == 281) {
 	return TRUE;
     } else if (reply != 381) {
-	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "username rejected: %03d", reply);
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
+               "authenticate: %s@%s: username rejected: %03d",
+               current_server->username, current_server->name, reply);
 	return FALSE;
     }
 
@@ -98,7 +100,8 @@ authenticate(const struct serverlist *current_server)
     reply = nntpreply(current_server);
     if (reply != 281) {
 	ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
-	       "authenticate: password failed: %03d", reply);
+	       "authenticate: %s@%s: password failed: %03d",
+               current_server->username, current_server->name, reply);
 	return FALSE;
     }
     return TRUE;
