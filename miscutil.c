@@ -290,6 +290,7 @@ initgrouplistdir(const char *dir)
 }
 
 /** Read lines of a file into rbtree, ignore duplicates and empty lines.
+ *  replace all spaces in file with '\0'.
  *  \return rbtree, NULL in case of trouble.
  */
 /*@null@*/ /*@only@*/ struct rbtree *
@@ -308,10 +309,14 @@ initfilelist(FILE *f, const void *config,
     }
 
     while ((l = getaline(f)) && *l) {
-	char *k1;
+	char *k1, *p;
 	const char *k2;
 
 	k1 = critstrdup(l, myname);
+	for (p = k1; (p = strchr(p, ' ')) != NULL; ) {
+	    *p++ = '\0';
+	}
+
 	k2 = rbsearch(k1, rb);
 
 	if (k2 == NULL) {
