@@ -1980,6 +1980,9 @@ main(int argc, char **argv)
 	fprintf(stderr, "Cannot catch SIGUSR2.\n");
     else if (setjmp(jmpbuffer) != 0) {
 	servers = NULL;		/* in this case, jump the while ... loop */
+	rc = 2;			/* and prevent writing "complete markers"
+				   if we omit this, we may never get rid of
+				   deleted newsgroups */
     }
 
     while (servers) {
@@ -2006,7 +2009,7 @@ main(int argc, char **argv)
 
     if (!postonly) {
 	writeactive();
-	if (rc == 0)
+	if (rc == 0 && forceactive)
 	    markactive(AM_UPDATE);
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
