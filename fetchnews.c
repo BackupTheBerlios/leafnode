@@ -557,10 +557,16 @@ getmarked(struct newsgroup *group)
 	struct stat dummy1;
 	time_t ts, expire;
 
-	if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2)
+	if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2) {
 	    /* skip malformatted line */
+	    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
+		    "warning: skipping malformatted "
+		    "interesting.groups/%s line \"%s\"",
+		    group->name, l);
 	    continue;
+	}
 
+	/* check time stamp of mark, if too old, expire */
 	ts = fi[2] ? strtoul(fi[2], NULL, 10) : 0;
 	if (ts < 10)
 	    /* compatibility with 20040818a that wrote a retry counter */
@@ -569,15 +575,25 @@ getmarked(struct newsgroup *group)
 	expire = lookup_expire(group->name);
 	if (expire <= 0)
 	    expire = default_expire;
-	if (ts < expire)
-	    /* expired */
-	    continue;
 
-	if (stat(fi[1], &dummy1))
-	    /* file not existent -> skip */
+	if (ts < expire) {
+	    /* expired */
+	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
+		    "interesting.groups/%s: mark for %s %s has expired",
+		    group->name, fi[1], fi[0]);
 	    continue;
+	}
+
+	if (stat(fi[1], &dummy1)) {
+	    /* file not existent -> skip */
+	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
+		    "interesting.groups/%s: article %s not present, stat failed: %m",
+		    group->name, fi[1], fi[0]);
+	    continue;
+	}
 
 	if (!getbymsgid(fi[0], 2)) {
+	    /* mark article for retry */
 	    initlist(&failed);
 	    appendtolist(failed, l);
 	}
