@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.39 2002/04/28 10:40:31 ralf Exp $ */
+/* $Id: leafnode.h,v 1.40 2002/05/01 09:04:39 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -321,7 +321,7 @@ extern "C" {
      fgetheader( /*@null@*/ FILE * f, /*@notnull@*/ const char *header,
 		int rewind_me);
 /*@null@*//*@only@*/ char *
-     mgetheader( /*@notnull@*/ const char *hdr, /*@null@*/ char *buf);
+     mgetheader( /*@notnull@*/ const char *hdr, /*@null@*/ const char *buf);
 
 /*
  * various functions in artutil.c

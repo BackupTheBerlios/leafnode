@@ -41,10 +41,10 @@ mgetheader(
 /** header to find, must contain a colon, must not be NULL */
 	      /*@notnull@*/ const char *hdr,
 /** buffer to search, may be NULL */
-	      /*@null@*/ char *buf)
+	      /*@null@*/ const char *buf)
 {
     mastr *hunt;
-    char *p, *q;
+    const char *p, *q;
     char *value = NULL;
 
     /* ensure we have a header to look for */
