@@ -1,3 +1,28 @@
+2004-01-08  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040108a =
+	* fetchnews.c: Log user name when authentication fails.  Patch by
+	Samuel Tardieu.
+
+2004-01-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* try-indent.c.orig: Remove unneeded file.
+	* reformat.pl: Handle new --version output of GNU indent 2.2.8a.
+
+2004-01-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode.8.in: Document log_poster_ip. Patch by Samuel Tardieu.
+	* nntpd.c: Clean up code a bit, avoid double maock_sa2addr for
+	log_sockaddr.
+	* config.example, config.table, configutil.c, leafnode.h, nntpd.c:
+	Support a new log_poster_ip option that inserts a
+	X-Leafnode-NNTP-Posting-Host header. Based on a patch by Samuel
+	Tardieu, nntpd.c with modifications.
+	* configure.ac: Enhance ./configure --help messages.  Patch by
+	Samuel Tardieu.
+	* nntputil.c: Log authentication failures with username and server.
+	Patch by Samuel Tardieu <sam@rfc1149.net>.
+
 2003-12-21  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20031221a =

@@ -1,6 +1,6 @@
-20031221a: Changes since 20031221a:
+20040108a: Changes since 20031221a:
 - Change: Log username and upstream server for authentication failures.
-  Patch by Samuel Tardieu.
+  Patches by Samuel Tardieu.
 - Change: Better ./configure --help messages.
   Patch by Samuel Tardieu.
 - Feature: log_poster_ip in a X-Leafnode-NNTP-Posting-Host header.
