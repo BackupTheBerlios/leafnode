@@ -564,7 +564,6 @@ xgetxover(
 	g->count = current;
     }
 
-    free(overview);
     return 1;
 }
 
