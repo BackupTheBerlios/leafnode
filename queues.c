@@ -70,15 +70,6 @@ checkincoming(void)
     return checkqueue("in.coming");
 }
 
-#if 0
-static int
-q_compare(const void *a, const void *b,
-	const void *config __attribute__ ((unused)))
-{
-    return strcasecmp((const char *)a, (const char *)b);
-}
-#endif
-
 /** Feeds all postings in $(SPOOLDIR)/in.coming/ into newsgroups
  * \return
  *  - TRUE in case of success
