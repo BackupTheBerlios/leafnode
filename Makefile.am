@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.23 2002/06/27 16:00:07 ralf Exp $
+# $Id: Makefile.am,v 1.24 2002/07/03 15:29:22 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -145,8 +145,8 @@ sbin_PROGRAMS = \
 	fetchnews \
 	leafnode \
 	lsort \
+	rnews \
 	texpire
-#	rnews is disabled
 
 bin_PROGRAMS = \
 	leafnode-version \
