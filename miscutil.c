@@ -653,6 +653,7 @@ whoami(void)
 			   "alias for my hostname: %s", *alias);
 		}
 		if (is_validfqdn(*alias)) {
+		    fqdn[0] = '\0';
 		    strncat(fqdn, *alias, 255);
 		    break;
 		} else {
