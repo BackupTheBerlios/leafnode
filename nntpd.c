@@ -798,16 +798,9 @@ static int is_pattern(const char *s) {
 /* LIST ACTIVE if what==0, else LIST NEWSGROUPS */
 static void printlist(const struct newsgroup *ng, const int what) {
     if (what) {
-	char *m, *s;
 	printf("%s\t%s", ng->name, ng->desc ? ng->desc : "-x-");
-	if (is_localgroup(ng->name)
-		&& (s = checkstatus(ng->name, 'm'))) {
-	    if ((m = getmoderator(ng->name))) {
-		printf(" (moderator: %s)", m);
-		free(m);
-	    }
-	    free(s);
-	}
+	if (ng->status == 'm' && (!ng->desc || !strstr(ng->desc, " (Moderated)")))
+	    printf(" (Moderated)");
 	printf("\r\n");
     } else {
 	printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,

@@ -3,8 +3,12 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20041006a:
-- Change: fetchnews will flag groups as moderated if the reported status
+- Change: fetchnews will treat groups as moderated if the reported status
   flag is 'y' but the group has the tag ' (Moderated)'
+- Change: leafnode will no longer print the moderator of local groups in
+  the newsgroup list.
+- Change: leafnode will make sure that a moderated group has the 
+  ' (Moderated)' tag in its description.
 
 20041006a: Changes since 20040920a:
 - Feature: texpire offers an "-a" option to expire article based
