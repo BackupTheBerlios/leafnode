@@ -8,6 +8,7 @@
 #include <netdb.h>
 
 char *masock_sa2addr(const struct sockaddr *sa);
+long  masock_sa2port(const struct sockaddr *sa);
 char *masock_sa2name(const struct sockaddr *sa, int *h_error);
 
 #endif
