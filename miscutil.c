@@ -94,9 +94,20 @@ initvars(const char *const progname, int logtostdout)
 		RUNAS_USER);
 	return FALSE;
     }
-    if (gid_getbyuname(RUNAS_GROUP, &gi)) {
+    if (ui == (uid_t)0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot run leafnode with user %s that has uid #0!\n",
+		RUNAS_USER);
+	return FALSE;
+    }
+
+    if (gid_getbyuname(RUNAS_USER, &gi)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot gid_getbyuname(%s,&gi): %m\n",
-		RUNAS_GROUP);
+		RUNAS_USER);
+	return FALSE;
+    }
+    if (gi == (gid_t)0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot run leafnode with user %s that has gid #0!\n",
+		RUNAS_USER);
 	return FALSE;
     }
 #endif /* not TESTMODE */
