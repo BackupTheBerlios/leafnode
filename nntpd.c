@@ -1992,7 +1992,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	}
     } else {
 	/* _is_ pseudogroup */
-	if ((b < 1) || (a > 1) || (a > b)) {
+	if (arg && (b < 1 || a > 1 || a > b)) {
 	    nntpprintf("420 No articles in specified range.");
 	    return;
 	}
@@ -2134,7 +2134,7 @@ doauth_file(char *const cmd, char *const val)
 	if (!user)
 	    return P_REJECTED;
 	/* XXX hook up other authenticators here
-	 * user name + blank is in "user"
+	 * user name + ':' is in "user"
 	 * password (cleartext) is in "val" */
 	if ((pwdline = findinlist(users, user))) {
 	    char *c, *pwd;
