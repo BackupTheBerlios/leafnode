@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.27 2002/01/30 12:19:46 emma Exp $ */
+/* $Id: leafnode.h,v 1.28 2002/01/31 18:02:27 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -211,7 +211,7 @@ extern "C" {
 /* translation from message-id to article number, used in fetch and expire */
     void clearidtree(void);
     void insertmsgid(const char *msgid, unsigned long art);
-    int findmsgid(const char *msgid);
+    unsigned long findmsgid(const char *msgid);
 
 /* -----------here starts the new stuff-----------------*/
 /*
