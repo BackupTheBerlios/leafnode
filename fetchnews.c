@@ -715,14 +715,14 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 
     t = l;
     if (!parsegroupreply((const char **)&t, &u, &h, &window, last)) {
-	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse GROUP reply: \"%s\"",
-		g->name, l);
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse reply to GROUP %s: \"%s\"",
+		cursrv->name, g->name, l);
 	return 0;
     }
 
     if (u != 211) {
-	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: protocol error in response to GROUP command: \"%s\", must be 211 or 411",
-		g->name, l);
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: protocol error in response to GROUP %s: \"%s\", must be 211 or 411",
+		cursrv->name, g->name, l);
 	return 0;
     }
 
@@ -740,7 +740,8 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 	else if (h < 1)
 	    h = 1;
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: backing up from %lu to %lu", g->name, h, *first);
+	       "%s: backing up %s from %lu to %lu", cursrv->name, g->name,
+	       h, *first);
 	*first = h;
     }
 
@@ -748,35 +749,36 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 	const long maximum_decrease = 10;
 	
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: last seen %s was %lu, server now has %lu - %lu",
-	       g->name, delaybody_this_group ? "header" : "article",
+	       "%s: %s last seen %s was %lu, server now has %lu - %lu",
+	       cursrv->name, g->name,
+	       delaybody_this_group ? "header" : "article",
 	       *first, window, *last);
 	if (*first > (*last + maximum_decrease)) {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: switched upstream servers? upstream bug? %lu > %lu",
-		   g->name, *first, *last);
+		   "%s: switched upstream servers for %s? upstream bug? %lu > %lu",
+		   cursrv->name, g->name, *first, *last);
 	    *first = window;	/* check all upstream articles again */
 	    if ((initiallimit) && (*last - *first > initiallimit))
 		*first = *last - initiallimit + 1;
 	} else {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: rampant spam cancel? upstream bug? %lu > %lu",
-		   g->name, *first - 1, *last);
+		   "%s: rampant spam cancel in %s? upstream bug? %lu > %lu",
+		   cursrv->name, g->name, *first - 1, *last);
 	    *first = *last - maximum_decrease; /* re-check last N
 						  upstream articles */
 	}
     }
     if (initiallimit && (*first == 1) && (*last - *first > initiallimit)) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: skipping %s %lu-%lu inclusive (initial limit)",
-	       g->name, delaybody_this_group ? "headers" : "articles",
+	       "%s: %s: skipping %s %lu-%lu inclusive (initial limit)",
+	       cursrv->name, g->name, delaybody_this_group ? "headers" : "articles",
 	       *first, *last - initiallimit);
 	*first = *last - initiallimit + 1;
     }
     if (artlimit && (*last + 1 - *first > artlimit)) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: skipping %s %lu-%lu inclusive (article limit)",
-	       g->name, delaybody_this_group ? "headers" : "articles",
+	       "%s: %s: skipping %s %lu-%lu inclusive (article limit)",
+	       cursrv->name, g->name, delaybody_this_group ? "headers" : "articles",
 	       *first, *last - artlimit);
 	*first = *last + 1 - artlimit;
     }
@@ -786,8 +788,9 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 	window = 1;
     *first = window;
     if (*first > *last) {
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: no new %s", g->name,
-	       delaybody_this_group ? "headers" : "articles");
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: %s: no new %s",
+		cursrv->name, g->name,
+		delaybody_this_group ? "headers" : "articles");
 	return 0;
     }
     return 1;
