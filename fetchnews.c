@@ -1337,7 +1337,7 @@ nntpactive(struct serverlist *cursrv, int fa)
     if (!forceact && (0 == stat(mastr_str(s), &st))) {
 	initlist(&groups);
 
-	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		"%s: checking for new newsgroups", cursrv->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
 	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&last_update));
