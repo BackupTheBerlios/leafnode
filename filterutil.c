@@ -513,7 +513,9 @@ killfilter(const struct filterlist *f, const char *hdr)
 	    }
 	} else if (strcasecmp(g->cleartext, "maxcrosspost") == 0) {
 	    long l = 1;
-	    char *q = mgetheader("Newsgroups:", hdr);
+	    char *r, *q;
+
+	    r = q = mgetheader("Newsgroups:", hdr);
 	    if (q) {
 		while (*q && *q != '\n') {
 		    if (*q++ == ',') {
@@ -521,7 +523,7 @@ killfilter(const struct filterlist *f, const char *hdr)
 			l++;
 		    }
 		}
-		free(q);
+		free(r);
 	    }
 	    if (l > g->limit)
 		match = 0;
