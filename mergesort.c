@@ -114,7 +114,8 @@ mergesort(void *base, size_t nmemb, register size_t size,
 {
     register int sense;
     register size_t i;
-    int big, iflag;
+    size_t big;
+    int iflag;
     register u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
     u_char *list2, *list1, *p2, *p, *last, **p1;
 
@@ -271,8 +272,9 @@ void
 setup(u_char * list1, u_char * list2, size_t n, size_t size,
       int (*cmp) (const void *, const void *))
 {
-    int i, length, size2, tmp, sense;
-    u_char *f1, *f2, *s, *l2, *last, *p2;
+    int length, size2, sense;
+    size_t i;
+    u_char *f1, *f2, *s, *l2, *last, *p2, tmp;
 
     size2 = size * 2;
     if (n <= 5) {
@@ -344,7 +346,7 @@ insertionsort(u_char * a, size_t n, size_t size,
 	      int (*cmp) (const void *, const void *))
 {
     u_char *ai, *s, *t, *u, tmp;
-    int i;
+    size_t i;
 
     for (ai = a + size; --n >= 1; ai += size)
 	for (t = ai; t > a; t -= size) {
