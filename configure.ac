@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre4])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.24 $)
+AC_REVISION($Revision: 1.25 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -22,7 +22,6 @@ AC_PROG_RANLIB
 AC_CHECK_PROG(AR,ar,ar)
 AC_PATH_PROG(LYNX,lynx,no)
 AC_PATH_PROG(RPM,rpm)
-AC_PATH_PROG(CAT,cat,false)
 AC_PATH_PROG(GZIP,gzip,false)
 AC_PATH_PROG(BZIP2,bzip2,false)
 AC_PATH_PROG(SED,sed,false)

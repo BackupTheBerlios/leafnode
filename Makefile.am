@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.26 2002/07/03 16:14:06 ralf Exp $
+# $Id: Makefile.am,v 1.27 2002/07/03 22:47:08 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -219,7 +219,6 @@ config.c: Makefile
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
 	@echo >>.$@ "const char *GZIP = \"$(GZIP)\";"
 	@echo >>.$@ "const char *BZIP2 = \"$(BZIP2)\";"
-	@echo >>.$@ "const char *CAT = \"$(CAT)\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
 	@echo >>.$@ "const char *RUNAS_GROUP = \"$(RUNAS_GROUP)\";"
