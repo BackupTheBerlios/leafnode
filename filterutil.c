@@ -318,6 +318,7 @@ readfilter(const char *filterfilename)
     }
     debug = debugmode;
     fclose(ff);
+    if (ng) free(ng);
     free(param);
     free(value);
     if (filter == NULL) {
@@ -498,6 +499,8 @@ static void
 free_entry(struct filterentry *e)
 {
     if (e) {
+	if (e->expr)
+	    pcre_free(e->expr);
 	if (e->action)
 	    free(e->action);
 	if (e->cleartext)
