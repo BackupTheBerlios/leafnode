@@ -14,13 +14,17 @@ Changes since 20050324a:
   Jörg Lüders.
 
 20050321a: Changes since 20050215a:
+- INCOMPATIBLE Change: forward port configuration parser fix from
+  leafnode-1.11, to allow the right hand side of configuration or filter
+  file to be quoted, useful when the NUMBER SIGN character needs to be
+  specified. This may require you to change the configuration when you
+  are using NUMBER SIGN #, QUOTATION MARK " or BACKSLASH/REVERSE SOLIDUS \
+  character on the right hand side (in passwords, PC regular expressions
+  etc.) of a configuration line.
 - Change: when deleting articles (supersedes, cancel, ...) and we don't
   rebuild the overview right away, store a line in a new file that marks
   the corresponding overview line invalid, so that the article is no
   longer offered in the overview. Reported by Jörg Lüders.
-- Change: forward port configuration parser fix from leafnode-1.11,
-  to allow the right hand side of configuration or filter file to be
-  quoted, useful when the NUMBER SIGN character needs to be specified.
 - Documentation: some parts of README* had been out of date and have
   been revised. Documentation flaws reported by Jens Kutilek.
 
@@ -43,12 +47,11 @@ Changes since 20050324a:
 - Bugfix: store() does not create message.id link unless there was at
   least one valid newsgroup, also avoids writing empty Xref: header that
   confused delete_article()
-- Cleanup: the half-working applyfilter -C mode is gone. texpire -C gets
-  it right.
+- INCOMPATIBLE Cleanup: the half-working applyfilter -C mode is gone.
+  texpire -C gets it right.
 
 20050104a: Changes since 20050103a:
-- Feature: texpire can now remove articles from the spool, new -C
-  option.
+- Feature: texpire can now remove articles from the spool, new -C option.
 
 20050103a: Changes since 20050102a:
 - Change: obtain LISTGROUP article numbers directly from the directory
