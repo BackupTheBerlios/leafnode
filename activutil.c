@@ -502,19 +502,12 @@ rereadactive(void)
  */
 void mergeactives(struct newsgroup *old, struct newsgroup *new)
 {
-    size_t oldsize;
     struct newsgroup *g;
     struct newsgroup *ogrp;
 
-    oldsize = 0;
-    g = old;
-    while (g->name) {
-	oldsize++;
-	g++;
-    }
     g = new;
     while (g->name) {
-	if ( (ogrp = findgroup(g->name, old, oldsize)) != NULL ) {
+	if ( (ogrp = findgroup(g->name, old, oldactivesize)) != NULL ) {
 	    g->first = (g->first > ogrp->first) ? ogrp->first : g->first;
 	    g->last = (g->last > ogrp->last) ? g->last : ogrp->last;
 	    g->age = (g->age > ogrp-> age) ? g->age : ogrp->age;
