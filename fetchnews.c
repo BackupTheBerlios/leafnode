@@ -1802,25 +1802,6 @@ do_server(int forceactive)
 
     check_date(current_server->name);
 
-    /* fetch by MID */
-    switch (getmsgidlist(&msgidlist)) {
-    case 0:
-	rc = 0;
-    default:
-	;
-    }
-
-    /* do regular fetching of articles, headers, delayed bodies */
-    if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
-	nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
-	res = processupstream(current_server->name, current_server->port,
-			forceactive);
-	if (res == 1)
-	    rc = 1;
-	else
-	    rc = -1;
-    }
-
     /* post articles */
     if (action_method & FETCH_POST) {
 	switch(current_server->feedtype) {
@@ -1841,6 +1822,25 @@ do_server(int forceactive)
 			get_feedtype(current_server->feedtype));
 		exit(1);
 	}
+    }
+
+    /* fetch by MID */
+    switch (getmsgidlist(&msgidlist)) {
+    case 0:
+	rc = 0;
+    default:
+	;
+    }
+
+    /* do regular fetching of articles, headers, delayed bodies */
+    if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
+	nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
+	res = processupstream(current_server->name, current_server->port,
+			forceactive);
+	if (res == 1)
+	    rc = 1;
+	else
+	    rc = -1;
     }
 
 out:
