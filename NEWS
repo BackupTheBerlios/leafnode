@@ -1,3 +1,10 @@
+20030728a: Changes since 20030716a:
+- Bugfix: unfold header before applying filters. Reported by Reiner
+  Steib.
+- Feature: ln_log_stderronly (in config file) -e (on command line),
+  redirects all syslog to stderr, useful with daemontools or runit.
+  Requested by Clemens Fischer. Only lightly tested.
+
 20030716a: Changes since 20030714a:
 - Bugfix: posting only tried the first server. Regression in 20030714a,
   reported by Jeff Grossman.

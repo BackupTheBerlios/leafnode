@@ -1,3 +1,25 @@
+2003-07-28  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030728a =
+	* applyfilter.c, checkgroups.c, fetchnews.c, nntpd.c, rnews.c,
+	texpire.c: Use GLOBALOPTS macro for getopt.  
+	* interesting.c: Remove spurious LF.  
+	* TODO, config.example, config.table, configutil.c, ln_log.c,
+	ln_log.h, miscutil.c: Add -e (command line) or ln_log_stderronly
+	(config file) option to redirect all syslog output to stderr, for
+	daemontools or runit use.  Requested by Clemens Fischer.  
+	* leafnode.h: Add #define GLOBALOPTS string that holds all options
+	parsed by parseopt() 
+	* store.c: Unfold header before applying filters, add DEBUG_FILTER
+	logging.  
+	* mastring.c, mastring.h: Implement function to unfold header lines
+	contained in string.  
+
+2003-07-25  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode.8.in: Document windowsize. Reported missing by Reiner
+	Steib.  
+
 2003-07-16  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20030716a =
