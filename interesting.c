@@ -171,6 +171,12 @@ readinteresting(/*@null@*/ RBLIST * r)
     return (const char *)rbreadlist(r);
 }
 
+/*@null@*/ /*@owned@*/ const char *
+addtointeresting(const char *key)
+{
+    return rbsearch(key, rb_interesting);
+}
+
 void
 closeinteresting(/*@null@*/ /*@only@*/ RBLIST * r)
 {

@@ -161,6 +161,26 @@ insert_server(char *servspec)
     servers = sl;
 }
 
+/* add the group names given on the cmdline to the interesting rbtree */
+static void
+add_fetchgroups(void)
+{
+    struct stringlist *sl = nglist;
+    char *s;
+    const char *t;
+
+    while (sl) {
+	/* do not add wildcards */
+	if (strcspn(sl->string, "\\*?[") == strlen(sl->string)) {
+	    s = critstrdup(sl->string, "add_fetchgroups");
+	    t = addtointeresting(s);
+	    if (t != NULL && t != s)	/* NULL: OOM, t!=s: repeated entry */
+		free(s);
+	}
+	sl = sl->next;
+    }
+}
+
 /**
  * parse fetchnews command line
  * \return 0 for success, -1 for failure
@@ -1465,7 +1485,8 @@ processupstream(const char *const server, const unsigned short port,
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
 	goto out;
     }
-    /*FIXME: add cmdline -N groups to r */
+    /* add cmdline -N groups to r */
+    add_fetchgroups();
 
     if ((f = fopen(newfile, "w")) == NULL) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.64 2002/07/06 13:16:37 emma Exp $ */
+/* $Id: leafnode.h,v 1.65 2002/07/06 13:37:48 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -544,6 +544,8 @@ extern "C" {
     /*@null@*/ /*@owned@*/ const char *readinteresting(/*@null@*/ RBLIST *);
     void closeinteresting(/*@null@*/ /*@only@*/ RBLIST *);
     void freeinteresting(void);
+    /*@null@*/ /*@owned@*/ const char *
+         addtointeresting(const char *key);
 
 
     int init_dormant(void);
