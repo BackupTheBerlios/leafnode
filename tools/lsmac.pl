@@ -20,8 +20,9 @@ lsmac.pl - List directories with file mtimes, atimes and ctimes.
 =head1 DESCRIPTION
 
 For each directory given on the command line, lsmac.pl will list the
-directory contents with mtime, atime and ctime for each of the entries. The columns are, in this order:
-ctime, mtime, atime, number of links, size and file name.
+directory contents with ctime, mtime and atime for each of the entries.
+The columns are, in this order: ctime, mtime, atime, number of links,
+size and file name.
 
 If no directory is given, lsmac.pl will process the current directory.
 
@@ -31,9 +32,14 @@ If no directory is given, lsmac.pl will process the current directory.
 
 =item * Matthias Andree <matthias.andree@gmx.de>
 
+=head1 BUGS
+
+Unfortunately, the program's name suggests that the times were in the
+order mtime, atime, ctime, but they are in ctime, mtime, atime instead.
+
 =head1 LICENSE
 
-lsmac.pl C<$Revision: 1.5 $>, Copyright (C) 2001,2003 Matthias Andree.
+lsmac.pl C<$Revision: 1.6 $>, Copyright (C) 2001,2003 Matthias Andree.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -90,7 +96,7 @@ sub lsf($ ) {
 
 
     if(($st = lstat($name))) {
-	print 
+	print
 	&$cvt($st->ctime), " ",
 	&$cvt($st->mtime), " ",
 	&$cvt($st->atime), " ",
