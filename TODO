@@ -62,6 +62,9 @@ Ralfs TODO:
 	  "%d articles deleted' message not correct.
 
 10pre4
+0.0 markdownload: check for I/O errors
+
+10pre4
 0.0 forward port bug fixes from 1.9.19rc*
     (applyfilter done)
 
