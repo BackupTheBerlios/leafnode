@@ -486,13 +486,13 @@ readactive(void)
        return;
     }
 
-    if (strncmp(mmap_ptr, "#A ", 3) == 0) {
+    p = getabufferedline(mmap_ptr, &file_index, filesize);
+    if (p && strncmp(p, "#A ", 3) == 0) {
 	long t;
 	/* new format: first line = #X u where u is the natural number
 	 * with line count and X is a version letter */
 	get_long(mmap_ptr + 3, &t);
 	activesize = t;
-	file_index = strcspn(mmap_ptr, "\n") + 1;
     } else {
 	/* old format; count lines = newsgroups */
 	activesize = 0;

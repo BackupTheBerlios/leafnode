@@ -3,6 +3,7 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20041227a:
+- Bugfix: do not crash if the groupinfo file is empty
 - Change: checkpoint the ./configure cache before common failure points
 
 20041227a: Changes since 20041215a:
