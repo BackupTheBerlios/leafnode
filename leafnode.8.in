@@ -325,7 +325,8 @@ groupexpire = very.crowded.group 1
 .TP
 groupexpire = very.crowded.hierarchy.* 1
 "groupexpire" makes it possible to adjust expiry times for individual
-groups. Expiry times are given in days. This value is used by
+groups. Expiry times are given in days, negative values prevent expiry
+for the given groups. This value is used by
 .BR texpire (8).
 You can specify as many groupexpire lines as you like. It is
 possible to specify
