@@ -27,6 +27,7 @@
 
 #include "arc4random.h"
 #include "critmem.h"
+#include "link_force.h"
 
 int link_force(const char *from, const char *to) {
     char *x = critmalloc(strlen(to)+11, "link_force");
