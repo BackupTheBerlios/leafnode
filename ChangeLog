@@ -1,3 +1,41 @@
+2002-06-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Major cleanup of dogroup(). is_pseudogroup now also
+	returns true for empty groups not in interesting; since introduction
+	of .last.posting in 2.0b8_ma7.4pre on 2001-10-05, this has been
+	broken. As consequence, groups that expired from the spool and from
+	interesting.groups could not be subscribed to with slrn. Reported by
+	Ralf Wildenhues.  
+	* texpire.c: new function texpire_log_unlink 
+	* Makefile.am, fetchnews.c, interesting.c, leafnode.h, miscutil.c: 
+	Move handling of interesting.groups into interesting.c 
+
+2002-06-21  Matthias Andree <matthias.andree@gmx.de>
+
+	* config.example, config.table, configutil.c, leafnode.h, nntpd.c: 
+	The killbogus parameter is gone. nntpd should not clean up, but
+	texpire.  
+
+2002-06-19  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: doxover: don't read uninitialized range if pseudogroup.  
+	doauth_file: comment typo.  
+	* getaline.c, getline.c, mergesort.c: Compatibility: We provide
+	getline ourselves, so the code is not _GNU_SOURCE.  mergesort needs
+	proprietary _BSD_SOURCE because of u_char.  
+	* configure.ac: No need to test for search.h any more.  
+	* nntpd.c: Make 'XOVER' on pseudogroup return the right article
+	number.  
+
+2002-06-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* redblack.h: drop <search.h> for dietlibc compatibility 
+
+2002-06-19  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: doselectedheader: extract Xref header from overview file
+	instead of searching the article headers for XHDR and XPAT.  
+
 2002-06-18  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* Makefile.am, TODO, configure.ac, leafnode.h, miscutil.c: 
