@@ -76,6 +76,9 @@ Matthias:
 10pre5
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
+3.3 timeout_long per group? (user complained about low-traffic
+    unsubscription at the same time so he may simply need to update)
+
 2.2 Add a switch to disallow storing posts that fetchnews has fetched
     into local groups. Add another switch to disallow accepting locally
     posted articles that are crossposted across various hierarchies.
