@@ -1321,8 +1321,17 @@ dopost(void)
 	if (str_isprefix(line, "Newsgroups:")) {
 	    if (havenewsgroups)
 		err = TRUE;
-	    else
+	    else {
+		char *p = line + 11;
+		SKIPLWS(p);
+		if (!*p) {	/* disallow folded Newsgroups: header */
+		    err = TRUE;
+		    ln_log(LNLOG_SERR, LNLOG_CTOP,
+			   "folding not allowed in Newsgroups: header in %s",
+			   inname);
+		}
 		havenewsgroups = TRUE;
+	    }
 	}
 
 	if (str_isprefix(line, "Date:")) {
@@ -1424,7 +1433,7 @@ dopost(void)
 
 	f = fopen(inname, "r");
 	if (f) {
-	    mid = fgetheader(f, "Message-ID:", 1);
+	    mid = fgetheader(f, "Message-ID:", 0);
 	    groups = fgetheader(f, "Newsgroups:", 1);
 	    log_fclose(f);
 	}
