@@ -106,7 +106,6 @@ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
 int debug = 0;
 static int authflag = 0;	/* TRUE if authenticated */
-static time_t gmt_off;		/* offset between localtime and GMT in sec */
 
 /*
  * this function avoids the continuous calls to both ln_log and printf
@@ -939,53 +938,37 @@ dolist(char *oarg)
     }
 }
 
-static void
-donewnews(char *arg)
-{
-    struct stringlist *l = cmdlinetolist(arg);
-    struct stat st;
+static time_t
+parsedate_newnews(const struct stringlist *l, const int gmt) {
     struct tm timearray;
-    struct tm *ltime;
     time_t age;
-    time_t now;
-    int year, century;
-    int a, b;
-    DIR *d, *ng;
-    struct dirent *de, *nga;
-    char s[PATH_MAX + 1];	/* FIXME */
+    long a, b;
 
-    if (stringlistlen(l) < 3) {
-	nntpprintf("502 Syntax error");
-	return;
-    }
-    now = time(0);
-    ltime = localtime(&now);
-    year = ltime->tm_year % 100;
-    century = ltime->tm_year / 100;	/* 0 for 1900-1999, 1 for 2000-2099 etc */
+    if (stringlistlen(l) < 2) return (time_t)-1;
     memset(&timearray, 0, sizeof(timearray));
-    a = strtol(l->next->string, NULL, 10);
-    /* NEWNEWS may have the form YYMMDD or YYYYMMDD.
-       Distinguish between the two */
+    a = strtol(l->string, NULL, 10);
+    /* NEWNEWS/NEWGROUPS dates may have the form YYMMDD or YYYYMMDD.
+     * Distinguish between the two */
     b = a / 10000;
     if (b < 100) {
 	/* YYMMDD */
-	if (b <= year)
-	    timearray.tm_year = b + (century * 100);
+	if (b < 70)
+	    timearray.tm_year = b + 100;
 	else
-	    timearray.tm_year = b + (century - 1) * 100;
+	    timearray.tm_year = b;
     } else if (b < 1000) {
 	/* YYYMMDD - happens with buggy newsreaders */
 	/* In these readers, YYY=100 is equivalent to YY=00 or YYYY=2000 */
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
-	       "NEWGROUPS year is %d: please update your newsreader", b);
+	       "NEWGROUPS year is %ld: please update your newsreader", b);
 	timearray.tm_year = b;
     } else {
-	/* YYYYMMDD */
+	/* [Y]YYYYMMDD -- we don't check for years > 2037 */
 	timearray.tm_year = b - 1900;
     }
     timearray.tm_mon = (a % 10000 / 100) - 1;
     timearray.tm_mday = a % 100;
-    a = strtol(l->next->next->string, NULL, 10);
+    a = strtol(l->next->string, NULL, 10);
     timearray.tm_hour = a / 10000;
     timearray.tm_min = a % 10000 / 100;
     timearray.tm_sec = a % 100;
@@ -994,8 +977,55 @@ donewnews(char *arg)
     /* mktime() assumes local time -> correct according to timezone
        (global variable set by last call to localtime()) if GMT is
        not requested */
-    age = mktime(&timearray) - (strstr(arg, "GMT") ? gmt_off : 0);
-    nntpprintf("230 List of new articles in newsgroup %s", l->string);
+    age = mktime(&timearray);
+    if (age != (time_t)-1 && gmt) {
+	time_t off = gmtoff(age);
+	age += off;
+    }
+    return age;
+}
+
+static time_t
+donew_common(const struct stringlist *l) {
+    int gmt, len;
+    time_t age;
+
+    len = stringlistlen(l);
+    if (len < 2) {
+	nntpprintf("502 Syntax error");
+	return -1;
+    }
+
+    gmt = (len >= 3 && !strcasecmp(l->next->next->string, "gmt"));
+
+    age = parsedate_newnews(l, gmt);
+    if (age == (time_t)-1) {
+	nntpprintf("502 Syntax error");
+	return -1;
+    }
+
+    return age;
+}
+
+static void
+donewnews(char *arg)
+{
+    struct stringlist *l = cmdlinetolist(arg);
+    struct stat st;
+    time_t age;
+    DIR *d, *ng;
+    struct dirent *de, *nga;
+    char s[PATH_MAX + 1];	/* FIXME */
+
+    if (!l) {
+	nntpprintf("502 Syntax error.");
+	return;
+    }
+    age = donew_common(l->next);
+    if (age == -1) return;
+
+    nntpprintf("230 List of new articles since %ld in newsgroup %s", age,
+	       l->string);
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
     if (!d) {
@@ -1044,55 +1074,13 @@ donewnews(char *arg)
 static void
 donewgroups(const char *arg)
 {
-    struct tm timearray;
-    struct tm *ltime;
+    struct stringlist *l = cmdlinetolist(arg);
     time_t age;
-    time_t now;
-    int year, century;
-    char *l;
-    int a, b;
     struct newsgroup *ng;
 
-    now = time(0);
-    ltime = localtime(&now);
-    year = ltime->tm_year % 100;
-    century = ltime->tm_year / 100;	/* 0 for 1900-1999, 1 for 2000-2099 etc */
-    memset(&timearray, 0, sizeof(timearray));
-    l = NULL;
-    a = strtol(arg, &l, 10);
-    /* NEWGROUPS may have the form YYMMDD or YYYYMMDD.
-       Distinguish between the two */
-    b = a / 10000;
-    if (b < 100) {
-	/* YYMMDD */
-	if (b <= year)
-	    timearray.tm_year = b + (century * 100);
-	else
-	    timearray.tm_year = b + (century - 1) * 100;
-    } else if (b < 1000) {
-	/* YYYMMDD - happens with buggy newsreaders */
-	/* In these readers, YYY=100 is equivalent to YY=00 or YYYY=2000 */
-	ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
-	       "NEWGROUPS year is %d: please update your newsreader", b);
-	timearray.tm_year = b;
-    } else {
-	/* YYYYMMDD */
-	timearray.tm_year = b - 1900;
-    }
-    timearray.tm_mon = (a % 10000 / 100) - 1;
-    timearray.tm_mday = a % 100;
-    while (*l && isspace((unsigned char)*l))
-	l++;
-    a = strtol(l, NULL, 10);	/* we don't care about the rest of the line */
-    timearray.tm_hour = a / 10000;
-    timearray.tm_min = a % 10000 / 100;
-    timearray.tm_sec = a % 100;
-    /* mktime() shall guess correct value of tm_isdst(0 or 1) */
-    timearray.tm_isdst = -1;
-    /* mktime() assumes local time -> correct according to timezone
-       (global variable set by last call to localtime()) if GMT is not
-       requested */
-    age = mktime(&timearray) - (strstr(arg, "GMT") ? gmt_off : 0);
+    age = donew_common(l);
+    if (age == -1) return;
+
     nntpprintf("231 List of new newsgroups since %lu follows",
 	       (unsigned long)age);
     ng = active;
@@ -2269,7 +2257,6 @@ main(int argc, char **argv)
     }
     signal(SIGCHLD, dummy);	/* SIG_IGN would cause ECHILD on wait, so we use
 				   our own no-op dummy */
-    gmt_off = gmtoff();		/* get difference between local time and GMT */
     printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
 	   201 - allowposting(), version, owndn ? owndn : fqdn,
 	   allowposting()? "" : " (No posting.)",
