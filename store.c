@@ -106,7 +106,7 @@ store_stream(FILE * in /** input file */ ,
 {
     int rc = -1;		/* first, assume something went wrong */
     const char *ta[3];
-    char *tmpfn = memstrcat(ta);
+    char *tmpfn;
     const char *line = 0;
     char *mid = 0, *m;
     char *ngs = 0;
@@ -130,6 +130,7 @@ store_stream(FILE * in /** input file */ ,
     ta[0] = spooldir;
     ta[1] = "/temp.files/store_XXXXXXXXXX";
     ta[2] = 0;
+    tmpfn = memstrcat(ta);
 
     /* check for OOM */
     if (!tmpfn)
