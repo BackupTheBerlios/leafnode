@@ -71,11 +71,11 @@ static struct stringlisthead *nglist = NULL;	/* newsgroups patterns to fetch */
 static char *only_server = NULL;		/* server name when -S option is given */
 
 static void
-_ignore_answer(FILE * f)
+ignore_answer(FILE * f)
 {
     char *l;
 
-    while (((l = getaline(f)))) {
+    while (((l = mgetaline(f)))) {
 	if (!strcmp(l, "."))
 	    break;
     }
@@ -353,7 +353,7 @@ ismsgidonserver(char *msgid)
 
     if (!stat_is_evil) {
 	putaline(nntpout, "STAT %s", msgid);
-	l = getaline(nntpin);
+	l = mgetaline(nntpin);
 	if (l && get_long(l, &a) == 1) {
 	    switch (a) {
 	    case 223:
@@ -370,9 +370,9 @@ ismsgidonserver(char *msgid)
     }
 
     putaline(nntpout, "HEAD %s", msgid);
-    l = getaline(nntpin);
+    l = mgetaline(nntpin);
     if (l && get_long(l, &a) == 1 && a == 221) {
-	_ignore_answer(nntpin);
+	ignore_answer(nntpin);
 	return TRUE;
     } else {
 	return FALSE;
@@ -395,7 +395,7 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
     char *l;
     int reply = 0;
 
-    l = getaline(nntpin);
+    l = mgetaline(nntpin);
     if (!l) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "Server went away when it should send an article.");
@@ -513,13 +513,13 @@ fn_donewnews(struct newsgroup *g, time_t lastrun)
 	return 0;		/* NEWNEWS not supported or something going wrong */
     }
 /* #ifdef NOTYET */
-    while ((l = getaline(nntpin)) && strcmp(l, ".")) {
+    while ((l = mgetaline(nntpin)) && strcmp(l, ".")) {
 	/* get a list of message ids: put them into a stringlist and
 	   request them one by one */
     }
     return 1;
 #else
-    _ignore_answer(nntpin);
+    ignore_answer(nntpin);
     return 0;
 #endif
 }
@@ -659,7 +659,7 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 	return 0;
 
     putaline(nntpout, "GROUP %s", g->name);
-    l = getaline(nntpin);
+    l = mgetaline(nntpin);
     if (!l)
 	return 0;
 
@@ -841,13 +841,13 @@ fn_doxover(struct stringlisthead *stufftoget,
     int delaybody_this_group = delaybody_group(groupname);
 
     putaline(nntpout, "XOVER %lu-%lu", first, last);
-    l = getaline(nntpin);
+    l = mgetaline(nntpin);
     if (l == NULL || (!get_long(l, &reply)) || (reply != 224)) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "Unknown reply to XOVER command: %s", l ? l : "(null)");
 	return -2;
     }
-    while ((l = getaline(nntpin)) && strcmp(l, ".")) {
+    while ((l = mgetaline(nntpin)) && strcmp(l, ".")) {
 	char *xover[20];	/* RATS: ignore */
 	char *artno, *subject, *from, *date, *messageid;
 	char *references, *lines, *bytes, *xref;
@@ -972,13 +972,13 @@ fn_doxhdr(struct stringlisthead *stufftoget, unsigned long first,
     long reply;
 
     putaline(nntpout, "XHDR message-id %lu-%lu", first, last);
-    l = getaline(nntpin);
+    l = mgetaline(nntpin);
     if (l == NULL || (!get_long(l, &reply)) || (reply != 221)) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "Unknown reply to XHDR command: %s", l ? l : "(null)");
 	return -2;
     }
-    while ((l = getaline(nntpin)) && strcmp(l, ".")) {
+    while ((l = mgetaline(nntpin)) && strcmp(l, ".")) {
 	/* format is: [# of article] [message-id] */
 	char *t;
 
@@ -1019,8 +1019,9 @@ chopmid(/*@unique@*/ const char *in)
  * get all articles in a group, with pipelining NNTP commands
  */
 static unsigned long
-getarticles(/*@null@*/ struct stringlisthead *stufftoget, long n,
-    /*@null@*/ struct filterlist *f)
+getarticles(/*@null@*/ struct stringlisthead *stufftoget,
+	long n /** number of articles to fetch */,
+	/*@null@*/ struct filterlist *f)
 {
     struct stringlistnode *p;
     long advance = 0, window;
@@ -1300,7 +1301,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    mastr_delete(s);
 	    return 1;
 	}
-	while ((l = getaline(nntpin)) && (strcmp(l, ".") != 0)) {
+	while ((l = mgetaline(nntpin)) && (strcmp(l, ".") != 0)) {
 	    char *r;
 	    p = l;
 	    if (!splitLISTline(l, &p, &r))
@@ -1330,13 +1331,13 @@ nntpactive(struct serverlist *cursrv, int fa)
 		putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
 		reply = nntpreply(cursrv);
 		if (reply == 215) {
-		    l = getaline(nntpin);
+		    l = mgetaline(nntpin);
 		    if (l && *l != '.') {
 			p = l;
 			CUTSKIPWORD(p);
 			changegroupdesc(l, *p ? p : NULL);
 			do {
-			    l = getaline(nntpin);
+			    l = mgetaline(nntpin);
 			    error++;
 			} while (l && *l && strcmp(l, "."));
 			if (error > 1) {
@@ -1362,7 +1363,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    mastr_delete(s);
 	    return 1;
 	}
-	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
+	while ((l = mgetaline(nntpin)) && (strcmp(l, "."))) {
 	    last = first = 0;
 	    p = l;
 	    if (!splitLISTline(l, &q, &p))
@@ -1397,7 +1398,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		    "%s: getting newsgroup descriptions", cursrv->name);
 	    putaline(nntpout, "LIST NEWSGROUPS");
-	    l = getaline(nntpin);
+	    l = mgetaline(nntpin);
 	    /* correct reply starts with "215". However, INN 1.5.1 is broken
 	       and immediately returns the list of groups */
 	    if (l) {
@@ -1405,7 +1406,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 
 		reply = strtol(l, &tmp, 10);
 		if ((reply == 215) && (*tmp == ' ' || *tmp == '\0')) {
-		    l = getaline(nntpin);	/* get first description */
+		    l = mgetaline(nntpin);	/* get first description */
 		} else if (*tmp != ' ' && *tmp != '\0') {
 		    /* FIXME: INN 1.5.1: line already contains description */
 		    /* do nothing here */
@@ -1427,7 +1428,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 		p = l;
 		CUTSKIPWORD(p);
 		changegroupdesc(l, *p ? p : NULL);
-		l = getaline(nntpin);
+		l = mgetaline(nntpin);
 	    }
 	    if (!l) {
 		mastr_delete(s);
@@ -1467,7 +1468,7 @@ post_FILE(const struct serverlist *cursrv, FILE * f, char **line)
 	fputs("\r\n", nntpout);
     };
     putaline(nntpout, ".");
-    *line = getaline(nntpin);
+    *line = mgetaline(nntpin);
     if (!*line)
 	return FALSE;
     if (0 == strncmp(*line, "240", 3))
