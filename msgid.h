@@ -3,8 +3,8 @@
 
 void msgid_sanitize(char *m);
 unsigned int msgid_hash(const char *name);
-char *lookup (const char *msgid);
-int ihave (const char *mid);
+/*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
+/*@falsewhennull@*/ int ihave(/*@null@*/ const char *mid);
 int msgid_allocate(const char *file, const char *mid);
 
 #endif
