@@ -17,7 +17,6 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -492,7 +491,7 @@ xgetxover(
     if (current) {
 	xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
 						    sizeof(struct xoverinfo) *
-						    (current),
+						    (current+1),
 						    "reallocating overview array");
 	sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
     }
