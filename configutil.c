@@ -59,6 +59,7 @@ long windowsize = 5;
 					   set a sensible one */
 /*@null@*/ struct serverlist *servers = NULL;
 				/* global work variable */
+/*@null@*/ char *localgroups = NULL;	/* filename for localgroups file name */
 static struct serverlist *serverlist;	/* local copy to free list */
 
 
@@ -239,6 +240,12 @@ readconfig(/*@null@*/ const char *configfile)
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: filterfile is %s", value);
+		    break;
+		case CP_LOCALGRP:
+		    localgroups = critstrdup(value, "readconfig");
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: localgroups is %s", value);
 		    break;
 		case CP_HOST:
 		    owndn = critstrdup(value, "readconfig");

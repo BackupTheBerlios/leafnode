@@ -497,19 +497,14 @@ void
 rereadactive(void)
 {
     static struct stat st1, st2;
-    char *s1, *s2;
+    char *s1;
     char *t;
     int reread = 0, stat2 = 0;
-    const char *const append = "/local.groups";
 
     s1 = (char *)critmalloc(strlen(spooldir) + strlen(GROUPINFO) + 1,
 			    "rereadactive");
-    s2 = (char *)critmalloc(strlen(sysconfdir) + strlen(append) + 1,
-			    "rereadactive");
     t = mastrcpy(s1, spooldir);
     (void)mastrcpy(t, GROUPINFO);
-    t = mastrcpy(s2, sysconfdir);
-    (void)mastrcpy(t, append);
 
     if (!active)
 	reread = 1;
@@ -518,10 +513,10 @@ rereadactive(void)
 	       "cannot stat %s: %m, may cause bad performance", s1);
 	reread = 1;
     }
-    if (stat(s2, &st2)) {
+    if (stat(localgroups, &st2)) {
 #if 0
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "cannot stat %s: %m, may cause bad performance", s2);
+	       "cannot stat %s: %m, may cause bad performance", localgroups);
 	reread = 1;
 #else
 	/* do nothing */
@@ -541,7 +536,7 @@ rereadactive(void)
 
     if (reread) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "%sreading %s and %s",
-	       active ? "re" : "", s1, s2);
+	       active ? "re" : "", s1, localgroups);
 	readactive();
 	readlocalgroups();
 	activetime = st1.st_mtime;
@@ -551,7 +546,6 @@ rereadactive(void)
 	    localinode = st2.st_ino;
 	}
     }
-    free(s2);
     free(s1);
 }
 

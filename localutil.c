@@ -85,20 +85,11 @@ readlocalgroups(void)
 {
     char *l, *p;
     FILE *f;
-    char *s, *u;
-    /*@dependent@*/ char *t;
-    const char *const append = "/local.groups";
+    char *u;
 
-    s = (char *)critmalloc(strlen(sysconfdir) + strlen(append) + 1,
-			   "readlocalgroups");
-
-    t = mastrcpy(s, sysconfdir);
-    t = mastrcpy(t, append);
-
-    if (!(f = fopen(s, "r"))) {
+    if (!(f = fopen(localgroups, "r"))) {
 	/* still reject this to make sure the configuration is complete */
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
-	free(s);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", localgroups);
 	return;
     }
 
@@ -120,7 +111,7 @@ readlocalgroups(void)
 	/* l points to group name, u to status, p to description */
 	if (strcmp(u, "y") && strcmp(u, "n") && strcmp(u, "m")) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "malformatted %s: status is not one of y, n, m", s);
+		   "malformatted %s: status is not one of y, n, m", localgroups);
 	    abort();
 	}
 	if (*l && validate_groupname(l)) {
@@ -130,7 +121,6 @@ readlocalgroups(void)
     }
     log_fclose(f);
     mergegroups();
-    free(s);
 }
 
 /*
