@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.41 2002/05/05 17:32:07 emma Exp $ */
+/* $Id: leafnode.h,v 1.42 2002/05/05 19:49:28 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -78,6 +78,10 @@ extern "C" {
 
     /*@constant mode_t MKDIR_MODE;@*/
 #define MKDIR_MODE 0750
+
+/*@constant unsigned long LOCKWAIT;@*/
+/** how long to wait for a lock, in seconds */
+#define LOCKWAIT 5UL
 
 #define BASENAME(a) (strrchr((a), '/') ? strrchr((a), '/') : (a))
 #define WHITESPACE " \t"
@@ -476,7 +480,7 @@ extern "C" {
  * misc prototypes
  */
     /*@falsewhennull@*/ int ihave(/*@null@*/ const char *mid);
-    int lockfile_exists(int block);
+    int lockfile_exists(const int block, unsigned long timeout);
     void putaline(FILE *, const char *fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));
     extern char last_command[1025];

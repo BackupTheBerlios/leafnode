@@ -321,8 +321,10 @@ main(int argc, char *argv[])
     umask((mode_t) 077);
 
     whoami();
-    if (lockfile_exists(FALSE))
+    if (lockfile_exists(FALSE, 0UL)) {
+	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
+    }
     rereadactive();
     readlocalgroups();
     if (!argv[optind])

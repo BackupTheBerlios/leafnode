@@ -1017,8 +1017,11 @@ main(int argc, char **argv)
 	exit(2);
     }
 
-    if (lockfile_exists(FALSE))
+    if (lockfile_exists(TRUE, LOCKWAIT)) {
+	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
+    }
+
     rereadactive();
     if (!active) {
 	fprintf(stderr, "Reading active file failed, exiting "

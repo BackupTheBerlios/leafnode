@@ -1562,7 +1562,8 @@ dopost(void)
 	    fclose(stdin);
 	    fclose(stdout);
 	    fclose(stderr);
-	    if (lockfile_exists(FALSE)) {
+
+	    if (lockfile_exists(FALSE, 0UL)) {
 		ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		       "Cannot obtain lock file to store article %s. "
 		       "It will be posted later.", inname);

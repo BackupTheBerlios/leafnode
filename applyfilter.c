@@ -178,8 +178,11 @@ main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
     }
 
-    if (lockfile_exists(FALSE))
+    if (lockfile_exists(TRUE, LOCKWAIT)) {
+	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
+    }
+
     rereadactive();
     g = findgroup(argv[optind], active, -1);
     if (!g) {

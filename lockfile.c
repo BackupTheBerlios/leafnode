@@ -190,14 +190,17 @@ safe_mkstemp(
  *
  * \return
  * - 0: if locking succeeded
- * - 1: if locking failed because the lock is held by someone else and 
+ * - 1: if locking failed because the lock is held by someone else and
  *     isn't stale
- * - -1: for other errors 
+ * - -1: for other errors
  */
 int
 lockfile_exists(
 /** Flag, if set, wait until lock becomes available */
-		   const int block)
+		   const int block,
+/** Timeout, if nonzero, wait at most this many seconds. Ignored when
+ * block == 0. */
+		   unsigned long timeout)
 {
     char *l2, *pid;
     int fd;
@@ -207,7 +210,8 @@ lockfile_exists(
 
     if (debugmode & DEBUG_LOCKING)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-	       "lockfile_exists(block=%d), fqdn=\"%s\"", block, fqdn);
+	       "lockfile_exists(block=%d, timeout=%lu), fqdn=\"%s\"",
+	       block, timeout, fqdn);
 
     /* kill bogus fqdn */
     if (!strchr(fqdn, '.')
@@ -278,6 +282,11 @@ lockfile_exists(
 		   if we are in non-blocking mode, abort */
 		if (stale == -1 || !block)
 		    break;
+
+		if (timeout == 0)
+		    break;
+
+		--timeout;
 
 		/* retry after a second, select does not interfere w/ alarm */
 		if (select(0, NULL, NULL, NULL, &tv) < 0) {

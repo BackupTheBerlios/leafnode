@@ -1674,10 +1674,12 @@ main(int argc, char **argv)
 		   "%s: lockfile %s exists, abort", myname, lockfile);
 	    exit(EXIT_FAILURE);
 	}
-	alarm(5);
-	if (lockfile_exists(TRUE))
+
+	if (lockfile_exists(TRUE, LOCKWAIT)) {
+	    fprintf(stderr, "%s: lockfile %s exists, abort\n", 
+		    argv[0], lockfile);
 	    exit(EXIT_FAILURE);
-	alarm(0);
+	}
 
 	if (filterfile && !readfilter(filterfile)) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
