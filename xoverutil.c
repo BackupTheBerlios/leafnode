@@ -11,6 +11,7 @@
 #include "mastring.h"
 #include "bsearch_range.h"
 #include "msgid.h"
+#include "sgetcwd.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -340,39 +341,6 @@ crunchxover(struct xoverinfo *xi, unsigned long count)
     return i;
 }
 
-/** checks if directory is more current than .overview, if so,
- * update overview. The .overview is also updated if g is non-NULL and the
- * .overview file is more current than the active file.
- * \return
- * - 0 problem
- * - 1 success
- */
-int
-maybegetxover( /*@null@*/ struct newsgroup *g)
-{
-    struct stat sd, sf;
-
-    if (stat(".", &sd))
-	return 0;
-    if (stat(".overview", &sf)) {
-	if (errno != ENOENT)
-	    return 0;
-	return xgetxover(1, g);
-    }
-    if (sd.st_mtime > sf.st_mtime)
-	return xgetxover(1, g);
-    if (g && sf.st_mtime > query_active_mtime())
-	return xgetxover(1, g);
-    return 1;
-}
-
-int
-getxover(/** if set, delete articles with missing or improper hardlink to message.id */
-	    const int require_messageidlink)
-{
-    return xgetxover(require_messageidlink, NULL);
-}
-
 /**
  * Read xoverfile into struct xoverinfo.
  * \return
@@ -384,78 +352,46 @@ xgetxover(
 /** if set, delete articles with missing or improper hardlink to message.id */
 	     const int require_messageidlink,
     /** if set, update first/last/count of this group */
-	     /*@null@*/ struct newsgroup *g)
+	     /*@null@*/ struct newsgroup *g,
+	     /** if set, try to update .overview */
+	     const int fixxover)
 {
     struct stat st;
     char *overview = NULL;
     /*@dependent@*/ char *p, *q;
-    char **dl, **t;		/* directory file list */
+    char **dl = NULL, **t;		/* directory file list */
     int fd, update = 0;
     unsigned long current, art;
     long i;
 
     freexover();
 
-    dl = dirlist(".", DIRLIST_ALLNUM, &xcount);
-    if (!dl)
-	return 0;
-
-    /* read .overview file into memory */
-    if (((fd = open(".overview", O_RDONLY)) >= 0)
-	&& (fstat(fd, &st) == 0)
-	&& (overview = (char *)critmalloc((size_t) st.st_size + 1, "xgetxover")) != NULL
-	&& (read(fd, overview, st.st_size) == (ssize_t)st.st_size)) {
-	overview[st.st_size] = '\0';
+    fd = open(".overview", O_RDONLY);
+    if (fd < 0) {
+	/* this is debug priority because we remove .overview files from
+	 * empty groups */
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+		"cannot read %s/.overview: %s", sgetcwd(),
+		strerror(errno));
     } else {
-	/* .overview file not present: make a new one */
-	if (overview) {
-	    /* may happen on short read */
-	    free(overview);
-	    overview = NULL;
+	if (fstat(fd, &st)) {
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		    "error: cannot fstat %s/.overview: %s", sgetcwd(),
+		    strerror(errno));
+	} else {
+	    overview = (char *)critmalloc((size_t)st.st_size + 1, "xgetxover");
+	    if ((ssize_t)st.st_size != read(fd, overview, st.st_size)) {
+		ln_log(LNLOG_SERR, LNLOG_CGROUP,
+			"error: cannot read %s/.overview: %s",
+			sgetcwd(), strerror(errno));
+		free(overview);
+		overview = NULL;
+	    } else {
+		overview[st.st_size] = '\0';
+	    }
 	}
-    }
-
-    if (fd >= 0) {
 	close(fd);
     }
-
-    /* find article range on disk, store into xcount */
-    /* FIXME: don't choke on numeric subgroups */
-    /* FIXME: get this under the same roof as nntpd's dogroup */
-    xcount = 0;
-    xlast = 0;
-    xfirst = ULONG_MAX;
-    for (t = dl; *t; t++) {
-	if (!get_ulong(*t, &art))
-	    abort();		/* FIXME: must not happen */
-	xcount++;
-	if (art < xfirst)
-	    xfirst = art;
-	if (art > xlast)
-	    xlast = art;
-    }
-
-#if 0
-    if (!xcount || xlast < xfirst) {
-	char sd[LN_PATH_MAX], s[LN_PATH_MAX + 15];
-	if (!getcwd(sd, sizeof(sd))) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "cannot get current working directory in getxover: %m");
-	    free_dirlist(dl);
-	    if (overview)
-		free(overview);
-	    return 0;
-	}
-	snprintf(s, sizeof(s), "%s/.overview", sd);
-	if (unlink(s) && errno != ENOENT) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot unlink %s: %m", s);
-	}
-	free_dirlist(dl);
-	if (overview)
-	    free(overview);
-	return 1;
-    }
-#endif
 
     /* count number of entries in .overview file, store into current */
     p = overview;
@@ -470,6 +406,30 @@ xgetxover(
 		break;
 	    }
 	}
+    }
+
+    if (fixxover) {
+	dl = dirlist(".", DIRLIST_ALLNUM, &xcount);
+	if (!dl)
+	    return 0;
+
+	/* find article range on disk, store into xcount */
+	/* FIXME: don't choke on numeric subgroups */
+	/* FIXME: get this under the same roof as nntpd's dogroup */
+	xcount = 0;
+	xlast = 0;
+	xfirst = ULONG_MAX;
+	for (t = dl; *t; t++) {
+	    if (!get_ulong(*t, &art))
+		abort();		/* FIXME: must not happen */
+	    xcount++;
+	    if (art < xfirst)
+		xfirst = art;
+	    if (art > xlast)
+		xlast = art;
+	}
+    } else {
+	xcount = 0;
     }
 
     /* parse .overview file */
@@ -490,7 +450,7 @@ xgetxover(
 	    *q++ = '\0';
 	art = strtoul(p, &tmp, 10);	/* FIXME ... hum, what is to fix here? */
 	if (art && tmp && *tmp) {
-	    if (art > xlast || art < xfirst) {
+	    if (fixxover && (art > xlast || art < xfirst)) {
 		update = 1;
 	    } else {
 		char *tmp2 = critstrdup(p, "getxover");
@@ -503,8 +463,14 @@ xgetxover(
 	p = q;
     }
 
-    xcount = current;		/* to prevent findxover from choking */
+    if (!fixxover) {
+	xcount = current;		/* to prevent findxover from choking */
+	if (g)
+	    g->count = current;
+	return 1;
+    }
 
+    /* this part fixes the overview data */
     /* now fix things, iterate over directory list */
     for (t = dl; *t; t++) {
 	(void)get_ulong(*t, &art);	/* would have failed above */
@@ -585,15 +551,15 @@ xgetxover(
     /* sort xover */
     xcount = current;
 
+    if (update)
+	writexover();
+
     if (g) {
 	g->first = min(xfirst, g->last + 1);
 	if (xlast > g->last)
 	    g->last = xlast;
 	g->count = current;
     }
-
-    if (update)
-	writexover();
 
     return 1;
 }
