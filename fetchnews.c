@@ -1515,12 +1515,20 @@ postarticles(void)
 /* these groups need not be fetched *again* */
 static struct rbtree *done_groups = NULL;
 
+/* compare 'KEY' with 'key value' in a symmetric way */
 static int
 cmp_upstream(const void *a, const void *b,
 	/*@unused@*/ const void *config __attribute__ ((unused)))
 {
     const char *s = a, *t = b;
-    return strcasecmp(s, t);
+    size_t m, n;
+    static const char WHITE[] = " \t";
+
+    /* slow but safe version */
+    m = strcspn(s, WHITE);
+    n = strcspn(t, WHITE);
+
+    return strncasecmp(s, t, m > n ? m : n);
 }
 
 /** get server high water mark
@@ -1540,7 +1548,7 @@ get_old_watermark(const char *group, struct rbtree *upstream)
 
     if (k == NULL)
 	return 1;
-    k += strlen(group) + 1;
+    SKIPWORD(k);
     if (*k == '\0')
 	return 1;
 
