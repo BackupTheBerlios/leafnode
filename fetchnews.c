@@ -793,7 +793,7 @@ fn_doxover(struct stringlist **stufftoget,
 	unsigned long first, unsigned long last,
 	/*@null@*/ struct filterlist *filtlst, char *groupname)
 {
-    char *l;
+    char *l, *xref_scratch;
     unsigned long count = 0, dupes = 0, seen = 0;
     long reply;
     struct stringlist *helpptr = NULL;
@@ -834,10 +834,11 @@ fn_doxover(struct stringlist **stufftoget,
 	bytes = xover[6];
 	lines = xover[7];
 	xref = xover[8];
+	xref_scratch = critstrdup(xref, "fn_doxover");
 
 	/* is there an Xref: header present as well? */
 	if (xover[8] == NULL ||
-	    (num_groups = parsekill_xref_line(xover[8], &newsgroups_list, NULL, 0)) == -1) {
+	    (num_groups = parsekill_xref_line(xref_scratch, &newsgroups_list, NULL, 0)) == -1) {
 	    /* newsgroups filling by hand */
 	    num_groups = 1;
 	    newsgroups_list = critmalloc(num_groups * sizeof *newsgroups_list, "doxover");
@@ -850,6 +851,8 @@ fn_doxover(struct stringlist **stufftoget,
 	    s = create_pseudo_header(subject, from, date, messageid,
 		    references, newsgroups_list, num_groups, bytes, lines,
 		    xref);
+
+	    free(xref_scratch);
 
 	    if (filtlst && killfilter(filtlst, mastr_str(s))) {
 		groupkilled++;
