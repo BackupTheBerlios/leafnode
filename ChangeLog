@@ -1,4 +1,33 @@
+2004-02-10  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Mark Ivo Schwalbe's article loss bug fixed without further
+	tests. (hynek)
+	* xoverutil.c: Remove 'cannot lstat' message after 'removing empty
+	article file'. Reported by Martin Imlau.
+
+2004-02-09  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode-version.c: Print PCRE version.
+
+2004-02-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews_check_date.c, filterutil.c, nntpd.c: Kill more static
+	forward declarations.
+	* activutil.c, rnews.c: Kill unneeded static decl's.
+	* miscutil.c: Shuffle code around to eliminate static forward
+	decl's.
+	* nntpd.c: Eliminate static forward declarations. Make some
+	internal functions static.
+	* texpire.c: Unexport internal functions.  Rearrange code to
+	eliminate forward declarations of internal functions.
+	* fetchnews.c: Rearrange code to get rid of forward declarations
+	for static functions.
+	* TODO, activutil.c, fetchnews_check_date.c: Elimination of all
+	sscanf(), courtesy of Hynek Schlawack.
+
 2004-02-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20040206a
 
 	= snapshot 20040206a =
 	* newsq.c: Print whether an article has successfully been posted.
