@@ -1723,6 +1723,14 @@ do_server(int forceactive)
     int res;
     int reply;
 
+    /* do not try to connect if we don't want to post here in -P mode */
+    if (action_method == FETCH_POST
+	    && current_server -> feedtype != CPFT_NNTP) {
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "skipping %s:%hu",
+		current_server -> name, current_server -> port);
+	return 1;
+    }
+
     /* establish connection to server */
     fflush(stdout);
     reply = nntpconnect(current_server);
