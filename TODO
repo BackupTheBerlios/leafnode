@@ -94,11 +94,6 @@ Ralfs TODO:
     But should have been fixed with sigaction on 2002-07-08.
 
 10pre5
-1.1 groupinfo not updated after timeout + subsequent SIGINT
-    bug confirmed by Jörg Dietrich 2002-01-04
-    ACTION: FEEDBACK: has this been fixed with sigaction on 2002-07-08?
-
-10pre5
 1.1 leafnode does not add a Lines: header, but has the Lines count in
     XOVER. slrn then displays "0 Lines" when fetching a parent not
     previously displayed in the article overview. Reported by Ralf
@@ -263,6 +258,9 @@ FIXED ITEMS:
 
 2002-07-22 tolerate ", " instead of just "," in Newsgroup:
 	   current NNTP drafts suggests that to be able to fold Newsgroup: headers.
+
+2002-07-08 groupinfo not updated after timeout + subsequent SIGINT
+	   fix acknowledged by Jörg Dietrich 2002-08-17
 
 2002-07-08 Matthias Andree
 	   do not tamper with permissions on /var/spool/news/* directories
