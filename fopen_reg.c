@@ -30,7 +30,7 @@
  * \return FILE* stream handle or NULL if it's not a regular file.
  * \bugs on systems, that do not support ENOTSUP, returns EINVAL instead.
  */
-FILE *
+/*@null@*/ /*@dependent@*/ FILE *
 fopen_reg(
 /** file to open, parameter has the same meaning as in fopen */
 	     const char *path,
@@ -43,20 +43,20 @@ fopen_reg(
 
     if (!mode || ((mode[0] != 'r') && (mode[0] != 'a'))) {
 	errno = EINVAL;
-	return 0;
+	return NULL;
     }
 
     f = fopen(path, mode);
     /* cannot open file */
     if (!f)
-	return 0;
+	return NULL;
     if (fstat(fileno(f), &st)) {
 	/* cannot stat */
 	int e = errno;
 
 	fclose(f);
 	errno = e;
-	return 0;
+	return NULL;
     }
 #ifdef STAT_MACROS_BROKEN
     if ((st.st_mode & S_IFMT) != S_IFREG) {
@@ -65,7 +65,7 @@ fopen_reg(
 #endif
 	fclose(f);
 	errno = EINVAL;
-	return 0;
+	return NULL;
     }
     return f;
 }

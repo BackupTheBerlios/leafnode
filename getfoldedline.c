@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-char *
+/*@null@*/ /*@only@*/ char *
 mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
 {
     const char white[] = " \t";
@@ -17,7 +17,7 @@ mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
 
     l1 = getaline(f);
     if (!l1)
-	return 0;
+	return NULL;
     l2 = (char *)mycritmalloc(fi, ln, (len = strlen(l1)) + 1, "getfoldedline");
     strcpy(l2, l1);
 
