@@ -97,6 +97,7 @@ feedincoming(void)
     dl = spooldirlist_prefix("in.coming", DIRLIST_NONDOT, &articles);
     if (!dl) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read in.coming: %m");
+	rbdestroy(rb);
 	return 0;
     }
 
