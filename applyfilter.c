@@ -4,6 +4,9 @@
  * Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
  * Copyright 1999.
  *
+ * Modified by Matthias Andree <matthias.andree@gmx.de>
+ * Copyright of modifications 2000-2003.
+ *
  * See README for restrictions on the use of this software.
  */
 
@@ -100,7 +103,9 @@ readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *de
 static int
 readheaders(int fd, /*@unique@*/ const char *name, char **bufp, size_t *size)
 {
-    char *k = readtodelim(fd, name, "\n\n", bufp, size);
+    char *k = readtodelim(fd, name, "\n\n", bufp, size); /* XXX FIXME:
+							    cater for wire
+							    format */
     if (k != NULL) {
 	if (*k == '\0')
 	    return -2;
@@ -110,6 +115,21 @@ readheaders(int fd, /*@unique@*/ const char *name, char **bufp, size_t *size)
 	}
     } else {
 	return -1;
+    }
+}
+
+static void unfold(char *p)
+{
+    char *s, *q;
+
+    q = p;
+    s = p + strlen(p);
+    while (p <= s) {
+	if (p[0] != '\n' || p + 1 > s || !isspace((unsigned char)p[1])) {
+	    *q++ = *p++;
+	} else {
+	    p++;
+	}
     }
 }
 
@@ -220,7 +240,9 @@ main(int argc, char *argv[])
 	stat(de->d_name, &st);
 	if (S_ISREG(st.st_mode)
 	    && (fd = open(de->d_name, O_RDONLY))) {
-	    switch (readheaders(fd, de->d_name, &l, &lsize)) {
+	    int ret = readheaders(fd, de->d_name, &l, &lsize);
+	    if (ret != -1) { unfold(l); }
+	    switch (ret) {
 	    case 0:
 		score = killfilter(myfilter, l);
 		break;
