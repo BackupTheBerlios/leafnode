@@ -21,9 +21,16 @@ int
 main(void)
 {
     static char env_path[] = "PATH=/bin:/usr/bin";
-/*    puts(compileinfo); */
+    /* ------------------------------------------------ */
+    /* *** IMPORTANT ***
+     * 
+     * external tools depend on the first line of this output, which is
+     * in the fixed format
+     * version: leafnode-2.3.4...
+     */
     fputs("version: leafnode-", stdout);
     puts(version);
+    /* changable parts below :-) */
     fputs("current machine: ", stdout);
     fflush(stdout);
     putenv(env_path);
