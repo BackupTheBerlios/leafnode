@@ -86,3 +86,14 @@ msgid_allocate(const char *file /** file to link into message.id */,
     if (errno == EEXIST) return 1;
     return -1;
 }
+
+/** delete file given and the corresponding link in message.id */
+int
+msgid_deallocate(const char *file /** file linked into message.id */,
+	const char *mid /** Non-NULL Message-ID to remove from message.id */)
+{
+    const char *m = lookup(mid);
+    int r1 = log_unlink(file, 0);
+    int r2 = log_unlink(m, 0);
+    return min(r1, r2);
+}
