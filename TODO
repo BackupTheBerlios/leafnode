@@ -81,11 +81,6 @@ Ralfs TODO:
     to Damian Ivereigh. Message-ID: <20020126133758.A428@uni-bonn.de>
 
 10pre5
-1.1 dopost: Newsgroups: is not checked for valid groups. Use
-    checkstatus(groups, 'y') after checkstatus('m'). Reported by Ralf
-    Wildenhues. Message-ID: <20020126133758.A428@uni-bonn.de>
-
-10pre5
 1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch of 2002-02-04
     note: cannot reproduce "SIGCHLD triggers getc() EOF" on Linux or
     FreeBSD. Asked Jeffrey for explanation of OS and maybe scenario.
@@ -263,6 +258,9 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-08-21 Jörg Dietrich
+	   dopost: Newsgroups: is not checked for valid groups
 
 2002-07-22 tolerate ", " instead of just "," in Newsgroup:
 	   current NNTP drafts suggests that to be able to fold Newsgroup: headers.
