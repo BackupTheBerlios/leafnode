@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.8 2002/01/29 10:35:23 emma Exp $
+# $Id: Makefile.am,v 1.9 2002/01/30 12:22:08 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -187,7 +187,8 @@ checkgroups_SOURCES	= checkgroups.c
 newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 
-DISTCLEANFILES = config.c config_defs.h configparam_data.c README
+DISTCLEANFILES = config.c config_defs.h configparam_data.c README \
+	config.table.sorted
 
 # GENERATED SOURCES ========================================
 config.c: Makefile
@@ -205,7 +206,7 @@ config.c: Makefile
 	@echo >>.$@ "const char *CAT = \"$(CAT)\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 #	@echo >>.$@ 'const char *compileinfo = "*** leafnode @PACKAGE_VERSION@ ***\ncompile date:' "`env - PATH=/bin:/usr/bin TZ=GMT date`" '\ncompile machine: ' "`uname -a`" '\\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)";'
-	if test -f $@ && cmp >/dev/null .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
+	if test -f $@ && cmp >/dev/null .$@ $@ && rm -f .$@ ; then touch $@ ; else rm -f $@ ; mv .$@ $@ ; fi
 
 config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h
 	@echo creating $@
@@ -222,9 +223,10 @@ config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h
 		}' <$(srcdir)/config.table >$@ || rm -f $@
 
 configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
-	./b_sortnl <$(srcdir)/config.table \
-	| $(AWK) -f $(srcdir)/genconfigparam_data.awk >.$@ \
-	&& mv .$@ $@
+	rm -f config.table.sorted
+	./b_sortnl <$(srcdir)/config.table >config.table.sorted
+	$(AWK) -f $(srcdir)/genconfigparam_data.awk <config.table.sorted >.$@ \
+	&& { rm -f $@ ; mv -f .$@ $@ ; }
 
 
 .PHONY:	update
@@ -290,4 +292,4 @@ rpm: dist leafnode.spec
 	-ln -s `pwd`/leafnode.spec $(RPMSRC)/SPECS
 	unset IFS ; rpm -ba $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
 	| grep '^Wrote:' | $(SED) -e 's/^Wrote: //' \
-	| while read r ; do mv "$$r" . || exit 1 ; done
+	| while read r ; do mv -f "$$r" . || exit 1 ; done
