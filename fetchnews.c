@@ -1710,8 +1710,8 @@ out:
 /**
  * works current_server.
  * \return
- * -  0 if no other servers have to be queried,
- * -  1 if no errors, but more servers needed
+ * -  0 if no other servers have to be queried (for Message-ID fetch, e. g.)
+ * -  1 if no errors, but more servers needed (normal return code)
  * - -1 for non fatal errors (go to next server)
  * - -2 for fatal errors (do not query any more)
  */
