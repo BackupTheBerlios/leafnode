@@ -1,12 +1,16 @@
 BEGIN	{
 	print "/* file generated from $(srcdir)/config.table, do not edit! */\n";
-	print "enum {"
+	print "enum {";
 	}
 
 	{
-	print $2 ",";
+	    if (p) {
+		print p ",";
+		p=""; 
+	    }
+	    p = $2
 	}
 
 END	{
-	print "};"
+	print p "};"
 	}
