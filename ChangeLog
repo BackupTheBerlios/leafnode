@@ -1,4 +1,11 @@
+2004-03-20  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, config.example: ln_log_stderronly is bogus, we use logstderr.
+	Patch by Thomas Schwinge.
+
 2004-03-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, configure.ac: Snapshot 20040319a.
 
 	= snapshot 20040319a =
 	* NEWS, nntpd.c: Fix SIGSEGV when XPAT, XHDR or NEWNEWS are issued
