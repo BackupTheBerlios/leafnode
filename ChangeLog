@@ -1,5 +1,22 @@
+2002-05-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* validatefqdn.c, validatefqdn.h: No longer shadow the global
+	"fqdn" variable.
+
+	* checkgroups.c, fetchnews.c, leafnode.h, miscutil.c, nntpd.c,
+	rnews.c, texpire.c, applyfilter.c: Initvars() now takes two
+	arguments, the new one determines if validatefqdn is to complain to
+	stdout in NNTP-style. Parameter bug in this context reported by
+	Ralf Wildenhues.
+
+	* Makefile.am: Pull @GCC_FLAGS@ (from configure.ac) into CFLAGS.
+	Suggested by Ralf Wildenhues.
+
+	* ChangeLog: Track changes. cvs2cl is not perfect though :-/
+
 2002-05-05  Matthias Andree <matthias.andree@gmx.de>
 
+	=== release-2.0b8_ma10pre3.2 ===
 	* TODO: stricter Message-ID checking is now in place.  Done: "add
 	COPYING".
 	* autobootstrap.sh: Note that this file is public domain.
