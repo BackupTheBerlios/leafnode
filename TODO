@@ -46,10 +46,12 @@ Ralfs TODO:
 	  "%d articles deleted' message not correct.
 	* delaybody mode: Cancels for marked bodies lead to marks not being
 	  removed (supersedes are handled ok) until expiry of the pseudo header.
-	* Leftover link in temp.files for each (successfully?) posted article.
+	* Leftover link in temp.files for each (successfully?) posted article,
+	  as well as backup.moderated.
 	* :active.read must not be updated on NEWGROUPS, or the active will
 	  never be refetched as a whole.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
+	* Fix handling of pseudo article.
 
 10pre5
 0.0 forward port bug fixes from 1.9.19rc*
@@ -135,10 +137,6 @@ Ralfs TODO:
 2.2 Fix and amend copyright statements and licenses.
 
 2.2 nntpd control articles are also displayed
-
-2.2 tolerate ", " instead of just "," in Newsgroup:
-    current NNTP drafts suggests that to be able to fold Newsgroup: headers.
-    ACTION: work in progress, fixed in some places.
 
 2.2 convert Newsgroup: to lowercase on external newsgroups.
 
@@ -248,6 +246,9 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-07-22 tolerate ", " instead of just "," in Newsgroup:
+	   current NNTP drafts suggests that to be able to fold Newsgroup: headers.
 
 2002-07-08 Matthias Andree
 	   do not tamper with permissions on /var/spool/news/* directories
