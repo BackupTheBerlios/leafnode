@@ -1,7 +1,7 @@
 #include <pwd.h>
 #include "ugid.h"
 int
-uid_getbyuname(const char *name, uid_t * p_uid)
+uid_getbyuname(const char *name, /*@out@*/ uid_t * p_uid)
 {
     struct passwd *pw;
 
