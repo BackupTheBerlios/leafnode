@@ -1511,7 +1511,7 @@ postarticles(void)
 				}
 				/* POST was OK */
 				++n;
-			    } else {
+			    } else if (!current_server->next) {
 				/* POST failed */
 				/* FIXME: TOCTOU race here - check for
 				 * duplicate article here */
@@ -1826,7 +1826,7 @@ static int mysigaction(int signum, const  struct  sigaction  *act) {
 
 static mastr *activeread(void)
 {
-    mastr *c = mastr_new(100);
+    mastr *c = mastr_new(100); /* FIXME? LN_PATH_MAX? */
     mastr_vcat(c, spooldir, "/leaf.node/:active.read", NULL);
     return c;
 }
@@ -1980,12 +1980,13 @@ main(int argc, char **argv)
 	}
     }
 
+    /* FIXME! Race condition here if no lockfile */
     rereadactive();
+    feedincoming();
     if (forceactive) {
 	oldactive = mvactive(active);
 	active = NULL;
     }
-    feedincoming();
 
     signal(SIGHUP, SIG_IGN);
     sa.sa_handler = sigcatch;
