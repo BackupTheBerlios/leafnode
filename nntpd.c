@@ -328,7 +328,7 @@ buildpseudoart(const char *grp)
     }
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	   "Creating pseudoarticle for group %s", grp);
-    fprintf(f, "Path: %s\n", owndn ? owndn : fqdn);
+    fprintf(f, "Path: %s!not-for-mail\n", owndn ? owndn : fqdn);
     fprintf(f, "Newsgroups: %s\n", grp);
     fprintf(f, "From: Leafnode <nobody@%s>\n", owndn ? owndn : fqdn);
     fprintf(f, "Subject: Leafnode placeholder for group %s\n", grp);
@@ -480,6 +480,7 @@ doarticle(const struct newsgroup *group, const char *arg, int what,
     char *localmsgid = NULL;
     char s[PATH_MAX + 1];	/* FIXME */
 
+    if (!*artno && !arg) *artno=1; arg="1";
     f = fopenart(group, arg, artno);
     if (!f) {
 	if (arg && *arg != '<' && !group)
@@ -1659,11 +1660,18 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	}
 
 	if (OVfield < 0) {
-	    if (strcasecmp(header, "Newsgroups:")) {
+	    if (!strcasecmp(header, "Newsgroups:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s\r\n", group->name);
-	    } else
-		nntpprintf("430 No such header: %s", hd);
+		printf(".\r\n");
+	    } else if (!strcasecmp(header, "Path:")) { 
+		nntpprintf("221 First line of %s pseudo-header follows:", hd);
+		printf("1 %s!not-for-mail\r\n", owndn ? owndn : fqdn);
+		printf(".\r\n");
+	    } else {
+		nntpprintf("221 No such header: %s", hd);
+		printf(".\r\n");
+	    }
 	    return;
 	}
 
