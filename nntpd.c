@@ -407,10 +407,8 @@ is_pseudogroup(const char *group)
     /* when the client cannot subscribe, no group will be pseudo */
     if (!allowsubscribe()) return FALSE;
 
-#if 0
     /* interesting is never pseudo */
     if (is_interesting(group)) return FALSE;
-#endif
 
     /* make sure that is_localgroup is FALSE here: */
     if (!chdirgroup(group, FALSE)) return TRUE;
@@ -833,12 +831,11 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 	opengroup(g);
 
 	if (is_pseudogroup(g->name))
-	    count = 1;
+	    nntpprintf("211 %lu %lu %lu %s group selected",
+		    1, g->first, g->first, g->name);
 	else
-	    count = g->count;
-
-	nntpprintf("211 %lu %lu %lu %s group selected",
-		   count, g->first, g->last, g->name);
+	    nntpprintf("211 %lu %lu %lu %s group selected",
+		    g->count, g->first, g->last, g->name);
 	*artno = g->first;
 
 	fflush(stdout);
@@ -2072,7 +2069,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	}
     } else {
 	/* _is_ pseudogroup */
-	if (!b) b = a;
+	if (!(i & RANGE_HAVETO)) b = a;
 	if (arg && (b < group->first || a > b || a > group->last+1)) {
 	    nntpprintf("420 No articles in specified range.");
 	    return;
