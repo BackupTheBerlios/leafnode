@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.57 2004/01/27 12:31:07 emma Exp $
+# $Id: Makefile.am,v 1.58 2004/01/27 12:33:29 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -189,6 +189,7 @@ EXTRA_DIST = \
 	leafnode.spec.in \
 	mergesort.3 \
 	README \
+	README-leaf.node \
 	README_FIRST \
 	README.html \
 	update.sh \

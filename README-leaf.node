@@ -1,0 +1,88 @@
+README-leaf.node
+================
+
+This file describes the files in the leaf.node directory.
+(C) Copyright 2004 Matthias Andree. GNU GPL v2
+
+1. Persistent files
+-------------------
+
+":active.read"
+	tracks the last time when the active file was completely
+	refreshed, either through fetchnews -f or because
+	"timeout_active" days have passed since the last refresh.
+
+	fetchnews checks the mtime of this file, which, in regular
+	operation, should never be older than "timeout_active" days.
+
+	this file is always 0 bytes.
+
+"groupinfo"
+	contains the list of newsgroups that leafnode knows about
+	and is both large and preciuos
+
+	The syntax is, in Pseudo-C:
+	groupname TAB mode TAB high TAB low TAB timestamp TAB description
+
+	groupname and description are self-documenting, timestamp is the
+	UNIX time when the group was added to leafnode, and mode can be
+	n (no posting), m (moderated), y (posting allowed).
+
+	low and high are the lowest and highest article numbers (natural
+	numbers) in leafnode's group store. These need to be tracked
+	explicitly because the "high" number must be monotonically
+	increasing.
+
+last:SERVER:PORT
+	tracks when the last _full_ fetch of the active from SERVER:PORT
+	was completed. A PORT of 0 means looking up "nntp/tcp" from
+	/etc/services.
+
+	These files are empty.
+
+SERVER:PORT
+SERVER
+	these files store the "high number" of the upstream server that
+	fetchnews has last seen, for the interesting groups. A missing
+	:PORT means looking up "nntp/tcp" from /etc/services.
+
+	These files contain lines with the following syntax:
+	group.name SPACE high
+
+	high is a natural number.
+
+2. Intermittent files
+---------------------
+
+SERVER:PORT~
+SERVER~
+	these files correspond to SERVER:PORT and SERVER and exist while
+	fetchnews fetches news from the server in question, these
+	contain checkpoint information that is read back next time
+	fetchnews runs, in order to not re-check XOVER information that
+	has successfully been fetched before.
+
+groupinfo.??????????
+	temporary file that exists for the few seconds while the
+	groupinfo is written back to disk. It is renamed to groupinfo
+	only when successfully written.
+
+lock.file
+	is present while a leafnode process that can modify groupinfo is
+	running (everything except leafnode-version, newsq).
+
+	It contains the process ID (PID) of the process that set the
+	lock file on the first line and the host name on the second
+	line. The second line is there to avoid cleaning "stale" locks
+	from other hosts, should the spooldir be shared by some hosts
+	(via NFS, for instance).
+
+	It can be removed manually when the process ID recorded in the
+	file does not belong to a leafnode related process (i. e. after
+	crash and reboot).
+
+lock.file.??????????
+	this file is used to work around NFS non-atomicity in the
+	open(2) O_EXCL mode. It can be safely deleted at any time,
+	although leafnode takes care not to leave one behind if it can
+	help it.
