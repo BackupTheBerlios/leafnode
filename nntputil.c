@@ -44,8 +44,8 @@ int stat_is_evil;
 long sendbuf;
 extern struct serverlist *current_server;
 char last_command[1025];
-FILE *nntpin  = NULL;
-FILE *nntpout = NULL;
+/*@dependent@*/ FILE *nntpin  = NULL;
+/*@dependent@*/ FILE *nntpout = NULL;
 int authenticated;
 
 /**
@@ -120,7 +120,7 @@ authenticate(void)
  * - status code from server otherwise.
  */
 int
-newnntpreply(/*@out@*/ char **resline
+newnntpreply(/*@null@*/ /*@out@*/ char **resline
 	     /** If non-NULL, stores pointer to line here. */)
 {
     char *response;
@@ -183,7 +183,7 @@ static int
 any_connect(const int family, const int socktype, const int protocol,
 	    const struct sockaddr *sa, socklen_t addrlen,
 	    /*@exposed@*/ const char ** const errcause)
-/*@modifies *errcause@*/
+/*@modifies errcause@*/
 {
     char *as;
     int sock;
@@ -255,7 +255,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     sock = -1;
     errcause = "no addresses";
     errno = 0;
-    for (aii = ai; aii; aii = aii->ai_next) {
+    for (aii = ai; aii != NULL; aii = aii->ai_next) {
 	sock = any_connect(aii->ai_family, aii->ai_socktype, aii->ai_protocol,
 			   aii->ai_addr, aii->ai_addrlen, &errcause);
 	if (sock >= 0)
