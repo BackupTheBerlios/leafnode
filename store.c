@@ -86,7 +86,8 @@ int
 store_stream(FILE * in /** input file */ ,
 	     int nntpmode /** if 1, unescape . and use . as end marker */ ,
 	     const struct filterlist *f /** filters or NULL */ ,
-	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */ )
+	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */,
+	     int delayflg /** delayed download, 0: no 1: pseudo head, 2: all */)
 {
     int rc = -1;		/* first, assume something went wrong */
     mastr *tmpfn = mastr_new(4095l);
@@ -267,8 +268,8 @@ store_stream(FILE * in /** input file */ ,
     if (maxbytes == 0 && !found_body)
 	BAIL(-4, "Headers extend beyond allowed read range");
 
-    /* check if we already have the article */
-    if (ihave(mid)) {
+    /* check if we already have the article, ignore if downloading delayed body */
+    if (delayflg != 2 && ihave(mid)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "store: duplicate article %s", mid);
 	rc = -2;
@@ -379,8 +380,10 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-1, "write error");
 
     /* write separator between header and body */
-    if (fputs(LLS, tmpstream) == EOF)
-	BAIL(-1, "write error");
+    if (delayflg != 1) {
+	if (fputs(LLS, tmpstream) == EOF)
+	    BAIL(-1, "write error");
+    }
 
     /* copy body */
     while ((maxbytes > 0 || maxbytes == -1) &&
@@ -413,6 +416,11 @@ store_stream(FILE * in /** input file */ ,
 
     if (fflush(tmpstream))
 	BAIL(-1, "write error");
+
+    /* delaybody downloaded: kill old pseudo article header */
+    if (delayflg == 2) {
+	supersede_cancel(mid, "Delaybody body-fetch", "Body fetched");
+    }
 
     /* now create link in message.id */
     m = lookup(mid);
@@ -500,11 +508,12 @@ store_stream(FILE * in /** input file */ ,
 
 int
 store(const char *name, int nntpmode,
-      /*@null@*/ const struct filterlist *f /** filters or NULL */ )
+      /*@null@*/ const struct filterlist *f /** filters or NULL */,
+      int delayflg)
 {
     FILE *i = fopen(name, "r");
     if (i) {
-	int rc = store_stream(i, nntpmode, f, (ssize_t)-1);
+	int rc = store_stream(i, nntpmode, f, (ssize_t)-1, delayflg);
 	(void)fclose(i);
 	return rc;
     } else {

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.57 2002/07/04 09:26:15 ralf Exp $ */
+/* $Id: leafnode.h,v 1.58 2002/07/04 22:30:06 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -242,7 +242,7 @@ extern "C" {
 	char string[1];
     };
     void appendtolist(struct stringlist **list, struct stringlist **lastentry,
-		      /*@unique@*/ char *newentry);
+		      /*@unique@*/ const char *newentry);
     /* append "newentry" to "list". "lastentry" points to the last
        entry in "list" and must be supplied. */
     /*@dependent@*//*@null@*/ char *findinlist(/*@null@*/ struct stringlist *haystack,
@@ -314,9 +314,10 @@ extern "C" {
 /*
  * store articles
  */
-    int store(const char *filename, int, /*@null@*/ const struct filterlist *);
+    int store(const char *filename, int, /*@null@*/ const struct filterlist *,
+	      int);
     int store_stream(FILE * stream, int, /*@null@*/ const struct filterlist *,
-		     ssize_t);
+		     ssize_t, int);
     /*@observer@*/ const char *store_err(int);
 
 /*
@@ -424,6 +425,13 @@ extern "C" {
 
     extern /*@null@*/ struct expire_entry *expire_base;
 
+    struct delaybody_entry {
+	struct delaybody_entry *next;
+	char *group;
+    };
+
+    extern /*@null@*/ struct delaybody_entry *delaybody_base;
+
     extern char *mta;		/* mail transfer agent for mailing to moderators */
     /* expire for certain groups */
     extern unsigned long artlimit;
@@ -509,6 +517,8 @@ extern "C" {
     void lowercase(char *string);
     int ngmatch(const char *pattern, const char *string);
     int copyfile(FILE * infile, FILE * outfile, long n);
+
+    int delaybody_group(/*@null@*/ const char *group);
 
     int initinteresting(void);
     /*@null@*/ /*@only@*/ RBLIST *openinteresting(void);

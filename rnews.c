@@ -73,7 +73,7 @@ fprocessbatch(FILE * f, char *firstline)
 		   strlen(l) > 40 ? "[...]" : "");
 	    goto pb_bail;
 	}
-	ret = store_stream(f, 0, filter , bytes);
+	ret = store_stream(f, 0, filter, bytes, 0);
 	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 			"store_stream returns %d", ret);
     }

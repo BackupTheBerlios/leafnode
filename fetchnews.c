@@ -55,7 +55,7 @@ static int isgrouponserver(char *newsgroups);
 static int ismsgidonserver(char *msgid);
 static unsigned long getgroup(struct newsgroup *g, unsigned long server);
 static int postarticles(void);
-static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *);
+static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *, int);
 
 static void
 _ignore_answer(FILE * f)
@@ -121,7 +121,7 @@ findserver(char *servername)
 static int
 testheaderbody(int optchar)
 {
-    if (!delaybody) {
+    if (!delaybody) {	/* FIXME */
 	printf
 	    ("Option -%c can only be used in conjunction with delaybody -"
 	     "ignored\n", optchar);
@@ -280,11 +280,11 @@ donewnews(struct newsgroup *g, time_t lastrun)
  * get an article by message id
  */
 static int
-getbymsgid(char *msgid)
+getbymsgid(const char *msgid, int delayflg)
 {
     unsigned long artno;
     putaline(nntpout, "ARTICLE %s", msgid);
-    return (getarticle(NULL, &artno) > 0) ? TRUE : FALSE;
+    return (getarticle(NULL, &artno, delayflg) > 0) ? TRUE : FALSE;
 }
 
 /*
@@ -300,7 +300,7 @@ getmarked(struct newsgroup *group)
     struct stringlist *failed = NULL;
     struct stringlist *ptr = NULL;
     char filename[1024];
-    unsigned long artno;
+    mastr *str;
 
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	   "Getting bodies of marked messages for group %s ...\n", group->name);
@@ -310,12 +310,18 @@ getmarked(struct newsgroup *group)
 	       "Cannot open %s for reading: %m", filename);
 	return;
     }
+    str = mastr_new(256);
     while ((l = getaline(f))) {
-	putaline(nntpout, "ARTICLE %s", l);
-	if (!getarticle(NULL, &artno))
-	    appendtolist(&failed, &ptr, l);
+	mastr_cpy(str, l);
+	if (getbymsgid(mastr_str(str), 2)) {
+	    groupfetched++;
+	} else {
+	    appendtolist(&failed, &ptr, mastr_str(str));
+	    groupkilled++;
+	}
     }
     fclose(f);
+    mastr_delete(str);
     truncate(filename, (off_t) 0);	/* kill file contents */
     if (!failed)
 	return;
@@ -339,6 +345,7 @@ getmarked(struct newsgroup *group)
  * get newsgroup from a server. "server" is the last article that
  * was previously read from this group on that server
  */
+#if 0
 /*
  * fopenmsgid: open a message id file, repairing errors if possible
  */
@@ -376,6 +383,7 @@ fopenmsgid(const char *filename)
 	return NULL;
     }
 }
+#endif
 
 /*
  * calculate first and last article number to get
@@ -476,9 +484,9 @@ doxover(struct stringlist **stufftoget,
 {
     char *l;
     unsigned long count = 0;
-    char *c = 0;
     long reply;
     struct stringlist *helpptr = NULL;
+    int delaybody_this_group = delaybody_group(groupname);
 
     putaline(nntpout, "XOVER %lu-%lu", first, last);
     l = getaline(nntpin);
@@ -492,7 +500,7 @@ doxover(struct stringlist **stufftoget,
 	char *xover[20];
 	char *artno, *subject, *from, *date, *messageid;
 	char *references, *lines, *bytes, *p;
-	char *newsgroups = NULL;
+	const char *newsgroups = NULL;
 	char *newsgroups_storage = NULL;
 
 	if (abs(str_nsplit(xover, l, "\t", sizeof(xover) / sizeof(xover[0]))) <
@@ -542,7 +550,7 @@ doxover(struct stringlist **stufftoget,
 		newsgroups_storage = (char *)critcalloc(strlen(p),
 						"Allocating space for "
 						"newsgroups header");
-		r = newsgroups = newsgroups_storage;
+		newsgroups = r = newsgroups_storage;
 
 		/* skip server name */
 		SKIPWORD(p);
@@ -561,17 +569,18 @@ doxover(struct stringlist **stufftoget,
 	    }
 	}
 
-	if ((filtermode & FM_XOVER) || delaybody) {
+	if ((filtermode & FM_XOVER) || delaybody_this_group) {
 	    char *hdr, *q;
 
-	    hdr = (char *)critmalloc(xoverlen + strlen(newsgroups) + 200,
+	    hdr = (char *)critmalloc(xoverlen + strlen(newsgroups) + 300,
 				     "allocating space for pseudo header");
 	    q = hdr + sprintf(hdr, "From: %s\n"
 		    "Subject: %s\n"
 		    "Message-ID: %s\n"
 		    "References: %s\n"
 		    "Date: %s\n"
-		    "Newsgroups: %s\n",
+		    "Newsgroups: %s\n"
+		    "Path: fake-delaybody-path!not-for-mail\n",
 		    from, subject, messageid, references, date, newsgroups);
 
 	    if (lines) {
@@ -602,22 +611,29 @@ doxover(struct stringlist **stufftoget,
 		continue;
 	    }
 
-	    if (delaybody) {
+	    if (delaybody_this_group) {
 		/* write pseudoarticle */
-		FILE *f;
+		int tmpfd;
+		mastr *tmpfn = mastr_new(4095l);
 
-		if (!c) {
-		    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-			   "lookup of %s failed", messageid);
+		(void)mastr_vcat(tmpfn, spooldir, "/temp.files/delaypseudo_XXXXXXXXXX", NULL);
+		tmpfd = safe_mkstemp(mastr_modifyable_str(tmpfn));
+		if (tmpfd < 0) {
+		    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "doxover: error in mkstemp(\"%s\"): %m",
+			    mastr_str(tmpfn));
+		    mastr_delete(tmpfn);
 		    free(hdr);
 		    free_strlist(xover);
 		    continue;
 		}
-		if ((f = fopenmsgid(c)) != NULL) {
-		    fputs(hdr, f);
-		    fclose(f);
-		    store(c, 0, 0);
+		write(tmpfd, hdr, (size_t)(q-hdr)); /* FIXME: check error! */
+		if (!log_fsync(tmpfd) && !log_close(tmpfd)) {
+		    if (store(mastr_str(tmpfn), 0, 0, 1) == 0)
+			(void)log_unlink(mastr_str(tmpfn));
+		    else
+			; /* FIXME */
 		}
+		mastr_delete(tmpfn);
 	    } else {
 		count++;
 		appendtolist(stufftoget, &helpptr, artno);
@@ -690,7 +706,8 @@ doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
  *
  */
 int
-getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno)
+getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
+    int delayflg)
 {
     char *l;
     int reply = 0;
@@ -711,7 +728,7 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno)
     }
 
     switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
-			 -1)) {
+			 -1, delayflg)) {
     case 1:
 	groupkilled++;
 	return 1;
@@ -773,7 +790,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
 	fflush(nntpout);
 	/* now read articles and feed ARTICLE commands one-by-one */
 	while (advance) {
-	    int res = getarticle(f, &artno_server);
+	    int res = getarticle(f, &artno_server, 0);
 	    if (res == -2)
 		return 0;	/* disconnected server or store OS error */
 	    /* FIXME: add timeout here and force window to 1 if it triggers */
@@ -812,6 +829,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     int x = 0;
     long outstanding = 0;
     unsigned long last = 0;
+    int delaybody_this_group;
 
     /* lots of plausibility tests */
     if (!g)
@@ -820,8 +838,11 @@ getgroup(struct newsgroup *g, unsigned long first)
 	return 0;
     groupfetched = 0;
     groupkilled = 0;
+
+    /* we don't care about x-posts for delaybody */
+    delaybody_this_group = delaybody_group(g->name);
     /* get marked articles first */
-    if (delaybody && (headerbody != 1)) {
+    if (delaybody_this_group && (headerbody != 1)) {
 	getmarked(g);
 	if (headerbody == 2) {
 	    /* get only marked bodies, nothing else */
@@ -856,7 +877,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     /* use XOVER since it is often faster than XHDR. User may prefer
        XHDR if they know what they are doing and no additional information
        is requested */
-    if (current_server->usexhdr && !f && !delaybody) {
+    if (current_server->usexhdr && !f && !delaybody_this_group) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: considering %ld articles %lu - %lu, using XHDR", g->name,
 	       (last - first + 1), first, last);
@@ -886,7 +907,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 	break;
     }
 
-    if (delaybody) {
+    if (delaybody_this_group) {
 	freefilter(f);
 	freelist(stufftoget);
 	return last;
@@ -1449,7 +1470,7 @@ do_server(/*@null@*/ char *msgid, time_t lastrun, /*@null@*/ char *newsgrp)
 	} else if (msgid) {
 	    /* if retrieval of the message id is successful at one
 	       server, we don't have to check the others */
-	    if (getbymsgid(msgid)) {
+	    if (getbymsgid(msgid, 0)) {
 		globalfetched += groupfetched;	/* FIXME: initialize! */
 		globalkilled += groupkilled;
 		return TRUE;

@@ -524,7 +524,7 @@ whoami(void)
  */
 void
 appendtolist(struct stringlist **list, struct stringlist **lastentry,
-	     /*@unique@*/ char *newentry)
+	     /*@unique@*/ const char *newentry)
 {
     struct stringlist *ptr;
     ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
@@ -679,4 +679,23 @@ ngmatch(const char *pattern, const char *str)
 	       "str = \"%s\") == %d", pattern, str, r);
     }
     return !r;
+}
+
+/*
+ * return 1 if this (maybe nondeterminate) group is
+ * (or all groups are) in delaybody mode
+ */
+int
+delaybody_group(/*@null@*/ const char *group)
+{
+    struct delaybody_entry *e;
+
+    if (delaybody || !group)
+	return delaybody;
+
+    for (e = delaybody_base; e; e = e->next) {
+	if (!ngmatch(e->group, group))
+	    return 1;
+    }
+    return 0;
 }

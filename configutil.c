@@ -33,6 +33,7 @@
 char *mta = NULL;
 time_t default_expire = 0;
 /*@null@*/ struct expire_entry *expire_base = NULL;
+/*@null@*/ struct delaybody_entry *delaybody_base = NULL;
 unsigned long artlimit = 0;
 unsigned long initiallimit = 0;
 int create_all_links = 0;
@@ -325,6 +326,18 @@ readconfig(char *configfile)
 			}
 		    }
 		    break;
+		case CP_GROUPDELAY:
+		    {
+			struct delaybody_entry *e = (struct delaybody_entry *)
+			    critmalloc(sizeof *e, "parsing groupdelay");
+			e->group = critstrdup(value, "parsing groupdelay");
+			e->next = delaybody_base;
+			delaybody_base = e;
+			if (debugmode & DEBUG_CONFIG)
+			    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				    "config: groupdelay for group %s", value);
+		    }
+		    break;
 		case CP_MAXAGE:
 		case CP_MAXOLD:
 		case CP_MAXXP:
@@ -469,6 +482,20 @@ freeexpire(void)
     expire_base = 0;
 }
 
+static void
+freedelaybody(void)
+{
+    struct delaybody_entry *t, *e = delaybody_base;
+    while (e) {
+	t = e->next;
+	if (e->group)
+	    free(e->group);
+	free(e);
+	e = t;
+    }
+    delaybody_base = NULL;
+}
+
 void
 freeconfig(void)
 {
@@ -490,4 +517,5 @@ freeconfig(void)
 	mta = NULL;
     }
     freeexpire();
+    freedelaybody();
 }

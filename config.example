@@ -62,6 +62,11 @@ expire = 20
 ## a fault of Leafnode). Optional.
 # delaybody = 0
 
+## If you want delaybody mode only for selected groups, you can enable
+## this download mode here.  The global delaybody switch above causes all
+## groups to be treated that way.  Use one line per group pattern.  Optional.
+# groupdelaybody = some.news.groups.*
+
 ##
 ## maxcrosspost, maxage, maxlines, minlines, maxbytes now are configured
 ## in filterfile.

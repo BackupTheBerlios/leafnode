@@ -129,7 +129,7 @@ feedincoming(void)
 	}
 
 	/* FIXME: fix xover */
-	if ((rc = store(*di, 0, 0))) {
+	if ((rc = store(*di, 0, 0, 0))) {
 	    static const char xx[] = "/failed.postings/";
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
 		   "moving to %s%s",

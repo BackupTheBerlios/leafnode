@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.16 2002/06/27 16:00:07 ralf Exp $
+<P>Version ID of this document: $Id: README.html,v 1.17 2002/07/04 22:30:06 ralf Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -602,8 +602,6 @@ server every 90 days. This interval can be changed by setting
 frequently will keep it a little bit smaller but will increase
 the on-line time.
 
-<!--
-delaybody does not currently work well, if at all.
 <p>
 <blockquote>delaybody = 1</blockquote>
 This option switches fetchnews into a mode where only the headers
@@ -611,7 +609,13 @@ of articles are fetched for visual inspection. Only the articles
 read in the newsreader will be retrieved the next time fetchnews
 is called. This can save a huge amount of disk space and download
 time but requires more manual intervention on the user side.
-//-->
+
+<p>
+<blockquote>groupdelaybody = some.news.group</blockquote>
+If you want delaybody mode only for selected groups, you can enable
+this download mode for one specific group.  The global delaybody
+switch above causes all groups to be treated that way.  Use one line
+per group pattern.
 
 <p>
 <blockquote>debugmode = 260</blockquote>

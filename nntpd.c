@@ -599,7 +599,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	 * present. If the blank line is missing, the body will also be
 	 * missing.
 	 */
-	if (delaybody && !l) {
+	/* for ARTICLE MID, assume same delaybody mode for now - FIXME */
+	if (!l && delaybody_group(group->name)) {
 	    /* EOF -> no body */
 	    switch (markdownload(group, localmsgid)) {
 	    case 0:

@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 		score = TRUE;
 		break;
 	    case -2: /* article has no body */
-		if (delaybody)
+		if (delaybody_group(g->name))
 		    score = killfilter(myfilter, l);
 		else
 		    score = TRUE;

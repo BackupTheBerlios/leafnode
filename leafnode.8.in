@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.9 2002/04/03 21:57:02 emma Exp $
+.\" $Id: leafnode.8.in,v 1.10 2002/07/04 22:30:06 ralf Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -313,6 +313,12 @@ when the headers have been read, the bodies of the articles will
 be retrieved the next time
 .BR fetchnews (8)
 is called. This can save a huge amount of download time and disk space.
+.TP
+groupdelaybody = some.news.groups.*
+If you want delaybody mode only for selected groups, you can enable
+this download mode for one specific group.  The global delaybody
+switch above causes all groups to be treated that way, groupdelaybody
+enables delaybody for all groups matching the pattern.
 .TP
 debugmode = 260
 With this option set,
