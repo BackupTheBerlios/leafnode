@@ -8,7 +8,6 @@ CLEANFILES=	$(GENERATED_DOCS)
 
 EXTRA_DIST=	archivefaq.pl \
 		make_pass.pl \
-		newsq.pl \
 		sendbatch.bash.in \
 		simple-batcher.sh \
 		uucp \
