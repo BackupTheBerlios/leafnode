@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.62 2002/07/06 11:35:54 ralf Exp $ */
+/* $Id: leafnode.h,v 1.63 2002/07/06 13:06:29 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -423,6 +423,8 @@ extern "C" {
     extern long sendbuf;	/* TCP send buffer of currently connected server */
     extern time_t default_expire;
 
+    enum feedtype { CPFT_NNTP = 0, CPFT_UUCP, CPFT_NONE };
+
     struct serverlist {
 	/*@null@*/ struct serverlist *next;
 	char *name;		/* Servername */
@@ -433,6 +435,7 @@ extern "C" {
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
 	int timeout;		/* timeout in seconds before we give up */
+	enum feedtype feedtype;
 	char active;
     };
 
@@ -501,6 +504,7 @@ extern "C" {
     extern /*@null@*/ struct serverlist *servers;
 
     void freeconfig(void);
+    const char * get_feedtype(enum feedtype t);
 
     /* list of servers to use */
 /*

@@ -58,6 +58,22 @@ long windowsize = 5;
 				/* global work variable */
 static struct serverlist *serverlist;	/* local copy to free list */
 
+
+const char *
+get_feedtype(enum feedtype t)
+{
+    /* this requires C9x support for "designated initializers"
+     * gcc 2.95.3 is fine
+     */
+    static const char *ftn[] = {
+	[CPFT_NNTP] = "NNTP",
+	[CPFT_UUCP] = "UUCP",
+	[CPFT_NONE] = "none",
+    };
+
+    return ftn[t];
+}
+
 /* parse a line, destructively */
 int
 parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
@@ -406,6 +422,22 @@ readconfig(char *configfile)
 				   "config: no_direct_spool is %d (default 0)",
 				   no_direct_spool);
 		    break;
+		case CP_FEEDTYPE:
+		    if (0 == strcasecmp(value, "none")) {
+			p->feedtype = CPFT_NONE;
+		    } else if (0 == strcasecmp(value, "uucp")) {
+			p->feedtype = CPFT_UUCP;
+		    } else if (0 == strcasecmp(value, "nntp")) {
+			p->feedtype = CPFT_NNTP;
+		    } else {
+			ln_log(LNLOG_SERR, LNLOG_CTOP,
+				"config: feedtype \"%s\" unknown. abort.",
+				value);
+			abort();
+		    }
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			    "config: feedtype is %s", get_feedtype(p->feedtype));
+		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			   "Config line \"%s=%s\" unhandled, abort.",
@@ -453,6 +485,7 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
     p->password = NULL;
     p->active = TRUE;
     p->dontpost = FALSE;
+    p->feedtype = CPFT_NNTP; /* default: use NNTP */
     return p;
 }
 

@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.10 2002/07/04 22:30:06 ralf Exp $
+.\" $Id: leafnode.8.in,v 1.11 2002/07/06 13:06:29 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -187,6 +187,10 @@ once after each server definition.  Since the password is available in clear
 text, it is recommended that you set the rights on the config file as
 restrictive as possible, otherwise other users of your computer will be able
 to get your password(s) from that file.
+.TP
+feedtype = TYPE
+Determine how to send postings to the upstream server. Can be any of
+NNTP (default), UUCP or NONE. Case does not matter.
 .TP
 timeout = 30
 By default, leafnode tries to connect for 10 seconds to a server and then
