@@ -5,18 +5,13 @@
  * 
  */
 #include "config.h"
-#ifndef HAVE_INET_NTOP
+#if !HAVE_INET_NTOP
 #include "leafnode.h"
-#include "mastring.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
-
-#ifdef WITH_DMALLOC
-#include <dmalloc.h>
-#endif
 
 #include <string.h>
 
@@ -25,7 +20,8 @@ inet_ntop(int af, const void *s, char *dst, int x)
 {
     switch (af) {
     case AF_INET:
-	mastrncpy(dst, inet_ntoa(*(const struct in_addr *)s), x);
+	strncpy(dst, inet_ntoa(*(const struct in_addr *)s), x);
+	if (x) dst[x-1] = '\0';
 	return dst;
 	break;
     default:
