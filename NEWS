@@ -6,6 +6,7 @@ Changes since 20050110a:
 - Bugfix: if log_poster_ip is enabled, strip existing
   X-Leafnode-NNTP-Posting-Host headers. Fixes Gnus newsreader warnings
   when superseding.
+- Change: in postonly mode, log if there is nothing to post.
 
 20050110a: Changes since 20050105a:
 - Cleanup: Only use top-level Makefile.am, drop recursion.

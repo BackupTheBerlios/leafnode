@@ -2094,8 +2094,11 @@ main(int argc, char **argv)
      * invoked with -P; otherwise quit immediately.
      */
     if (postonly) {
-	if (!checkforpostings())
+	if (!checkforpostings()) {
+	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+		    "%s: no articles to post, exiting.", myname);
 	    exit(EXIT_SUCCESS);
+	}
     } else {
 	if (attempt_lock(LOCKWAIT)) {
 	    fprintf(stderr, "%s: lockfile %s exists, abort\n",
