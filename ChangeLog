@@ -1,4 +1,64 @@
+2005-01-04  Matthias Andree <matthias.andree@gmx.de>
+  * Add a new cancel mode to texpire (-C option).
+
+    M ./NEWS +4
+    M ./texpire.8.in +8
+    M ./texpire.c -19 +43
+
+  * cleanup
+
+    M ./texpire.8.in -1 +1
+
+  * drop obsolete NOTES section
+
+    M ./texpire.8.in -5
+
+  * add missing diagnostic to Xref parser
+
+    M ./artutil.c -1 +1
+
+  * add fourth argument to delete_article, updatexover (Boolean)
+
+    M ./applyfilter.c -2 +2
+    M ./artutil.c -11 +3
+    M ./leafnode.h -1 +6
+    M ./store.c -3 +3
+
+  * update Doxygen stuff for 1.4.0
+
+    M ./Doxyfile -29 +1053
+    M ./b_sortnl.c -1 +1
+    M ./bsearch_range.c -1 +1
+    M ./fetchnews.c -1 +1
+    M ./fopen_reg.c -1 +1
+    M ./masock_sa2name.c -1 +1
+    M ./midutil.c -1 +1
+    M ./mkdir_parent.c -1 +1
+    M ./nntpd.c -1 +1
+    M ./parserange.c -1 +1
+    M ./store.c -2 +3
+    M ./strcasestr.c -2 +2
+
+  * rename sort -> ln_sort to avoid collision with C++ algo
+
+    M ./activutil.c -3 +3
+    M ./leafnode.h -1 +1
+    M ./xoverutil.c -1 +1
+
+  * Update copyrights.
+
+    M ./AUTHORS -1 +1
+    M ./configure.ac -2 +2
+    M ./localutil.c +3
+    M ./store.c -2 +2
+
 2005-01-03  Matthias Andree <matthias.andree@gmx.de>
+  * snapshot 20050103a.
+
+    M ./ChangeLog +32
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
   * Fix up broken groupinfo reader bugfix.
   Yesterday's Bugfix "do not crash if the groupinfo file is empty" caused
   a fallback to the old groupinfo reader and emits one bogus warning about
