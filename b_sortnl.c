@@ -21,7 +21,7 @@
 static int
 comp(const void *a, const void *b)
 {
-    return strcmp(*(const char *const *const)a, *(const char *const *const)b);
+    return strcmp(*(const char *const *)a, *(const char *const *)b);
 }
 
 int
