@@ -17,6 +17,7 @@ this document.
 <LI>Installation
 <LI>Update from previous versions
     <OL>
+    <LI>Update from versions &lt; 2.0b8_ma8
     <LI>Update from versions &lt; 2.0
     <LI>Update from versions &lt; 1.9.3
     <LI>Update from versions &lt; 1.6
@@ -199,8 +200,7 @@ instead.
 
 <br><I>For packagers: if you want to prefix all installation paths with a common
 prefix, e. g. to support RPM's BuildRoot feature: You can use
-<KBD>make install-strip INSTALLROOT=/var/tmp/leafnode-root</KBD>, it may change
-to DESTDIR in a future version though.
+<KBD>make install-strip DESTDIR=/var/tmp/leafnode-root</KBD>.</I>
 
 <LI>If you are updating leafnode from a previous version, see the section
 "Updating" below.
@@ -397,7 +397,7 @@ action = kill
 <p>The leafnode programs will issue warnings if they encounter
 obsolete specifications in the main config file.
 
-<h3 align=center>3.2 Update from versions &lt; 1.9.3</h3>
+<h3 align=center>3.3 Update from versions &lt; 1.9.3</h3>
 
 <p>
 From version 1.9.3 on, the groupinfo file is sorted in a case-insensitive
@@ -407,7 +407,7 @@ file. The old groupinfo file will be stored as groupinfo.old just in
 case something goes wrong. You also have to change your main config
 file manually as described in the last section.
 
-<h3 align=center>3.3 Update from versions &lt; 1.6</h3>
+<h3 align=center>3.4 Update from versions &lt; 1.6</h3>
 
 <p>
 Between leafnode-1.6alpha and leafnode-1.6, the format of the groupinfo
@@ -520,6 +520,22 @@ runs on a different port, you can specify it with this option.
 <p><b>General optional parameters</b>
 
 <p>
+<blockquote>authenticate = <i>METHOD</i></blockquote>
+Require that NNTP clients connecting to your leafnode authenticate themselves.
+The only method currently
+supported is <tt>internal</tt>. In this mode, leafnode expects a file
+<i>users</i> in its sysconfdir, /etc/leafnode/users by default, which has a
+simple format, one line per user, with the user name (which cannot contain
+spaces), then a space, then the crypt(3) encrypted password. To
+generate these lines, you can use the Perl program <i>tools/make_pass.pl</i>,
+for example, if you want to add a user "enigma" with a password of "break!me",
+type:
+<blockquote>perl -wT tools/make_pass.pl 'enigma' 'break!me'</blockquote> 
+and copy the
+resulting line to the <i>users</i> file.<br>htpasswd as
+shipped for Apache servers should also work if in crypt(3) mode.
+
+<p>
 <blockquote>hostname = host.domain.country</blockquote>
 If the postings that you write do not have message IDs (generated
 by the newsreader), leafnode will generate a message ID for you.
@@ -593,9 +609,10 @@ want to hunt down bugs. See config.example for an explanation of the number here
 
 <h3 align=center>4.2. The filter file</h3>
 
-<hr>The filter file format is currently described in fetchnews(5). Type man 5
+<p>The filter file format is currently described in fetchnews(5). Type man 5
 fetchnews or man -s 5 fetchnews to see the description.
 
+<HR>
 <h3 align=center>5. LOCAL NEWSGROUPS</h3>
 
 <p>From version 2.0 on, Leafnode is able to handle local newsgroups.
@@ -693,13 +710,10 @@ local.*:egon+%s@example.net
 <p>
 If you want to uninstall leafnode (e.g. because you want to replace it
 with another newsserver) and have a Makefile available, you can
-achieve this by doing "make uninstall". This will remove the executables,
-newsspool and configuration directories. If you only want to remove
-the executables and leave the spool and configuration directories
-untouched, use "make uninstall-bins" instead.
+achieve this by doing "make uninstall".
 
 <p>
-There is no need to uninstall an old version of leafnode before updating.
+Do <b>not</b> uninstall an old version of leafnode before updating.
 
 <hr>
 
@@ -717,7 +731,10 @@ See the file FAQ.
 Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
 
 <p>Leafnode versions 1.5 and higher were written by Cornelius Krasel
-&lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are copyright 1997-2000.
+&lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are copyright 1997-2001.
+
+<p>Leafnode versions 2.0b8_ma were written by Matthias Andree
+&lt;matthias.andree@gmx.de&gt; and are &copy; copyright 1999-2002.
 
 <p>Major modifications were made by<br>
 Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
@@ -745,7 +762,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-<p>The getaline() and getline() routines are Copyright (c) 2000
+<p>The getaline() and getline() routines are Copyright (c) 2000-2002
 Matthias Andree &lt;matthias.andree@gmx.de&gt;. They are licensed
 under the GNU Lesser General Public License (GNU LGPL) 2.1. A
 copy of the LGPL is provided in the file COPYING.
