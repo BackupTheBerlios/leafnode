@@ -1,3 +1,11 @@
+20031221a: Changes since 20031221a:
+- Change: Log username and upstream server for authentication failures.
+  Patch by Samuel Tardieu.
+- Change: Better ./configure --help messages.
+  Patch by Samuel Tardieu.
+- Feature: log_poster_ip in a X-Leafnode-NNTP-Posting-Host header.
+  Based on a patch by Samuel Tardieu.
+
 20031221a: Changes since 20031218a:
 - Change: list active and list newsgroups are now much more efficient
   when a pattern is given that does not contain wildmat meta characters.
