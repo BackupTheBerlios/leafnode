@@ -49,5 +49,7 @@ main(void)
 #endif
     fputs("default MTA: ", stdout);
     puts(DEFAULTMTA);
+    fputs("pcre version: ", stdout);
+    puts(pcre_version());
     exit(0);
 }
