@@ -43,3 +43,5 @@ cscope\.out$
 ^xsnprintf$
 ^new$
 ^build
+^tags$
+^TAGS$
