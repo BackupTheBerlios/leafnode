@@ -55,6 +55,7 @@ stuff?
 Matthias:
 
 * Fix all USAGE() statements. Print standard options from a common file.
+  Switch to some sane license and print a short edition in usage.
 
 * fix TOKENSIZE in filters.
 

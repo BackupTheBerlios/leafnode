@@ -1,4 +1,20 @@
+2004-01-27  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, README-leaf.node, leafnode.spec.in: README-leaf.node
+	describes the contents of the leaf.node directory.
+	* fetchnews.c: Robustness: Make leaf.node/server[:port]~ files line
+	buffered, in order to recover more data in a hard crash.
+	* nntpd.c: Use mysetvbuf.
+	* Makefile.am, mysetvbuf.c, mysetvbuf.h: New mysetvbuf(). Wrapper
+	for setvbuf that handles reversed arguments.
+	* tools/lsmac.pl: Add -d option and allow to give files as
+	arguments.
+
 2004-01-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, newsq.1.in, newsq.c: New newsq -c option that sets its exit
+	code depending on whether there are articles spooled in out.going.
+	* ChangeLog, NEWS, configure.ac: snapshot 2.0.0.alpha20040122a
 
 	= snapshot 20040122a =
 	* NEWS, applyfilter.8.in, applyfilter.c: Add applyfilter -C option
