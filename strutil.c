@@ -141,7 +141,7 @@ int
 main(int argc, char **argv)
 {
     int n, t;
-    char **x, **y;
+    char **x;
     const int maxf = 20;
 
     if (argc != 3) {
@@ -161,7 +161,6 @@ main(int argc, char **argv)
 	printf("%2d: %s\n", n, *x);
 	free(*x);
     }
-    free(y);
     return 0;
 }
 #endif
