@@ -91,7 +91,8 @@ store_stream(FILE * in /** input file */ ,
     mastr *tmpfn = mastr_new(4095l);
     const char *line = 0;
     char *mid = 0, *m;
-    char *ngs = 0;
+    mastr *ngs = mastr_new(80l);
+    int ngs_just_seen = 0;
     int c_date = 0;
     int c_from = 0;
     int c_subject = 0;
@@ -165,45 +166,68 @@ store_stream(FILE * in /** input file */ ,
 	    (void)mastr_cat(head, line);
 	    (void)mastr_cat(head, LLS);
 	}
-	if (c_date < 2 && str_isprefix(line, "Date:"))
-	    ++c_date;
-	if (c_from < 2 && str_isprefix(line, "From:"))
-	    ++c_from;
-	if (c_subject < 2 && str_isprefix(line, "Subject:"))
-	    ++c_subject;
-	if (c_path < 2 && str_isprefix(line, "Path:"))
-	    ++c_path;
-
-	if (str_isprefix(line, "Xref:"))
-	    continue;
-
-	if (str_isprefix(line, "Message-ID:")) {
-	    const char *p = line + 11;
-	    if (mid)
-		BAIL(-3, "more than one Message-ID header found");
-	    SKIPLWS(p);
-	    mid = critstrdup(p, "store");
-	    D(d_stop_mid(mid));
-	}
-
-	if (str_isprefix(line, "Newsgroups:")) {
-	    const char *p = line + 11;
-	    if (ngs) {
-		BAIL(-3, "more than one Newsgroups header found");
+	if (ngs_just_seen) {
+	    if (line[0] == ' ' || line[0] == '\t') {
+		(void)mastr_cat(ngs, line);
+	    } else {
+		ngs_just_seen = 0;
 	    }
-	    SKIPLWS(p);
-	    ngs = critstrdup(p, "store");
 	}
-
-	if (str_isprefix(line, "Supersedes:")) {
-	    supersede_cancel(line + 11, "Supersede", "Superseded");
-	}
-
-	if (str_isprefix(line, "Control:")) {
-	    const char *p = line + 8;
-	    SKIPLWS(p);
-	    if (str_isprefix(p, "cancel") && isspace((unsigned char)p[6]))
-		supersede_cancel(p + 7, "Cancel", "Cancelled");
+	switch (toupper(line[0])) {
+	case 'D':
+	    if (c_date < 2 && str_isprefix(line, "Date:"))
+		++c_date;
+	    break;
+	case 'F':
+	    if (c_from < 2 && str_isprefix(line, "From:"))
+		++c_from;
+	    break;
+	case 'S':
+	    if (c_subject < 2 && str_isprefix(line, "Subject:"))
+		++c_subject;
+	    if (str_isprefix(line, "Supersedes:")) {
+		supersede_cancel(line + 11, "Supersede", "Superseded");
+	    }
+	    break;
+	case 'P':
+	    if (c_path < 2 && str_isprefix(line, "Path:"))
+		++c_path;
+	    break;
+	case 'X':
+	    if (str_isprefix(line, "Xref:"))
+		continue;
+	    break;
+	case 'M':
+	    if (str_isprefix(line, "Message-ID:")) {
+		const char *p = line + 11;
+		if (mid)
+		    BAIL(-3, "more than one Message-ID header found");
+		SKIPLWS(p);
+		mid = critstrdup(p, "store");
+		D(d_stop_mid(mid));
+	    }
+	    break;
+	case 'N':
+	    if (str_isprefix(line, "Newsgroups:")) {
+		const char *p = line + 11;
+		if (ngs->len > 0) {
+		    BAIL(-3, "more than one Newsgroups header found");
+		}
+		SKIPLWS(p);
+		(void)mastr_cat(ngs, p);
+		ngs_just_seen = 1;
+	    }
+	    break;
+	case 'C':
+	    if (str_isprefix(line, "Control:")) {
+		const char *p = line + 8;
+		SKIPLWS(p);
+		if (str_isprefix(p, "cancel") && isspace((unsigned char)p[6]))
+		    supersede_cancel(p + 7, "Cancel", "Cancelled");
+	    }
+	    break;
+	default:
+	    ;
 	}
 
 	if (fputs(line, tmpstream) == EOF)
@@ -223,7 +247,7 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-3, "More or less than one Path header found");
     if (NULL == mid)
 	BAIL(-3, "No Message-ID header found");
-    if (NULL == ngs)
+    if (ngs->len == 0)
 	BAIL(-3, "No Newsgroups header found");
 
     /* check if we already have the article */
@@ -255,7 +279,7 @@ store_stream(FILE * in /** input file */ ,
     /*@+loopexec@*/
     for (;;) {
 	nglist = critmalloc(nglistlen * sizeof(char *), "store");
-	if (str_nsplit(nglist, ngs, ",", nglistlen) >= 0)
+	if (str_nsplit(nglist, mastr_str(ngs), ",", nglistlen) >= 0)
 	    break;
 	/* retry with doubled size */
 	free_strlist(nglist);
@@ -406,8 +430,7 @@ store_stream(FILE * in /** input file */ ,
 	free_strlist(nglist);
 	free(nglist);
     }
-    if (ngs)
-	free(ngs);
+    mastr_delete(ngs);
     if (tmpstream) {
 	(void)fflush(tmpstream);
 	if (rc) {
