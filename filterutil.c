@@ -3,7 +3,8 @@
  *
  * Read and parse filter file and do filtering of messages.
  * (C) 1998 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
- * modifications (C) 2001 by Matthias Andree.
+ * modifications (C) 2001 - 2002 by Matthias Andree.
+ * modifications (C) 2002 by Ralf Wildenhues.
  * See README for restrictions on the use of this software.
  */
 
@@ -21,21 +22,21 @@
 #include <dmalloc.h>
 #endif
 
-struct filterlist *filter = NULL;
+/*@null@*/ /*@owned@*/ struct filterlist *filter = NULL;
 
-static void free_entry(struct filterentry *e);
+static void free_entry(/*@null@*/ /*@only@*/ struct filterentry *e);
 
 static enum state { RF_WANTNG, RF_WANTPAT,
 		    RF_WANTNGORPAT, RF_WANTACTION } state;
 
-static const char *whatexpected(enum state s);
+static /*@observer@*/ const char *whatexpected(enum state s);
 
 /*
  * find "needle" in "haystack" only if "needle" is at the beginning of a line
  * returns a pointer to the first char after "needle" which should be a
  * whitespace
  */
-static const char *
+static /*@null@*/ /*@dependent@*/ const char *
 findinheaders(const char *needle, const char *haystack)
 {
     static const char *p;
@@ -89,7 +90,7 @@ compmon(const void *key, const void *member)
  * calculate date in seconds since Jan 1st 1970 from a Date: header
  */
 static int
-age(const char *date)
+age(/*@null@*/ const char *date)
 {
     /* these are for struct tm and thus the numbers are 1 low */
     char monthname[4];
@@ -145,9 +146,8 @@ age(const char *date)
 	if (!m) {
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE, "Unable to parse %s", date);
 	    return 1001;
-	} else {
-	    month = m->mon;
 	}
+	month = m->mon;
 	if (year < 70)
 	    /* years 2000-2069 in two-digit form */
 	    year += 100;
@@ -173,7 +173,7 @@ age(const char *date)
 /*
  * create a new filterentry for a list
  */
-static struct filterlist *
+static /*@only@*/ struct filterlist *
 newfilter(void)
 {
     struct filterlist *fl;
@@ -197,7 +197,7 @@ newfilter(void)
 static struct filterlist *oldf = NULL;
 
 static void
-insertfilter(struct filterlist *f, char *ng)
+insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ char *ng)
 {
     (f->entry)->newsgroup = ng;
     if (!filter)
@@ -210,7 +210,7 @@ insertfilter(struct filterlist *f, char *ng)
 static const struct expect
 {
     const enum state state;
-    const char *msg;
+    /*@observer@*/ const char *msg;
 } expect[] = {
     { RF_WANTNG, "newsgroup" },
     { RF_WANTPAT, "pattern" },
@@ -218,7 +218,7 @@ static const struct expect
     { RF_WANTACTION, "action" }
 };
 
-static const char *
+static /*@observer@*/ const char *
 whatexpected(enum state s) {
     const char *x = 0;
     unsigned int i;
@@ -236,7 +236,8 @@ whatexpected(enum state s) {
  * in addition, we initialize for standard regular expressions
  */
 int
-readfilter(const char *filterfilename)
+readfilter(/*@null@*/ const char *filterfilename)
+    /*@globals undef filter@*/
 {
     FILE *ff;
     char *l;
@@ -247,12 +248,13 @@ readfilter(const char *filterfilename)
     struct filterlist *f;
     int rv = TRUE;
     unsigned long line = 0;
+
+    filter = NULL;
     if (!filterfilename || !strlen(filterfilename))
 	return FALSE;
 
     param = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     value = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
-    filter = NULL;
     f = NULL;
     ff = fopen(filterfilename, "r");
     if (!ff) {
@@ -292,6 +294,13 @@ readfilter(const char *filterfilename)
 			   "No newsgroup for pattern = %s (line %lu) found",
 			   value, line);
 		    rv = FALSE;
+		    /* strictly speaking, the following "continue"
+		     * statement is not needed. We will never be in this
+		     * branch with ng == NULL, because we start off in
+		     * state RF_WANTNG, and when we get into RF_WANTPAT
+		     * or WANTNGORPAT, ng != NULL holds.
+		     */
+		    continue;
 		}
 		re = pcre_compile(value, PCRE_MULTILINE,
 				  &regex_errmsg, &regex_errpos,
@@ -356,7 +365,7 @@ readfilter(const char *filterfilename)
 	    rv = FALSE;
 	}
     }
-    fclose(ff);
+    (void)fclose(ff);
     if (ng)
 	free(ng);
     free(param);
@@ -505,6 +514,7 @@ killfilter(const struct filterlist *f, const char *hdr)
 	} else if (strcasecmp(g->cleartext, "maxcrosspost") == 0) {
 	    long l = 1;
 	    p = findinheaders("Newsgroups:", hdr);
+	    if (p == NULL) internalerror();
 	    while (*p && *p != '\n') {
 		if (*p++ == ',') {
 		    SKIPLWS(p);
@@ -546,7 +556,7 @@ killfilter(const struct filterlist *f, const char *hdr)
 ** Free filterlist but not filterentries
  */
 void
-freefilter(struct filterlist *f)
+freefilter(/*@null@*/ /*@only@*/ struct filterlist *f)
 {
     struct filterlist *g;
 
@@ -558,7 +568,7 @@ freefilter(struct filterlist *f)
 }
 
 static void
-free_entry(struct filterentry *e)
+free_entry(/*@null@*/ /*@only@*/ struct filterentry *e)
 {
     if (e) {
 	if (e->expr)
@@ -574,7 +584,7 @@ free_entry(struct filterentry *e)
 }
 
 void
-freeallfilter(struct filterlist *f)
+freeallfilter(/*@null@*/ /*@only@*/ struct filterlist *f)
 {
     struct filterlist *g;
     while (f) {
