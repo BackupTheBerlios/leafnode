@@ -101,8 +101,9 @@ struct rnode {
     struct rnode *nhash;	/* next rnode in this hash list */
     struct rnode *nthread;	/* next rnode in this thread */
     struct thread *fthread;	/* start of this thread */
-    unsigned long artno;	/* article number, 0 if unknown */
     const char *mid;		/* Message-ID */
+    unsigned long artno;	/* article number, 0 if unknown */
+    int	noexpire;		/* prevent expiry */
 };
 
 struct thread {
@@ -170,6 +171,7 @@ newnode(const char *mid, unsigned long artno)
     newn->fthread = NULL;
     newn->artno = artno;
     newn->mid = mid;
+    newn->noexpire = 0;
     return newn;
 }
 
@@ -274,7 +276,7 @@ expire_article(struct rnode *r)
 {
     char name[64];
 
-    if (!r || !r->artno) {
+    if (!r || !r->artno || r->noexpire) {
 	return;
     }
     str_ulong(name, r->artno);
@@ -416,8 +418,7 @@ remove_newer(struct thread *threadlist, time_t expire)
 			/* no need to look further */
 			break;
 		    } else {
-			/* prevent this article from expiry */
-			r->artno = 0;
+			r->noexpire = 1;
 		    }
 		}
 	    }
