@@ -10,7 +10,7 @@
  * to the NUL byte in the destination string, thus, there's no need for
  * subsequent implicit strlen traversals for strcat */
 char *
-mastrcpy(char *dest, const char *src)
+mastrcpy(/*@out@*/ /*@returned@*/ char *dest, const char *src)
 {
     while (*src) {
 	*(dest++) = *(src++);

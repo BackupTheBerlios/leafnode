@@ -4,7 +4,8 @@
 #include <sys/types.h>		/* for size_t */
 #include <stdio.h>
 
-char *mastrcpy(char *dest, const char *src);
+char *
+mastrcpy(/*@out@*/ /*@returned@*/ char *dest, const char *src);
 /*@null@*/ char *
 mastrncpy(/*@out@*/ /*@unique@*/ /*@returned@*/ char *dest, const char *src, size_t n);
 
