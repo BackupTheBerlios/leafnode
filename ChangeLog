@@ -1,3 +1,57 @@
+2002-07-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* config.example: Drop "dontpost" option. Replaced by
+	"feedtype=none".  
+	* fetchnews.c: Drop "dontpost" option. Replaced by "feedtype=none".
+	Implement "feedtype" selector.  
+	* config.table, configutil.c, leafnode.h: Drop "dontpost" option.
+	Replaced by "feedtype=none".  
+	* config.example, config.table, configutil.c, leafnode.8.in,
+	leafnode.h: New server-specific configuration option: "feedtype".
+	Can be nntp, uucp or none. Case insensitive.  
+
+2002-07-06  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: Squish bogus compiler warning in getmarkgroup 
+	* fetchnews.c: Major rewrite of the upper layers.  Copes with
+	delaybody groups now.  Can handle multiple -M <MID> options now,
+	multiple -N newsgroup and -N news.groups.pattern, can fine-tune
+	download of delayed bodies, headers and regular articles.  Move
+	functionality from main to small functions process_options, 
+	deactivate_server, find_server, insert_server, print_fetchnews_mode, 
+	make use of create_server.  Move subtasks of doxover in functions
+	create_pseudo_header, write_pseudo_header, make use of
+	parsekill_xref_line.  Implement orthogonal handling of -[BHPR]
+	options.  Remove legacy fopenmsgid, join functionality of do_group
+	in processupstream.  Rewrite do_server to handle errors gracefully
+	and get multiple MIDs.  Reset signal handlers for SIGTERM and
+	SIGALRM after fetching, update output counts.  
+	
+	TODO: output for stored delaybody headers not correct, few error
+	checks missing.  fix forceactive handling.  
+	* artutil.c, leafnode.h, nntpd.c: New function parsekill_xref_line,
+	which reads an Xref: header line, null-terminated newsgroup and
+	article number strings and creates array of pointers to these
+	strings.  Returns the number of groups found or -1 for error.  Use
+	parsekill_xref_line for a cleaner rewrite of supersede_cancel and 
+	getmarkgroup.  
+	* leafnode.h, nntpd.c, xoverutil.c: New function getxoverfield
+	returns one of the xover headers.  Renumber enum xoverfields for
+	consistent usage, do not use cuttab directly.  
+	* configutil.c, leafnode.h: New function create_server creates a
+	serverlist entry with default values.  Factors out common
+	functionality.  
+	* leafnode.h, miscutil.c: Forward port lfindinlist, replaceinlist
+	and prependtolist from 1.9.23.pre3, add new function removefromlist.
+	Call with argument &(successor->next); 
+
+2002-07-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: euhm, cannot tell , from +...  
+	* nntpd.c: Change first MID separator to , to allow tracking
+	leafnode "after 2.0b8_ma10pre4" vs. "old leafnode" 
+	* fetchnews.c: Fix empty else body compiler warning.  
+
 2002-07-05  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* nntpd.c: getmarkgroup:  also look at Xref for other interesting
