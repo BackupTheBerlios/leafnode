@@ -162,7 +162,7 @@ getxoverline(
 
 	    switch (field) {
 	    case XO_FROM:
-		if (!from && *l) {
+		if (!from) {
 		    from = critstrdup(l, "getxoverline");
 		    tab2spc(from);
 		}
@@ -174,7 +174,7 @@ getxoverline(
 		}
 		break;
 	    case XO_DATE:
-		if (!date && *l) {
+		if (!date) {
 		    date = critstrdup(l, "getxoverline");
 		    tab2spc(date);
 		}
