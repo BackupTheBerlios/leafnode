@@ -1,6 +1,7 @@
 /** \file b_sortnl.c
- *  ultra-short non-locale-dependent sort replacement
- * \year 2000
+ *  Ultra-short non-locale-dependent sort replacement.
+ *  exits with code 0 for success, code 1 for internal problems (out of memory), *  code 2 for I/O errors.
+ * \year 2000 - 2002
  * \author Matthias Andree
  */
 
@@ -21,16 +22,15 @@ comp(const void *a, const void *b)
 int
 main(void)
 {
-    int max = 1000;
+    size_t max = 1000;
     char **x = (char **)malloc(max * sizeof(char *));
-    char **y = x;
-    int count = 0;
+    size_t count;
     char buf[LINELEN];
-    int i;
+    size_t i;
 
     if (!x)
 	exit(1);
-    for (;;) {
+    for (count = 0;; count++) {
 	if (count == max) {
 	    max += max;
 	    x = (char **)realloc(x, max * sizeof(char *));
@@ -38,25 +38,28 @@ main(void)
 	    if (!x)
 		exit(1);
 	}
-	if (!fgets(buf, LINELEN, stdin))
+	if (NULL == fgets(buf, LINELEN, stdin))
 	    break;
-	*y = (char *)malloc(strlen(buf) + 1);
-	if (!*y)
+
+	x[count] = (char *)malloc(strlen(buf) + 1);
+
+	if (!x[count])
 	    exit(1);
-	strcpy(*y, buf);	/* Flawfinder: ignore -- this is allocated */
-	count++;
-	y++;
+
+	strcpy(x[count], buf);
     }
+
     if (ferror(stdin))
 	exit(2);
 
     if (mergesort(x, count, sizeof(char *), comp))
 	qsort(x, count, sizeof(char *), comp);
 
-    for (i = 0, y = x; i < count; i++) {
-	fputs(*y, stdout);
-	free(*y);
-	y++;
+    for (i = 0; i < count; i++) {
+	if (EOF == fputs(x[i], stdout)) {
+	    exit(2);
+	}
+	free(x[i]);
     }
     free(x);
     exit(0);
