@@ -45,6 +45,7 @@ int mastr_cat(mastr *, /*@unique@*/ /*@observer@*/ const char *);
 int mastr_vcat(mastr *, ...);
 int mastr_resizekeep(mastr *, size_t);
 int mastr_resizekill(mastr *, size_t);
+size_t mastr_size(mastr *);
 ssize_t mastr_getln(mastr *, FILE *, ssize_t maxbytes);
 #define mastr_autosize(m) do { (void)mastr_resizekeep(m, m->len); } while(0)
 void mastr_delete(/*@only@*/ mastr *);

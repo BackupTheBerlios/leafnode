@@ -56,7 +56,7 @@ mastr_oom(void)
 mastr *
 mastr_new(size_t size)
 {
-    mastr *n = malloc(sizeof(mastr));
+    mastr *n = (mastr *)malloc(sizeof(mastr));
 
     assert(size != 0);
     if (!n) {
@@ -64,7 +64,7 @@ mastr_new(size_t size)
 	/*@notreached@*/ return NULL;
     }
     n->bufsize = size + 1;
-    if (!(n->dat = malloc(n->bufsize))) {
+    if (!(n->dat = (char *)malloc(n->bufsize))) {
 	free(n);
 	mastr_oom();
 	/*@notreached@*/ return NULL;
@@ -180,7 +180,7 @@ mastr_resizekill(mastr * m, size_t l)
 
     if (!m)
 	return 0;
-    n = malloc(l + 1);
+    n = (char *)malloc(l + 1);
     if (!n) {
 	mastr_oom();
 	/*@notreached@*/ return 0;
@@ -200,7 +200,7 @@ mastr_resizekeep(mastr * m, size_t l)
 
     if (!m)
 	return 0;
-    n = realloc(m->dat, l + 1);
+    n = (char *)realloc(m->dat, l + 1);
     if (!n) {
 	free(m->dat);
 	mastr_oom();
@@ -259,7 +259,7 @@ mastr_getln(mastr * m, FILE * f,
 	    ssize_t maxbytes /** if negative: unlimited */ )
 {
     /* FIXME: make this overflow safe, size_t vs. ssize_t. */
-    char buf[40];
+    char buf[4096];
     ssize_t bufsiz = (ssize_t)sizeof buf;
     ssize_t r;
 
@@ -267,7 +267,7 @@ mastr_getln(mastr * m, FILE * f,
 
     for (;;) {
 	r = _getline(buf,
-		     (size_t)(maxbytes > 0 ? min(bufsiz, maxbytes) : bufsiz),
+		     (size_t)(maxbytes > 0 ? min(bufsiz, maxbytes+1) : bufsiz),
 		     f);
 	if (r < 0)
 	    return r;
@@ -277,10 +277,10 @@ mastr_getln(mastr * m, FILE * f,
 		/*@notreached@*/ return 0;
 	    }
 	memcpy(m->dat + m->len, buf, (size_t)r); /* FIXME: avoid this copy */
-	m->dat[r] = '\0';
 	if (maxbytes > 0)
 	    maxbytes -= r;
 	m->len += r;
+	m->dat[m->len] = '\0';
 	if (r == 0 || memchr(buf, '\n', (size_t)r) != NULL)
 	    break;
     }
@@ -305,4 +305,11 @@ mastr_chop(mastr * m)
 	choplast(m);
     if (m && m->len && m->dat[m->len - 1] == '\r')
 	choplast(m);
+}
+
+/** return size of buffer */
+size_t
+mastr_size(mastr * m)
+{
+    return m->bufsize - 1;
 }
