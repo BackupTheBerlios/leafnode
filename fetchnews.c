@@ -1594,12 +1594,23 @@ do_server(time_t lastrun)
 
     /* post articles */
     if (action_method & FETCH_POST) {
-	if (reply == 200 && !current_server->dontpost) {
-	    res = postarticles();
-	    if (res == 0 && rc >= 0)
-		rc = -1;
-	    else if (rc == 0)
-		rc = 1;		/* when posting, query all servers! */
+	switch(current_server->feedtype) {
+	    case CPFT_NNTP:
+		if (reply == 200) {
+		    res = postarticles();
+		    if (res == 0 && rc >= 0)
+			rc = -1;
+		    else if (rc == 0)
+			rc = 1;		/* when posting, query all servers! */
+		}
+		break;
+	    case CPFT_NONE:
+		break;
+	    default:
+		ln_log(LNLOG_SCRIT, LNLOG_CTOP,
+			"fatal: feedtype %s not implemented",
+			get_feedtype(current_server->feedtype));
+		exit(1);
 	}
     }
 
