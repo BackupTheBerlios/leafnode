@@ -39,6 +39,7 @@
 #endif
 
 static unsigned long globalfetched = 0;
+static unsigned long globalhdrfetched = 0;
 static unsigned long globalkilled = 0;
 static unsigned long globalposted = 0;
 static unsigned long groupfetched;
@@ -1121,7 +1122,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 
     switch (outstanding) {
     case -2:
-	current_server->usexhdr = 0;	/* disable XOVER */
+	current_server->usexhdr = 0;	/* disable XHDR */
 	/*@fallthrough@*/ /* fall through to -1 */
     case -1:
 	freefilter(f);
@@ -1136,6 +1137,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 	return last + 1;
     default:
 	if (delaybody_this_group) {
+	    globalhdrfetched += outstanding;
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
 		   "%s: %lu pseudo headers fetched",
 		   g->name, outstanding);
@@ -1925,8 +1927,8 @@ main(int argc, char **argv)
 	writeactive();
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
-	       "%s: %lu articles fetched, %lu killed, %lu posted, in %ld seconds",
-	       myname, globalfetched, globalkilled, globalposted, time(0) - starttime);
+	       "%s: %lu articles and %lu headers fetched, %lu killed, %lu posted, in %ld seconds",
+	       myname, globalfetched, globalhdrfetched, globalkilled, globalposted, time(0) - starttime);
 
 	if (only_fetch_once)
 	    freegrouplist(done_groups);
