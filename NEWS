@@ -1,7 +1,7 @@
 KNOWN BUG:
 Valgrind-2.1 will interfere with writeactive, break fchmod.
 Use Valgrind 2.0.
-
+|
 20040513a: Changes since 20040510a:
 - Bugfix: fetchnews will try authentication when GROUP command replies 480.
 - Bugfix: bogus "too few fields in DATE reply" in debug mode.
