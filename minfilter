@@ -1,0 +1,3 @@
+newsgroups=.*
+pattern=Outlook
+action=kill

@@ -1,0 +1,5 @@
+expire=20
+localgroups=/dev/null
+filterfile=minfilter
+server=localhost
+server=merlin
