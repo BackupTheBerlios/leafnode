@@ -1,3 +1,27 @@
+2002-07-07  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* TODO: Update.
+	* fetchnews.c: getgroup:  Fallback from XOVER to XHDR should work
+	now.
+	* fetchnews.c: main/processupstream:  If only_fetch_once is set,
+	maintain a rbtree of successfully fetched groups.  Do not fetch
+	twice, but preserve as much state from previous fetchnews runs in
+	leaf.node/server for all interesting groups.
+	* config.example, config.table, configutil.c, leafnode.h: New
+	configuration option only_fetch_once (boolean).  If set, groups
+	will not be fetched from several servers, only if a server failed.
+	* miscutil.c: Change semantics of new function initfilelist: 
+	replace all spaces in redblack key with \0.
+	* leafnode.h, miscutil.c: New function initfilelist reads nonempty
+	lines of an open FILE into redblack tree.  Must provide custom
+	comparison function and extra data.
+	* fetchnews.c: New function getmsgidlist moves -M functionality out
+	of do_server.  Better logging.
+	* nntpd.c: Fix is*(char) signedness issues in validate_messageid.
+	* fetchnews.c: Make doxhdr really return -2 if XHDR is not
+	available.  getgroup:  Implement fall back to XHDR if XOVER not
+	available and no filtering or delaybody wanted.
+
 2002-07-06  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* TODO: Update.

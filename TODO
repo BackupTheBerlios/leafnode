@@ -60,9 +60,6 @@ Ralfs TODO:
 0.0 use separate repairspool program
 
 10pre5
-1.1 delaybody mode: Overviews are not corrected at all times yet.
-
-10pre5
 1.1 exit code of fetchnews always zero
 
 10pre5
@@ -161,9 +158,6 @@ Ralfs TODO:
 
 3.3 add IHAVE support for feeding upstream
 
-3.3 Suggestion by Jörg Mensmann: only pick groups from supplement that
-    have not been fetched before (or filter groups by server)
-
 3.3 don't supersede() articles unconditionally
     ACTION: figure criteria for allowing/denying supersede
     Cancel-Lock? Plausibility checks?
@@ -245,6 +239,13 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-07-07 Ralf Wildenhues
+	   delaybody mode: Overviews are not corrected at all times yet.
+
+	   Suggestion by Jörg Mensmann: only pick groups from supplement that
+	   have not been fetched before (or filter groups by server)
+	   Implemented with only_fetch_once config option.
 
 2002-07-06 Ralf Wildenhues
 	   can fetchnews cope with servers that reject XOVER?
