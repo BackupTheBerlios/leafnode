@@ -25,7 +25,7 @@ See README for restrictions on the use of this software.
 
 /* FIXME: scan for directories not listed in groupinfo (is this what
  * texpire iterates over to expire?) and add them to allow them to be
- * expired. 
+ * expired.
  */
 
 #include "leafnode.h"
