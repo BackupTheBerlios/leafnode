@@ -834,7 +834,8 @@ fn_doxover(struct stringlist **stufftoget,
 	bytes = xover[6];
 	lines = xover[7];
 	xref = xover[8];
-	xref_scratch = critstrdup(xref, "fn_doxover");
+	
+	xref_scratch = xref ? critstrdup(xref, "fn_doxover") : NULL;
 
 	/* is there an Xref: header present as well? */
 	if (xover[8] == NULL ||
@@ -852,7 +853,8 @@ fn_doxover(struct stringlist **stufftoget,
 		    references, newsgroups_list, num_groups, bytes, lines,
 		    xref);
 
-	    free(xref_scratch);
+	    if (xref_scratch)
+		free(xref_scratch);
 
 	    if (filtlst && killfilter(filtlst, mastr_str(s))) {
 		groupkilled++;
