@@ -36,11 +36,12 @@ regelm‰ﬂig lesen, vom Newsserver des Providers.
 CFLAGS="$RPM_OPT_FLAGS"
 %configure \
  --enable-spooldir=%spooldir \
- --enable-runas-user=%{runas_user} --with-runas-group=%{runas_group}
+ --enable-runas-user=%{runas_user} --with-runas-group=%{runas_group} \
+ --sysconfdir=%_sysconfdir/leafnode
 
 %build
-make -s
-make -s check
+make
+make check
 
 %install
 # first clean out any prior aborted runs
@@ -56,6 +57,7 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %config(noreplace) %attr(640,root,news) %confdir/filters
 %attr(640,root,news) %confdir/config.example
 %attr(640,root,news) %confdir/filters.example
+%attr(640,root,news) %confdir/uucp
 %attr(755,root,root) %{prefix}/bin/leafnode-version
 %attr(755,root,root) %{prefix}/bin/lsmac.pl
 %attr(755,root,root) %{prefix}/bin/newsq
@@ -64,6 +66,7 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %attr(755,root,root) %{prefix}/sbin/fetchnews
 %attr(755,root,root) %{prefix}/sbin/leafnode
 %attr(755,root,root) %{prefix}/sbin/rnews
+%attr(755,root,root) %{prefix}/sbin/sendbatch.bash
 %attr(755,root,root) %{prefix}/sbin/texpire
 %doc %_mandir/man1/*
 %doc %_mandir/man5/*
