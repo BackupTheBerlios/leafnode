@@ -1,3 +1,8 @@
+2002-09-08  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release snapshot-20020908a ---
+	* miscutil.c: Change into spooldir on start-up.  
+
 2002-09-07  Matthias Andree <matthias.andree@gmx.de>
 
 	* fetchnews.c: Add FIXME comment.  
