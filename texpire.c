@@ -114,20 +114,6 @@ struct thread {
 struct rnode *hashtab[HASHSIZE];	/* each entry points to a list of */
 					/* rnodes with same hash value */
 
-static unsigned long hashval(const struct rnode *node);
-static void hash_thread(struct thread *thread);
-static struct rnode *newnode(const char *mid, unsigned long artno);
-static struct rnode *findnode(const struct rnode *node);
-static void merge_threads(struct thread *a, struct thread *b);
-static struct thread *xoverthread(char *xoverline, unsigned long artno);
-static struct thread *build_threadlist(unsigned long acount);
-static void free_threadlist(struct thread *);
-static unsigned long count_threads(struct thread *);
-static void remove_newer(struct thread *, time_t);
-static void expire_article(struct rnode *r);
-static void delete_threads(struct thread *);
-static unsigned long low_wm(unsigned long high);
-
 static void texpire_log_unlink(const char *file, const char *logprefix)
 {
     if (unlink(file) < 0) {
@@ -156,7 +142,7 @@ hashval(const struct rnode *node)
 }
 
 /* put all references in this thread into hash table */
-void
+static void
 hash_thread(struct thread *th)
 {
     struct rnode *r;
@@ -172,7 +158,7 @@ hash_thread(struct thread *th)
 }
 
 /* create a new reference node */
-struct rnode *
+static struct rnode *
 newnode(const char *mid, unsigned long artno)
 {
     struct rnode *newn;
@@ -187,7 +173,7 @@ newnode(const char *mid, unsigned long artno)
 }
 
 /* find node with same message-ID, return node or NULL if not found */
-struct rnode *
+static struct rnode *
 findnode(const struct rnode *node)
 {
     struct rnode *f;
@@ -206,7 +192,7 @@ findnode(const struct rnode *node)
 }
 
 /* merge thread b into a */
-void
+static void
 merge_threads(struct thread *a, struct thread *b)
 {
     struct rnode *r;
@@ -228,7 +214,7 @@ merge_threads(struct thread *a, struct thread *b)
  * return a thread built from an XOVER line,
  * containing its Message-ID and all references
  */
-struct thread *
+static struct thread *
 xoverthread(char *xoverline, unsigned long artno)
 {
     int i;
@@ -279,10 +265,43 @@ xoverthread(char *xoverline, unsigned long artno)
     return newthread;
 }
 
+/** delete article file which belongs to this node.
+ * r may be null.
+ * this function does nothing if the artno of this node is zero. */
+static void
+expire_article(struct rnode *r)
+{
+    char name[64];
+
+    if (!r || !r->artno) {
+	return;
+    }
+    str_ulong(name, r->artno);
+    if (dryrun) {
+	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+	       "dry-run: should delete %s/%lu", gdir, r->artno);
+	deleted++;
+    } else {
+	if (!unlink(name)) {
+	    if (debugmode & DEBUG_EXPIRE) {
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "deleted article %s/%lu", gdir, r->artno);
+	    }
+	    r->artno = 0;
+	    deleted++;
+	} else if (errno != ENOENT && errno != EEXIST) {
+	    /* if file was deleted already or it was not a file */
+	    /* but a directory, skip error message */
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		   "unlink %s/%lu: %m", gdir, r->artno);
+	}
+    }
+}
+
 /*
  * generate threadlist from xoverinfo
  */
-struct thread *
+static struct thread *
 build_threadlist(unsigned long acount)
 {
     unsigned long i;
@@ -335,7 +354,7 @@ build_threadlist(unsigned long acount)
 }
 
 /* free all rnodes and threads, empty hash table */
-void
+static void
 free_threadlist(struct thread *threadlist)
 {
     unsigned long i;
@@ -400,41 +419,8 @@ remove_newer(struct thread *threadlist, time_t expire)
     }
 }
 
-/** delete article file which belongs to this node.
- * r may be null.
- * this function does nothing if the artno of this node is zero. */
-static void
-expire_article(struct rnode *r)
-{
-    char name[64];
-
-    if (!r || !r->artno) {
-	return;
-    }
-    str_ulong(name, r->artno);
-    if (dryrun) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-	       "dry-run: should delete %s/%lu", gdir, r->artno);
-	deleted++;
-    } else {
-	if (!unlink(name)) {
-	    if (debugmode & DEBUG_EXPIRE) {
-		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		       "deleted article %s/%lu", gdir, r->artno);
-	    }
-	    r->artno = 0;
-	    deleted++;
-	} else if (errno != ENOENT && errno != EEXIST) {
-	    /* if file was deleted already or it was not a file */
-	    /* but a directory, skip error message */
-	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		   "unlink %s/%lu: %m", gdir, r->artno);
-	}
-    }
-}
-
 /** delete all article files in all remaining threads */
-void
+static void
 delete_threads(struct thread *threadlist)
 {
     struct thread *t;
