@@ -11,7 +11,7 @@ applyfilter \- apply filter settings to news spool
 .SH SYNOPSIS
 .B applyfilter -V
 .br
-.B applyfilter [-D debugmode] [-v] [-F configfile] [newsgroup]
+.B applyfilter [-vn] [-D debugmode] [-F configfile] newsgroup
 
 .SH DESCRIPTION
 .B Leafnode
@@ -40,6 +40,11 @@ for details on how to set the debugmode.
 .I -F configfile
 Read configuration from an alternate config file instead of
 @sysconfdir@/config.
+.TP
+.I -n
+Dry run.  Do not actually delete anything.  Use in combination with
+.I -v
+to see which articles would be deleted.
 .TP
 .I -v
 Be verbose.
