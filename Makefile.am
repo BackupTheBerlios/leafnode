@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.66 2004/03/27 11:31:22 emma Exp $
+# $Id: Makefile.am,v 1.67 2004/05/10 09:12:30 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -166,13 +166,14 @@ noinst_PROGRAMS = \
 check_PROGRAMS= \
 		t.getwatermarks \
 		xsnprintf strutil \
-		grouplist
+		grouplist \
+		t.mgetheader
 
 strutil_CPPFLAGS=$(AM_CPPFLAGS) -DTEST
 grouplist_CPPFLAGS=$(AM_CPPFLAGS) -DTEST
 
 TESTS= \
-	xsnprintf
+	xsnprintf t.mgetheader
 
 EXTRA_DIST = \
 	$(sysconf_DATA) \
@@ -229,6 +230,7 @@ checkgroups_SOURCES	= checkgroups.c
 newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 t_getwatermarks_SOURCES	= t.getwatermarks.c
+t_mgetheader_SOURCES=	  t.mgetheader.c
 
 DISTCLEANFILES = $(BUILT_SOURCES) README \
 	config.table.sorted
@@ -316,5 +318,5 @@ rpm: dist-bzip2 leafnode.spec
 # host:directory/
 # it will call rsync from its source directory to the destination for
 # each of them, running them in parallel
-rsync:	distdir .rsyncs
-	@( cat .rsyncs | sed -e 's}^}rsync -av --delete $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
+rsync:	distdir $(srcdir)/.rsyncs
+	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -av --delete $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
