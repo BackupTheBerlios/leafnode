@@ -87,7 +87,7 @@ store_err(int i)
     }
 }
 
-#define BAIL(r,msg) do { rc = (r); ln_log(LNLOG_SERR, LNLOG_CARTICLE, ("store: " msg)); goto bail; } while(0);
+#define BAIL(r,msg) do { rc = (r); if (*msg) ln_log(LNLOG_SERR, LNLOG_CARTICLE, ("store: " msg)); goto bail; } while(0);
 
 /** Read an article from input stream and store it into message.id and
  *  link it into the newsgroups.
@@ -138,7 +138,7 @@ store_stream(FILE * in /** input file */ ,
     /* make temp. file */
     tmpfd = safe_mkstemp(mastr_modifyable_str(tmpfn));
     if (tmpfd < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "error in mkstemp(\"%s\"): %m",
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "store: error in mkstemp(\"%s\"): %m",
 	       mastr_str(tmpfn));
 	mastr_delete(tmpfn);
 	mastr_delete(head);
@@ -148,7 +148,7 @@ store_stream(FILE * in /** input file */ ,
 
     tmpstream = fdopen(tmpfd, "w+");
     if (!tmpstream) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot fdopen(%d): %m", tmpfd);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "store: cannot fdopen(%d): %m", tmpfd);
 	(void)log_close(tmpfd);
 	(void)log_unlink(mastr_str(tmpfn));
 	mastr_delete(tmpfn);
@@ -307,12 +307,22 @@ store_stream(FILE * in /** input file */ ,
 		    ls = !link(mastr_str(tmpfn), nb);
 		    if (ls)
 			/*@innerbreak@*/ break;
-		    if (errno == EEXIST)
-			continue;	/* try again */
-		    /* FIXME: if EEXIST happens, obtain water marks anew
-		       and retry */
+		    if (errno == EEXIST) {
+			int e;
+			ln_log(LNLOG_SWARNING, LNLOG_CARTICLE,
+			       "store: %s: stale water marks, trying to fix",
+			       name);
+			e = getwatermarks(&g->first, &g->last, &g->count);
+			if (e != 0) {
+			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				   "store: %s: cannot obtain water marks",
+				   name);
+			    BAIL(-1, "");
+			}
+			continue;
+		    }
 		    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-			   "error linking %s into %s for %s: %m",
+			   "store: error linking %s into %s for %s: %m",
 			   mastr_str(tmpfn), nb, name);
 		    /*@innerbreak@*/ break;
 		}
@@ -432,7 +442,7 @@ store(const char *name, int nntpmode,
 	(void)fclose(i);
 	return rc;
     } else {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s for storing: %m",
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "store: cannot open %s for storing: %m",
 	       name);
 	return -1;
     }
