@@ -7,13 +7,13 @@ KNOWN BUGS:
   Dietrich Schaffer.
 - Documentation: help output in programs has been revised.
 - Bugfix: the deleted-articles journal was always empty. Reported by
-  Jörg Lüders.
+  JÃ¶rg LÃ¼ders.
 
 20050321a: Changes since 20050215a:
 - Change: when deleting articles (supersedes, cancel, ...) and we don't
   rebuild the overview right away, store a line in a new file that marks
   the corresponding overview line invalid, so that the article is no
-  longer offered in the overview. Reported by Jörg Lüders.
+  longer offered in the overview. Reported by JÃ¶rg LÃ¼ders.
 - Change: forward port configuration parser fix from leafnode-1.11,
   to allow the right hand side of configuration or filter file to be
   quoted, useful when the NUMBER SIGN character needs to be specified.
@@ -244,11 +244,11 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Bugfix: empty bindir/sysconfdir messed up in previous snapshot.
 - Bugfix: fix the leafnode-version regression that showed in 20040116a.
 Thanks to Daniel Zwick for his report and patient testing and
-to Jörg Dietrich for finding the real bug.
+to JÃ¶rg Dietrich for finding the real bug.
 
 20040116a - Changes since 20040108a:
 - Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group
-  argument was given that was not a pattern. Patch by Hans-Jürgen
+  argument was given that was not a pattern. Patch by Hans-JÃ¼rgen
   Ficker.
 - Feature: Spooldir can now be overridden by "-d dir" on the command
   line.
@@ -339,9 +339,9 @@ to Jörg Dietrich for finding the real bug.
   unconditionally deleted them. Reported by Reiner Steib.
 - Bugfix: leafnode was unable to retrieve pseudo articles with XOVER n
   or XOVER n- forms (XOVER n-m was fine).
-- Bugfix: does not crash on a fresh install. Reported by Jürgen Salk.
+- Bugfix: does not crash on a fresh install. Reported by JÃ¼rgen Salk.
 - Documentation: fix typo (syslogd.pid) in README.html. Reported by
-  Jürgen Salk.
+  JÃ¼rgen Salk.
 
 20031001a - Changes since 20030814a:
 - Bugfix: stricter GROUP reply parsing to avoid accepting negative
@@ -379,12 +379,12 @@ to Jörg Dietrich for finding the real bug.
 - Bugfix: posting only tried the first server. Regression in 20030714a,
   reported by Jeff Grossman.
 - Documentation: Clean up fetchnews.8.in, -B, -M, -N, -P and -R
-  descriptions. New sections courtesy of Jörg Lüders.
+  descriptions. New sections courtesy of JÃ¶rg LÃ¼ders.
 
 20030714a - Changes since 20030712a:
 - Bugfix: fix double free() in filter handling. Reported by Robert J. Clark.
 - Bugfix: fix some memory leaks.
-- Change: Post first, then fetch. Suggested by Jörg Lüders.
+- Change: Post first, then fetch. Suggested by JÃ¶rg LÃ¼ders.
 
 20030712a - Changes since 20030710a:
 - Bugfix: Filtering by regexp was broken (inverse logic) unless
@@ -447,7 +447,7 @@ other changes:
 - the filterfile and applyfilter manual pages have been updated
 - Add: Rnews is back!
 - There is a new "only_fetch_once" option, that reads a group only from
-  the first server queried that carries this group. Suggested by Jörg
+  the first server queried that carries this group. Suggested by JÃ¶rg
   Mensmann.
 - Only change permissions/owner of leafnode directories when creating
   them. Requested by Kevin Bulgrien.
