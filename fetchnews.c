@@ -1713,7 +1713,7 @@ main(int argc, char **argv)
 	}
 	if (current_server->active) {
 	    if (do_server(msgid, lastrun, newsgrp))
-		continue;	/* no other servers have to be queried */
+		break;	/* no other servers have to be queried */
 	}
 	servers = servers->next;
     }
