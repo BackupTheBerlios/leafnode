@@ -1,6 +1,24 @@
+2003-12-21  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031221a =
+	* fetchnews.c: Forward port leafnode-1 'must refetch full active
+	next run' error messages.
+	* activutil.c: Document return values for writeactive().
+
+2003-12-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, nntpd.c: Accelerate list newsgroups and list active when a
+	pattern without wildmat meta characters is given.  Respond with 500
+	not implemented to list active.times (needs to be forward ported
+	from leafnode-1).
+
 2003-12-18  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20031218a =
+	* ChangeLog, NEWS, configure.ac: Update for snapshot
+	2.0.0.alpha20031218a.
+	* Makefile.am: Update for automake 1.8.
+	* tools/.cvsignore: update
 	* fetchnews.8.in: Revise EXPIRY OF NEWGROUPS section further.
 	* tools/Makefile.am: Install lsmac.pl and man page.
 	* NEWS, fetchnews.8.in: Enhance documentation.

@@ -1,7 +1,9 @@
-Changes since 20031218a:
-- Change: list active and list newsgroups are now faster when a pattern
-  is given that does not contain wildmat meta characters.
+20031221a: Changes since 20031218a:
+- Change: list active and list newsgroups are now much more efficient
+  when a pattern is given that does not contain wildmat meta characters.
 - Change: list active.times is rejected with a 500 code for now.
+- Change: let fetchnews print when and why it must refetch the active
+  file at the next run.
 
 20031218a: Changes since 20031203a:
 - Change: texpire now prints why a particular group directory is not
