@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.50 2003/12/18 14:20:09 emma Exp $
+# $Id: Makefile.am,v 1.51 2004/01/16 18:28:06 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -246,9 +246,8 @@ config.c: Makefile
 	@echo >>.$@ " * *** DO NOT EDIT ***"
 	@echo >>.$@ " */"
 	@echo >>.$@ "const char *bindir = \"$(BINDIR)\";"
-	@echo >>.$@ "const char *spooldir = \"$(SPOOLDIR)\";"
+	@echo >>.$@ "const char *def_spooldir = \"$(SPOOLDIR)\";"
 	@echo >>.$@ "const char *sysconfdir = \"$(SYSCONFDIR)\";"
-	@echo >>.$@ "const char *lockfile = \"$(LOCKFILE)\";"
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
@@ -278,7 +277,7 @@ configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
 
 .PHONY:	update
 update:
-	@./update.sh $(SPOOLDIR) $(SYSCONFDIR) $(LOCKFILE) $(RUNAS_USER) $(RUNAS_GROUP)
+	@./update.sh $(SPOOLDIR) $(SYSCONFDIR) $(SPOOLDIR)/leaf.node/lock.file $(RUNAS_USER) $(RUNAS_GROUP)
 
 install-data-hook:
 # directories
@@ -288,13 +287,6 @@ install-data-hook:
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)/leaf.node
-	p=`dirname $(DESTDIR)$(LOCKFILE)` ; \
-	if test ! -d $$p ; then \
-	  $(INSTALL) -d -m 750 $$p ; \
-	  ./amiroot && chown $(RUNAS_USER) $$p ; \
-	  ./amiroot && chgrp $(RUNAS_GROUP) $$p ; true ; \
-        fi
-# don't use test -e, it's broken on Solaris (only in /usr/bin/test)
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2755 $$p  ; true
