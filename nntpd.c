@@ -1575,6 +1575,7 @@ dopost(void)
 
 	if (moderator && !approved) {
 	    /* Mail the article to the moderator */
+	    mastr *s = mastr_new(LN_PATH_MAX);
 	    int fd;
 
 	    fd = open(inname, O_RDONLY);
@@ -1592,6 +1593,11 @@ dopost(void)
 	    if (fd >= 0)
 		log_close(fd);
 	    log_unlink(inname, 0);
+	    outbasename = strrchr(inname, '/');
+	    outbasename++;
+	    mastr_vcat(s, spooldir, "/in.coming/", outbasename, NULL);
+	    (void)unlink(mastr_str(s));
+	    mastr_delete(s);
 	    goto cleanup;
 	}
 
