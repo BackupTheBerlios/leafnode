@@ -2,6 +2,11 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050110a:
+- Bugfix: if log_poster_ip is enabled, strip existing
+  X-Leafnode-NNTP-Posting-Host headers. Fixes Gnus newsreader warnings
+  when superseding.
+
 20050110a: Changes since 20050105a:
 - Cleanup: Only use top-level Makefile.am, drop recursion.
 - Bugfix: Make groupexpire = pattern -1 actually work. Bug reported by

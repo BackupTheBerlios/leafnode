@@ -1316,6 +1316,10 @@ dopost(void)
 		havedate = TRUE;
 	}
 
+	if (ln_log_posterip
+		&& str_isprefix(line, "X-Leafnode-NNTP-Posting-Host:"))
+	    continue;
+
 	len = strlen(line);
 	/* maximal header length of 1000 chars is suggested in RFC.
 	   Some people have requested that leafnode should barf if
