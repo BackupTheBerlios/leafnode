@@ -1,5 +1,5 @@
 /*
- * RCS $Id: redblack.h,v 1.3 2002/01/29 10:35:54 emma Exp $
+ * RCS $Id: redblack.h,v 1.4 2002/06/19 09:20:28 emma Exp $
  */
 
 /*
@@ -42,9 +42,6 @@
 #define RB_LULAST 8		/* Last key in index */
 
 /* Defines the VISIT structure */
-#ifdef HAVE_SEARCH_H
-#include <search.h>
-#else
 typedef enum
 {
   preorder,
@@ -53,7 +50,6 @@ typedef enum
   leaf
 }
 VISIT;
-#endif
 
 struct rblists {
     const struct rbnode *rootp;
@@ -91,6 +87,9 @@ void rbcloselist(RBLIST *);
 /*
  *
  * $Log: redblack.h,v $
+ * Revision 1.4  2002/06/19 09:20:28  emma
+ * drop <search.h> for dietlibc compatibility
+ *
  * Revision 1.3  2002/01/29 10:35:54  emma
  * Manually define the "VISIT" enum type unless HAVE_SEARCH_H is defined.
  *
