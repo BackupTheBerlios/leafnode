@@ -67,6 +67,8 @@ Matthias:
 
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
 
+0.0 make "newsgroup" in filter a PCRE (rather than wildmat)
+
 10pre5
 0.0 if group is empty, low water mark is not bumped up to high water mark
 
