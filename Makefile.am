@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.13 2002/04/03 22:11:42 emma Exp $
+# $Id: Makefile.am,v 1.14 2002/04/10 22:20:55 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -69,6 +69,7 @@ liblnutil_a_SOURCES	= \
 	gmtoff.c \
 	h_error.c \
 	h_error.h \
+	lclint_fixes.h \
 	leafnode.h \
 	ln_dir.h \
 	ln_log.c \
