@@ -918,7 +918,6 @@ expiremsgid(void)
     DIR *d;
     struct dirent *de;
     struct stat st;
-//      unsigned long deleted, kept;
     char s[PATH_MAX];
 
     deleted = kept = 0;
