@@ -2360,11 +2360,10 @@ doauthinfo(char *arg)
 }
 
 static void
-log_sockaddr(const char *tag, const struct sockaddr *sa)
+log_sockaddr(const char *tag, const struct sockaddr *sa, const char *a)
 {
     int h_e;
     char *s = masock_sa2name(sa, &h_e);
-    char *a = masock_sa2addr(sa);
     long port = masock_sa2port(sa);
 
     if (!a) {
@@ -2377,7 +2376,6 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
     ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s: %s:%ld (%s)", tag, s ? s : a, port, a);
     if (s)
 	free(s);
-    free(a);			/* a == NULL caught above */
 }
 
 /* this dummy function is used so we can define a no-op for SIGCHLD */
@@ -2462,7 +2460,9 @@ main(int argc, char **argv)
 	    exit(EXIT_FAILURE);
 	}
     } else {
-	log_sockaddr("local  host", (struct sockaddr *)&sa);
+	char *t = masock_sa2addr((struct sockaddr *)&sa);
+	log_sockaddr("local  host", (struct sockaddr *)&sa, t);
+	if (t) free(t);
     }
 
     /* get remote address */
@@ -2476,8 +2476,8 @@ main(int argc, char **argv)
 	}
 	peeraddr = critstrdup("local file or pipe", "leafnode");
     } else {
-	log_sockaddr("remote host", (struct sockaddr *)&peer);
 	peeraddr = masock_sa2addr((struct sockaddr *)&peer);
+	log_sockaddr("remote host", (struct sockaddr *)&peer, peeraddr);
     }
 
 /* #endif */
