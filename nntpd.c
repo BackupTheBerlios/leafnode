@@ -581,16 +581,27 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 
     if (what & 1) {
 	if (delaybody && *s != '\n') {
-	    if (!markdownload(group, localmsgid)) {
-		fputs( "\r\n\r\n"
-		       "\t[Leafnode:]\r\n"
-		       "\t[This message has already been "
-		       "marked for download.]\r\n", stdout);
-	    } else {
+	    switch (markdownload(group, localmsgid)) {
+	    case 0:
+		fputs("\r\n\r\n"
+		      "\t[Leafnode:]\r\n"
+		      "\t[This message has already been "
+		      "marked for download.]\r\n", stdout);
+		break;
+	    case 1:
 		printf("\r\n\r\n"
 		       "\t[Leafnode:]\r\n"
 		       "\t[Message %lu of %s]\r\n"
 		       "\t[has been marked for download.]\r\n",
+		       localartno, group->name);
+		break;
+	    default:
+		printf("\r\n\r\n"
+		       "\t[ Leafnode: ]\r\n"
+		       "\t[ Message %lu of %s ]\r\n"
+		       "\t[ cannot be marked for download. ]\r\n"
+		       "\t[ (Check the server's syslog "
+		       "for information). ]\r\n",
 		       localartno, group->name);
 	    }
 	} else {
@@ -1642,7 +1653,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 		 unsigned long *artno /** currently selected article */)
 {
     /* FIXME: this is bloody complex and hard to follow */
-    const char *const h[] = { "Subject:", "From:", "Date:", "Message-ID:",
+    static const char *const h[] = { "Subject:", "From:", "Date:", "Message-ID:",
 	"References:", "Bytes:", "Lines:"
     };
     int OVfield;
@@ -2358,6 +2369,7 @@ main(int argc, char **argv)
     freelocal();
     freeconfig();
     freeinteresting();
+    free_dormant();
     /* Ralf Wildenhues: close stdout before freeing its buffer */
     (void)fclose(stdout);
     free(buf);
