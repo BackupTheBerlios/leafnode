@@ -29,7 +29,8 @@
 
 /**
  * Return an arbitrary news article header from a memory buffer.
- * Copes with folded header lines.
+ * Copes with folded header lines. NOTE: The input must be
+ * null-terminated.
  * NOTE: calls abort() if header does not contain a colon.
  * \return malloc()ed copy of header without its tag (caller must free
  * that) or NULL
@@ -46,8 +47,13 @@ mgetheader(
     char *p, *q;
     char *value = NULL;
 
+    /* ensure we have a header to look for */
     assert(hdr != NULL);
+    /* if the buffer does not exist, we don't find anything, but we
+     * do not barf either. */
     if (NULL == buf) return NULL;
+    /* if the buffer exists, we require '\n' (LF) termination */
+    assert(strchr(buf, '\n'));
 
     if (!strchr(hdr, ':')) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
