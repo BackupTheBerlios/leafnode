@@ -44,12 +44,17 @@ unsigned long xcount = 0;
 struct xoverinfo *xoverinfo = NULL;
 
 /* declarations */
-static char *getxoverline(const char *filename);
+static char *getxoverline(const int, const char *filename);
 int writexover(void);
 
-/* getxoverline returns a malloc()ed string */
+/** Extract information from given file to construct an .overview line.
+ *  \return a malloc()ed string .overview */
 static char *
-getxoverline(const char *filename)
+getxoverline(
+/** if set, delete articles with missing or improper hardlink to message.id */
+		const int require_messageidlink,
+    /** name of article file */
+		const char *const filename)
 {
     char *l, *block;
     FILE *f;
@@ -144,7 +149,7 @@ getxoverline(const char *filename)
 	    linecount++;
 
 	if (from && date && subject && msgid && bytes) {
-	    if (ihave(msgid)) {
+	    if (!require_messageidlink || ihave(msgid)) {
 		/* only generate message ID if article has a link in
 		   message.id */
 		result = (char *)critmalloc(strlen(from) + strlen(date) +
@@ -271,22 +276,29 @@ crunchxover(struct xoverinfo *xi, unsigned long count)
  * - 1 success
  */
 int
-maybegetxover(/*@null@*/ struct newsgroup *g) {
+maybegetxover( /*@null@*/ struct newsgroup *g)
+{
     struct stat sd, sf;
 
-    if (stat (".", &sd)) return 0;
-    if (stat (".overview", &sf)) {
-	if (errno != ENOENT) return 0;
-	return xgetxover(g);
+    if (stat(".", &sd))
+	return 0;
+    if (stat(".overview", &sf)) {
+	if (errno != ENOENT)
+	    return 0;
+	return xgetxover(1, g);
     }
-    if (sd.st_mtime > sf.st_mtime) return xgetxover(g);
-    if (g && sf.st_mtime > query_active_mtime()) return xgetxover(g);
+    if (sd.st_mtime > sf.st_mtime)
+	return xgetxover(1, g);
+    if (g && sf.st_mtime > query_active_mtime())
+	return xgetxover(1, g);
     return 1;
 }
 
 int
-getxover(void) {
-    return xgetxover(NULL);
+getxover(/** if set, delete articles with missing or improper hardlink to message.id */
+	    const int require_messageidlink)
+{
+    return xgetxover(require_messageidlink, NULL);
 }
 
 /**
@@ -296,9 +308,11 @@ getxover(void) {
  * - 1 success
  */
 int
-xgetxover(/*@null@*/ struct newsgroup *g
-	  /** if set, update first/last/count of this group */
-    )
+xgetxover(
+/** if set, delete articles with missing or improper hardlink to message.id */
+	     const int require_messageidlink,
+    /** if set, update first/last/count of this group */
+	     /*@null@*/ struct newsgroup *g)
 {
     struct stat st;
     char *overview = NULL;
@@ -434,7 +448,7 @@ xgetxover(/*@null@*/ struct newsgroup *g
 	}
 
 	/* enter new xover line into database */
-	if ((xoverinfo[current].text = getxoverline(*t))) {
+	if ((xoverinfo[current].text = getxoverline(require_messageidlink, *t))) {
 	    xoverinfo[current].exists = 1;
 	    xoverinfo[current].artno = art;
 	    update = 1;
@@ -475,14 +489,16 @@ xgetxover(/*@null@*/ struct newsgroup *g
 
     /* free superfluous memory */
     /* FIXME: do we need this at all? After all, free will get rid of that */
-    xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
-						sizeof(struct xoverinfo) *
-						(current),
-						"reallocating overview array");
+    if (current) {
+	xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
+						    sizeof(struct xoverinfo) *
+						    (current),
+						    "reallocating overview array");
+	sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
+    }
 
     /* sort xover */
     xcount = current;
-    sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
 
     if (g) {
 	g->first = xfirst;
@@ -529,7 +545,7 @@ writexover(void)
 	}
     }
 
-    if (fchmod(wfd, (mode_t) 0664)) {
+    if (fchmod(wfd, (mode_t) 0660)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP,
 	       "Cannot chmod new .overview file to 0664: %m");
 	err = 1;
@@ -580,7 +596,7 @@ gfixxover(const char *i)
 	    SKIPLWS(q);
 	}
 	if (chdirgroup(g, FALSE) && findgroup(g)) {
-	    getxover();
+	    getxover(1);
 	    freexover();
 	}
 	g = q;
@@ -607,7 +623,7 @@ fixxover(void)
     while ((de = readdir(d))) {
 	if ((de->d_name[0] != '.') && findgroup(de->d_name)) {
 	    if (chdirgroup(de->d_name, FALSE)) {
-		getxover();
+		getxover(1);
 		freexover();
 	    }
 	}
