@@ -54,6 +54,10 @@ stuff?
 
 Matthias:
 
+* line 1605 fetchnews.c (if active && ...) needs to be fixed. The whole
+  process may need to be split in phases 1-obtain group lists, 2-post,
+  3-fetch.
+
 * Fix all USAGE() statements. Print standard options from a common file.
   Switch to some sane license and print a short edition in usage.
 

@@ -1602,7 +1602,7 @@ processupstream(struct serverlist *cursrv, const char *const server,
 		    "%s already fetched successfully, skipping", ng);
 	}
 
-	if ((!nglist || matchlist(nglist->head, ng)) && !donethisgroup) {
+	if (active && (!nglist || matchlist(nglist->head, ng)) && !donethisgroup) {
 	    /* we still want this group */
 
 	    g = findgroup(ng, active, -1);
