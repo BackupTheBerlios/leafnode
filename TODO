@@ -52,6 +52,10 @@ Ralfs TODO:
 	  never be refetched as a whole.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
 	* Fix handling of pseudo article.
+	* XPAT hdr range *PATTERN WITH SPACES* does not work, cf. RFC2980
+	* race condition in fetchnews: a second fetchnews can read the active file
+	  before the first one wrote it.  After obtaining the lock, the second
+	  fetchnews writes back the old active file.  Other programs affected?
 
 10pre5
 0.0 forward port bug fixes from 1.9.19rc*
