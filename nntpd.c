@@ -949,6 +949,30 @@ domove(/*@null@*/ const struct newsgroup *group, int by, unsigned long *artno)
     }
 }
 
+static int is_pattern(const char *s) {
+    return s ? strcspn(s, "?*[") < strlen(s) : 1;
+}
+
+/* LIST ACTIVE if what==0, else LIST NEWSGROUPS */
+static void printlist(const struct newsgroup *ng, const int what) {
+    if (what) {
+	char *m, *s;
+	printf("%s\t%s", ng->name, ng->desc ? ng->desc : "-x-");
+	if (is_localgroup(ng->name)
+		&& (s = checkstatus(ng->name, 'm'))) {
+	    if ((m = getmoderator(ng->name))) {
+		printf(" (moderator: %s)", m);
+		free(m);
+	    }
+	    free(s);
+	}
+	printf("\r\n");
+    } else {
+	printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,
+		ng->first, ng->status);
+    }
+}
+
 /* LIST ACTIVE if what==0, else LIST NEWSGROUPS */
 static void
 list(struct newsgroup *g, int what, char *pattern)
@@ -964,26 +988,19 @@ list(struct newsgroup *g, int what, char *pattern)
 	    p++;
 	}
     }
-    ng = g;
-    while (ng->name) {
-	if (!pattern || !ngmatch(pattern, ng->name)) {
-	    if (what) {
-		char *m, *s;
-		printf("%s\t%s", ng->name, ng->desc ? ng->desc : "-x-");
-		if (is_localgroup(ng->name)
-			&& (s = checkstatus(ng->name, 'm'))) {
-		    if ((m = getmoderator(ng->name))) {
-			printf(" (moderator: %s)", m);
-			free(m);
-		    }
-		    free(s);
-		}
-		printf("\r\n");
-	    } else
-		printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,
-		       ng->first, ng->status);
+
+    if (!is_pattern(pattern)) {
+	/* accelerate */
+	ng = findgroup(pattern, active, -1);
+	printlist(ng, what);
+    } else {
+	ng = g;
+	while (ng->name) {
+	    if (!pattern || !ngmatch(pattern, ng->name)) {
+		printlist(ng, what);
+	    }
+	    ng++;
 	}
-	ng++;
     }
 }
 
@@ -1007,9 +1024,13 @@ dolist(char *oarg)
 	       "References:\r\n"
 	       "Bytes:\r\n" "Lines:\r\n" "Xref:full\r\n" ".\r\n", stdout);
     } else if (!strcasecmp(arg, "active.times")) {
+#if 1
+	fputs("500 not implemented\r\n", stdout);
+#else
 	nntpprintf_as("215 Placeholder - Leafnode will fetch groups on demand");
 	fputs("news.announce.newusers 42 tale@uunet.uu.net\r\n"
 	       "news.answers 42 tale@uunet.uu.net\r\n" ".\r\n", stdout);
+#endif
     } else {
 	rereadactive();
 	if (!active) {
