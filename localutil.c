@@ -5,6 +5,9 @@
  * Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
  * Copyright 2000.
  *
+ * Modified by Matthias Andree <matthias.andree@gmx.de>
+ * Copyright 2005.
+ *
  * Based on ideas and code by Joerg Dietrich.
  *
  * See README for restrictions on the use of this software.

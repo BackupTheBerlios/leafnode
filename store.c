@@ -1,7 +1,7 @@
 /** \file store.c
  * Store article into news store.
- * Copyright 2001 - 2002 by Matthias Andree <matthias.andree@gmx.de>
- * \copyright 2001 - 2002
+ * Copyright 2001 - 2005 by Matthias Andree <matthias.andree@gmx.de>
+ * \copyright 2001 - 2005
  * \author Matthias Andree
  * \bugs Can corrupt .overview files when used across NFS.
  * Modified by Volker Apelt <volker_apelt@yahoo.de>.
