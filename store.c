@@ -300,10 +300,6 @@ store_stream(FILE * in /** input file */ ,
 		    ls = !link(tmpfn, nb);
 		    if (ls)
 			break;
-		    if (errno == ENOENT) { /* message.id file missing, create */
-			if (0 == mkdir_parent(nb))
-			    continue;
-		    }
 		    if (errno == EEXIST)
 			continue;	/* try again */
 		    /* FIXME: if EEXIST happens, obtain water marks anew
@@ -350,11 +346,16 @@ store_stream(FILE * in /** input file */ ,
     /* now create link in message.id */
     m = lookup(mid);
     if (link(tmpfn, m)) {
+	if (errno == ENOENT) { /* message.id file missing, create */
+	    if (0 == mkdir_parent(m))
+		if (0 == link(tmpfn, m)) goto cont;
+	}
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "store: cannot link %s to %s: %m", tmpfn, m);
 	rc = -1;
 	goto bail;
     }
+ cont:
     if (log_fsync(fileno(tmpstream))) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "store: cannot fsync: %m");
