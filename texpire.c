@@ -133,7 +133,6 @@ static unsigned long count_threads(struct thread *);
 static void remove_newer(struct thread *, time_t);
 static void delete_article(struct rnode *r);
 static void delete_threads(struct thread *);
-static void relink(const char *);
 static unsigned long low_wm(unsigned long high);
 
 
@@ -277,7 +276,7 @@ xoverthread(char *xoverline, unsigned long artno)
     return newthread;
 }
 
-/* 
+/*
  * generate threadlist from xoverinfo
  */
 struct thread *
@@ -445,7 +444,7 @@ delete_threads(struct thread *threadlist)
 
 /** make sure group directory is consistent */
 static void
-killcruft(const char *groupname)
+updatedir(const char *groupname)
 {
     struct rnode *r;
     char name[PATH_MAX];
@@ -454,7 +453,7 @@ killcruft(const char *groupname)
     long i;
 
     if (debugmode & DEBUG_EXPIRE)
-	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: enter killcruft", groupname);
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: enter updatedir", groupname);
 
     for (i = 0; i < HASHSIZE; ++i) {
 	r = hashtab[i];
@@ -463,6 +462,8 @@ killcruft(const char *groupname)
 		str_ulong(name, r->artno);
 		if (!stat(name, &st)
 		    && S_ISREG(st.st_mode)) {
+		    int relink = 0;
+
 		    /* check if message.id is the same file */
 		    m = lookup(r->mid);
 		    if (stat(m, &st2)) {
@@ -471,89 +472,48 @@ killcruft(const char *groupname)
 			     * article, since it has been left behind by
 			     * a crashed store() */
 			    if (debug & DEBUG_EXPIRE)
-				ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-				       "%s: article %lu has no "
-				       "message.id file", groupname, r->artno);
-			    delete_article(r);
+				ln_log
+				    (LNLOG_SDEBUG,
+				     LNLOG_CARTICLE,
+				     "%s: article %lu has no "
+				     "message.id file", groupname, r->artno);
+			    if (!repair_spool)
+				delete_article(r);
+			    else
+				relink = 1;
 			}
 		    } else {
-			if (st2.st_ino != st.st_ino) {
-			    /* inode mismatch, relink from message.id */
-			    if (debug & DEBUG_EXPIRE)
-				ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-				       "%s: article %lu and message.id "
-				       "inode mismatch %lu != %lu",
-				       groupname,
-				       r->artno, (unsigned long)st.st_ino,
-				       (unsigned long)st2.st_ino);
-			    if (link(m, ".to.relink")
-				|| rename(".to.relink", name)) {
-				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				       "%s: cannot restore hard link "
-				       "%s -> %s: %m", groupname, m, name);
-			    } else {
-				ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-				       "%s: restored hard link "
-				       "%s -> %s", groupname, m, name);
-			    }
+			if (st2.st_ino != st.st_ino)
+			    relink = 1;
+		    }
+		    if (relink) {
+			/* atomically regenerate link to make sure the
+			 * article is not lost -- unlink+link is not
+			 * safe */
+			(void)unlink(".to.relink");
+			if (link(name, ".to.relink")
+			    || rename(".to.relink", m)) {
+			    ln_log(LNLOG_SERR,
+				   LNLOG_CARTICLE,
+				   "%s: cannot restore hard link "
+				   "%s -> %s: %m", groupname, name, m);
+			} else {
+			    ln_log(LNLOG_SINFO,
+				   LNLOG_CARTICLE,
+				   "%s: restored hard link "
+				   "%s -> %s", groupname, name, m);
 			}
 		    }
 		}
 	    }
 	}
     }
-    /* FIXME: fsync directory here */
 
     if (debugmode & DEBUG_EXPIRE)
-	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: exit killcruft", groupname);
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: exit updatedir", groupname);
 }
 
-/* create missing links in the message.id subdirectory */
-static void
-relink(const char *groupname)
-{
-    unsigned long i;
-    struct rnode *r;
-    const char *m;
-    char name[PATH_MAX];
-    struct stat st;
-
-    for (i = 0; i < HASHSIZE; ++i) {
-	r = hashtab[i];
-	for (r = hashtab[i]; r; r = r->nhash) {
-	    if (r->artno && r->mid) {
-		str_ulong(name, r->artno);
-		if (!stat(name, &st)
-		    && S_ISREG(st.st_mode)
-		    && (m = lookup(r->mid))) {	/* repair fs damage */
-		    if (sync_link(name, m)) {
-			if (errno == EEXIST) {
-			    struct stat n;
-			    stat(m, &n);
-			    if (n.st_ino != st.st_ino) {
-				/* exists, but points to another file */
-				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				       "%s: cannot relink %s -> %s: file exists",
-				       groupname, name, m);
-				delete_article(r);
-			    }
-			} else {
-			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				   "%s: relink %s -> %s failed: %m",
-				   groupname, name, m);
-			}
-		    } else {
-			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-			       "%s: relinked message %s to %s",
-			       groupname, name, m);
-		    }
-		}
-	    }
-	}
-    }
-}
-
-/* 
+/*
  * find lowest article number, lower than high,
  * also count total number of articles
  */
@@ -796,6 +756,9 @@ legalxoverline(char *xover, unsigned long artno)
 static void
 dogroup(struct newsgroup *g, time_t expire)
 {
+
+    /* FIXME: why is getxover run twice? why is chdirgroup run
+       * twice? */
     unsigned long first, last, i, totalthreads;
     struct thread *threadlist;
 
@@ -809,7 +772,7 @@ dogroup(struct newsgroup *g, time_t expire)
 
     /* read overview information */
     freexover();
-    if (!getxover())
+    if (!getxover(0))
 	return;
 
     /* find low-water and high-water marks */
@@ -825,9 +788,10 @@ dogroup(struct newsgroup *g, time_t expire)
 	    }
 	}
     }
-    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	   "%s: expire %lu, low water mark %lu, high water mark %lu",
-	   g->name, expire, first, last);
+    if (debugmode & DEBUG_EXPIRE)
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+	       "%s: expire %lu, low water mark %lu, high water mark %lu",
+	       g->name, expire, first, last);
     if (expire <= 0) {
 	return;
     }
@@ -842,10 +806,7 @@ dogroup(struct newsgroup *g, time_t expire)
     }
     threadlist = build_threadlist(xcount);
     totalthreads = count_threads(threadlist);
-    if (repair_spool)
-	relink(g->name);
-    else
-	killcruft(g->name);
+    updatedir(g->name);
     remove_newer(threadlist, expire);
     if (debugmode & DEBUG_EXPIRE) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
@@ -865,12 +826,13 @@ dogroup(struct newsgroup *g, time_t expire)
 	g->last = last;
     }
     if (dryrun)
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: running without dry-run "
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: running without dry-run "
 	       "will delete %lu and keep %lu articles", g->name,
 	       deleted, kept - deleted);
     else
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: %lu articles deleted, "
-	       "%lu kept", g->name, deleted, kept);
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: %lu articles deleted, " "%lu kept", g->name, deleted, kept);
     if (!kept) {
 	if (unlink(".overview") < 0)
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/.overview: %m", gdir);
@@ -887,7 +849,7 @@ dogroup(struct newsgroup *g, time_t expire)
      * deleted.
      */
     if (chdirgroup(g->name, FALSE)) {
-	getxover();
+	getxover(1);
 	freexover();
     }
 }
@@ -911,15 +873,17 @@ static void
 expiremsgid(void)
 {
     int n;
-    DIR *d;
-    struct dirent *de;
+    char **dl, **di;
     struct stat st;
     char s[PATH_MAX];
 
     deleted = kept = 0;
 
     for (n = 0; n < 1000; n++) {
+	int slen;
 	snprintf(s, sizeof(s), "%s/message.id/%03d", spooldir, n);
+	slen = strlen(s);	/* not all snprintf implementations have
+				 * reliable return values */
 	if (chdir(s)) {
 	    if (errno == ENOENT) {
 		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
@@ -932,20 +896,33 @@ expiremsgid(void)
 	    }
 	}
 
-	d = opendir(".");
-	if (!d) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "cannot open directory %s: %m", s);
+	dl = dirlist(s, DIRLIST_NONDOT, NULL);
+	if (!dl) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open directory %s: %m", s);
 	    continue;
 	}
-	while ((de = readdir(d)) != 0) {
-	    if (de->d_name[0] == '.') continue;
+
+	for (di = dl; *di; di++) {
+	    const char *m;
+	    if (*di[0] == '.')
+		continue;
 	    /* FIXME: do not stat more than once */
-	    if (stat(de->d_name, &st) == 0) {
-		if (st.st_nlink < 2 && !dryrun && !unlink(de->d_name)) {
+
+	    /* First, make sure that all wrongly-hashed
+	       articles are deleted. */
+	    m = lookup(*di);
+	    if (strncmp(m, s, slen) && !dryrun) {
+		if (0 == log_unlink(*di)) {
 		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-			   "%s/%s has less than 2 links, deleting",
-			   s, de->d_name);
+			   "%s/%s was bogus, removed", s, *di);
+		    deleted++;
+		}
+	    } else if (stat(*di, &st) == 0) {
+		/* Then, check if the article has expired. */
+		if (st.st_nlink < 2 && !dryrun && !unlink(*di)) {
+		    ln_log(LNLOG_SDEBUG,
+			   LNLOG_CARTICLE,
+			   "%s/%s has less than 2 links, deleting", s, *di);
 		    deleted++;
 		} else {
 		    if (S_ISREG(st.st_mode)) {
@@ -954,7 +931,7 @@ expiremsgid(void)
 		}
 	    }
 	}
-	closedir(d);
+	free_dirlist(dl);
     }
 
     ln_log(LNLOG_SINFO, LNLOG_CTOP,
@@ -1065,6 +1042,7 @@ main(int argc, char **argv)
     freeactive();		/* throw away active data */
     freexover();		/* throw away overview data */
     expiremsgid();
+    /* do not release the lock earlier to prevent confusion of other daemons */
     (void)log_unlink(lockfile);
     freeconfig();
     return 0;
