@@ -1017,7 +1017,6 @@ main(int argc, char **argv)
 	exit(2);
     }
 
-    whoami();
     if (lockfile_exists(FALSE))
 	exit(EXIT_FAILURE);
     rereadactive();

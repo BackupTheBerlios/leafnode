@@ -178,8 +178,6 @@ main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
     }
 
-    whoami();
-
     if (lockfile_exists(FALSE))
 	exit(EXIT_FAILURE);
     rereadactive();

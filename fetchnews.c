@@ -1505,7 +1505,6 @@ main(int argc, char **argv)
     starttime = time(NULL);
     now = time(NULL);
     umask(2);
-    whoami();
     servers = NULL;
     t = getoptarg('F', argc, argv);
     if (t)

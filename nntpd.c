@@ -2280,8 +2280,6 @@ main(int argc, char **argv)
     struct sockaddr_in sa, peer;
 #endif
 
-    whoami();
-
     /* set buffer */
     fflush(stdout);
 

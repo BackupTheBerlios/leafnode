@@ -108,7 +108,6 @@ main(int argc, char *argv[])
 	fclose(f);
     }
 
-    whoami();
     umask((mode_t)2);
 
     /* lock */
