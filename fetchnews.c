@@ -1186,7 +1186,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 	first = 1;
 
     if (g->first > g->last)
-	g->last = g->first;
+	g->first = g->last+1;
 
     x = getfirstlast(g, &first, &last, delaybody_this_group);
 
