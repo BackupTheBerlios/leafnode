@@ -21,9 +21,21 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
+0.0 use separate repairspool program
+
+1.1 Robert Marshall on 2.0b8_ma9:
+    Changing subject slightly, I have a filters file containing
+    newsgroups = *
+    maxcrosspost = 6
+    action = kill
+    and I've just seen an article crossposted to 8 groups...
+
 1.1 put conditional #include <dmalloc.h> into each file
 
 1.1 fix posting issues, introduce per-server queues?
+
+1.1 do not log without debug/verbose mode (cron should not send mail
+    when everything goes smoothly)
 
 1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
     sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
