@@ -259,6 +259,9 @@ donewnews(struct newsgroup *g, time_t lastrun)
 	   g->name, timestr + 2);
     putaline(nntpout, "NEWNEWS %s %s", g->name, timestr + 2);
     if (nntpreply() != 230) {
+	/* FIXME: if the upstream uses NNTPcache v2.4.0b5, it may send a
+	 * line with a single dot after a 502 reply in violation of
+	 * RFC-977 */
 	return 0;		/* NEWNEWS not supported or something going wrong */
     }
 /* #ifdef NOTYET */
