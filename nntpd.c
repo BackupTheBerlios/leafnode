@@ -182,7 +182,6 @@ main_loop(void)
 	else if (size > MAXLINELENGTH || size > INT_MAX) {
 	    /* ignore attempts at buffer overflow */
 	    nntpprintf("500 Dazed and confused");
-	    (void)fflush(stdout);
 	    continue;
 	}
 	cmd = critstrdup(cmd, "main_loop");
@@ -683,7 +682,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	localmsgid = fgetheader(f, "Message-ID:", 1);
     }
 
-    nntpprintf("%3d %lu %s article retrieved - %s", 223 - what,
+    nntpprintf_as("%3d %lu %s article retrieved - %s", 223 - what,
 	    localartno, localmsgid, whatyouget[what]);
 
     while ((l = getaline(f)) && *l) {
@@ -858,7 +857,6 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 		    g->count, min(g->last, g->first), g->last, g->name);
 	*artno = g->first;
 
-	fflush(stdout);
 	return g;
     } else {
 	nntpprintf("411 No such group");
@@ -995,13 +993,13 @@ dolist(char *oarg)
     char *const arg = critstrdup(oarg, "dolist");
 
     if (!strcasecmp(arg, "extensions")) {
-	nntpprintf("202 extensions supported follow");
+	nntpprintf_as("202 extensions supported follow");
 	fputs("HDR\r\n" "OVER\r\n" "XPAT\r\n" "LISTGROUP\r\n", stdout);
 	if (authentication)
 	    fputs(" AUTHINFO USER\r\n", stdout);
 	fputs(".\r\n", stdout);
     } else if (!strcasecmp(arg, "overview.fmt")) {
-	nntpprintf("215 information follows");
+	nntpprintf_as("215 information follows");
 	fputs("Subject:\r\n"
 	       "From:\r\n"
 	       "Date:\r\n"
@@ -1009,7 +1007,7 @@ dolist(char *oarg)
 	       "References:\r\n"
 	       "Bytes:\r\n" "Lines:\r\n" "Xref:full\r\n" ".\r\n", stdout);
     } else if (!strcasecmp(arg, "active.times")) {
-	nntpprintf("215 Placeholder - Leafnode will fetch groups on demand");
+	nntpprintf_as("215 Placeholder - Leafnode will fetch groups on demand");
 	fputs("news.announce.newusers 42 tale@uunet.uu.net\r\n"
 	       "news.answers 42 tale@uunet.uu.net\r\n" ".\r\n", stdout);
     } else {
@@ -1018,7 +1016,7 @@ dolist(char *oarg)
 	    ln_log_so(LNLOG_SERR, LNLOG_CTOP,
 		      "503 Group information file does not exist!");
 	} else if (!*arg || str_isprefix(arg, "active")) {
-	    nntpprintf("215 Newsgroups in form \"group high low flags\".");
+	    nntpprintf_as("215 Newsgroups in form \"group high low flags\".");
 	    if (active) {
 		if (!*arg || strlen(arg) == 6)
 		    list(active, 0, NULL);
@@ -1149,7 +1147,7 @@ donewnews(char *arg)
 	return;
     }
 
-    nntpprintf("230 List of new articles since %ld in newsgroup %s", age,
+    nntpprintf_as("230 List of new articles since %ld in newsgroup %s", age,
 	       l->string);
     s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups", NULL);
@@ -1217,7 +1215,7 @@ donewgroups(const char *arg)
 	return;
     }
 
-    nntpprintf("231 List of new newsgroups since %lu follows",
+    nntpprintf_as("231 List of new newsgroups since %lu follows",
 	       (unsigned long)age);
     ng = active;
     while (ng->name) {
@@ -1384,7 +1382,6 @@ dopost(void)
 
     msgid = generateMessageID();
     nntpprintf("340 Ok, recommended ID %s", msgid);
-    fflush(stdout);
     /* get headers */
     do {
 	line = getaline(stdin);
@@ -1838,7 +1835,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	l = fgetheader(f, header, 1);
 	fclose(f);
 	if (!l || !(*l)) {
-	    nntpprintf("221 No such header: %s", hd);
+	    nntpprintf_as("221 No such header: %s", hd);
 	    fputs(".\r\n", stdout);
 	    free(header);
 	    return;
@@ -1846,13 +1843,13 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	STRIP_TRAILING_SPACE(l);
 	if (patterns && !matchlist(patterns, l)) {
 	    /* doesn't match any pattern */
-	    nntpprintf("221 %s matches follow:", hd);
+	    nntpprintf_as("221 %s matches follow:", hd);
 	    fputs(".\r\n", stdout);
 	    free(header);
 	    free(l);
 	    return;
 	}
-	nntpprintf("221 %s %s follow:", hd, (patterns ? "matches" : "headers"));
+	nntpprintf_as("221 %s %s follow:", hd, (patterns ? "matches" : "headers"));
 	printf("%s %s\r\n.\r\n", messages, l ? l : "");
 	free(header);
 	free(l);
@@ -1883,14 +1880,14 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	/* is a pseudo group */
 
 	if (patterns) {		/* placeholder matches pseudogroup never */
-	    nntpprintf("221 %s header matches follow:", hd);
+	    nntpprintf_as("221 %s header matches follow:", hd);
 	    fputs(".\r\n", stdout);
 	    free(header);
 	    return;
 	}
 
 	if (OVfield != XO_ERR) {
-	    nntpprintf("221 First line of %s pseudo-header follows:", hd);
+	    nntpprintf_as("221 First line of %s pseudo-header follows:", hd);
 	    printf("%lu ", group->first);
 	}
 	switch (OVfield) {
@@ -1921,10 +1918,10 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    break;
 	default:
 	    if (!strcasecmp(header, "Newsgroups:")) {
-		nntpprintf("221 First line of %s pseudo-header follows:", hd);
+		nntpprintf_as("221 First line of %s pseudo-header follows:", hd);
 		printf("%lu %s\r\n", group->first, group->name);
 	    } else if (!strcasecmp(header, "Path:")) {
-		nntpprintf("221 First line of %s pseudo-header follows:", hd);
+		nntpprintf_as("221 First line of %s pseudo-header follows:", hd);
 		printf("%lu %s!not-for-mail\r\n", group->first, owndn ? owndn : fqdn);
 	    } else {
 		nntpprintf("221 No such header: %s", hd);
@@ -1958,7 +1955,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	return;
     }
     if (OVfield != XO_ERR) {
-	nntpprintf("221 %s header %s(from overview) for postings %lu-%lu:",
+	nntpprintf_as("221 %s header %s(from overview) for postings %lu-%lu:",
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
@@ -2104,9 +2101,9 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	    nntpprintf("420 No articles in specified range.");
 	    return;
 	}
-	nntpprintf("224 Overview information (pseudo) for postings %lu-%lu:",
+	nntpprintf_as("224 Overview information (pseudo) for postings %lu-%lu:",
 		group->first, group->first);
-	nntpprintf("%lu\t"
+	nntpprintf_as("%lu\t"
 		   "Leafnode placeholder for group %s\t"
 		   "news@%s (Leafnode)\t%s\t"
 		   "<leafnode:placeholder:%s@%s>\t\t1000\t40\t"
@@ -2157,12 +2154,12 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     }
     markinterest(group->name);
     if (pseudogroup) {
-	nntpprintf("211 Article list for %s follows (pseudo)", g->name);
+	nntpprintf_as("211 Article list for %s follows (pseudo)", g->name);
 	printf("%lu\r\n", g->first ? g->first : 1);
     } else if (emptygroup) {
 	nntpprintf("211 No articles in %s", g->name);
     } else {
-	nntpprintf("211 Article list for %s (%lu-%lu) follows",
+	nntpprintf_as("211 Article list for %s (%lu-%lu) follows",
 		   g->name, xfirst, xlast);
 	for (idx = 0; idx < xcount; idx++) {
 	    if (xoverinfo[idx].text)
@@ -2472,12 +2469,11 @@ main(int argc, char **argv)
 
     {
 	int allow = allowposting();
-	printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
+	nntpprintf("%03d Leafnode NNTP daemon, version %s at %s%s %s",
 	       201 - allow, version, owndn ? owndn : fqdn,
 	       allow ? "" : " (No posting.)",
 	       allow ? "" : NOPOSTING);
     }
-    (void)fflush(stdout);
     rereadactive();		/* print banner first, so while the
 				   client command is in transit, we read
 				   the active file. should speed things
