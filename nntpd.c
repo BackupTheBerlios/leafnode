@@ -482,7 +482,7 @@ getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
     char *p, *q, *r, *s, *xref;
     char *markgroup;
     unsigned long a;
-    struct stringlist *l;
+    struct stringlist *l, *ptr;
 
     *markartno = 0;
     xref = fgetheader(f, "Xref:", 1);
@@ -500,18 +500,30 @@ getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
 	    (r = strchr(q, ':')) != NULL &&
 	    (a = strtoul(r+1, &s, 10)) != 0 &&
 	    (*s == '\0')) {
-	    *markartno = a;
 	    *r = '\0';
-	    markgroup = critstrdup(q, "getmarkgroup");
-	    freelist(l);
-	    return markgroup;
+	    goto found;
 	}
     }
     /* look for another group to mark this article in */
-    /* ... */
+    for (ptr = l; ptr; ptr = ptr->next) {
+	q = ptr->string;
+	if ((r = strchr(q, ':')) == NULL)
+	    continue;
+	*r++ = '\0';
+	if (!*r || !is_interesting(q) || !delaybody_group(q))
+	    continue;
+	if ((a = strtoul(r, &s, 10)) == 0 || *s != '\0')
+	    continue;
+	goto found;
+    }
 
     freelist(l);
     return NULL;
+found:
+    *markartno = a;
+    markgroup = critstrdup(q, "getmarkgroup");
+    freelist(l);
+    return markgroup;
 }
 
 
@@ -592,8 +604,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
    what & 2: show header */
 {
     FILE *f;
-    unsigned long localartno, markartno;
-    char *markgroup;
+    unsigned long localartno;
     char *localmsgid = NULL;
     char *l;
     static const char *whatyouget[] = {
@@ -649,15 +660,18 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	 * present. If the blank line is missing, the body will also be
 	 * missing.
 	 */
-	/* goal: parse Xref to get (markgroup, markartno) here */
+	/* EOF -> no body */
 	if (!l) {
+	    unsigned long markartno;
+	    char *markgroup;
+
 	    if (localartno) {
 		markgroup = critstrdup(group->name, "doarticle");
 		markartno = localartno;
 	    } else {
+		/* parse Xref to get (markgroup, markartno) here */
 		markgroup = getmarkgroup(group ? group->name : NULL, f, &markartno);
 	    }
-	    /* EOF -> no body */
 	    switch (markdownload(markgroup, localmsgid, markartno)) {
 	    case 0:
 		fputs("\r\n\r\n"
@@ -677,8 +691,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 			"\t[ Leafnode: ]\r\n"
 			"\t[ Message %s ]\r\n"
 			"\t[ cannot be marked for download. ]\r\n"
-			"\t[ (Check the server's syslog "
-			"for information). ]\r\n",
+			"\t[ Apparently none of the interesting groups ]\r\n"
+			"\t[ this message was posted to is in delaybody mode ]\r\n",
 			localmsgid);
 	    }
 	    if (markgroup)
