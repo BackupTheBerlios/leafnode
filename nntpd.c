@@ -80,6 +80,7 @@ static void dohelp(void);
 static void domode(const char *arg);
 static void domove(/*@null@*/ const struct newsgroup *group, int, unsigned long *);
 static void dolist(char *p);
+static void dodate(void);
 static void donewgroups(const char *);
 static void donewnews(char *);
 static void dopost(void);
@@ -211,6 +212,8 @@ main_loop(void)
 	} else if (!strcasecmp(cmd, "mode")) {
 	    if (isauthorized())
 		domode(arg);
+	} else if (!strcasecmp(cmd, "date")) {
+	    dodate();
 	} else if (!strcasecmp(cmd, "newgroups")) {
 	    if (isauthorized())
 		donewgroups(arg);
@@ -763,7 +766,7 @@ dohelp(void)
     printf("  authinfo user Name|pass Password\r\n");
     printf("  article [MessageID|Number]\r\n");
     printf("  body [MessageID|Number]\r\n");
-/*  printf("  date\r\n"); */
+    printf("  date\r\n");
     printf("  group newsgroup\r\n");
     printf("  hdr header [range|MessageID]\r\n");
     printf("  head [MessageID|Number]\r\n");
@@ -934,8 +937,19 @@ dolist(char *oarg)
     free(arg);
 }
 
+static void
+dodate(void)
+{
+  time_t now = time(0);
+  struct tm *t = gmtime(&now);
+  char timestr[64];
+  strftime(timestr, sizeof timestr, "%Y%m%d%H%M%S", t);
+  nntpprintf("111 %s", timestr);
+}
+
 static time_t
-parsedate_newnews(const struct stringlist *l, const int gmt) {
+parsedate_newnews(const struct stringlist *l, const int gmt)
+{
     struct tm timearray;
     time_t age;
     long a, b;
@@ -982,7 +996,8 @@ parsedate_newnews(const struct stringlist *l, const int gmt) {
 }
 
 static time_t
-donew_common(const struct stringlist *l) {
+donew_common(const struct stringlist *l)
+{
     int gmt, len;
     time_t age;
 
@@ -2212,7 +2227,7 @@ main(int argc, char **argv)
     char conffile[PATH_MAX + 1];
     FILE *se;
     const long bufsize = BLOCKSIZE;
-    char *buf = (char *)critmalloc(bufsize, "main_loop");
+    char *buf = (char *)critmalloc(bufsize, "main");
 
 #ifdef HAVE_IPV6
     struct sockaddr_in6 sa, peer;
@@ -2317,6 +2332,7 @@ main(int argc, char **argv)
     active = NULL;
     freelocal();
     freeconfig();
+    freeinteresting();
     /* Ralf Wildenhues: close stdout before freeing its buffer */
     (void)fclose(stdout);
     free(buf);
