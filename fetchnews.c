@@ -1118,11 +1118,12 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
     int tryxhdr = 0;
 
     /* lots of plausibility tests */
-    if (!g)
-	return first;
-    if (!is_interesting(g->name))
-	return 0;
+    assert(g);
+    assert(is_interesting(g->name));
+
     if (!chdirgroup(g->name, TRUE))	/* also creates the directory */
+	return 0;
+    if (!gs_match(cursrv -> group_pcre, g->name))
 	return 0;
 
     /* we don't care about x-posts for delaybody */
