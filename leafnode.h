@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.8 2001/01/03 05:07:05 emma Exp $ */
+/* $Id: leafnode.h,v 1.9 2001/11/12 00:08:10 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -20,7 +20,7 @@
 
 #define BLOCKSIZE 16384
 
-#include "config.h"	/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
+#include "config.h"		/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
 
 #ifndef HAVE_SOCKLEN_T
 typedef unsigned int socklen_t;
@@ -40,28 +40,28 @@ typedef unsigned int socklen_t;
 #endif
 #ifndef HAVE_ERRNO_H
 extern int errno;
-#endif	/* HAVE_ERRNO_H */
+#endif				/* HAVE_ERRNO_H */
 
 #ifndef HAVE_STRDUP
-char * strdup (const char *);
+char *strdup(const char *);
 #endif
 
-#include <sys/types.h>	/* size_t */
-#include <stdio.h>	/* FILE */
-#include <time.h>	/* time_t */
-#include <stdarg.h>	/* va_list */
-#include <dirent.h>     /* DIR */
+#include <sys/types.h>		/* size_t */
+#include <stdio.h>		/* FILE */
+#include <time.h>		/* time_t */
+#include <stdarg.h>		/* va_list */
+#include <dirent.h>		/* DIR */
 
 #ifndef HAVE_SNPRINTF
 int snprintf(char *str, size_t n, const char *format, ...);
 #endif
 
 #ifndef HAVE_VSNPRINTF
-int vsnprintf( char *str, size_t n, const char *format, va_list ap );
+int vsnprintf(char *str, size_t n, const char *format, va_list ap);
 #endif
 
 #ifndef HAVE_MKSTEMP
-int mkstemp( char *template );
+int mkstemp(char *template);
 #endif
 
 #ifdef HAVE_LIBPCRE
@@ -83,17 +83,17 @@ int mkstemp( char *template );
 /* initialize global variables */
 int initvars(char *progname);
 /* get configuration file */
-char * getoptarg( char option, int argc, char * argv[] );
-int findopt( char option, int argc, char *argv[] );
-int parseopt( char *progname, int option, char * optarg, char *conffile );
+char *getoptarg(char option, int argc, char *argv[]);
+int findopt(char option, int argc, char *argv[]);
+int parseopt(char *progname, int option, char *optarg, char *conffile);
 
 /* converts a message-id to a file name, the return value points into
    a static array */
-const char * lookup (const char *msgid);
+const char *lookup(const char *msgid);
 
 /* handling of misc. lines */
-char * getaline(FILE *f);	/* reads one line, regardless of length */
-int parse_line (char *l, char * param, char * value) ;
+char *getaline(FILE * f);	/* reads one line, regardless of length */
+int parse_line(char *l, char *param, char *value);
 				/* parse a line of form "param = value" */
 #define TOKENSIZE 80		/* needed for parsing */
 
@@ -101,7 +101,7 @@ int parse_line (char *l, char * param, char * value) ;
 int chdirgroup(const char *group, int creatdir);
 
 /* is the group an interesting one? */
-int isinteresting(const char * groupname);
+int isinteresting(const char *groupname);
 void checkinteresting(void);
 
 /*
@@ -111,19 +111,19 @@ struct newsgroup {
     unsigned long first;
     unsigned long last;
     unsigned long count;	/* number of articles in the group */
-    char * name;
-    char * desc;
+    char *name;
+    char *desc;
     time_t age;
-    char status;	/* "y" if posting is permitted, "n" if not,
-    			   "m" for moderated.
-			   "Other status strings may exist." */
+    char status;		/* "y" if posting is permitted, "n" if not,
+				   "m" for moderated.
+				   "Other status strings may exist." */
 };
 
-void insertgroup(const char * name, long unsigned first,
-	long unsigned last, int date, char * desc);
-void changegroupdesc(const char * groupname, char * desc);
+void insertgroup(const char *name, long unsigned first,
+		 long unsigned last, int date, char *desc);
+void changegroupdesc(const char *groupname, char *desc);
 void mergegroups(void);
-struct newsgroup * findgroup(const char* name);
+struct newsgroup *findgroup(const char *name);
 void readactive(void);
 void writeactive(void);
 void fakeactive(void);
@@ -133,16 +133,16 @@ void fakeactive(void);
  */
 void insertlocal(const char *name);
 void readlocalgroups(void);
-int  islocalgroup(const char *groupname);
-int  islocal(const char *grouplist);
+int islocalgroup(const char *groupname);
+int islocal(const char *grouplist);
 
-extern struct newsgroup * active;
+extern struct newsgroup *active;
 
 /* translation from message-id to article number, used in fetch and expire */
 
 void clearidtree(void);
-void insertmsgid(const char * msgid, unsigned long art);
-int findmsgid(const char* msgid);
+void insertmsgid(const char *msgid, unsigned long art);
+int findmsgid(const char *msgid);
 
 /* -----------here starts the new stuff-----------------*/
 
@@ -150,21 +150,21 @@ int findmsgid(const char* msgid);
  * a linear list of strings
  */
 struct stringlist {
-    struct stringlist * next;
-    char string[1] ;
+    struct stringlist *next;
+    char string[1];
 };
-void appendtolist(struct stringlist ** list, struct stringlist ** lastentry,
-    char *newentry);
+void appendtolist(struct stringlist **list, struct stringlist **lastentry,
+		  char *newentry);
 	/* append "newentry" to "list". "lastentry" points to the last
 	   entry in "list" and must be supplied. */
-char * findinlist(struct stringlist * haystack, char * needle) ;
+char *findinlist(struct stringlist *haystack, char *needle);
 	/* find a string in a stringlist by doing a linear search */
-void freelist(struct stringlist * list) ;
+void freelist(struct stringlist *list);
 	/* free memory occupied by a stringlist */
 int stringlistlen(const struct stringlist *list);
-struct stringlist * cmdlinetolist(const char *cmdline) ;
-        /* convert a space separated string into a stringlist */
-	
+struct stringlist *cmdlinetolist(const char *cmdline);
+	/* convert a space separated string into a stringlist */
+
 /*
  * filtering headers for regexp
  */
@@ -196,11 +196,11 @@ struct stringlist * cmdlinetolist(const char *cmdline) ;
  */
 
 struct filterentry {
-    char * newsgroup;
-    int  limit;
-    char * cleartext;
-    pcre * expr;
-    char * action;
+    char *newsgroup;
+    int limit;
+    char *cleartext;
+    pcre *expr;
+    char *action;
 };
 
 struct filterlist {
@@ -208,11 +208,11 @@ struct filterlist {
     struct filterlist *next;
 };
 
-extern struct filterlist * filter;      /* all expressions precompiled */
+extern struct filterlist *filter;	/* all expressions precompiled */
 
-int readfilter(char *filterfile) ;
-int killfilter(struct filterlist *f, char *hdr) ;
-struct filterlist * selectfilter (char * groupname);
+int readfilter(char *filterfile);
+int killfilter(struct filterlist *f, char *hdr);
+struct filterlist *selectfilter(char *groupname);
 void freefilter(struct filterlist *f);
 
 /*
@@ -222,33 +222,33 @@ void freefilter(struct filterlist *f);
 /*
  * store articles
  */
-void storearticle (char * filename, char * msgid, char * newsgroups) ;
-void store(const char * filename, FILE * filehandle, char * newsgroups,
-	    const char *msgid);
+void storearticle(char *filename, char *msgid, char *newsgroups);
+void store(const char *filename, FILE * filehandle, char *newsgroups,
+	   const char *msgid);
 
 /*
  * find a certain header in an article and return it
  */
-char * getheader(const char * filename, const char * header);
-char * fgetheader(FILE *f, const char * header);
-char *mgetheader (const char *hdr, char *buf) ;
+char *getheader(const char *filename, const char *header);
+char *fgetheader(FILE * f, const char *header);
+char *mgetheader(const char *hdr, char *buf);
 
 /*
  * various functions in artutil.c
  */
-void supersede(const char * msgid);
+void supersede(const char *msgid);
 
 /*
  * xover stuff -- for nntpd.c
  */
 struct xoverinfo {
     unsigned long artno;
-    char * text;
+    char *text;
     int exists;
 };
 
 enum xoverfields {
-    XO_ARTNO=1,
+    XO_ARTNO = 1,
     XO_SUBJECT,
     XO_FROM,
     XO_DATE,
@@ -256,29 +256,29 @@ enum xoverfields {
     XO_REFERENCES,
     XO_BYTES,
     XO_LINES,
-    XO_XHDR 
-}; 
+    XO_XHDR
+};
 
-extern struct xoverinfo * xoverinfo;
+extern struct xoverinfo *xoverinfo;
 extern unsigned long xfirst;
 extern unsigned long xlast;
 
 long findxover(unsigned long article);
 		  /* find index number for an article, return -1 on error */
-int getxover(void);	  /* set xoverinfo, return 0 on error, nonzero else */
-void fixxover(void); 	  /* repair all .overview files */
-void gfixxover(char * g); /* repair .overview in groups g */
-void freexover(void);     /* free xoverinfo structure */
+int getxover(void);		/* set xoverinfo, return 0 on error, nonzero else */
+void fixxover(void);		/* repair all .overview files */
+void gfixxover(char *g);	/* repair .overview in groups g */
+void freexover(void);		/* free xoverinfo structure */
 
 /*
  * the strings in config.c
  */
-extern const char * spooldir;
-extern const char * libdir;
-extern const char * bindir;
-extern const char * version;
-extern const char * lockfile;
-extern const char * GZIP;
+extern const char *spooldir;
+extern const char *libdir;
+extern const char *bindir;
+extern const char *version;
+extern const char *lockfile;
+extern const char *GZIP;
 
 /*
  * global variables from config file. These are defined in configutil.c
@@ -286,31 +286,31 @@ extern const char * GZIP;
 struct expire_entry {
     int xtime;
     struct expire_entry *next;
-    char * group;
+    char *group;
 };
 
 struct serverlist {
-    int port ;
-    int usexhdr ;		/* use XHDR instead of XOVER if sensible */
-    int descriptions ;		/* download descriptions as well */
-    int timeout ;		/* timeout in seconds before we give up */
-    struct serverlist * next;
-    char * name ;		/* Servername */
-    char * username ;
-    char * password ;
+    int port;
+    int usexhdr;		/* use XHDR instead of XOVER if sensible */
+    int descriptions;		/* download descriptions as well */
+    int timeout;		/* timeout in seconds before we give up */
+    struct serverlist *next;
+    char *name;			/* Servername */
+    char *username;
+    char *password;
     char active;
 };
 
-extern time_t expire;	/* articles not touched since this time get deleted */
-extern struct expire_entry * expire_base;
+extern time_t expire;		/* articles not touched since this time get deleted */
+extern struct expire_entry *expire_base;
 			/* expire for certain groups */
 extern unsigned long artlimit;
 			/* max # of articles to read per group in one go */
 extern unsigned long initiallimit;
 			/* max # of articles to read at first time */
-extern int delaybody;	/* delay download of message body */
-extern int avoidxover;  /* prefer XHDR over XOVER */
-extern int debugmode;	/* log lots of stuff via syslog */
+extern int delaybody;		/* delay download of message body */
+extern int avoidxover;		/* prefer XHDR over XOVER */
+extern int debugmode;		/* log lots of stuff via syslog */
 extern int create_all_links;
 			/* store articles even in uninteresting groups */
 extern int timeout_short;	/* don't fetch groups that have been
@@ -328,10 +328,10 @@ extern int filtermode;		/* can be one of */
 #define FM_XOVER 1
 #define FM_HEAD  2
 #define FM_BOTH  3
-extern char * filterfile;	/* filename where filter resides */
-extern char * pseudofile;	/* filename of pseudoarticle body */
-extern char * owndn;		/* own domain name, if you can't set one */
-extern struct serverlist * servers;
+extern char *filterfile;	/* filename where filter resides */
+extern char *pseudofile;	/* filename of pseudoarticle body */
+extern char *owndn;		/* own domain name, if you can't set one */
+extern struct serverlist *servers;
 				/* list of servers to use */
 
 /*
@@ -358,10 +358,10 @@ void putaline(const char *fmt, ...);
 void retry(void);
 void readexpire(void);
 void free_expire(void);
-int readconfig(char * configfile);
+int readconfig(char *configfile);
 void whoami(void);
 void lowercase(char *string);
-int ngmatch(const char* pattern, const char* string);
+int ngmatch(const char *pattern, const char *string);
 void copyfile(FILE * infile, FILE * outfile, long n);
 
 int rename(const char *oldname, const char *newname);
@@ -370,28 +370,28 @@ int rename(const char *oldname, const char *newname);
 /*
  * stuff from nntputil.c
  */
-int authenticate(void);	/* authenticate ourselves at a server */
+int authenticate(void);		/* authenticate ourselves at a server */
 int nntpreply(void);		/* decode an NNTP reply number */
-int nntpconnect(const struct serverlist * upstream);
+int nntpconnect(const struct serverlist *upstream);
 				/* connect to upstream server */
 void nntpdisconnect(void);	/* disconnect from upstream server */
 
-const char* rfctime(void);	/* An rfc type date */
+const char *rfctime(void);	/* An rfc type date */
 
 /* from strutil.c */
-int check_allnum_minus(const char *); /* check if string is all made 
-					 of digits and "-" */
-char *cuttab(const char *in, int field); /* break tab-separated field */
+int check_allnum_minus(const char *);	/* check if string is all made 
+					   of digits and "-" */
+char *cuttab(const char *in, int field);	/* break tab-separated field */
 
 
 /* from dirutil.c */
 /* open directory, log problems */
-DIR *log_open_dir(const char *); 
+DIR *log_open_dir(const char *);
 /* open directory, relative to spooldir, log problems */
-DIR *log_open_spool_dir(const char *); 
+DIR *log_open_spool_dir(const char *);
 
 #ifndef HAVE_INET_NTOP
 const char *inet_ntop(int af, const void *s, char *dst, int x);
 #endif
 
-#endif	/* #ifndef LEAFNODE_H */
+#endif				/* #ifndef LEAFNODE_H */

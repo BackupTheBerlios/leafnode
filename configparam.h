@@ -3,7 +3,10 @@
 
 #include "config.h"
 
-struct configparam { const char *name; int code; };
+struct configparam {
+    const char *name;
+    int code;
+};
 
 extern const struct configparam configparam[];
 extern const int count_configparam;

@@ -21,10 +21,10 @@
 #include <stdio.h>
 
 struct localgroup {
-    char * name;
-    struct localgroup * left;
-    struct localgroup * right;
-} ;
+    char *name;
+    struct localgroup *left;
+    struct localgroup *right;
+};
 
 struct localgroup *local = NULL;
 
@@ -34,8 +34,10 @@ struct localgroup *local = NULL;
  * The function is taken from insertgroup() of leafnode-1.9.7 and
  * somewhat modified.
  */
-void insertlocal(const char *name) {
-    struct localgroup ** a;
+void
+insertlocal(const char *name)
+{
+    struct localgroup **a;
     char c;
 
     a = &local;
@@ -49,21 +51,21 @@ void insertlocal(const char *name) {
 	    else {
 		/* this shouldn't happen */
 		ln_log(LNLOG_NOTICE, "Two identical local groups: %s = %s",
-			(*a)->name, name);
+		       (*a)->name, name);
 		return;
 	    }
 	} else {
 	    /* create new entry */
 	    *a = (struct localgroup *)critmalloc(sizeof(struct localgroup),
-		 "Building list of local groups");
+						 "Building list of local groups");
 	    if (!*a)
 		return;
-	    (*a)->left  = NULL;
+	    (*a)->left = NULL;
 	    (*a)->right = NULL;
-	    (*a)->name  = strdup(name);
+	    (*a)->name = strdup(name);
 	    if ((*a)->name == NULL) {
 		ln_log(LNLOG_ERR, "Not sufficient memory for newsgroup %s",
-				 name);
+		       name);
 		free(*a);
 		return;
 	    }
@@ -87,14 +89,16 @@ void insertlocal(const char *name) {
  * The format of the file containing the local groups is
  * news.group.name[whitespace]Description
  */
-void readlocalgroups(void) {
+void
+readlocalgroups(void)
+{
     char *l, *p;
     FILE *f;
 
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/local.groups");
 
-    if (!(f = fopen( s, "r"))) {
+    if (!(f = fopen(s, "r"))) {
 	/* not very dramatic because the user probably just
 	   does not want local groups */
 	ln_log(LNLOG_DEBUG, "unable to open %s: %m", s);
@@ -103,7 +107,7 @@ void readlocalgroups(void) {
 
     debug = 0;
 
-    while ((l = getaline( f)) != NULL ) {
+    while ((l = getaline(f)) != NULL) {
 	p = l;
 
 	while (p && *p && !isspace((unsigned char)*p))
@@ -112,12 +116,12 @@ void readlocalgroups(void) {
 	    *p++ = '\0';
 
 	/* l points to group name, p to description */
-	if ( strlen(l) ) {
-	    if ( strlen(p) )
-		insertgroup( l, 0, 0, time(NULL), p );
+	if (strlen(l)) {
+	    if (strlen(p))
+		insertgroup(l, 0, 0, time(NULL), p);
 	    else
-		insertgroup( l, 0, 0, time(NULL), "local group" );
-	    insertlocal( l );
+		insertgroup(l, 0, 0, time(NULL), "local group");
+	    insertlocal(l);
 	}
     }
 
@@ -130,7 +134,9 @@ void readlocalgroups(void) {
 /*
  * find whether a group is indeed a local one
  */
-int islocalgroup(const char *groupname) {
+int
+islocalgroup(const char *groupname)
+{
     struct localgroup *a;
     int c;
 
@@ -140,8 +146,7 @@ int islocalgroup(const char *groupname) {
 	c = strcasecmp(a->name, groupname);
 	if (c < 0) {
 	    a = a->left;
-	}
-	else if (c > 0) {
+	} else if (c > 0) {
 	    a = a->right;
 	} else {
 	    return TRUE;
@@ -153,18 +158,20 @@ int islocalgroup(const char *groupname) {
 /*
  * find whether a comma-separated list of groups contains only local ones
  */
-int islocal( const char * grouplist ) {
+int
+islocal(const char *grouplist)
+{
     char *p, *q;
-    int retval = TRUE;	/* assume that all groups are local */
+    int retval = TRUE;		/* assume that all groups are local */
 
     p = strdup(grouplist);
     do {
-	while (isspace( (unsigned char)*p) )
+	while (isspace((unsigned char)*p))
 	    p++;
 	q = strchr(p, ',');
 	if (q)
 	    *q++ = '\0';
-	if (!islocalgroup( p) ) 
+	if (!islocalgroup(p))
 	    retval = FALSE;
 	p = q;
     } while (p && *p && retval);

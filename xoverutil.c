@@ -41,38 +41,40 @@ extern struct state _res;
 unsigned long xfirst = 0;
 unsigned long xlast = 0;
 unsigned long xcount = 0;
-struct xoverinfo * xoverinfo = NULL;
+struct xoverinfo *xoverinfo = NULL;
 
 /* declarations */
-char * getxoverline(const char * filename);
+char *getxoverline(const char *filename);
 void writexover(void);
 
-char * getxoverline(const char * filename) {
-    char * l;
-    char * result;
-    FILE * f;
+char *
+getxoverline(const char *filename)
+{
+    char *l;
+    char *result;
+    FILE *f;
     struct stat st;
     struct utimbuf buf;
 
     /* We have to preserve atime and mtime to correctly
        expire unsubscribed groups */
-    if (stat( filename, &st) != 0 )
+    if (stat(filename, &st) != 0)
 	return NULL;
     buf.actime = st.st_atime;
     buf.modtime = st.st_mtime;
-    
+
     result = NULL;
     debug = 0;
-    if ((f=fopen( filename, "r")) ) {
-	char * from;
-	char * subject;
-	char * date;
-	char * msgid;
-	char * references;
+    if ((f = fopen(filename, "r"))) {
+	char *from;
+	char *subject;
+	char *date;
+	char *msgid;
+	char *references;
 	int bytes;
 	int linecount;
-	char * xref;
-	char ** h;
+	char *xref;
+	char **h;
 	int body;
 	int i;
 
@@ -81,7 +83,7 @@ char * getxoverline(const char * filename) {
 	h = NULL;
 	body = 0;
 
-	while (!feof( f) && ( ( l = getaline( f )) != NULL ) ) {
+	while (!feof(f) && ((l = getaline(f)) != NULL)) {
 	    if (l) {
 		linecount++;
 		bytes += strlen(l) + 2;
@@ -94,16 +96,16 @@ char * getxoverline(const char * filename) {
 	    } else if (h && isspace((unsigned char)*l)) {
 		if (*l) {
 		    /* extend multiline headers */
-		    (*h) = critrealloc(*h, strlen( *h) + strlen( l ) + 1,
-					"extending header");
+		    (*h) = critrealloc(*h, strlen(*h) + strlen(l) + 1,
+				       "extending header");
 		    /* replace tabs with spaces */
-		    for (i = strlen(l)-1; i >= 0; i--) {
+		    for (i = strlen(l) - 1; i >= 0; i--) {
 			if (l[i] == '\t')
-			    l[i] = ' ' ;
+			    l[i] = ' ';
 		    }
 		    strcat(*h, l);
 		}
-	    } else if (!from && !strncasecmp( "From:", l, 5) ) {
+	    } else if (!from && !strncasecmp("From:", l, 5)) {
 		l += 5;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -111,7 +113,7 @@ char * getxoverline(const char * filename) {
 		    from = strdup(l);
 		    h = &from;
 		}
-	    } else if (!subject && !strncasecmp( "Subject:", l, 8) ) {
+	    } else if (!subject && !strncasecmp("Subject:", l, 8)) {
 		l += 8;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -119,7 +121,7 @@ char * getxoverline(const char * filename) {
 		    subject = strdup(l);
 		    h = &subject;
 		}
-	    } else if (!date && !strncasecmp( "Date:", l, 5) ) {
+	    } else if (!date && !strncasecmp("Date:", l, 5)) {
 		l += 5;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -127,7 +129,7 @@ char * getxoverline(const char * filename) {
 		    date = strdup(l);
 		    h = &date;
 		}
-	    } else if (!msgid && !strncasecmp( "Message-ID:", l, 11) ) {
+	    } else if (!msgid && !strncasecmp("Message-ID:", l, 11)) {
 		l += 11;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -135,8 +137,7 @@ char * getxoverline(const char * filename) {
 		    msgid = strdup(l);
 		    h = &msgid;
 		}
-	    } else if (!references &&
-			!strncasecmp("References:", l, 11) ) {
+	    } else if (!references && !strncasecmp("References:", l, 11)) {
 		l += 11;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -144,7 +145,7 @@ char * getxoverline(const char * filename) {
 		    references = strdup(l);
 		    h = &references;
 		}
-	    } else if (!xref && !strncasecmp( "Xref:", l, 5) ) {
+	    } else if (!xref && !strncasecmp("Xref:", l, 5)) {
 		l += 5;
 		while (*l && isspace((unsigned char)*l))
 		    l++;
@@ -157,27 +158,26 @@ char * getxoverline(const char * filename) {
 	    }
 	}
 	if (from && date && subject && msgid && bytes) {
-	    result = critmalloc(strlen( from) + strlen( date ) +
-				 strlen(subject) + strlen( msgid ) +
-				 (references ? strlen(references) : 0 ) +
-				 100 + (xref ? strlen( xref) : 0),
-				 "computing overview line");
+	    result = critmalloc(strlen(from) + strlen(date) +
+				strlen(subject) + strlen(msgid) +
+				(references ? strlen(references) : 0) +
+				100 + (xref ? strlen(xref) : 0),
+				"computing overview line");
 	    sprintf(result, "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d",
-		     filename, subject, from, date, msgid,
-		     references ? references : "" ,
-		     bytes, linecount);
+		    filename, subject, from, date, msgid,
+		    references ? references : "", bytes, linecount);
 	    if (xref) {
 		strcat(result, "\tXref: ");
 		strcat(result, xref);
 	    }
 	}
 	fclose(f);
-	free (from);
-	free (date);
-	free (subject);
-	free (msgid);
-	free (references);
-	free (xref);
+	free(from);
+	free(date);
+	free(subject);
+	free(msgid);
+	free(references);
+	free(xref);
     }
     debug = debugmode;
     utime(filename, &buf);
@@ -187,8 +187,9 @@ char * getxoverline(const char * filename) {
 /*
  * find xover line in sorted array, recursively
  */
-static long helpfindxover(unsigned long article,
-    unsigned long low, unsigned long high) {
+static long
+helpfindxover(unsigned long article, unsigned long low, unsigned long high)
+{
     unsigned long mid;
 
     if (low > high)
@@ -197,30 +198,33 @@ static long helpfindxover(unsigned long article,
 	return low;
     if (article == xoverinfo[high].artno)
 	return high;
-    mid = (high-low)/2+low;
+    mid = (high - low) / 2 + low;
     if (article == xoverinfo[mid].artno)
 	return mid;
     if (article < xoverinfo[mid].artno) {
 	if (mid == 0)
 	    return -1;
 	else
-	    return helpfindxover(article, low, mid-1);
-    }
-    else
-	return helpfindxover(article, mid+1, high);
+	    return helpfindxover(article, low, mid - 1);
+    } else
+	return helpfindxover(article, mid + 1, high);
 }
 
 /*
  * return xover record of "article". -1 means failure.
  */
-long findxover(unsigned long article) {
-    return(helpfindxover( article, 0, xcount-1) );
+long
+findxover(unsigned long article)
+{
+    return (helpfindxover(article, 0, xcount - 1));
 }
 
 /*
  * sort xoverfile 
  */
-static int _compxover(const void *a, const void *b) {
+static int
+_compxover(const void *a, const void *b)
+{
     struct xoverinfo *la = (struct xoverinfo *)a;
     struct xoverinfo *lb = (struct xoverinfo *)b;
     if (la->artno < lb->artno)
@@ -233,11 +237,13 @@ static int _compxover(const void *a, const void *b) {
 /*
  * read xoverfile into struct xoverinfo
  */
-int getxover(void) {
-    DIR * d;
+int
+getxover(void)
+{
+    DIR *d;
     struct dirent *de;
     struct stat st;
-    static char * overview = NULL;
+    static char *overview = NULL;
     char *p, *q;
     int fd, update = 0;
     unsigned long current, art;
@@ -250,11 +256,12 @@ int getxover(void) {
     }
 
     /* read .overview file into memory */
-    if ( ( (fd=open( ".overview", O_RDONLY)) >= 0) &&
-	 ( fstat(fd, &st) == 0 ) &&
-	 ( (overview = (char*)realloc(overview, (size_t)st.st_size+1)) != NULL ) &&
-	 ( read( fd, overview, st.st_size ) == st.st_size ) ) {
-	close( fd );
+    if (((fd = open(".overview", O_RDONLY)) >= 0) &&
+	(fstat(fd, &st) == 0) &&
+	((overview =
+	  (char *)realloc(overview, (size_t) st.st_size + 1)) != NULL)
+	&& (read(fd, overview, st.st_size) == st.st_size)) {
+	close(fd);
 	overview[st.st_size] = '\0';
     } else {
 	/* .overview file not present: make a new one */
@@ -269,7 +276,7 @@ int getxover(void) {
     xcount = 0;
     xlast = 0;
     xfirst = INT_MAX;
-    while ((de=readdir(d))) {
+    while ((de = readdir(d))) {
 	art = strtoul(de->d_name, &p, 10);
 	if (art && p && !*p) {
 	    xcount++;
@@ -289,10 +296,9 @@ int getxover(void) {
     while (p && *p) {
 	q = strchr(p, '\n');
 	if (q) {
-	    p = q+1;
+	    p = q + 1;
 	    current++;
-	}
-	else
+	} else
 	    p = NULL;
     }
 
@@ -300,10 +306,11 @@ int getxover(void) {
 	update = 1;
 
     /* parse .overview file */
-    xoverinfo = (struct xoverinfo *)critrealloc(
-		  (char*)xoverinfo, sizeof(struct xoverinfo)*(xcount+current+1),
-		  "allocating overview array");
-    memset(xoverinfo, 0, sizeof(struct xoverinfo) * (xcount+current+1));
+    xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
+						sizeof(struct xoverinfo) *
+						(xcount + current + 1),
+						"allocating overview array");
+    memset(xoverinfo, 0, sizeof(struct xoverinfo) * (xcount + current + 1));
 
     p = overview;
     current = 0;
@@ -321,8 +328,7 @@ int getxover(void) {
 	    xoverinfo[current].exists = 0;
 	    xoverinfo[current].artno = art;
 	    current++;
-	}
-	else {
+	} else {
 	    xoverinfo[current].exists = 0;
 	    xoverinfo[current].text = p;
 	    xoverinfo[current].artno = art;
@@ -347,14 +353,12 @@ int getxover(void) {
 		    continue;
 		}
 	    }
-	    if (stat( de->d_name, &st)) {
+	    if (stat(de->d_name, &st)) {
 		ln_log(LNLOG_DEBUG, "Can't stat %s", de->d_name);
 		continue;
-	    }
-	    else if (S_ISREG( st.st_mode) ) {
+	    } else if (S_ISREG(st.st_mode)) {
 		xoverinfo[current].text = getxoverline(de->d_name);
-	    }
-	    else
+	    } else
 		/* probably a directory */
 		continue;
 	    if (xoverinfo[current].text != NULL) {
@@ -362,30 +366,29 @@ int getxover(void) {
 		xoverinfo[current].artno = art;
 		update = 1;
 		current++;
-	    }
-	    else {
+	    } else {
 		/* error getting xoverline from article - delete it */
 		getcwd(s, 1024);
 		ln_log(LNLOG_NOTICE, "illegal article: %s/%s", s, de->d_name);
-		if ((lstat( de->d_name, &st) == 0) && S_ISREG(st.st_mode) ) {
-		    if (unlink( de->d_name) )
+		if ((lstat(de->d_name, &st) == 0) && S_ISREG(st.st_mode)) {
+		    if (unlink(de->d_name))
 			ln_log(LNLOG_WARNING, "failed to remove %s/%s",
-				s, de->d_name);
-		}
-		else
+			       s, de->d_name);
+		} else
 		    ln_log(LNLOG_WARNING, "%s/%s is not a regular file",
-			    s, de->d_name);
+			   s, de->d_name);
 	    }
-	} /* if (art >= xfirst && art <= xlast) */
-    } /* while */
+	}			/* if (art >= xfirst && art <= xlast) */
+    }				/* while */
     closedir(d);
 
     /* free superfluous memory */
-    xoverinfo = (struct xoverinfo *)critrealloc((char*)xoverinfo,
-	sizeof(struct xoverinfo)*(current+2),
-	"allocating overview array");
+    xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
+						sizeof(struct xoverinfo) *
+						(current + 2),
+						"allocating overview array");
 
-    qsort(xoverinfo, current, sizeof( struct xoverinfo), &_compxover);
+    qsort(xoverinfo, current, sizeof(struct xoverinfo), &_compxover);
     xcount = current;
 
     if (update)
@@ -396,21 +399,23 @@ int getxover(void) {
 /*
  * write .overview file
  */
-void writexover(void) {
+void
+writexover(void)
+{
     char newfile[20];
     char lineend[3];
     struct iovec oooh[UIO_MAXIOV];
     int wfd, vi, vc, va;
     unsigned long art;
 
-    strcpy( newfile, ".overview.XXXXXX" );
-    if ( (wfd=mkstemp(newfile)) == -1) {
-	ln_log( LNLOG_ERR, "mkstemp of new .overview failed: %m" );
+    strcpy(newfile, ".overview.XXXXXX");
+    if ((wfd = mkstemp(newfile)) == -1) {
+	ln_log(LNLOG_ERR, "mkstemp of new .overview failed: %m");
 	return;
     }
 
     vi = vc = va = 0;
-    for (art=0; art < xcount; art++) {
+    for (art = 0; art < xcount; art++) {
 	if (xoverinfo[art].exists && xoverinfo[art].text) {
 	    oooh[vi].iov_base = xoverinfo[art].text;
 	    oooh[vi].iov_len = strlen(xoverinfo[art].text);
@@ -418,9 +423,9 @@ void writexover(void) {
 	    oooh[vi].iov_base = lineend;
 	    oooh[vi++].iov_len = 1;
 	    if (vi >= (UIO_MAXIOV - 1)) {
-		if (writev( wfd, oooh, vi) != vc ) {
+		if (writev(wfd, oooh, vi) != vc) {
 		    ln_log(LNLOG_ERR, "writev() for .overview failed: %m");
-		    art = xlast+1;	/* so the loop will stop */
+		    art = xlast + 1;	/* so the loop will stop */
 		}
 		vi = vc = 0;
 		va = 1;
@@ -428,27 +433,25 @@ void writexover(void) {
 	}
     }
     if (vi) {
-	if (writev( wfd, oooh, vi) != vc )
+	if (writev(wfd, oooh, vi) != vc)
 	    ln_log(LNLOG_ERR, "writev() for .overview failed: %m");
 	else
 	    va = 1;
     }
-    fchmod(wfd, (mode_t)0664);
+    fchmod(wfd, (mode_t) 0664);
     close(wfd);
     if (va) {
-	if (rename( newfile, ".overview") ) {
-	    if (unlink( newfile) )
+	if (rename(newfile, ".overview")) {
+	    if (unlink(newfile))
 		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %m");
 	    else
 		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %m",
 		       getcwd(s, 1024), newfile);
-	}
-	else {
+	} else {
 	    if (debugmode)
 		ln_log(LNLOG_DEBUG, "wrote %s/.overview", getcwd(s, 1024));
 	}
-    }
-    else {
+    } else {
 	unlink(newfile);
 	/* the group must be newly empty: I want to keep the old
 	   .overview file I think */
@@ -459,26 +462,30 @@ void writexover(void) {
  * Fix overview lines for every group in g. g is a comma-delimited string
  * which may contain spaces.
  */
-void gfixxover(char * g) {
-    char * q;
+void
+gfixxover(char *g)
+{
+    char *q;
 
     if (!g)
-        return;
+	return;
     while (g && *g) {
-        while (isspace((unsigned char)*g) )
-            g++;
-        q = strchr(g, ',');
-        if (q)
-            *q++ = '\0';
-        if (chdirgroup( g, FALSE) && findgroup( g ) )
-            getxover();
-        g = q;
+	while (isspace((unsigned char)*g))
+	    g++;
+	q = strchr(g, ',');
+	if (q)
+	    *q++ = '\0';
+	if (chdirgroup(g, FALSE) && findgroup(g))
+	    getxover();
+	g = q;
     }
 }
 
-void fixxover(void) {
-    DIR * d;
-    struct dirent * de;
+void
+fixxover(void)
+{
+    DIR *d;
+    struct dirent *de;
 
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
@@ -487,9 +494,9 @@ void fixxover(void) {
 	return;
     }
 
-    while ((de = readdir(d)))  {
-	if (( de->d_name[0] != '.') && findgroup( de->d_name ) ) {
-	    if (chdirgroup( de->d_name, FALSE) ) {
+    while ((de = readdir(d))) {
+	if ((de->d_name[0] != '.') && findgroup(de->d_name)) {
+	    if (chdirgroup(de->d_name, FALSE)) {
 		getxover();
 	    }
 	}
@@ -498,8 +505,10 @@ void fixxover(void) {
     closedir(d);
 }
 
-void freexover(void) {
-    if(xoverinfo) {
+void
+freexover(void)
+{
+    if (xoverinfo) {
 	free(xoverinfo);
 	xoverinfo = 0;
     }

@@ -6,7 +6,7 @@
  *
  * See README for restrictions on the use of this software.
  */
- 
+
 #include "leafnode.h"
 #include "critmem.h"
 #include "ln_log.h"
@@ -27,36 +27,40 @@ int debug = 0;
 /* int verbose; */
 int first, last;
 
-static void usage(void) {
+static void
+usage(void)
+{
     fprintf(stderr,
-	"Usage:\n"
-	"applyfilter -V: print version number and exit\n"
-	"applyfilter [-Dv] [-F configfile] newsgroups\n"
-	"    -D: switch on debug mode\n"
-	"    -v: switch on verbose mode\n"
-	"    -F: use \"configfile\" instead of %s/config\n"
-	"See also the leafnode homepage at http://www.leafnode.org/\n",
-	libdir);
+	    "Usage:\n"
+	    "applyfilter -V: print version number and exit\n"
+	    "applyfilter [-Dv] [-F configfile] newsgroups\n"
+	    "    -D: switch on debug mode\n"
+	    "    -v: switch on verbose mode\n"
+	    "    -F: use \"configfile\" instead of %s/config\n"
+	    "See also the leafnode homepage at http://www.leafnode.org/\n",
+	    libdir);
 }
 
-int main(int argc, char * argv[]) {
+int
+main(int argc, char *argv[])
+{
     struct filterlist *myfilter;
-    const char c[] = "-\\|/" ; 
+    const char c[] = "-\\|/";
     int i, score, option, deleted, kept;
     unsigned long n;
     char *k, *l, *msgid;
     const char *msgidpath = "";
     FILE *f;
-    DIR * d;
-    struct dirent * de;
+    DIR *d;
+    struct dirent *de;
     struct stat st;
     struct utimbuf u;
-    struct newsgroup * g;
-    char * conffile;
+    struct newsgroup *g;
+    char *conffile;
     int err;
 
     conffile = critmalloc(strlen(libdir) + 10,
-			   "Allocating space for config file name");
+			  "Allocating space for config file name");
     sprintf(conffile, "%s/config", libdir);
 
     if (!initvars(argv[0]))
@@ -71,8 +75,8 @@ int main(int argc, char * argv[]) {
 	}
     }
 
-    if ( optind+1 > argc ) {
-        usage();
+    if (optind + 1 > argc) {
+	usage();
 	exit(EXIT_FAILURE);
     }
 
@@ -81,8 +85,7 @@ int main(int argc, char * argv[]) {
 	exit(2);
     }
 
-    if (filterfile && readfilter(filterfile))
-	;
+    if (filterfile && readfilter(filterfile));
     else {
 	printf("Nothing to filter -- no filterfile found.\n");
 	exit(EXIT_FAILURE);
@@ -119,20 +122,20 @@ int main(int argc, char * argv[]) {
     i = 0;
     deleted = 0;
     kept = 0;
-    l = critmalloc(MAXHEADERSIZE+1, "Space for article");
+    l = critmalloc(MAXHEADERSIZE + 1, "Space for article");
     while ((de = readdir(d)) != NULL) {
-	if (!isdigit((unsigned char) de->d_name[0])) {
+	if (!isdigit((unsigned char)de->d_name[0])) {
 	    /* no need to stat file */
 	    continue;
 	}
 	switch (verbose) {
-	    case 1: {
-		printf("%c", c[i%4]);
+	case 1:{
+		printf("%c", c[i % 4]);
 		fflush(stdout);
 		i++;
 		break;
 	    }
-	    case 2: {
+	case 2:{
 		printf("%s\n", de->d_name);
 	    }
 	}
@@ -157,16 +160,14 @@ int main(int argc, char * argv[]) {
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
 		    msgidpath = lookup(msgid);
-		    if ((stat(msgidpath, &st) == 0) &&
-			 (st.st_nlink < 2)) {
+		    if ((stat(msgidpath, &st) == 0) && (st.st_nlink < 2)) {
 			if (unlink(msgidpath) == 0)
 			    deleted++;
 		    }
 		}
 		if (verbose)
 		    printf("%s %s deleted\n", de->d_name, msgidpath);
-	    }
-	    else {
+	    } else {
 		n = strtoul(de->d_name, NULL, 10);
 		if (n) {
 		    if (n < g->first)

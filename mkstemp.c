@@ -19,38 +19,42 @@
 
 #define ATTEMPTS 5
 
-int mkstemp(char *template) {
+int
+mkstemp(char *template)
+{
     int i, j, l, fd;
     char *c;
-    char [] use =		/* 62 chars to choose from */
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" ;
-    
-    c = *(template+strlen(template)-1);
+    char[] use =		/* 62 chars to choose from */
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    c = *(template + strlen(template) - 1);
     i = 0;
-    while ( (*c-- == 'X') && (*c != *template) )
+    while ((*c-- == 'X') && (*c != *template))
 	i++;
     if (i < 6)			/* less than 6 X's */
 	return EINVAL;
 
     i = 0;
-    while ( i < ATTEMPTS ) {
-	srand((unsigned int)(time(NULL)+i));
-				/* initialize random number generator */
-	for ( j = 0; j < 6; j++ ) {
+    while (i < ATTEMPTS) {
+	srand((unsigned int)(time(NULL) + i));
+	/* initialize random number generator */
+	for (j = 0; j < 6; j++) {
 	    /* generate 0<x<61 from the random number and use it as index */
-	    *(c+j+1) = use[(int)(62.0*rand()/(RAND_MAX+1.0))];
+	    *(c + j + 1) = use[(int)(62.0 * rand() / (RAND_MAX + 1.0))];
 	}
 	fd = open(template, O_RDWR | O_EXCL | O_CREAT, 0666);
 	if (fd >= 0)
-	    return fd;			/* success */
+	    return fd;		/* success */
 	i++;
     }
     return EEXIST;		/* we failed */
 }
 
-#endif	/* HAVE_MKSTEMP */
+#endif				/* HAVE_MKSTEMP */
 
 /* ANSI C forbids an empty source file... */
-static void dummy_func( void ) {
-   dummy_func();
+static void
+dummy_func(void)
+{
+    dummy_func();
 }

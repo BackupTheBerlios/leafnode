@@ -1,0 +1,1 @@
+-kr -ncs -l80 -psl -hnl

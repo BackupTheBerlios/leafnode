@@ -31,7 +31,7 @@
  * misc. global variables, documented in leafnode.h
  */
 time_t expire = 0;
-struct expire_entry * expire_base;
+struct expire_entry *expire_base;
 unsigned long artlimit = 0;
 unsigned long initiallimit = 0;
 int create_all_links = 0;
@@ -40,26 +40,28 @@ int avoidxover = 0;
 int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
-int authentication = 0;	/* use authentication for NNTP access:
-			   possible values defined in leafnode.h */
-int filtermode = FM_XOVER | FM_HEAD ;
+int authentication = 0;		/* use authentication for NNTP access:
+				   possible values defined in leafnode.h */
+int filtermode = FM_XOVER | FM_HEAD;
 			/* filter xover headers or heads or both (default) */
-char * filterfile = NULL ;
-char * pseudofile = NULL ;	/* filename containing pseudoarticle body */
-char * owndn = NULL;	/* own domain name, if you can't set a sensible one */
+char *filterfile = NULL;
+char *pseudofile = NULL;	/* filename containing pseudoarticle body */
+char *owndn = NULL;		/* own domain name, if you can't set a sensible one */
 struct serverlist *servers = NULL;	/* list of servers to fetch news from */
 
 /* parse a line, destructively */
-int parse_line (char *l, char * param, char * value) {
+int
+parse_line(char *l, char *param, char *value)
+{
     char *p, *q;
 
     p = l;
     /* skip comments */
     q = strchr(p, '#');
     if (q)
-       *q = '\0';
+	*q = '\0';
     if (*p == 0)
-        return 0;
+	return 0;
     if ((q = strchr(p, '=')) == NULL)
 	return 0;
     else
@@ -98,12 +100,14 @@ int parse_line (char *l, char * param, char * value) {
  * read configuration. Return 0 upon success, values > 0 (taken from
  * errno.h) otherwise
  */
-int readconfig(char * configfile) {
+int
+readconfig(char *configfile)
+{
     struct serverlist *p = NULL, *q = NULL;
     struct expire_entry *ent = NULL, *prev = NULL;
-    FILE * f;
-    char * l;
-    char * param, * value ;
+    FILE *f;
+    char *l;
+    char *param, *value;
     int i, err;
 
     artlimit = 0;
@@ -112,162 +116,163 @@ int readconfig(char * configfile) {
 
     if (configfile == NULL) {
 	snprintf(s, 1023, "%s/config", libdir);
-    }  else {
+    } else {
 	snprintf(s, 1023, configfile);
     }
 
-    if ((f=fopen(s, "r")) == 0) {
+    if ((f = fopen(s, "r")) == 0) {
 	err = errno;
-        ln_log(LNLOG_ERR, "cannot open %s: %s", s, strerror(err));
+	ln_log(LNLOG_ERR, "cannot open %s: %s", s, strerror(err));
 	free(param);
 	free(value);
 	return err;
     }
-    while ((l=getaline(f))) {
+    while ((l = getaline(f))) {
 	const struct configparam *cp;
 	if (parse_line(l, param, value)) {
 	    if ((cp = find_configparam(param))) {
-		switch(cp->code) {
-		    case CP_DEBUG:
-			debug = debugmode = strtol(value, NULL, 10);
-			ln_log_sys(LNLOG_DEBUG, 
-				   "config: debugmode is %d", debugmode);
-			break;
-		    case CP_USER:
-			if (p) {
-			    p->username = strdup(value);
-			    if (debugmode)
-				ln_log_sys(LNLOG_DEBUG, 
-					   "config: found username for %s",
-					   p->name);
-			} else { 
-			    ln_log(LNLOG_ERR, "config: no server for username %s",
-				   value);
-			}
-			break;
-		    case CP_PASS:
-			if (p) {
-			    p->password = strdup(value);
-			    if (debugmode)
-				ln_log_sys(LNLOG_DEBUG, 
-					   "config: found password for %s",
-					   p->name);
-			} else {
-			    ln_log(LNLOG_ERR, "config: no server for password");
-			}
-			break;
-		    case CP_TIMEOUT:
-			if (p) {
-			    p->timeout = strtol(value, NULL, 10);
-			    if (debugmode)
-				ln_log_sys(LNLOG_DEBUG, 
-					   "config: timeout is %d seconds",
-					   p->timeout);
-			} else { 
-			    ln_log(LNLOG_ERR, "config: no server for timeout");
-			}
-			break;
-		    case CP_LINKS:
-			if (value && strlen(value)) {
-			    create_all_links = strtol(value, NULL, 10);
-			    if (create_all_links && debugmode)
-				ln_log_sys(LNLOG_DEBUG,
-					   "config: link articles in all groups");
-			}
-			break;
-		    case CP_EXPIRE:
-		    { 
+		switch (cp->code) {
+		case CP_DEBUG:
+		    debug = debugmode = strtol(value, NULL, 10);
+		    ln_log_sys(LNLOG_DEBUG,
+			       "config: debugmode is %d", debugmode);
+		    break;
+		case CP_USER:
+		    if (p) {
+			p->username = strdup(value);
+			if (debugmode)
+			    ln_log_sys(LNLOG_DEBUG,
+				       "config: found username for %s",
+				       p->name);
+		    } else {
+			ln_log(LNLOG_ERR, "config: no server for username %s",
+			       value);
+		    }
+		    break;
+		case CP_PASS:
+		    if (p) {
+			p->password = strdup(value);
+			if (debugmode)
+			    ln_log_sys(LNLOG_DEBUG,
+				       "config: found password for %s",
+				       p->name);
+		    } else {
+			ln_log(LNLOG_ERR, "config: no server for password");
+		    }
+		    break;
+		case CP_TIMEOUT:
+		    if (p) {
+			p->timeout = strtol(value, NULL, 10);
+			if (debugmode)
+			    ln_log_sys(LNLOG_DEBUG,
+				       "config: timeout is %d seconds",
+				       p->timeout);
+		    } else {
+			ln_log(LNLOG_ERR, "config: no server for timeout");
+		    }
+		    break;
+		case CP_LINKS:
+		    if (value && strlen(value)) {
+			create_all_links = strtol(value, NULL, 10);
+			if (create_all_links && debugmode)
+			    ln_log_sys(LNLOG_DEBUG,
+				       "config: link articles in all groups");
+		    }
+		    break;
+		case CP_EXPIRE:
+		    {
 			long days;
-			if(!get_long(value, &days)) {
+			if (!get_long(value, &days)) {
 			    ln_log_sys(LNLOG_ERR, "config: cannot parse %s=%s"
 				       ": expected integer", param, value);
 			}
-			expire = time(0)-(time_t)(SECONDS_PER_DAY*days);
+			expire = time(0) - (time_t) (SECONDS_PER_DAY * days);
 			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
+			    ln_log_sys(LNLOG_DEBUG,
 				       "config: expire is %s days", value);
 		    }
 		    break;
-		    case CP_FILTFIL:
-			filterfile = strdup(value);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: filterfile is %s", value);
-			break;
-		    case CP_HOST:
-		    case CP_FQDN:
-			owndn = strdup(value);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: hostname is %s", value);
-			break;
-		    case CP_AUTH:
-			if (strcmp("name", value) == 0)
-			    authentication = AM_NAME;
-			else
-			    authentication = AM_FILE;
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, "authentication method: %d",
-				       authentication);
-			break;
-		    case CP_DELAY:
-			delaybody = strtol(value, NULL, 10);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: delaybody is %d (default 0)",
-				       delaybody);
-			break;
-		    case CP_AVOIDXOVER:
-			avoidxover = strtol(value, NULL, 10);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: avoidxover is %d (default 0)",
-				       avoidxover);
-			break;
-		    case CP_TOSHORT:
-			timeout_short = strtol(value, NULL, 10);
+		case CP_FILTFIL:
+		    filterfile = strdup(value);
 		    if (debugmode)
-			ln_log_sys(LNLOG_DEBUG, 
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: filterfile is %s", value);
+		    break;
+		case CP_HOST:
+		case CP_FQDN:
+		    owndn = strdup(value);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: hostname is %s", value);
+		    break;
+		case CP_AUTH:
+		    if (strcmp("name", value) == 0)
+			authentication = AM_NAME;
+		    else
+			authentication = AM_FILE;
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG, "authentication method: %d",
+				   authentication);
+		    break;
+		case CP_DELAY:
+		    delaybody = strtol(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: delaybody is %d (default 0)",
+				   delaybody);
+		    break;
+		case CP_AVOIDXOVER:
+		    avoidxover = strtol(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: avoidxover is %d (default 0)",
+				   avoidxover);
+		    break;
+		case CP_TOSHORT:
+		    timeout_short = strtol(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
 				   "config: timeout_short is %d days",
 				   timeout_short);
 		    break;
-		    case CP_TOLONG:
-			timeout_long = strtol(value, NULL, 10);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: timeout_long is %d days",
-				       timeout_long);
-			break;
-		    case CP_TOACTIVE:
-			timeout_active = strtol(value, NULL, 10);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: timeout_active is %d days",
-				       timeout_active);
-			break;
-		    case CP_GROUPEXP: 
+		case CP_TOLONG:
+		    timeout_long = strtol(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: timeout_long is %d days",
+				   timeout_long);
+		    break;
+		case CP_TOACTIVE:
+		    timeout_active = strtol(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: timeout_active is %d days",
+				   timeout_active);
+		    break;
+		case CP_GROUPEXP:
 		    {
-			char * m = value;
-		    
+			char *m = value;
+
 			while (*m && !(isspace((unsigned char)*m))) {
 			    *m = tolower((unsigned char)*m);
 			    m++;
 			}
-			*m++=0;
-			while (isspace((unsigned char)*m)) m++;
+			*m++ = 0;
+			while (isspace((unsigned char)*m))
+			    m++;
 			if (m && *m) {
 			    long days;
-			    if(!get_long(m, &days)) {
+			    if (!get_long(m, &days)) {
 				ln_log_sys(LNLOG_ERR, "config: cannot parse "
 					   "%s=%s line: expected integer",
 					   param, value);
-			    } else {				
+			    } else {
 				i = time(NULL)
-				    -(time_t)(SECONDS_PER_DAY*days);
+				    - (time_t) (SECONDS_PER_DAY * days);
 				ent = (struct expire_entry *)
 				    critmalloc(sizeof(struct expire_entry),
 					       "parsing groupexpire");
-				if(ent) {
+				if (ent) {
 				    ent->group = strdup(value);
 				    ent->xtime = i;
 				    ent->next = prev;
@@ -281,68 +286,67 @@ int readconfig(char * configfile) {
 			}
 		    }
 		    break;
-		    case CP_MAXAGE:
-		    case CP_MAXOLD:
-		    case CP_MAXXP:
-		    case CP_MAXGR:
-		    case CP_MAXLN:
-		    case CP_MINLN:
-		    case CP_MAXBYT:
-			ln_log(LNLOG_INFO, 
-			       "%s is obsolete: use filterfile instead",
-			       param);
-			break;
-		    case CP_MAXFETCH:
-			artlimit = strtoul(value, NULL, 10);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, "config: maxfetch is %lu", 
+		case CP_MAXAGE:
+		case CP_MAXOLD:
+		case CP_MAXXP:
+		case CP_MAXGR:
+		case CP_MAXLN:
+		case CP_MINLN:
+		case CP_MAXBYT:
+		    ln_log(LNLOG_INFO,
+			   "%s is obsolete: use filterfile instead", param);
+		    break;
+		case CP_MAXFETCH:
+		    artlimit = strtoul(value, NULL, 10);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG, "config: maxfetch is %lu",
 				   artlimit);
-			break;
-		    case CP_PORT:
-			if (p) {
-			    p->port = strtol(value, NULL, 10);
-			    if (debugmode)
-				ln_log_sys(LNLOG_DEBUG, "config: nntpport is %d",
-					   p->port);
-			} else
+		    break;
+		case CP_PORT:
+		    if (p) {
+			p->port = strtol(value, NULL, 10);
+			if (debugmode)
+			    ln_log_sys(LNLOG_DEBUG, "config: nntpport is %d",
+				       p->port);
+		    } else
 			ln_log(LNLOG_ERR, "config: no server for nntpport %s",
 			       value);
-			break;
-		    case CP_NODESC:
-			if (p) {
-			    p->descriptions = FALSE;
+		    break;
+		case CP_NODESC:
+		    if (p) {
+			p->descriptions = FALSE;
 			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
+			    ln_log_sys(LNLOG_DEBUG,
 				       "config: no LIST NEWSGROUPS for %s",
 				       p->name);
-			} else
+		    } else
 			ln_log(LNLOG_ERR, "config: no server for nodesc = %s",
 			       value);
-			break;
-		    case CP_INITIAL:
-			initiallimit = strtoul(value, NULL, 10);
-			if (debugmode)
+		    break;
+		case CP_INITIAL:
+		    initiallimit = strtoul(value, NULL, 10);
+		    if (debugmode)
 			ln_log_sys(LNLOG_DEBUG, "config: initialfetch is %lu",
 				   initiallimit);
-			break;
-		    case CP_PSEUDO:
-			pseudofile = strdup(value);
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, 
-				       "config: read pseudoarticle from %s",
+		    break;
+		case CP_PSEUDO:
+		    pseudofile = strdup(value);
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG,
+				   "config: read pseudoarticle from %s",
 				   pseudofile);
-			break;
-		    case CP_SERVER:
-		    case CP_SUPPL:
-			if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG, "config: server is %s", value);
-			p = (struct serverlist *)critmalloc(
-			sizeof(struct serverlist),
-			"allocating space for server name");
-			p->name = strdup(value);
-			p->descriptions = TRUE;
-			p->next = NULL;
-			p->timeout = 30;	/* default 30 seconds */
+		    break;
+		case CP_SERVER:
+		case CP_SUPPL:
+		    if (debugmode)
+			ln_log_sys(LNLOG_DEBUG, "config: server is %s", value);
+		    p = (struct serverlist *)
+			critmalloc(sizeof(struct serverlist),
+				   "allocating space for server name");
+		    p->name = strdup(value);
+		    p->descriptions = TRUE;
+		    p->next = NULL;
+		    p->timeout = 30;	/* default 30 seconds */
 		    p->port = 0;
 		    p->username = NULL;
 		    p->password = NULL;
@@ -353,14 +357,14 @@ int readconfig(char * configfile) {
 			q->next = p;
 		    q = p;
 		    break;
-		} /* switch */
+		}		/* switch */
 	    } else {
-		ln_log(LNLOG_WARNING, 
-			   "Unknown config line \"%s=%s\" ignored", param, value);
+		ln_log(LNLOG_WARNING,
+		       "Unknown config line \"%s=%s\" ignored", param, value);
 	    }
 	}
     }
-    
+
     expire_base = ent;
     fclose(f);
     if (!servers) {
@@ -371,7 +375,7 @@ int readconfig(char * configfile) {
     }
     if (!expire)
 	ln_log(LNLOG_ERR, "no expire declaration in config file");
-    
+
     free(param);
     free(value);
     return 0;

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <limits.h>
 
-int main() {
+int
+main()
+{
     char b[20];
 #define mytest(x) {str_ulong(b,(x));puts(b);}
     mytest(0);

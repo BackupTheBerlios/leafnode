@@ -21,49 +21,55 @@
 #include <sys/types.h>
 #include <string.h>
 #include "critmem.h"
-#include "getline.h" 
+#include "getline.h"
 
 /* Matthias Andree: implement fgets replacement that returns the number
    of characters read, excluding the terminating NUL byte. Reads at most
    size-1 bytes from stream 
  */
-static ssize_t _getline(char *to, size_t size, FILE *stream)
+static ssize_t
+_getline(char *to, size_t size, FILE * stream)
 {
-    ssize_t i=0;
+    ssize_t i = 0;
     int c;
-    if(1 > size) return -1;
+    if (1 > size)
+	return -1;
     size--;
-    while(size > 0 && ((c = getc(stream)) != EOF)) {
-	*to=(unsigned char)c; 
+    while (size > 0 && ((c = getc(stream)) != EOF)) {
+	*to = (unsigned char)c;
 	to++;
 	i++;
-	if(c == (int)'\n') break;
-	size --;
+	if (c == (int)'\n')
+	    break;
+	size--;
     }
     *to = '\0';
-    if(ferror(stream)) return -1;
+    if (ferror(stream))
+	return -1;
     return i;
-}	
+}
 
 /* this is a rewritten-from-scratch glibc2 getline() replacement 
    returns characters read or -1 for EOF/error */
-ssize_t getline(char **pto, size_t *size, FILE *stream);
-ssize_t getline(char **pto, size_t *size, FILE *stream) {
-    ssize_t i=0, cur=0, off=0;
+ssize_t getline(char **pto, size_t * size, FILE * stream);
+ssize_t
+getline(char **pto, size_t * size, FILE * stream)
+{
+    ssize_t i = 0, cur = 0, off = 0;
 
-    if(!(*size) && !(*pto)) {
-	*size=256;
-	*pto=critmalloc(*size, "fgetline");
+    if (!(*size) && !(*pto)) {
+	*size = 256;
+	*pto = critmalloc(*size, "fgetline");
     }
-    while ((cur=_getline(*pto+off, *size-off, stream)) > 0) {
-	i+=cur;
-	if((*pto)[i-1] == '\n') return i;
-	off=i;
-	*size+=*size;
-	*pto=critrealloc(*pto, *size, "fgetline");
+    while ((cur = _getline(*pto + off, *size - off, stream)) > 0) {
+	i += cur;
+	if ((*pto)[i - 1] == '\n')
+	    return i;
+	off = i;
+	*size += *size;
+	*pto = critrealloc(*pto, *size, "fgetline");
     }
-    if(!cur && i) return i;
+    if (!cur && i)
+	return i;
     return -1;
 }
-
-	

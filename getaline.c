@@ -25,23 +25,26 @@
 #include "ln_log.h"
 #include "leafnode.h"
 
-char *getaline(FILE *f) {
-    static char *buf;       /* buffer for line */
-    static size_t size;     /* size of buffer */
-    ssize_t len;            /* # of chars stored into buf before '\0' */
+char *
+getaline(FILE * f)
+{
+    static char *buf;		/* buffer for line */
+    static size_t size;		/* size of buffer */
+    ssize_t len;		/* # of chars stored into buf before '\0' */
 
-    len=getline(&buf, &size, f);
-    if(len < 0) return 0;
-    if (len && (buf[len-1] == '\n')) { /* go back on top of the newline */
+    len = getline(&buf, &size, f);
+    if (len < 0)
+	return 0;
+    if (len && (buf[len - 1] == '\n')) {	/* go back on top of the newline */
 	--len;
-	if (len && (buf[len-1] == '\r')) /* also delete CR */
+	if (len && (buf[len - 1] == '\r'))	/* also delete CR */
 	    --len;
     }
 
-    buf[len] = '\0';        /* unconditionally terminate string,
-                               possibly overwriting newline */
+    buf[len] = '\0';		/* unconditionally terminate string,
+				   possibly overwriting newline */
 
     if (debug)
-        ln_log(LNLOG_DEBUG, "<%s", buf);
+	ln_log(LNLOG_DEBUG, "<%s", buf);
     return buf;
 }

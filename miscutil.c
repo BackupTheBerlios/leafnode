@@ -7,7 +7,7 @@
 */
 
 #include "leafnode.h"
-#include "critmem.h" 
+#include "critmem.h"
 #include "ugid.h"
 #include "ln_log.h"
 
@@ -34,7 +34,7 @@
 #endif
 
 char fqdn[FQDN_SIZE];
-char s[PATH_MAX+1024]; /* long string, here to cut memory usage */
+char s[PATH_MAX + 1024];	/* long string, here to cut memory usage */
 extern struct state _res;
 
 /*
@@ -43,28 +43,31 @@ extern struct state _res;
 int debugmode = 0;
 int verbose = 0;
 
-struct mydir { 
-    char *name; mode_t m; 
+struct mydir {
+    char *name;
+    mode_t m;
 };
 
-static struct mydir dirs[]= {
-    { "failed.postings",     0755 },
-    { "interesting.groups",  0755 },
-    { "leaf.node",           0755 },
-    { "message.id",         02755 },
-    { "out.going",          02755 },
-    { 0, 0 }
-};	
+static struct mydir dirs[] = {
+    {"failed.postings", 0755},
+    {"interesting.groups", 0755},
+    {"leaf.node", 0755},
+    {"message.id", 02755},
+    {"out.going", 02755},
+    {0, 0}
+};
 
 int wildmat(const char *text, const char *p);
 
 /*
  * initialize all global variables
  */
-int initvars(char * progname) {
+int
+initvars(char *progname)
+{
     uid_t ui;
     gid_t gi;
-    struct mydir *md=&dirs[0];
+    struct mydir *md = &dirs[0];
 
     if (uid_getbyuname("news", &ui)) {
 	fprintf(stderr, "news: %s\n", strerror(errno));
@@ -80,26 +83,28 @@ int initvars(char * progname) {
     expire_base = NULL;
 
     /* These directories should exist anyway */
-    while(md->name) {
+    while (md->name) {
 	char x[PATH_MAX];
 	snprintf(x, sizeof(x), "%s/%s", spooldir, md->name);
-	if(mkdir(x, 0110) && errno != EEXIST) {
-	    if(progname) fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr,"cannot mkdir(%s): %s\n", 
-		    x, strerror(errno));
+	if (mkdir(x, 0110) && errno != EEXIST) {
+	    if (progname)
+		fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr, "cannot mkdir(%s): %s\n", x, strerror(errno));
 	    return FALSE;
 	}
 
-	if(chown(x, ui, gi)) {
-	    if(progname) fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr,"cannot chown(%s,%ld,%ld): %s\n", 
+	if (chown(x, ui, gi)) {
+	    if (progname)
+		fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr, "cannot chown(%s,%ld,%ld): %s\n",
 		    x, (long)ui, (long)gi, strerror(errno));
 	    return FALSE;
 	}
 
-	if(chmod(x, md->m)) {
-	    if(progname) fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr,"cannot chmod(%s,%o): %s\n", 
+	if (chmod(x, md->m)) {
+	    if (progname)
+		fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr, "cannot chmod(%s,%o): %s\n",
 		    x, (unsigned int)md->m, strerror(errno));
 	    return FALSE;
 	}
@@ -107,7 +112,7 @@ int initvars(char * progname) {
     }
 
     if (gid_ensure(gi)) {
-	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi, 
+	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi,
 		strerror(errno));
 	return FALSE;
     }
@@ -117,7 +122,7 @@ int initvars(char * progname) {
 		strerror(errno));
 	return FALSE;
     }
-   
+
     return TRUE;
 }
 
@@ -126,15 +131,17 @@ int initvars(char * progname) {
  * and return the pointer to this option - i.e. if 0 is returned,
  * the option is not present. Does not call getopt().
  */
-int findopt(char option, int argc, char * argv[]) {
+int
+findopt(char option, int argc, char *argv[])
+{
     int i, j;
 
     i = 1;
     while (i < argc) {
-	if (strcmp( argv[i], "--") == 0 ) {	/* end of option args */
+	if (strcmp(argv[i], "--") == 0) {	/* end of option args */
 	    return 0;
 	}
-	if (argv[i][0] == '-') {		/* option found */
+	if (argv[i][0] == '-') {	/* option found */
 	    j = strlen(argv[i]) - 1;
 	    while (j > 0) {
 		if (argv[i][j] == option)
@@ -152,15 +159,17 @@ int findopt(char option, int argc, char * argv[]) {
  * returns name of configuration file or NULL if no such file was found.
  * If there is more than one "-F configfile" present, use the first one.
  */
-char * getoptarg(char option, int argc, char * argv[]) {
+char *
+getoptarg(char option, int argc, char *argv[])
+{
     int i, j;
 
     i = findopt(option, argc, argv);
     if (!i)
 	return NULL;
     j = strlen(argv[i]) - 1;
-    if ((argv[i][j] == option) && (i+1 < argc) && (argv[i+1][0] != '-')) {
-	return argv[i+1] ;
+    if ((argv[i][j] == option) && (i + 1 < argc) && (argv[i + 1][0] != '-')) {
+	return argv[i + 1];
     }
     return NULL;
 }
@@ -168,20 +177,19 @@ char * getoptarg(char option, int argc, char * argv[]) {
 /*
  * parse options global to all leafnode programs
  */
-int parseopt( char *progname, int option, char * optarg, char * conffile ) {
-    if ( option == 'V' ) {
-	printf( "%s %s\n", progname, version );
-	exit( 0 );
-    }
-    else if (option == 'v') {
+int
+parseopt(char *progname, int option, char *optarg, char *conffile)
+{
+    if (option == 'V') {
+	printf("%s %s\n", progname, version);
+	exit(0);
+    } else if (option == 'v') {
 	verbose++;
 	return TRUE;
-    }
-    else if (option == 'D') {
+    } else if (option == 'D') {
 	debugmode++;
 	return TRUE;
-    }
-    else if (( option == 'F') && optarg && strlen(optarg) ) {
+    } else if ((option == 'F') && optarg && strlen(optarg)) {
 	if (conffile)
 	    free(conffile);
 	conffile = strdup(optarg);
@@ -194,14 +202,16 @@ int parseopt( char *progname, int option, char * optarg, char * conffile ) {
  * check which groups are still interesting and unsubscribe groups
  * which are not
  */
-void checkinteresting(void) {
+void
+checkinteresting(void)
+{
     time_t now;
     struct dirent *de;
     struct stat st;
     DIR *d;
 
     now = time(NULL);
-    if (chdir( spooldir) || chdir( "interesting.groups" ) ) {
+    if (chdir(spooldir) || chdir("interesting.groups")) {
 	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %m",
 	       spooldir);
 	return;
@@ -210,17 +220,17 @@ void checkinteresting(void) {
     d = opendir(".");
     if (!d) {
 	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %m",
-		spooldir);
+	       spooldir);
 	return;
     }
 
-    while (( de = readdir( d) ) != NULL ) {
-	if (( stat( de->d_name, &st) == 0 ) && S_ISREG( st.st_mode ) ) {
+    while ((de = readdir(d)) != NULL) {
+	if ((stat(de->d_name, &st) == 0) && S_ISREG(st.st_mode)) {
 	    /* reading a newsgroup changes the ctime; if the newsgroup is
 	       newly created, the mtime is changed as well */
-	    if (( ( st.st_mtime == st.st_ctime) &&
-	    	   (now-st.st_ctime > (timeout_short * SECONDS_PER_DAY)) ) ||
-		 (now-st.st_ctime > (timeout_long * SECONDS_PER_DAY)) ) {
+	    if (((st.st_mtime == st.st_ctime) &&
+		 (now - st.st_ctime > (timeout_short * SECONDS_PER_DAY))) ||
+		(now - st.st_ctime > (timeout_long * SECONDS_PER_DAY))) {
 		if (verbose > 1)
 		    printf("skipping %s from now on\n", de->d_name);
 		unlink(de->d_name);
@@ -238,7 +248,9 @@ void checkinteresting(void) {
  * still active) return 1; otherwise generate it. If this fails,
  * also return 1, otherwise return 0
  */
-int lockfile_exists(int silent, int block) {
+int
+lockfile_exists(int silent, int block)
+{
     int fd;
     int ret;
     struct flock fl;
@@ -248,9 +260,9 @@ int lockfile_exists(int silent, int block) {
     if (fd == -1) {
 	if (!silent)
 	    printf("Could not open lockfile %s for writing, "
-		    "abort program ...\n", lockfile);
+		   "abort program ...\n", lockfile);
 	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %m",
-		lockfile);
+	       lockfile);
 	return 1;
     }
     fl.l_type = F_WRLCK;
@@ -262,21 +274,21 @@ int lockfile_exists(int silent, int block) {
     if (ret == -1) {
 	if (errno == EACCES || errno == EAGAIN) {
 	    if (!silent)
-		printf("lockfile  %s exists, abort ...\n" ,lockfile);
+		printf("lockfile  %s exists, abort ...\n", lockfile);
 	    ln_log(LNLOG_ERR, "lockfile %s exists, abort ...", lockfile);
 	    return 1;
 	} else {
 	    if (!silent)
-		printf(" locking %s failed: %s, abort ...\n"
-			, lockfile, strerror(errno) );
+		printf(" locking %s failed: %s, abort ...\n", lockfile,
+		       strerror(errno));
 	    ln_log(LNLOG_ERR, "locking %s failed: %m, abort", lockfile);
 	    return 1;
 	}
     } else {
-	char pid[11];  /* Hope nobody has sizeof(pid_t) > 4 */
-	memset(pid, 0, 11); 
+	char pid[11];		/* Hope nobody has sizeof(pid_t) > 4 */
+	memset(pid, 0, 11);
 	snprintf(pid, 11, "%d\n", fl.l_pid);
-	write(fd, pid, strlen(pid)); 
+	write(fd, pid, strlen(pid));
 	return 0;
     }
 }
@@ -285,23 +297,25 @@ int lockfile_exists(int silent, int block) {
  * check whether "groupname" is represented in interesting.groups without
  * touching the file
  */
-int isinteresting(const char *groupname) {
-    DIR * d;
-    struct dirent * de;
-    
+int
+isinteresting(const char *groupname)
+{
+    DIR *d;
+    struct dirent *de;
+
     /* Local groups are always interesting. At least for the server :-) */
-    if (islocalgroup( groupname) )
+    if (islocalgroup(groupname))
 	return TRUE;
 
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
     if (!d) {
-    	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s);
+	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s);
 	return FALSE;
     }
 
-    while(( de = readdir( d) ) != NULL ) {
-    	if (strcasecmp( de->d_name, groupname) == 0 ) {
+    while ((de = readdir(d)) != NULL) {
+	if (strcasecmp(de->d_name, groupname) == 0) {
 	    closedir(d);
 	    return TRUE;
 	}
@@ -311,16 +325,18 @@ int isinteresting(const char *groupname) {
 }
 
 /* no good but this server isn't going to be scalable so shut up */
-const char * lookup (const char *msgid) {
-    static char * name = NULL;
-    static unsigned int namelen = 0; 
+const char *
+lookup(const char *msgid)
+{
+    static char *name = NULL;
+    static unsigned int namelen = 0;
     unsigned int r;
     unsigned int i;
 
     if (!msgid || !*msgid)
 	return NULL;
 
-    i = strlen(msgid)+strlen(spooldir)+30;
+    i = strlen(msgid) + strlen(spooldir) + 30;
 
     if (!name) {
 	name = (char *)malloc(i);
@@ -345,23 +361,27 @@ const char * lookup (const char *msgid) {
 	if (name[i] == '/')
 	    name[i] = '@';
 	else if (name[i] == '>')
-	    name[i+1] = '\0';
+	    name[i + 1] = '\0';
 	r += (int)(name[i]);
 	r += ++i;
     } while (name[i]);
 
-    i = strlen(spooldir)+14; /* to the last digit */
-    r = (r%999)+1;
-    name[i--] = '0'+(char)(r%10); r /= 10;
-    name[i--] = '0'+(char)(r%10); r /= 10;
-    name[i] = '0'+(char)(r);
+    i = strlen(spooldir) + 14;	/* to the last digit */
+    r = (r % 999) + 1;
+    name[i--] = '0' + (char)(r % 10);
+    r /= 10;
+    name[i--] = '0' + (char)(r % 10);
+    r /= 10;
+    name[i] = '0' + (char)(r);
     return name;
 }
 
 
-static int makedir( char * d ) {
-    char * p;
-    char * q;
+static int
+makedir(char *d)
+{
+    char *p;
+    char *q;
 
     if (!d || *d != '/' || chdir("/"))
 	return 0;
@@ -373,8 +393,8 @@ static int makedir( char * d ) {
 	if (q)
 	    *q = '\0';
 	if (!chdir(p))
-	    continue; /* ok, I do use it sometimes :) */
-	if (errno==ENOENT)
+	    continue;		/* ok, I do use it sometimes :) */
+	if (errno == ENOENT)
 	    if (mkdir(p, 0775)) {
 		ln_log(LNLOG_ERR, "mkdir %s: %m", d);
 		exit(EXIT_FAILURE);
@@ -386,10 +406,12 @@ static int makedir( char * d ) {
     } while (q);
     return 1;
 }
-	
+
 
 /* chdir to the directory of the argument if it's a valid group */
-int chdirgroup(const char *group, int creatdir) {
+int
+chdirgroup(const char *group, int creatdir)
+{
     char *p;
 
     if (group && *group) {
@@ -397,8 +419,8 @@ int chdirgroup(const char *group, int creatdir) {
 	p = s + strlen(s);
 	*p++ = '/';
 	strcpy(p, group);
-	while(*p) {
-	    if (*p=='.')
+	while (*p) {
+	    if (*p == '.')
 		*p = '/';
 	    else
 		*p = tolower((unsigned char)*p);
@@ -414,20 +436,22 @@ int chdirgroup(const char *group, int creatdir) {
 
 /* get the fully qualified domain name of this box into fqdn */
 
-void whoami(void) {
-    struct hostent * he;
+void
+whoami(void)
+{
+    struct hostent *he;
 
-    if (!gethostname(fqdn, FQDN_SIZE-1) && (he = gethostbyname(fqdn))!=NULL) {
-	strncpy( fqdn, he->h_name, FQDN_SIZE-1 );
+    if (!gethostname(fqdn, FQDN_SIZE - 1) && (he = gethostbyname(fqdn)) != NULL) {
+	strncpy(fqdn, he->h_name, FQDN_SIZE - 1);
 	if (strchr(fqdn, '.') == NULL) {
-	    char ** alias;
+	    char **alias;
 	    alias = he->h_aliases;
-	    while(alias && *alias)
-		if (strchr(*alias, '.') && (strlen(*alias)>strlen(fqdn)))
-		    strncpy( fqdn, *alias, FQDN_SIZE-1 );
+	    while (alias && *alias)
+		if (strchr(*alias, '.') && (strlen(*alias) > strlen(fqdn)))
+		    strncpy(fqdn, *alias, FQDN_SIZE - 1);
 		else
 		    alias++;
-	    }
+	}
     } else
 	*fqdn = '\0';
 }
@@ -441,13 +465,16 @@ void whoami(void) {
  * pointer pointing to the last entry in "list" and must be properly
  * intialized.
  */
-void appendtolist(struct stringlist ** list, struct stringlist ** lastentry,
-    char * newentry) {
+void
+appendtolist(struct stringlist **list, struct stringlist **lastentry,
+	     char *newentry)
+{
 
     struct stringlist *ptr;
 
-    ptr = (struct stringlist *)critmalloc(sizeof( struct stringlist) +
-	  strlen(newentry), "Allocating space in stringlist" );
+    ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
+					  strlen(newentry),
+					  "Allocating space in stringlist");
     strcpy(ptr->string, newentry);
     ptr->next = NULL;
     if (*list == NULL)
@@ -461,14 +488,16 @@ void appendtolist(struct stringlist ** list, struct stringlist ** lastentry,
  * find a string in a stringlist
  * return pointer to string if found, NULL otherwise
  */
-char * findinlist(struct stringlist * haystack, char * needle) {
-    struct stringlist * a;
+char *
+findinlist(struct stringlist *haystack, char *needle)
+{
+    struct stringlist *a;
 
     if (needle == NULL)
 	return NULL;
     a = haystack;
     while (a && a->string) {
-	if (strncmp( needle, a->string, strlen(needle)) == 0 )
+	if (strncmp(needle, a->string, strlen(needle)) == 0)
 	    return a->string;
 	a = a->next;
     }
@@ -478,8 +507,10 @@ char * findinlist(struct stringlist * haystack, char * needle) {
 /*
  * free a list
  */
-void freelist(struct stringlist * list) {
-    struct stringlist * a;
+void
+freelist(struct stringlist *list)
+{
+    struct stringlist *a;
 
     while (list) {
 	a = list->next;
@@ -491,41 +522,43 @@ void freelist(struct stringlist * list) {
 /*
  * get the length of a list
  */
-int stringlistlen(const struct stringlist *list)
+int
+stringlistlen(const struct stringlist *list)
 {
     int i;
-    for (i = 0; list; i++, list = list->next) ;
+    for (i = 0; list; i++, list = list->next);
     return i;
 }
 
 /*
  * convert a space separated string into a stringlist
  */
-struct stringlist * cmdlinetolist(const char *cmdline)
+struct stringlist *
+cmdlinetolist(const char *cmdline)
 {
     char *c;
     char *o;
     struct stringlist *s = NULL, *l = NULL;
 
     if (!cmdline || !*cmdline)
-        return NULL;
+	return NULL;
 
-    o = (c = critmalloc( strlen( cmdline) + 1,
-                          "Allocating temporary string space") );
-    
+    o = (c = critmalloc(strlen(cmdline) + 1,
+			"Allocating temporary string space"));
+
     strcpy(c, cmdline);
 
     while (*c) {
-        char *p;
-        while (*c && isspace( (unsigned char)*c) )
-            c++;
-        p = c;
-        while (*c && !isspace( (unsigned char)*c) )
-            c++;
-        if (*c)
-            *c++ = '\0';
-        if (*p) /* avoid lists with only one empty entry */
-            appendtolist(&s, &l, p);
+	char *p;
+	while (*c && isspace((unsigned char)*c))
+	    c++;
+	p = c;
+	while (*c && !isspace((unsigned char)*c))
+	    c++;
+	if (*c)
+	    *c++ = '\0';
+	if (*p)			/* avoid lists with only one empty entry */
+	    appendtolist(&s, &l, p);
     }
     free(o);
     return s;
@@ -535,19 +568,21 @@ struct stringlist * cmdlinetolist(const char *cmdline)
    number, and clearing the entire space */
 
 struct msgidtree {
-    struct msgidtree * left;
-    struct msgidtree * right;
+    struct msgidtree *left;
+    struct msgidtree *right;
     int art;
     char msgid[1];
 };
 
-static struct msgidtree * head; /* starts as NULL */
+static struct msgidtree *head;	/* starts as NULL */
 
-void insertmsgid(const char * msgid, unsigned long art) {
-    struct msgidtree ** a;
+void
+insertmsgid(const char *msgid, unsigned long art)
+{
+    struct msgidtree **a;
     int c;
 
-    if (strchr( msgid, '@') == 0 )
+    if (strchr(msgid, '@') == 0)
 	return;
 
     a = &head;
@@ -558,17 +593,17 @@ void insertmsgid(const char * msgid, unsigned long art) {
 	    c = strcmp(strchr((*a)->msgid, '@'), strchr(msgid, '@'));
 	    if (c == 0)
 		c = strcmp((*a)->msgid, msgid);
-	    if (c<0)
+	    if (c < 0)
 		a = &((*a)->left);
-	    else if (c>0)
+	    else if (c > 0)
 		a = &((*a)->right);
 	    else {
 		return;
 	    }
 	} else {
 	    *a = (struct msgidtree *)
-		 critmalloc(sizeof(struct msgidtree) + strlen(msgid),
-			    "Building expiry database");
+		critmalloc(sizeof(struct msgidtree) + strlen(msgid),
+			   "Building expiry database");
 	    (*a)->left = (*a)->right = NULL;
 	    strcpy((*a)->msgid, msgid);
 	    (*a)->art = art;
@@ -577,10 +612,12 @@ void insertmsgid(const char * msgid, unsigned long art) {
     }
 }
 
-int findmsgid(const char* msgid) {
-    struct msgidtree * a;
+int
+findmsgid(const char *msgid)
+{
+    struct msgidtree *a;
     int c;
-    char * domainpart;
+    char *domainpart;
 
     /* domain part differs more than local-part, so try it first */
 
@@ -603,56 +640,64 @@ int findmsgid(const char* msgid) {
     return 0;
 }
 
-static void begone(struct msgidtree * m) {
+static void
+begone(struct msgidtree *m)
+{
     if (m) {
-	begone(m->right) ;
+	begone(m->right);
 	begone(m->left);
-	free((char *) m);
+	free((char *)m);
     }
 }
 
-void clearidtree(void) {
+void
+clearidtree(void)
+{
     if (head) {
-	begone(head->right) ;
+	begone(head->right);
 	begone(head->left);
-	free((char *) head);
+	free((char *)head);
     }
     head = NULL;
 }
 
 
-const char* rfctime(void) {
+const char *
+rfctime(void)
+{
     static char date[128];
-    const char * months[] = { "Jan", "Feb", "Mar", "Apr",
-	"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-    const char * days[] = { "Sun", "Mon", "Tue", "Wed",
-	"Thu", "Fri", "Sat" };
+    const char *months[] = { "Jan", "Feb", "Mar", "Apr",
+	"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    const char *days[] = { "Sun", "Mon", "Tue", "Wed",
+	"Thu", "Fri", "Sat"
+    };
     time_t now;
     struct tm gmt;
     struct tm local;
-    int    hours, mins;
+    int hours, mins;
 #ifndef HAVE_GMTOFF
     extern long int timezone;
 #endif
 
     /* get local and Greenwich times */
     now = time(0);
-    gmt	  = *(gmtime(&now));
+    gmt = *(gmtime(&now));
     local = *(localtime(&now));
 
 #ifdef HAVE_GMTOFF
-    hours = local.tm_gmtoff/60/60;
-    mins  = local.tm_gmtoff/60%60;
+    hours = local.tm_gmtoff / 60 / 60;
+    mins = local.tm_gmtoff / 60 % 60;
 #else
     /* this is empirical */
-    hours = -timezone/60/60+((local.tm_isdst>0)?1:0);
-    mins  = -timezone/60%60;
+    hours = -timezone / 60 / 60 + ((local.tm_isdst > 0) ? 1 : 0);
+    mins = -timezone / 60 % 60;
 #endif
 
     /* finally print the string */
     sprintf(date, "%3s, %d %3s %4d %02d:%02d:%02d %+03d%02d",
 	    days[local.tm_wday], local.tm_mday, months[local.tm_mon],
-	    local.tm_year+1900, local.tm_hour, local.tm_min, local.tm_sec,
+	    local.tm_year + 1900, local.tm_hour, local.tm_min, local.tm_sec,
 	    hours, mins);
 
     return (date);
@@ -661,15 +706,19 @@ const char* rfctime(void) {
 /*
  * returns 0 if string matches pattern
  */
-int ngmatch(const char* pattern, const char* str) {
-    return(!wildmat( str, pattern) );
+int
+ngmatch(const char *pattern, const char *str)
+{
+    return (!wildmat(str, pattern));
 }
 
 /*
  * copy n bytes from infile to outfile
  */
-void copyfile(FILE * infile, FILE * outfile, long n) {
-    static char * buf = NULL ;
+void
+copyfile(FILE * infile, FILE * outfile, long n)
+{
+    static char *buf = NULL;
     long total;
     size_t toread, read;
 
@@ -677,21 +726,21 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
 	return;
 
     if (!buf)
-	buf = critmalloc(BLOCKSIZE+1, "Allocating buffer space");
+	buf = critmalloc(BLOCKSIZE + 1, "Allocating buffer space");
     total = 0;
     do {
-	if ((n-total) < BLOCKSIZE)
+	if ((n - total) < BLOCKSIZE)
 	    toread = n - total;
 	else
 	    toread = BLOCKSIZE;
 	read = fread(buf, sizeof(char), toread, infile);
-	if (read < toread && !feof( infile) ) {
+	if (read < toread && !feof(infile)) {
 	    fprintf(stderr, "read error on compressed batch\n");
-            clearerr(infile);
+	    clearerr(infile);
 	}
 	fwrite(buf, sizeof(char), read, outfile);
 	total += read;
-    } while (( total < n) || ( read < toread ) );
+    } while ((total < n) || (read < toread));
 }
 
 /**************************************************************************/
@@ -701,7 +750,7 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.10 $
+/*  $Revision: 1.11 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"
@@ -754,11 +803,12 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
 /*
 **  Match text and p, return TRUE, FALSE, or ABORT.
 */
-static int DoMatch(const char *text, const char *p)
+static int
+DoMatch(const char *text, const char *p)
 {
-    int	                last;
-    int	                matched;
-    int	                reverse;
+    int last;
+    int matched;
+    int reverse;
 
     for (; *p; text++, p++) {
 	if (*text == '\0' && *p != '*')
@@ -809,7 +859,7 @@ static int DoMatch(const char *text, const char *p)
 #ifdef	MATCH_TAR_PATTERN
     if (*text == '/')
 	return TRUE;
-#endif	/* MATCH_TAR_PATTERN */
+#endif				/* MATCH_TAR_PATTERN */
     return *text == '\0';
 }
 
@@ -818,11 +868,12 @@ static int DoMatch(const char *text, const char *p)
 **  User-level routine.  Returns TRUE or FALSE.
 **  This routine was borrowed from Rich Salz and appeared first in INN.
 */
-int wildmat(const char *text, const char *p) 
+int
+wildmat(const char *text, const char *p)
 {
 #ifdef	OPTIMIZE_JUST_STAR
     if (p[0] == '*' && p[1] == '\0')
 	return TRUE;
-#endif	/* OPTIMIZE_JUST_STAR */
-    return DoMatch(text, p) == TRUE; /* FIXME */
+#endif				/* OPTIMIZE_JUST_STAR */
+    return DoMatch(text, p) == TRUE;	/* FIXME */
 }

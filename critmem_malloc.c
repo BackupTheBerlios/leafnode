@@ -7,8 +7,10 @@
  * replacement for malloc, logs allocation failures
  * and exits with the error message
  */
-char * critmalloc(size_t size, const char* message) {
-    char * a;
+char *
+critmalloc(size_t size, const char *message)
+{
+    char *a;
 
     a = (char *)malloc(size);
     if (!a) {

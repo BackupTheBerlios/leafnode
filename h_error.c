@@ -1,8 +1,10 @@
 #include "h_error.h"
 #include <netdb.h>
 
-const char *my_h_strerror(int he) {
-    switch(he) {
+const char *
+my_h_strerror(int he)
+{
+    switch (he) {
     case HOST_NOT_FOUND:
 	return "no such host";
     case NO_DATA:

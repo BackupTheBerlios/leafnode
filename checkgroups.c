@@ -29,57 +29,62 @@ int debug = 0;
 
 void process_input(char *s);
 
-void process_input(char *s) {
-    FILE * f;
-    char * l;
-   
+void
+process_input(char *s)
+{
+    FILE *f;
+    char *l;
+
     f = fopen(s, "r");
     if (!f) {
-        fprintf(stderr,"%s deleted (shouldn't happen)\n",s);
-        return;
+	fprintf(stderr, "%s deleted (shouldn't happen)\n", s);
+	return;
     }
 
-    while ((l=getaline( f)) ) {
-        char * p;
-        struct newsgroup * g;
+    while ((l = getaline(f))) {
+	char *p;
+	struct newsgroup *g;
 
-        p = l;
-        if (isalnum((unsigned char)*p)) {
-            while (!isspace((unsigned char)*p))
-                p++;
-            if (*p)
-                *p++ = '\0';
-            if ((g = findgroup(l)) != NULL) {
-	        fprintf(stderr, "%s\n", l);
-                if (strlen(p) > 0)
-                    g->desc = strdup(p);
+	p = l;
+	if (isalnum((unsigned char)*p)) {
+	    while (!isspace((unsigned char)*p))
+		p++;
+	    if (*p)
+		*p++ = '\0';
+	    if ((g = findgroup(l)) != NULL) {
+		fprintf(stderr, "%s\n", l);
+		if (strlen(p) > 0)
+		    g->desc = strdup(p);
 	    }
-        }
+	}
     }
 
     fclose(f);
 }
 
-static void usage(void) {
+static void
+usage(void)
+{
     fprintf(stderr,
-	"Usage:\n"
-	"checkgroups -V: print version number and exit\n"
-	"checkgroups [-Dv] checkfile\n"
-	"    -D: switch on debug mode\n"
-	"    -v: switch on verbose mode\n"
-	"See also the leafnode homepage at http://www.leafnode.org/\n"
-   );
+	    "Usage:\n"
+	    "checkgroups -V: print version number and exit\n"
+	    "checkgroups [-Dv] checkfile\n"
+	    "    -D: switch on debug mode\n"
+	    "    -v: switch on verbose mode\n"
+	    "See also the leafnode homepage at http://www.leafnode.org/\n");
 }
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
     extern int optind;
     int option;
-    FILE * f;
+    FILE *f;
 
-    if (! initvars( argv[0]) )
+    if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-    while ((option=getopt( argc, argv, "DVv")) != -1 ) {
-	if (!parseopt( "checkgroups", option, NULL, NULL) ) {
+    while ((option = getopt(argc, argv, "DVv")) != -1) {
+	if (!parseopt("checkgroups", option, NULL, NULL)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -92,23 +97,21 @@ int main(int argc, char *argv[]) {
     debug = debugmode;
 
     /* Check whether input file exists */
-    if (!( f = fopen( argv[optind], "r"))) {
-        if (errno == EACCES)
-	    fprintf(stderr, "%s: not permitted to open %s\n",
-		     argv[0], argv[1]);
+    if (!(f = fopen(argv[optind], "r"))) {
+	if (errno == EACCES)
+	    fprintf(stderr, "%s: not permitted to open %s\n", argv[0], argv[1]);
 	else
 	    fprintf(stderr, "%s: checkgroups file %s doesn't exist\n",
-		     argv[0], argv[1]);
-        exit(EXIT_FAILURE);
-    }
-    else
-        fclose(f);
+		    argv[0], argv[1]);
+	exit(EXIT_FAILURE);
+    } else
+	fclose(f);
 
     whoami();
     umask(2);
 
-    readactive();	/* read groupinfo file */
+    readactive();		/* read groupinfo file */
     process_input(argv[1]);
-    writeactive();	/* write groupinfo file */
+    writeactive();		/* write groupinfo file */
     exit(0);
 }

@@ -11,7 +11,7 @@
 */
 
 #ifndef __GNUC__
-#define __attributes__(a) 
+#define __attributes__(a)
 #endif
 
 #endif

@@ -18,15 +18,17 @@ See README for restrictions on the use of this software.
 #include <string.h>
 #include <time.h>
 
-struct filterlist * filter = NULL;
+struct filterlist *filter = NULL;
 
 /*
  * find "needle" in "haystack" only if "needle" is at the beginning of a line
  * returns a pointer to the first char after "needle" which should be a
  * whitespace
  */
-static char * findinheaders(char * needle, char * haystack) {
-    static char *p; 
+static char *
+findinheaders(char *needle, char *haystack)
+{
+    static char *p;
     char *q;
 
     p = haystack;
@@ -48,21 +50,23 @@ static char * findinheaders(char * needle, char * haystack) {
 /*
  * calculate date in seconds since Jan 1st 1970 from a Date: header
  */
-static int age(const char * date) {
+static int
+age(const char *date)
+{
     char monthname[4];
     int month;
     int year;
     int day;
-    const char * d;
+    const char *d;
     time_t tmp;
     struct tm time_struct;
 
     if (!date)
-	return 1000; /* large number: OLD */
+	return 1000;		/* large number: OLD */
     d = date;
     if (strncmp(date, "Date:", 5) == 0)
 	d += 5;
-    while(isspace((unsigned char)*d))
+    while (isspace((unsigned char)*d))
 	d++;
 
     if (isalpha((unsigned char)*d)) {
@@ -127,13 +131,13 @@ static int age(const char * date) {
 	    ln_log(LNLOG_INFO, "Unable to parse %s", date);
 	    return 1001;
 	}
-	if (year < 70)        /* years 2000-2069 in two-digit form */
+	if (year < 70)		/* years 2000-2069 in two-digit form */
 	    year += 100;
-	else if (year > 1970) /* years > 1970 in four-digit form */
+	else if (year > 1970)	/* years > 1970 in four-digit form */
 	    year -= 1900;
 
 	memset(&time_struct, 0, sizeof(time_struct));
-        time_struct.tm_sec = 0;
+	time_struct.tm_sec = 0;
 	time_struct.tm_min = 0;
 	time_struct.tm_hour = 0;
 	time_struct.tm_mday = day;
@@ -145,15 +149,17 @@ static int age(const char * date) {
 
 	if (tmp == -1)
 	    return 1002;
-	
-	return((time(NULL) - tmp) / SECONDS_PER_DAY);
+
+	return ((time(NULL) - tmp) / SECONDS_PER_DAY);
     }
 }
 
 /*
  * create a new filterentry for a list
  */
-static struct filterlist * newfilter(void) {
+static struct filterlist *
+newfilter(void)
+{
     struct filterlist *fl;
     struct filterentry *fe;
 
@@ -166,10 +172,10 @@ static struct filterlist * newfilter(void) {
     fe->action = NULL;
 
     fl = (struct filterlist *)critmalloc(sizeof(struct filterlist),
-					  "Allocating filterlist space");
+					 "Allocating filterlist space");
     fl->next = NULL;
     fl->entry = fe;
- 
+
     return fl;
 }
 
@@ -179,14 +185,16 @@ static struct filterlist * newfilter(void) {
  *
  * in addition, we initialize four standard regular expressions
  */
-int readfilter(char *filterfile) {
-    FILE * ff;
-    char * l;
-    char * ng = NULL;
-    char * param, * value;
+int
+readfilter(char *filterfile)
+{
+    FILE *ff;
+    char *l;
+    char *ng = NULL;
+    char *param, *value;
     const char *regex_errmsg;
     int regex_errpos;
-    struct filterlist * f, * oldf = NULL;
+    struct filterlist *f, *oldf = NULL;
 
     if (filterfile == NULL || !strlen(filterfile))
 	return FALSE;
@@ -205,7 +213,7 @@ int readfilter(char *filterfile) {
     while ((l = getaline(ff)) != NULL) {
 	if (parse_line(l, param, value)) {
 	    if (strcasecmp("newsgroup", param) == 0 ||
-		 strcasecmp("newsgroups", param) == 0) {
+		strcasecmp("newsgroups", param) == 0) {
 		ng = strdup(value);
 		f = newfilter();
 		(f->entry)->newsgroup = ng;
@@ -217,7 +225,7 @@ int readfilter(char *filterfile) {
 	    } else if (strcasecmp("pattern", param) == 0) {
 		if (!ng) {
 		    ln_log(LNLOG_NOTICE,
-			    "No newsgroup for expression %s found", value);
+			   "No newsgroup for expression %s found", value);
 		    if (verbose)
 			printf("No newsgroup for expression %s found", value);
 		    continue;
@@ -232,31 +240,34 @@ int readfilter(char *filterfile) {
 		    oldf = f;
 		}
 #ifdef NEW_PCRE_COMPILE
-		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE ,
-		       &regex_errmsg, &regex_errpos, NULL)) == NULL) {
+		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE,
+						     &regex_errmsg,
+						     &regex_errpos,
+						     NULL)) == NULL) {
 #else
-		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE ,
-		       &regex_errmsg, &regex_errpos)) == NULL) {
+		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE,
+						     &regex_errmsg,
+						     &regex_errpos)) == NULL) {
 #endif
 		    ln_log(LNLOG_NOTICE, "Invalid filter pattern %s: %s",
-			    value, regex_errmsg);
+			   value, regex_errmsg);
 		    if (verbose)
 			printf("Invalid filter pattern %s: %s",
-				value, regex_errmsg);
+			       value, regex_errmsg);
 		    free(f->entry);
 		    f->entry = NULL;
 		} else {
 		    (f->entry)->cleartext = strdup(value);
-		    (f->entry)->limit	  = -1 ;
+		    (f->entry)->limit = -1;
 		}
 	    } else if ((strcasecmp("maxage", param) == 0) ||
-		      (strcasecmp("minlines", param) == 0) ||
-		      (strcasecmp("maxlines", param) == 0) ||
-		      (strcasecmp("maxbytes", param) == 0) ||
-		      (strcasecmp("maxcrosspost", param) == 0)) {
-	        if (!ng) {
+		       (strcasecmp("minlines", param) == 0) ||
+		       (strcasecmp("maxlines", param) == 0) ||
+		       (strcasecmp("maxbytes", param) == 0) ||
+		       (strcasecmp("maxcrosspost", param) == 0)) {
+		if (!ng) {
 		    ln_log(LNLOG_NOTICE,
-			    "No newsgroup for expression %s found", value);
+			   "No newsgroup for expression %s found", value);
 		    if (verbose)
 			printf("No newsgroup for expression %s found", value);
 		    continue;
@@ -265,7 +276,7 @@ int readfilter(char *filterfile) {
 		    f = newfilter();
 		    (f->entry)->newsgroup = ng;
 		    if (!filter)
-		        filter = f;
+			filter = f;
 		    else
 			oldf->next = f;
 		    oldf = f;
@@ -275,14 +286,14 @@ int readfilter(char *filterfile) {
 	    } else if (strcasecmp("action", param) == 0) {
 		if (!f || !f->entry || !(f->entry)->cleartext) {
 		    ln_log(LNLOG_NOTICE, "No pattern found for action %s",
-			    value);
+			   value);
 		    if ((f->entry)->expr)
 			free((f->entry)->expr);
 		    if (f->entry)
 			free(f->entry);
 		    if (f)
 			free(f);
-		    continue ;
+		    continue;
 		} else {
 		    (f->entry)->action = strdup(value);
 		}
@@ -302,17 +313,19 @@ int readfilter(char *filterfile) {
 /*
  * create a new filterlist with filters matching the actual newsgroup
  */
-struct filterlist * selectfilter (char * groupname) {
+struct filterlist *
+selectfilter(char *groupname)
+{
     struct filterlist *master;
     struct filterlist *f, *fold, *froot;
 
     froot = NULL;
-    fold  = NULL;
+    fold = NULL;
     master = filter;
     while (master) {
 	if (ngmatch((master->entry)->newsgroup, groupname) == 0) {
 	    f = (struct filterlist *)critmalloc(sizeof(struct filterlist),
-					 "Allocating groupfilter space");
+						"Allocating groupfilter space");
 	    f->entry = master->entry;
 	    f->next = NULL;
 	    if (froot == NULL)
@@ -322,7 +335,7 @@ struct filterlist * selectfilter (char * groupname) {
 	    fold = f;
 	    if (debugmode) {
 		ln_log(LNLOG_DEBUG, "filtering in %s: %s -> %s",
-			groupname, (f->entry)->cleartext, (f->entry)->action);
+		       groupname, (f->entry)->cleartext, (f->entry)->action);
 	    }
 	}
 	master = master->next;
@@ -334,25 +347,26 @@ struct filterlist * selectfilter (char * groupname) {
  * read and filter headers.
  * Return true if article should be killed, false if not
  */
-int killfilter(struct filterlist *f, char *hdr) {
-    int match, score ;
-    struct filterentry * g;
-    char * p;
+int
+killfilter(struct filterlist *f, char *hdr)
+{
+    int match, score;
+    struct filterentry *g;
+    char *p;
 
     if (!f)
 	return FALSE;
 
     score = 0;
-    match = -1 ;
+    match = -1;
     while (f) {
 	g = f->entry;
 	if ((g->limit == -1) && (g->expr)) {
 #ifdef NEW_PCRE_EXEC
-	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr),
-			       0, 0, NULL, 0 );
+	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
+			      0, 0, NULL, 0);
 #else
-	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr),
-			       0, NULL, 0 );
+	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr), 0, NULL, 0);
 #endif
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    p = findinheaders("Date:", hdr);
@@ -361,7 +375,7 @@ int killfilter(struct filterlist *f, char *hdr) {
 	    if (age(p) > g->limit)
 		match = 0;	/* limit has been hit */
 	    else
-		match = PCRE_ERROR_NOMATCH;  /* don't match by default */
+		match = PCRE_ERROR_NOMATCH;	/* don't match by default */
 	} else if (strcasecmp(g->cleartext, "maxlines") == 0) {
 	    p = findinheaders("Lines:", hdr);
 	    if (p) {
@@ -402,15 +416,13 @@ int killfilter(struct filterlist *f, char *hdr) {
 	    /* article matched pattern/limit: what now? */
 	    if (strcasecmp(g->action, "select") == 0) {
 		return FALSE;
-	    }
-	    else if (strcasecmp(g->action, "kill") == 0) {
+	    } else if (strcasecmp(g->action, "kill") == 0) {
 		return TRUE;
-	    }
-	    else {
+	    } else {
 		score += strtol(g->action, NULL, 10);
 	    }
 	}
-	f = f->next ;
+	f = f->next;
     }
     if (score < 0)
 	return TRUE;
@@ -421,11 +433,13 @@ int killfilter(struct filterlist *f, char *hdr) {
 /*
  * free filterlist but not filterentries
  */
-void freefilter(struct filterlist *f) {
+void
+freefilter(struct filterlist *f)
+{
     struct filterlist *g;
 
     while (f) {
-	g = f->next ;
+	g = f->next;
 	free(f);
 	f = g;
     }
