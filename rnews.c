@@ -146,7 +146,8 @@ decompresspipe(FILE *original, const char *const compressor[])
 		close(explodepipe[1]);
 
 		while(!feof(original) && (r = fread(buf, 1, sizeof(buf), original))) {
-		    size_t w = r;
+		    /* FIXME: size_t to ssize_t may lose information */
+		    ssize_t w = r;
 		    while (w) {
 			if ((w = write(feedpipe[1], buf, r)) == -1) {
 			    rc = 1;
