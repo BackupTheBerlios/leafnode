@@ -157,7 +157,7 @@ readconfig(char *configfile)
 #endif /* __LCLINT__ */
 		switch (cp->code) {
 		case CP_DEBUG:
-		    debug = debugmode = strtol(value, NULL, 10);
+		    debugmode |= strtol(value, NULL, 10);
 		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			       "config: debugmode is %d", debugmode);
 		    break;
