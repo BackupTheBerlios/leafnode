@@ -1,3 +1,67 @@
+2004-12-13  Matthias Andree <matthias.andree@gmx.de>
+  * ignore tags/TAGS
+
+    M ./.boring +2
+
+  * filter new postings
+  Filters, if defined, are also matched against new postings, which will
+  be rejected when the filter decides "kill". To support "local-groups-only"
+  setups as asked for by Lloyd Zusman.
+
+    M ./NEWS +3
+    M ./nntpd.c +35
+
+  * readheaders split-out
+  Split readheaders and readtodelim out into a separate file.
+  Move MAXHEADERSIZE to leafnode.h.
+  Change readheaders API so it takes the delimiter as argument.
+
+    M ./Makefile.am +1
+    M ./applyfilter.c -68 +1
+    M ./leafnode.h +9
+    A ./readheaders.c
+
+  * Add short instruction file for the new DARCS repo.
+
+    A ./index.html
+
+  * Split repository export to export.sh
+
+    A ./export.sh
+    M ./release.sh -10 +2
+
+  * update for darcs
+
+    M ./release.sh -1 +10
+
+  tagged leafnode-2-0-0-alpha20041213a
+
+
+  * bump version
+
+    M ./configure.ac -1 +1
+
+  * Ignore build*
+
+    M ./.boring +1
+
+  tagged leafnode-2-0-0-alpha20041213a
+
+
+  * Update for darcs.
+
+    M ./release.sh -3 +3
+
+  * Add new changelog generator script.
+
+    A ./makechangelog.pl
+
+  * snapshot-20041213a
+
+    M ./.boring +1
+    M ./ChangeLog +44
+    M ./NEWS -1 +2
+
 2004-12-04  Matthias Andree <matthias.andree@gmx.de>
   * ignore generated files
 
