@@ -1170,7 +1170,7 @@ donewgroups(const char *arg)
 /* next bit is copied from INN 1.4 and modified("broken") by agulbra
    mail to Rich $alz <rsalz@uunet.uu.net> bounced */
 /* Scale time back a bit, for shorter Message-ID's. */
-#define OFFSET	673416000L
+#define OFFSET	(time_t)1026380000L
 static char ALPHABET[] = "0123456789abcdefghijklmnopqrstuv";
 static char *
 generateMessageID(void)
@@ -1180,14 +1180,21 @@ generateMessageID(void)
     static unsigned int fudge;
     time_t now;
     char *p;
-    int n;
+    unsigned long n;
 
     now = time(0);		/* might be 0, in which case fudge 
 				   will almost fix it */
+    if (now < OFFSET) {
+	ln_log(LNLOG_SCRIT, LNLOG_CTOP,
+		"your system clock cannot be right. abort.");
+	abort();
+    }
+
     if (now != then)
 	fudge = 0;
     else
 	fudge++;
+
     then = now;
     p = buff;
     *p++ = '<';
@@ -1202,7 +1209,7 @@ generateMessageID(void)
 	*p++ = ALPHABET[(int)(n & 31)];
 	n >>= 5;
     }
-    sprintf(p, ".ln@%s>", owndn ? owndn : fqdn);
+    sprintf(p, ".ln2@%s>", owndn ? owndn : fqdn);
     return (critstrdup(buff, "generateMessageID"));
 }
 
