@@ -102,11 +102,6 @@ Ralfs TODO:
     20020819, leafnode should tell if XOVER filtering killed these
     articles already.
 
-11pre1
-2.2 Let killfilter also apply maxcrosspost on an Xref header if one is
-    there, for this may not be exact, but may prevent downloading a
-    "maxcrosspost" filtered article without downloading it.
-
 2.2 Add custom headers like Organization: or X-Complaints-To: (Jeff
     Grossman, 2002-03-09)
 
@@ -312,6 +307,10 @@ FIXED ITEMS:
 	   delaybody mode: fetchnews currently tries normal download of those
 	   headers also, resulting in error messages, the output counts
 	   are wrong.
+
+	   Let killfilter also apply maxcrosspost on an Xref header if
+	   one is there; this may not be exact, but may still avoid
+	   downloading a "maxcrosspost" filtered article.
 
 2002-07-03 Ralf Wildenhues
            exit code of fetchnews always zero
