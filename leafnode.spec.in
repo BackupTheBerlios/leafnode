@@ -59,6 +59,7 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %attr(640,root,news) %confdir/config.example
 %attr(640,root,news) %confdir/filters.example
 %attr(755,root,root) %{prefix}/bin/newsq
+%attr(755,root,root) %{prefix}/bin/leafnode-version
 %attr(755,root,root) %{prefix}/sbin/applyfilter
 %attr(755,root,root) %{prefix}/sbin/checkgroups
 %attr(755,root,root) %{prefix}/sbin/leafnode
