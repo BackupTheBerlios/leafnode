@@ -5,7 +5,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma9pre2])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.3 $)
+AC_REVISION($Revision: 1.4 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -91,6 +91,13 @@ dnl check whether to use dmalloc
 AM_WITH_DMALLOC
 
 dnl check where to put the spooldir
+if test "$localstatedir" = '${prefix}/var' \
+  -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
+  SPDIR='/var/spool/news'
+else
+  SPDIR="$localstatedir/spool/news"
+fi
+
 AC_MSG_CHECKING(spooldir)
 AC_ARG_WITH(spooldir,
 [  --with-spooldir         news spool directory (/var/spool/news)],
@@ -99,7 +106,7 @@ AC_ARG_WITH(spooldir,
   fi
   withval=`echo "$withval" | sed 'sx/*$xx;'`
 , 
-  withval="/var/spool/news"
+  withval=$SPDIR
 )
 SPOOLDIR=$withval
 AC_MSG_RESULT($SPOOLDIR)
@@ -117,7 +124,6 @@ if test "$CONFDIR" != "$sysconfdir"; then
   AC_MSG_WARN([use --sysconfdir to fix])
   AC_MSG_WARN([use --sysconfdir='\$prefix/etc' to get])
   AC_MSG_WARN([the default autoconf behaviour])
-  sleep 2
 fi
 sysconfdir=$CONFDIR
 AC_SUBST(sysconfdir)
