@@ -1,3 +1,36 @@
+2003-05-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac, vsnprintf.c, xsnprintf.c: Change vsnprintf check
+	along the lines of leafnode-1. Note that if your vsprintf function
+	is borked, the check will later fail.  
+	* Makefile.am, xsnprintf.c: Import xnsprintf.c test from
+	leafnode-1.  
+	* fetchnews.c: Implement post_anygroup option. Don't complain if
+	upstream responds 441 435 to POST, but just pretend the article was
+	posted successfully (it was a dupe.) 
+	* config.example, config.table, configutil.c, leafnode.h: Implement
+	post_anygroup option.  
+
+2003-05-04  Matthias Andree <matthias.andree@gmx.de>
+
+	* filters.example: Fix typo, newsgrops -> newsgroups. Spotted by
+	Martin Schnitkemper.  
+
+2003-04-04  Matthias Andree <matthias.andree@gmx.de>
+
+	* store.c: Fix crosspostings when article is posted to groups where
+	one group name is the prefix of another group's name. Reported by
+	Robert Marshall.  
+	* fetchnews.8.in: Clarify -M usage, add example.  
+
+2003-04-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* draft-ietf-usefor-article-07.txt: Kill obsolete file.  
+
+2003-03-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, configure.ac: leafnode-2.0.0.alpha20030318a 
+
 2003-03-16  Matthias Andree <matthias.andree@gmx.de>
 
 	* nntpd.c: Bugfix: don't suppress pseudo article when the group is
