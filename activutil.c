@@ -248,8 +248,9 @@ findgroup(const char *name, struct newsgroup *a, size_t asize)
     return found;
 }
 
-/*
+/**
  * write active file
+ * \returns 0 for success, -1 for error.
  */
 int
 writeactive(void)
