@@ -1,5 +1,4 @@
 authenticate,CP_AUTH,CS_GLOBAL
-preferxhdr,CP_AVOIDXOVER,CS_SERVER
 create_all_links,CP_LINKS,CS_GLOBAL
 debugmode,CP_DEBUG,CS_GLOBAL
 delaybody,CP_DELAY,CS_GLOBAL
@@ -31,4 +30,5 @@ timeout_active,CP_TOACTIVE,CS_GLOBAL
 timeout_long,CP_TOLONG,CS_GLOBAL
 timeout_short,CP_TOSHORT,CS_GLOBAL
 username,CP_USER,CS_SERVER
+usexhdr,CP_AVOIDXOVER,CS_SERVER
 windowsize,CP_WINDOW,CS_GLOBAL
