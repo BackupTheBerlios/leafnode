@@ -261,9 +261,9 @@ readconfig(/*@null@*/ const char *configfile)
 			authentication = AM_PAM;
 #endif
 		    } else {
-			ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
+			ln_log(LNLOG_SERR, LNLOG_CTOP,
 				   "config: unknown authentication method: %s", value);
-			break;
+			return EINVAL;
 		    }
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
