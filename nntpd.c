@@ -1543,9 +1543,8 @@ dopost(void)
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to non-writable group %s", forbidden);
 	    nntpprintf("441 Posting to %s not allowed", forbidden);
-	    msgid_deallocate(inname, mid);
 	    free(forbidden);
-	    goto cleanup;
+	    goto unlink_cleanup;
 	}
 
 	/* set up all that we need */
@@ -1572,8 +1571,7 @@ dopost(void)
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to unknown groups %s", groups);
 	    nntpprintf("441 No such newsgroups %s.", groups);
-	    msgid_deallocate(inname, mid);
-	    goto cleanup;
+	    goto unlink_cleanup;
 	}
 
 	if (modgroup && !approved) {
@@ -1595,12 +1593,10 @@ dopost(void)
 		    }
 		    (void)close(fd);
 		}
-		msgid_deallocate(inname, mid);
-		goto cleanup;
+		goto unlink_cleanup;
 	    } else if (is_alllocal(groups)) {
 		nntpprintf("503 Configuration error: no moderator for group %s.", modgroup);
-		msgid_deallocate(inname, mid);
-		goto cleanup;
+		goto unlink_cleanup;
 	    }
 	}
 
@@ -1611,8 +1607,7 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, mastr_str(outgoingname));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
-		msgid_deallocate(inname, mid);
-		goto cleanup;
+		goto unlink_cleanup;
 	    }
 	}
 
@@ -1629,8 +1624,7 @@ dopost(void)
 		 */
 		if (!is_alllocal(groups))
 			log_unlink(mastr_str(outgoingname), 0);
-		msgid_deallocate(inname, mid);
-		goto cleanup;
+		goto unlink_cleanup;
 	    }
 	}
 
@@ -1667,6 +1661,8 @@ dopost(void)
 	    break;
 	}			/* switch(fork()) */
 
+unlink_cleanup:
+	msgid_deallocate(inname, mid);
 cleanup:
 	if (mid) free(mid);
 	if (groups) free(groups);
