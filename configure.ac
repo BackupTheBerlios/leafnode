@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040108a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.80 $)
+AC_REVISION($Revision: 1.81 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -200,16 +200,15 @@ dnl Check for PCRE library.
 AC_PATH_PROG(PCRECONFIG,pcre-config,AC_MSG_ERROR(pcre-config not found, make sure you have the pcre and pcre-devel packages installed))
 
 CF=`$PCRECONFIG --cflags`
-if echo "$CFLAGS" | grep >/dev/null 2>&1 "$CF" 
-then :
-else AC_MSG_NOTICE(adding $CF to CFLAGS) ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
-fi
+case $CF in ?*)
+AC_MSG_NOTICE([adding $CF to CFLAGS]); CFLAGS="$CFLAGS $CF"; export CFLAGS
+;; esac
+
 
 LF=`$PCRECONFIG --libs`
-if echo "$LDFLAGS" | grep >/dev/null 2>&1 "$LF" 
-then :
-else AC_MSG_NOTICE(adding $LF to LDFLAGS) ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
-fi
+case $LF in ?*)
+AC_MSG_NOTICE([adding $LF to LDFLAGS]); LDFLAGS="$LDFLAGS $LF"; export LDFLAGS
+;; esac
 
 AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <pcre.h>]], [[return 0;]])],[ac_cv_header_pcre_h=yes],[ac_cv_header_pcre_h=no])
