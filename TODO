@@ -234,11 +234,6 @@ FIXED ITEMS:
 	   try to post an article to *every* server before moving into
 	   failed.postings, suggested by Jeff Grossman
 
-	   this should also fix
-	   out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
-	   sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo
-	   Schwalbe, <51nig9.kv.ln@abu.ivos.de>
-
 2004-01-29 Matthias Andree
 	   forward port "noactive" from leafnode-1
 
@@ -470,7 +465,19 @@ FIXED ITEMS:
 2002-01-06 groupinfo is all 0 0 0 if groupinfo is entirely re-read, until
 	   texpire is run.
 
-========================================================================
+2001-06-27 Matthias Andree
+	   fix bug introduced on 2001-01-28. This bug was only present
+	   in 2.0b8_ma-pre3-WIP and 2.0b8_ma-pre3-snapshot.
+	   2.0b8_ma2 did not yet have the bug, 2.0b8_ma3 already fixed it.
+	   broken versions (CVS): 1.7.2.4...1.7.2.7
+
+	   out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
+	   sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo
+	   Schwalbe, <51nig9.kv.ln@abu.ivos.de>
+	   (he lost articles when running fetchnews while not connected
+	    to the internet)
+
+============================================================================
 DROPPED ITEMS:
 
 2003-02-03 Matthias Andree
