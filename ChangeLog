@@ -1,3 +1,28 @@
+2002-01-31  Matthias Andree  <matthias.andree@gmx.de>
+
+	* queues.c: - feedincoming: cast result of rbreadlist to char *
+	  (MIPS compiler chokes without it). (Ralf Wildenhues)
+	* leafnode.h: Ralf Wildenhues: - findmsgid: return unsigned long.
+	* miscutil.c: Patches by Ralf Wildenhues:
+	- initinteresting: do not read freed memory k!
+	  Since one abort()s anyway, do not care about freeing.
+	- struct msgidtree.art should be unsigned long.
+	- findmsgid: should return unsigned long.
+
+	* fetchnews.c: Apply 6 patches by Ralf Wildenhues:
+	- doxover: after while loop, test l!=NULL.  Servers can die.
+	- doxhdr: same problem.
+	- do_group: should return long.  variable newserver should be
+	  signed long, else it cannot detect error condition of getgroup().
+	- do_group: splint annotation typo.
+	- processupstream: variable newserver should be signed long (same
+	  error condition problem).  Unchecked though.
+	- processupstream: fix 2 memleaks.
+
+	* mkstemp.c: Compile fixes.
+	* configure.ac: Move mkstemp from AC_CHECK_FUNCS to
+	AC_REPLACE_FUNCS. Found by Ralf Wildenhues.
+
 2002-01-30  Matthias Andree  <matthias.andree@gmx.de>
 
 	=== RELEASE 2.0b8_ma10pre1 ===
