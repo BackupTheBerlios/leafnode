@@ -89,7 +89,7 @@ main(int argc, char **argv)
     int ret = 0;
     long c;
 
-    while ((option = getopt(argc, argv, "VD")) != -1) {
+    while ((option = getopt(argc, argv, "VD:")) != -1) {
 	if (!parseopt("newsq", option, NULL, NULL, 0)) {
 	    usage();
 	    exit(EXIT_FAILURE);

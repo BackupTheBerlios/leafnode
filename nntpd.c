@@ -2208,7 +2208,7 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    while ((option = getopt(argc, argv, "F:DV")) != -1) {
+    while ((option = getopt(argc, argv, "F:D:V")) != -1) {
 	if (!parseopt("leafnode", option, optarg, conffile, sizeof(conffile))) {
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
 	    exit(EXIT_FAILURE);

@@ -310,7 +310,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
 
 
-    while ((option = getopt(argc, argv, "DVv")) != -1) {
+    while ((option = getopt(argc, argv, "D:Vv")) != -1) {
 	if (!parseopt("rnews", option, NULL, NULL, 0)) {
 	    usage();
 	    exit(EXIT_FAILURE);
