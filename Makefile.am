@@ -207,7 +207,6 @@ EXTRA_DIST = \
 	mergesort.3 \
 	README \
 	README-leaf.node \
-	README_FIRST \
 	README.html \
 	update.sh \
 	tools/archivefaq.pl \
