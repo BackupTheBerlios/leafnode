@@ -3,9 +3,9 @@ dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre1])
+AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre2])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.12 $)
+AC_REVISION($Revision: 1.13 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -265,7 +265,7 @@ AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf getaddrinfo])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid snprintf vsnprintf getaddrinfo])
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -284,7 +284,7 @@ if test $ac_cv_func_setsockopt = no; then
   AC_CHECK_LIB(socket, setsockopt)
 fi
 
-AC_REPLACE_FUNCS(mergesort inet_ntop)
+AC_REPLACE_FUNCS(mergesort mkstemp inet_ntop)
 
 dnl Check whether the system has IPv6
 AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_COMPILE([
