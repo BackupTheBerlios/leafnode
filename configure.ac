@@ -3,9 +3,9 @@ dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma9pre2])
+AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma9pre3])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.4 $)
+AC_REVISION($Revision: 1.5 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -179,8 +179,7 @@ AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
 
 if test "$ac_cv_header_pcre_h" = yes
 then
-  # do not add this to LIBS (causes unnecessary linkage)
-  AC_CHECK_LIB(pcre, pcre_compile, LINKPCRELIB="-lpcre")
+  AC_CHECK_LIB(pcre, pcre_compile)
 fi
 
 if test "$ac_cv_lib_pcre_pcre_compile" = yes
