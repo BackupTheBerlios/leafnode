@@ -37,9 +37,9 @@ sync_parent(const char *in)
 
     /* copy just the dirname to s */
     if ((r = strrchr(in, '/'))) {
-	mastrncpy(s, in, r - in + 1);
+	(void)mastrncpy(s, in, r - in + 1);
     } else {
-	mastrcpy(s, ".");
+	(void)mastrcpy(s, ".");
     }
 
     return sync_dir(s);
