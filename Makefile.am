@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.31 2002/07/08 12:27:32 emma Exp $
+# $Id: Makefile.am,v 1.32 2002/07/08 12:39:18 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -162,9 +162,9 @@ noinst_PROGRAMS = \
 	b_sortnl
 
 EXTRA_DIST = \
+	$(sysconf_DATA) \
 	aclocal.m4 \
 	config_defs.h \
-	config.example \
 	config.table \
 	config.h.in \
 	COPYING.LGPL \
