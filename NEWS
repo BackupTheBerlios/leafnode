@@ -2,11 +2,12 @@ KNOWN BUG:
 Valgrind-2.1.1 will interfere with writeactive, break fchmod.
 Use Valgrind 2.0.
 |
-Changes since 20040513a:
+20040813a: Changes since 20040513a:
 - Bugfix: texpire will now properly repair hard links of cross-posted
   articles. Bug reported by Jeff Grossman.
 - Documentation: The extraneous "/leafnode" component was removed from
   the path names in the manual. Reported by Cory C. Albrecht.
+- Cleanup: The code is now valid C and C++.
 
 20040513a: Changes since 20040510a:
 - Bugfix: fetchnews will try authentication when GROUP command replies 480.
