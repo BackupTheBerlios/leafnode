@@ -1,5 +1,13 @@
+2002-01-08  Matthias Andree  <matthias.andree@gmx.de>
+
+	=== RELEASE 2.0b8_ma9.4pre ===
+	* Makefile.am: Move leafnode-version to bindir.
+	* activutil.c: Back out lold initialization.
+	* fetchnews.c: Fix bogus "not in groupinfo file" errors.
+
 2002-01-07  Matthias Andree  <matthias.andree@gmx.de>
 
+	=== RELEASE 2.0b8_ma9.3pre ===
 	* leafnode-version.c: Preset PATH to /bin:/usr/bin and run uname
 	without a path, SuSE Linux 7.3 installs it to /bin, FreeBSD to
 	/usr/bin.
