@@ -45,6 +45,10 @@ Ralfs TODO:
 	* race condition in fetchnews between ismsgidonserver and post_FILE.
 	  Using only_fetch_once e.g. can hit the window with two upstream servers.
 
+* split current high water mark vs. next-article-gets-number so as to
+  report current figures for LIST and GROUP (discussion with Brian
+  Summon on leafnode-list July 21/22 2004).
+
 * forward port leafnode-1 STAT blacklisting code? Or go for real posting
 stuff?
 
