@@ -1314,15 +1314,14 @@ do_group(const char *ng, char **const s,
 	if (f && newserver) {
 	    fprintf(f, "%s %lu\n", g->name,
 		    newserver > 0 ? newserver : from);
-	} else {		/* g != NULL */
-	    if (!forceactive || (debug & DEBUG_ACTIVE))
-		ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		       "%s not found in groupinfo file", ng);
+	    return newserver;
 	}
-	return newserver;
-    } else {
-	return -2;
+    } else {		/* g != NULL */
+	if (!forceactive || (debug & DEBUG_ACTIVE))
+	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+		   "%s not found in groupinfo file", ng);
     }
+    return -2;
 }
 
 /** process a given server/port,
