@@ -1,3 +1,15 @@
+2004-08-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Handle old interesting.groups files without retry
+	counter.
+	* leafnode.h: Add COUNT_OF macro.
+	* fetchnews.c: Handle retry count in interesting.groups files.  Fix
+	FILE* clobber and double fclose on garbage at end of
+	interesting.groups lines.
+	* nntpd.c: Store a retry count of 0 into interesting.groups files
+	for delaybody.
+	* mastring.c, mastring.h: Add mastr_ncpy (untested).
+
 2004-08-15  Matthias Andree <matthias.andree@gmx.de>
 
 	* config.example, config.table, configutil.c, fetchnews.c,
