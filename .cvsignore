@@ -11,10 +11,12 @@ config.log
 config.o
 config.status
 configutil.o
+cscope.out
 fetchnews
 fetchnews.o
 filterutil.o
 get_any.o
+leafnode.spec
 liblnutil.a
 localutil.o
 Makefile

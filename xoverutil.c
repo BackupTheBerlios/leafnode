@@ -17,6 +17,8 @@ Copyright of the modifications 1998, 1999.
 See README for restrictions on the use of this software.
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "leafnode.h"
 #include <fcntl.h>
 #include <sys/uio.h>
@@ -33,8 +35,6 @@ See README for restrictions on the use of this software.
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <time.h>
 #include <utime.h>
 #include <unistd.h>
@@ -259,16 +259,19 @@ int getxover( void ) {
     }
 
     /* read .overview file into memory */
-    if ( (fd=open( ".overview", O_RDONLY)) >= 0 && fstat( fd, &st )==0 &&
-	 (overview=(char*)realloc( overview, st.st_size + 1 )) != NULL &&
-	 read( fd, overview, st.st_size ) == st.st_size ) {
+    if ( 
+	((fd=open( ".overview", O_RDONLY)) >= 0)
+	&& (fstat( fd, &st ) == 0) 
+	&& (overview=(char *)realloc( overview, (size_t)st.st_size + 1 )) 
+	&& (read( fd, overview, (size_t)st.st_size ) == (ssize_t)st.st_size )
+	) {
 	close( fd );
 	overview[st.st_size] = '\0';
-    }
-    else {
+    } else {
 	/* .overview file not present: make a new one */
-	if ( fd >= 0 )
+	if ( fd >= 0 ) {
 	    close( fd );
+	}
 	free( overview );
 	overview = NULL;
     }
@@ -450,7 +453,7 @@ void writexover( void ) {
 	else
 	    va = 1;
     }
-    fchmod( wfd, 0664 );
+    fchmod( wfd, (mode_t)0664 );
     close( wfd );
     if ( va ) {
 	if ( rename( newfile, ".overview" ) ) {

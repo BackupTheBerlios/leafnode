@@ -18,3 +18,6 @@
 
 /* Define if you have IPv6 */
 #undef HAVE_IPV6
+
+/* Define if you have getline (GNU libc) */
+#undef HAVE_GETLINE

@@ -51,6 +51,7 @@ int main( int argc, char * argv[] ) {
     struct utimbuf u;
     struct newsgroup * g;
     char * conffile;
+    int err;
 
     conffile = critmalloc( strlen(libdir) + 10,
 			   "Allocating space for config file name" );
@@ -77,8 +78,8 @@ int main( int argc, char * argv[] ) {
 	exit(EXIT_FAILURE);
     }
 
-    if ( ( n = readconfig( conffile ) ) != 0 ) {
-	printf( "Reading configuration failed (%s).\n", strerror(n) );
+    if ( ( err = readconfig( conffile ) ) != 0 ) {
+	printf( "Reading configuration failed (%s).\n", strerror(err) );
 	exit( 2 );
     }
 

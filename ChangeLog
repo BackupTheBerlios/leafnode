@@ -4,6 +4,112 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma2 -- changes since 2.0b5-ma1:
+
+NOTE: This version changes the dash in -ma1 to an underscore in _ma2 for
+----- RPM compatibility.
+
+Compiling on FreeBSD 4.0, I found some problems in syslog calls. Not
+sure if they are security relevant, you'd better update.
+
+Makefile.in:
+============
+20001112: Add support for separate critmem and getline/getaline
+	  compilation. Remove unnecessary object file rules, replacing
+	  them by a .c.o: rule. Fix missing rnews dependency in install.
+	  Work around broken directory handling in dist. Move VERSION to
+	  configure.in to allow replacement in leafnode.spec.in. Take
+	  RPMSRC from configure. Introduce HDRFILES for proper
+	  dist. Change rpm target.
+
+acconfig.h:
+===========
+20001112: Add HAVE_GETLINE. 
+
+activutil.c:
+============
+20001112: Fix broken syslog formats.
+20001113: Change various variables to size_t. Change mid in helpfindgroup to
+	  signed.
+
+applyfilter.c:
+==============
+20001113: Introduce err, don't abuse n for errno (signedness issue)
+
+artutil.c:
+==========
+20001113: Change various variables to size_t.
+
+configure.in:
+=============
+20001112: Add support to replace getline. Add VERSION. Add leafnode.spec
+	  to AC_OUTPUT. Fix detecting when lynx is not there.
+ 
+configutil.c:
+=============
+20001112: Fix broken syslog formats.
+
+critmem.c:
+critmem.h:
+==========
+20001113: Forward port from 1.9.17ma3
+
+fetchnews.c:
+=============
+20001112: Fix broken syslog formats.
+20001113: Fix various signedness issues.
+
+filterutil.c:
+=============
+20001113: Cast strlen to int in pcre_exec to match prototypes.
+
+getaline.c:
+getline.c:
+==========
+20001113: Forward port from 1.9.17ma3
+
+leafnode.h:
+===========
+20001112: Move crit{m,re}alloc to critmem.h, include that file. 
+	  Add prototype for getline.
+20001113: Provide BLOCKSIZE. Fix prototype for insertmsgid, arg 2 to
+	  unsigned long.
+
+leafnode.spec.in:
+=================
+20001113: Forward port from 1.9.17ma3
+
+localutil.c:
+============
+20001113: Fix broken isspace() detection for characters > 127 by changing 
+	  l and p to unsigned char *. Fix casts to int.
+
+miscutil.c:
+===========
+20001113: Remove BLOCKSIZE, now in leafnode.h. Cast modes to
+	  mode_t. Remove crit{m,re}alloc. Fix insertmsgid
+	  prototype. Remove getaline, now in own file. Fix types in
+	  copyfile to size_t.
+
+nntpd.c:
+========
+20001112: Fix long long to long. Change socklen_t to size_t, socklen_t
+	  is not supported by Linux' libc5 (tried on SuSE 5.3).
+20001113: Fix various types to size_t.
+
+rnews.c:
+========
+20001112: Add "FIXME" comments to tmpnam.
+20001113: Remove BLOCKSIZE, now in leafnode.h. Fix type of i to size_t.
+
+texpire.c:
+==========
+20001112: Cast st.st_size to size_t. 
+
+xoverutil.c:
+============
+20001113: Code reformatting for readibility. Cast st.st_size to size_t.
+
 ** History of 2.0b5-ma1 -- changes since 2.0b5:
 
 2.0b5-ma1 is a resynchronization release.

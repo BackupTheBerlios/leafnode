@@ -53,9 +53,9 @@ time_t now;
 
 /* Variables set by command-line options which are specific for fetch */
 unsigned long extraarticles = 0;
-unsigned long windowsize = 5;
-			/* number of NNTP commands to pipeline */
-int throttling = 0;	/* the higher the value, the less bandwidth is used */
+long windowsize = 5;    /* number of NNTP commands to pipeline */
+unsigned int throttling = 0;	
+                        /* the higher the value, the less bandwidth is used */
 int postonly = 0;	/* if 1, don't read files from upstream server */
 int noexpire = 0;	/* if 1, don't automatically unsubscribe newsgroups */
 int forceactive = 0;	/* if 1, reread complete active file */
@@ -295,7 +295,7 @@ static void getmarked( struct newsgroup* group ) {
     }
     fclose( f );
 
-    truncate( filename, 0 );	/* kill file contents */
+    truncate( filename, (off_t)0 );	/* kill file contents */
     if ( !failed )
 	return;
 
@@ -864,9 +864,9 @@ unsigned long getarticle( struct filterlist *filter ) {
  * get all articles in a group, with overlapping NNTP commands
  */
 static unsigned long getarticles( struct stringlist * stufftoget,
-				  unsigned long n, struct filterlist *f ) {
+				  long n, struct filterlist *f ) {
     struct stringlist * p;
-    unsigned long sent, recd, window;
+    long sent, window, recd;
     unsigned long server = 0;
 
     p = stufftoget;
@@ -907,7 +907,7 @@ unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
     struct stringlist * stufftoget = NULL;
     struct filterlist * f = NULL;
     long x = 0;
-    unsigned long outstanding = 0;
+    long outstanding = 0;
     unsigned long last = 0;
 
     /* lots of plausibility tests */
@@ -1343,13 +1343,13 @@ static int checkactive( void ) {
     if ( ( now - st.st_mtime ) < ( timeout_active * SECONDS_PER_DAY ) ) {
 	if ( debugmode )
 	    syslog( LOG_DEBUG,
-		    "Last LIST ACTIVE done %d seconds ago: NEWGROUPS\n",
-		    now - st.st_mtime );
+		    "Last LIST ACTIVE done %ld seconds ago: NEWGROUPS\n",
+		    (long)(now - st.st_mtime));
 	return ( now < st.st_atime ) ? now : st.st_atime ;
     } else {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "Last LIST ACTIVE done %d seconds ago: LIST\n",
-		    now - st.st_mtime );
+	    syslog( LOG_DEBUG, "Last LIST ACTIVE done %ld seconds ago: LIST\n",
+		    (long)(now - st.st_mtime));
 	return 0;
     }
 }

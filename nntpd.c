@@ -78,7 +78,7 @@ int write2(int fd, const char *msg);
 int hash (const char *);
 FILE * fopenart(const char *);
 FILE * buildpseudoart(const char * grp);
-FILE * fopenpseudoart(const char * arg, const unsigned long long article_num);
+FILE * fopenpseudoart(const char * arg, const unsigned long article_num);
 void list(struct newsgroup * ng, int what, char * pattern );
 void rereadactive(void);
 
@@ -132,7 +132,7 @@ static time_t gmtoff( void ) {
     time_t now;
     struct tm * ltime;
     char *zone, *oldzone;
-    int  len;
+    size_t len;
 
     now = time( NULL );		/* returns UTC */
     ltime = localtime( &now );
@@ -412,7 +412,7 @@ FILE * buildpseudoart(const char * grp) {
 }
 
 /* open a pseudo art */
-FILE * fopenpseudoart(const char * arg, const unsigned long long article_num) {
+FILE * fopenpseudoart(const char * arg, const unsigned long article_num) {
     FILE *f = NULL;
     char msgidbuf[128];
     char * c;
@@ -1058,7 +1058,8 @@ void dopost( void ) {
     int havesubject = 0;
     int err = 0;
     int hdrtoolong = FALSE;
-    int i, len;
+    size_t i;
+    size_t len;
     int out;
     char outname[80];
     static int postingno; /* starts as 0 */
@@ -1081,7 +1082,7 @@ void dopost( void ) {
 
     /* get headers */
     do {
-	int len;
+	size_t len;
 	debug = 0;
 	line = getaline( stdin );
 	debug = debugmode;
@@ -1810,7 +1811,9 @@ void doauthinfo( const char *arg ) {
 
 int main( int argc, char ** argv ) {
     int option, reply;
-    socklen_t fodder;
+/* GNU libc5 does not have socklen_t */
+/*    socklen_t fodder; */
+    size_t fodder;
     char *conffile;
     struct hostent *he;
 #ifdef HAVE_IPV6
@@ -1893,7 +1896,7 @@ int main( int argc, char ** argv ) {
 
     artno = 0;
     verbose = 0;
-    umask(2);
+    umask((mode_t)02);
 
     if ( getpeername(0, (struct sockaddr *)&peer, &fodder) )
 	syslog( LOG_ERR, "Connect from unknown client");
@@ -1922,7 +1925,7 @@ int main( int argc, char ** argv ) {
     rereadactive();
     readlocalgroups();
     
-    signal( SIGCHLD, SIG_IGN );
+    signal( SIGCHLD, SIG_IGN ); 
 
     gmt_off = gmtoff();	/* get difference between local time and GMT */
     

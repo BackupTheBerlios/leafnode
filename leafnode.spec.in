@@ -1,0 +1,61 @@
+# DO NOT EDIT!
+# @configure_input@
+
+Version: @VERSION@
+Summary: Leafnode - a leafsite NNTP server (Version %version)
+Summary(de): Leafnode - ein offline-Newsserver (Version %version)
+Name: leafnode
+Release: 1
+Copyright: see COPYING
+Group: Applications/News
+Source: ftp://wpxx02.toxi.uni-wuerzburg.de/pub/leafnode-%version.tar.gz
+
+Prefix: /usr
+%define spooldir /var/spool/news
+%define confdir /etc/leafnode
+%define lockfile /var/lock/fetchnews.lck
+
+# Distribution: ${DISTRIBUTION}
+Buildroot: /var/tmp/leafnode-%version-buildroot/
+Packager: Matthias Andree <matthias.andree@gmx.de>
+%description
+Leafnode is a small NNTP server for leaf sites without permanent
+connection to the internet. It supports a subset of NNTP and is able to
+automatically fetch the newsgroups the user reads regularly from the
+newsserver of the ISP.
+
+%description -l de
+Leafnode ist ein offline-Newsserver, der vor allem für den typischen
+Einzelnutzer-Rechner ohne permanente Internetanbindung geeignet ist.
+Leafnode bezieht automatisch die Newsgroups, die der oder die Nutzer
+regelmäßig lesen, vom Newsserver des Providers.
+
+%prep
+%setup
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix --mandir=%_mandir \
+ --with-spooldir=%spooldir\
+ --sysconfdir=%confdir --with-lockfile=%lockfile
+
+%build
+make
+
+%install
+make DESTDIR=$RPM_BUILD_ROOT install-strip
+
+%files
+%attr(640,root,root) %confdir/config.example
+%defattr(755,root,root)
+%prefix/bin/newsq
+%defattr(750,root,root)
+%prefix/sbin/*
+%defattr(644,root,root)
+%doc %_mandir/man1/*
+%doc %_mandir/man8/*
+%doc ChangeLog COPYING CREDITS FAQ INSTALL README TODO 
+%doc CHANGES README-MAINTAINER
+%doc tools/*.pl
+%defattr(2755,news,news)
+%spooldir
+
+%clean
+rm -rf $RPM_BUILD_ROOT

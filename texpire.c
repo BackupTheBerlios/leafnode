@@ -390,9 +390,9 @@ static void dogroup(struct newsgroup* g) {
 
     if (stat(".overview", &st) == 0) {
 	/* could use mmap() here but I don't think it would help */
-	overview = critmalloc(st.st_size + 1, "Reading article overview info");
+	overview = critmalloc((size_t)st.st_size + 1, "Reading article overview info");
 	if ((fd = open(".overview", O_RDONLY)) < 0 ||
-	    (read(fd, overview, st.st_size) < st.st_size)) {
+	    (read(fd, overview, (size_t)st.st_size) < (ssize_t)st.st_size)) {
 	    syslog(LOG_ERR, "can't open/read %s/.overview: %m", gdir);
 	    *overview = '\0';
 	    if (fd > -1)

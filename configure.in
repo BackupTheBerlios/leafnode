@@ -1,8 +1,13 @@
 dnl autoconf script for leafnode
 dnl written by Cornelius Krasel, 1999
+dnl enhanced by Matthias Andree, 2000
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
+
+dnl version information
+VERSION="2.0b5_ma2"
+AC_SUBST(VERSION)
 
 dnl Checks for programs.
 AC_PROG_AWK
@@ -16,7 +21,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_CHECK_PROG( AR, ar, ar )
-AC_PATH_PROG( LYNX, lynx, lynx )
+AC_PATH_PROG( LYNX, lynx )
 AC_PATH_PROG( RPM, rpm )
 
 dnl Checks for header files.
@@ -189,6 +194,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_CHECK_FUNCS(getcwd gethostname gettext mkdir mktime regcomp rmdir socket strdup strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf)
+AC_REPLACE_FUNCS(getline)
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -225,4 +231,4 @@ AC_ARG_WITH(ipv6,
 AC_SUBST(PCRE_DEFINES)
 AC_SUBST(GCC_FLAGS)
 
-AC_OUTPUT(Makefile pcre/Makefile)
+AC_OUTPUT(Makefile pcre/Makefile leafnode.spec)

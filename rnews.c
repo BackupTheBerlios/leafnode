@@ -21,7 +21,6 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#define BLOCKSIZE 8192
 #define GZIP "/bin/gzip"
 
 extern int optind;
@@ -56,7 +55,7 @@ static int processbatch( char * filename ) {
 	fprintf( stderr, "unable to open batchfile %s -- abort\n", filename );
 	return 0;
     }
-    artname = tmpnam( NULL );
+    artname = tmpnam( NULL ); /* FIXME */
     if ( !artname ) {
 	fprintf( stderr, "unable to create temporary article -- abort\n" );
 	fclose( f );
@@ -91,9 +90,9 @@ static int processbatch( char * filename ) {
 static char * makecompressedfile( FILE * infile ) {
     FILE * outfile ;
     char * c, * buf;
-    int i;
+    size_t i;
 
-    c = tmpnam( NULL );
+    c = tmpnam( NULL ); /* FIXME */
     if ( !c ) {
 	fprintf( stderr, "unable to create temporary file -- abort\n" );
 	return NULL;

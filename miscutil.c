@@ -44,8 +44,6 @@ See file COPYING for restrictions on the use of this software.
 #include <stdarg.h>
 #endif
 
-#define BLOCKSIZE 8192
-
 char fqdn[256];
 char s[PATH_MAX+1024]; /* long string, here to cut memory usage */
 extern struct state _res;
@@ -70,14 +68,14 @@ int initvars( char * progname ) {
 
     /* These directories should exist anyway */
     sprintf( s, "%s/interesting.groups", spooldir );
-    mkdir( s, 0775 );
+    mkdir( s, (mode_t)0775 );
     sprintf( s, "%s/leaf.node", spooldir );
-    mkdir( s, 0755 );
+    mkdir( s, (mode_t)0755 );
     sprintf( s, "%s/failed.postings", spooldir );
-    mkdir( s, 0775 );
+    mkdir( s, (mode_t)0775 );
     sprintf( s, "%s/out.going", spooldir );
-    mkdir( s, 2755 );
-    chmod( s, S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+    mkdir( s, (mode_t)2755 );
+    chmod( s, (mode_t)(S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) );
 
     if ( progname ) {
 	pw = getpwnam( "news" );
@@ -340,40 +338,6 @@ const char * lookup ( const char *msgid ) {
     return name;
 }
 
-
-
-/*
- * replacement for malloc, syslogs allocation failures
- * and exits with the error message
- */
-char * critmalloc(size_t size, const char* message) {
-    char * a;
-
-    a = (char *)malloc(size);
-    if (!a) {
-	syslog(LOG_ERR, "malloc(%ld) failed: %s", (long)size, message);
-	fprintf(stderr, "malloc(%ld) failed: %s\n", (long)size, message);
-	exit(EXIT_FAILURE);
-    }
-    return a;
-}
-
-/*
- * replacement for realloc, syslogs allocation failures
- * and exits with the error message
- */
-char * critrealloc(char *a, size_t size, const char* message) {
-    a = (char *)realloc(a, size);
-    if (!a) {
-	syslog(LOG_ERR, "realloc(%ld) failed: %s", (long)size, message);
-	fprintf(stderr, "realloc(%ld) failed: %s\n", (long)size, message);
-	exit(EXIT_FAILURE);
-    }
-    return a;
-}
-
-#define LM_SIZE 65536
-
 static int makedir( char * d ) {
     char * p;
     char * q;
@@ -558,7 +522,7 @@ struct msgidtree {
 
 static struct msgidtree * head; /* starts as NULL */
 
-void insertmsgid( const char * msgid, int art ) {
+void insertmsgid( const char * msgid, unsigned long art ) {
     struct msgidtree ** a;
     int c;
 
@@ -674,67 +638,6 @@ const char* rfctime(void) {
 }
 
 /*
- * originally written by Lars Wirzenius: read a line into memory,
- * with no max length. Return a pointer to the line, or NULL in case
- * of error. Strip \r at EOL
- * redone for NUL bytes in string by Cornelius Krasel
- * using GNU getline is much easier, but not available everywhere
- */
-char *getaline(FILE *f) {
-    static char *buf;       /* buffer for line */
-    static size_t size;     /* size of buffer */
-    size_t len;             /* # of chars stored into buf before '\0' */
-    char * p;
-    int i;
-
-#ifdef HAVE_GETLINE
-    len = getline( &buf, &size, f );
-    if ( len < 0 )
-	return NULL;
-#else
-    len = 0;
-    if (!size)
-	size = 256;
-    if (!buf)
-	buf = critmalloc( size, "reading line" );
-
-    while ((p=fgets(buf+len, size-len, f))) {
-	/* replace NUL bytes (which shouldn't be there anyway)
-	 * with spaces
-	 */
-	i = size - len;
-	while ( *p != '\n' && --i > 0 ) {
-	    if ( *p == '\0' )
-		*p = ' ';
-	    p++;
-	}
-	len += strlen(buf+len);
-	if ( buf[len-1] == '\n' )
-	    break;		/* the whole line has been read */
-
-	size += size;		/* exponential growth of buffer */
-	buf = critrealloc(buf, size, "reading line" );
-    }
-
-    if ( len == 0 )
-	return NULL;
-#endif
-
-    if (len && (buf[len-1] == '\n')) { /* go back on top of the newline */
-	--len;
-	if (len && (buf[len-1] == '\r')) /* also delete CR */
-	    --len;
-    }
-
-    buf[len] = '\0';        /* unconditionally terminate string,
-                               possibly overwriting newline */
-
-    if ( debug > 1 )
-        syslog( LOG_DEBUG, "<%s\n", buf );
-    return buf;
-}
-
-/*
  * returns 0 if string matches pattern
  */
 int ngmatch(const char* pattern, const char* str) {
@@ -746,7 +649,8 @@ int ngmatch(const char* pattern, const char* str) {
  */
 void copyfile( FILE * infile, FILE * outfile, long n ) {
     static char * buf = NULL ;
-    long total, toread, read;
+    long total;
+    size_t toread, read;
 
     if ( n == 0 )
 	return;
@@ -776,7 +680,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.3 $
+/*  $Revision: 1.4 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

@@ -349,7 +349,7 @@ int readconfig( char * configfile ) {
         if ( getrlimit( RLIMIT_CORE, &corelimit ) < 0 )
 	    syslog( LOG_DEBUG, "Getting core file size failed: %m" );
 	else
-	    syslog( LOG_DEBUG, "Core file size: %d", corelimit.rlim_cur );
+	    syslog( LOG_DEBUG, "Core file size: %lu", (unsigned long)corelimit.rlim_cur );
     }
 
     free( param );

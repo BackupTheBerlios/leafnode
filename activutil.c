@@ -23,7 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int activesize;
+size_t activesize;
 struct newsgroup * active = NULL;
 
 struct nglist {
@@ -129,20 +129,20 @@ void mergegroups( void ) {
 /*
  * find a group by name
  */
-static unsigned long helpfindgroup( const char *name, long low, long high ) {
-    int result;
-    unsigned long new;
+static long helpfindgroup( const char *name, long low, long high ) {
+    long result;
+    long mid;
 
     if ( low > high )
 	return -1 ;
-    new = (high-low)/2+low;
-    result = strcasecmp( name, active[new].name );
+    mid = (high-low)/2+low;
+    result = strcasecmp( name, active[mid].name );
     if ( result == 0 )
-	return new;
+	return mid;
     else if ( result < 0 )
-	return helpfindgroup( name, low, new-1 );
+	return helpfindgroup( name, low, mid-1 );
     else
-	return helpfindgroup( name, new+1, high );
+	return helpfindgroup( name, mid+1, high );
 }
 
 /*
@@ -151,7 +151,7 @@ static unsigned long helpfindgroup( const char *name, long low, long high ) {
 struct newsgroup * findgroup(const char *name) {
     long i;
 
-    i = helpfindgroup( name, 0, activesize-1 );
+    i = helpfindgroup( name, 0, (long)activesize-1 );
     if ( i < 0 )
 	return NULL;
     else
@@ -166,7 +166,8 @@ void writeactive( void ) {
     struct newsgroup * g;
     char *c;
     char l[PATH_MAX];
-    int count, err;
+    size_t count;
+    int err;
 
     c = critmalloc( PATH_MAX, "Allocating buffer" );
 
@@ -237,7 +238,7 @@ static void freeactive( void ) {
 void readactive( void ) {
     char *buf;
     char *p, *q, *r;
-    long bufsize;
+    size_t bufsize;
     int n;
     struct stat st;
     FILE *f;
@@ -257,13 +258,13 @@ void readactive( void ) {
     	syslog( LOG_ERR, "%s not a regular file", s );
 	return;
     }
-    buf = critmalloc( st.st_size+2, "Reading group info" );
+    buf = critmalloc( (size_t)st.st_size+2, "Reading group info" );
     if (( f = fopen( s, "r" )) != NULL ) {
-    	bufsize = fread( buf, 1, st.st_size, f );
-	if ( bufsize < st.st_size ) {
+    	bufsize = fread( buf, 1, (size_t)st.st_size, f );
+	if ( bufsize < (size_t)st.st_size ) {
 	    syslog( LOG_ERR,
-	    	    "Groupinfo file truncated while reading: %d < %d .",
-		    bufsize, (int) st.st_size );
+	    	    "Groupinfo file truncated while reading: %ld < %ld.",
+		    (long)bufsize, (long)st.st_size );
 	}
 	fclose( f );
     }
@@ -272,20 +273,21 @@ void readactive( void ) {
 	return;
     }
 
-    bufsize = ( bufsize > st.st_size ) ? st.st_size : bufsize ;
+    bufsize = ( bufsize > (size_t)st.st_size ) ? (size_t)st.st_size : bufsize ;
     			/* to read truncated groupinfo files correctly */
     buf[bufsize++] = '\n';
     buf[bufsize++] = '\0';	/* 0-terminate string */
     buf = critrealloc( buf, bufsize, "Reallocating active file size" );
 
     /* delete spurious 0-bytes except not the last one */
-    while (( p = memchr( buf, '\0', bufsize-1 ) ) != NULL )
+    while (( p = (char *)memchr(buf, '\0', bufsize-1) ) != NULL )
 	*p = ' ';	/* \n might be better, but produces more errors */
 
     /* count lines = newsgroups */
     activesize = 0;
     p = buf;
-    while ( p && *p && (( q = memchr( p, '\n', (buf-p+bufsize) )) != NULL ) ) {
+    while ( p && *p &&
+	    ( (q = (char *)memchr(p, '\n', buf-p+bufsize)) != NULL ) ) {
 	activesize++;
 	p = q+1;
     }
@@ -420,7 +422,7 @@ void fakeactive( void ) {
 	    }
 	    closedir( ng );
 	    if ( debugmode )
-	    	syslog( LOG_DEBUG, "parsed directory %s: first %d, last %d",
+	    	syslog( LOG_DEBUG, "parsed directory %s: first %lu, last %lu",
 			de->d_name, first, last );
 	    insertgroup( de->d_name, first, last, 0, NULL );
 	}
@@ -460,7 +462,7 @@ void fakeactive( void ) {
 	    }
 	    closedir( ng );
 	    if ( debugmode )
-	    	syslog( LOG_DEBUG, "parsed directory %s: first %d, last %d",
+	    	syslog( LOG_DEBUG, "parsed directory %s: first %lu, last %lu",
 			de->d_name, first, last );
 	    insertgroup( de->d_name, first, last, 0, NULL );
 	}

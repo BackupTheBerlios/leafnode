@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.2 2000/11/12 18:05:49 emma Exp $ */
+/* $Id: leafnode.h,v 1.3 2000/11/13 00:58:38 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -18,9 +18,12 @@
 #define PATH_MAX MAXPATHLEN
 #endif
 
+#define BLOCKSIZE 16384
+
 #include "config.h"	/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
 
 #include "get.h"
+#include "critmem.h"
 
 #ifdef HAVE_AP_CONFIG_H
 #define AP_CONFIG_H
@@ -133,7 +136,7 @@ extern struct newsgroup * active;
 /* translation from message-id to article number, used in fetch and expire */
 
 void clearidtree( void );
-void insertmsgid( const char * msgid, int art );
+void insertmsgid( const char * msgid, unsigned long art );
 int findmsgid( const char* msgid );
 
 /* -----------here starts the new stuff-----------------*/
@@ -335,8 +338,6 @@ void free_expire( void );
 int readconfig( char * configfile );
 void whoami( void );
 void lowercase( char *string );
-char * critmalloc(size_t size, const char* message);
-char * critrealloc(char *a, size_t size, const char* message);
 int ngmatch(const char* pattern, const char* string);
 void copyfile( FILE * infile, FILE * outfile, long n );
 
@@ -353,5 +354,10 @@ int nntpconnect( const struct serverlist * upstream );
 void nntpdisconnect( void );	/* disconnect from upstream server */
 
 const char* rfctime(void);	/* An rfc type date */
+
+/* from getline.c */
+#ifndef HAVE_GETLINE
+ssize_t getline(char **, size_t *, FILE *); /* fgets replacement */
+#endif
 
 #endif	/* #ifndef LEAFNODE_H */

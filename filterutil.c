@@ -362,9 +362,9 @@ int killfilter( struct filterlist *f, char *hdr ) {
 	g = f->entry;
 	if ( ( g->limit == -1 ) && ( g->expr ) ) {
 #ifdef NEW_PCRE_EXEC
-	    match = pcre_exec( g->expr, NULL, hdr, strlen(hdr), 0, 0, NULL, 0 );
+	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr), 0, 0, NULL, 0 );
 #else
-	    match = pcre_exec( g->expr, NULL, hdr, strlen(hdr), 0, NULL, 0 );
+	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr), 0, NULL, 0 );
 #endif
 	}
 	else if ( strcasecmp( g->cleartext, "maxage" ) == 0 ) {

@@ -1,7 +1,7 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.3 2000/11/12 20:09:49 emma Exp $
+# $Id: Makefile.in,v 1.4 2000/11/13 00:58:38 emma Exp $
 
-VERSION = 2.0b5-ma1
+VERSION = @VERSION@
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -35,6 +35,7 @@ MANDIR = $(PREFIX_USR)/man
 SPOOLDIR = @SPOOLDIR@
 LIBDIR   = @sysconfdir@
 LOCKFILE = @LOCKFILE@
+RPMSRC   = @RPMSRC@
 
 # external programs
 LYNX = @LYNX@
@@ -45,15 +46,17 @@ MANFILES = newsq.1 fetchnews.5 applyfilter.8 checkgroups.8 fetchnews.8 \
 SRCFILES = nntputil.c configutil.c xoverutil.c activutil.c miscutil.c \
 	   artutil.c filterutil.c localutil.c config.c \
 	   applyfilter.c checkgroups.c newsq.c nntpd.c fetchnews.c texpire.c \
-	   rnews.c \
-	   vsnprintf.c strdup.c
+	   rnews.c getline.c getaline.c critmem.c \
+	   vsnprintf.c strdup.c get_any.c
 LIBFILES = nntputil.o configutil.o xoverutil.o activutil.o miscutil.o \
-	   artutil.o filterutil.o localutil.o \
-	   vsnprintf.o strdup.o get_any.o
+	   artutil.o filterutil.o localutil.o critmem.o \
+	   vsnprintf.o strdup.o get_any.o getaline.o @LIBOBJS@
+HDRFILES = leafnode.h get.h critmem.h acconfig.h
 
-all: liblnutil.a @PCRELIB@ nntpd rnews fetchnews texpire checkgroups applyfilter newsq
+all: liblnutil.a @PCRELIB@ nntpd rnews fetchnews texpire checkgroups \
+	applyfilter newsq
 
-leafnode.h: get.h
+leafnode.h: get.h critmem.h
 	touch $@
 
 liblnutil.a: $(LIBFILES) leafnode.h
@@ -85,29 +88,11 @@ checkgroups: checkgroups.o config.o liblnutil.a
 applyfilter: applyfilter.o config.o liblnutil.a @PCRELIB@
 	$(CC) $(CFLAGS) -o $@ applyfilter.o config.o -L. -llnutil $(LINKPCRELIB) $(LIBS)
 
+.c.o: leafnode.h
+	$(CC) $(CFLAGS) -o $@ -c $(srcdir)/$<
+
 newsq: newsq.o config.o liblnutil.a
 	$(CC) $(CFLAGS) -o $@ newsq.o config.o -L. -llnutil $(LIBS)
-
-nntpd.o: nntpd.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/nntpd.c
-
-rnews.o: rnews.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/rnews.c
-
-fetchnews.o: fetchnews.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/fetchnews.c
-
-texpire.o: texpire.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/texpire.c
-
-checkgroups.o: checkgroups.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/checkgroups.c
-
-applyfilter.o: applyfilter.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/applyfilter.c
-
-newsq.o: newsq.c leafnode.h
-	$(CC) -c $(CFLAGS) $(srcdir)/newsq.c
 
 .PHONY:	clean distclean realclean
 clean:
@@ -138,7 +123,7 @@ config.o: config.c Makefile
 install-strip:
 	$(MAKE) install STRIP=-s
 
-install: liblnutil.a nntpd fetchnews texpire checkgroups applyfilter newsq
+install: nntpd fetchnews texpire checkgroups applyfilter newsq rnews
 	$(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(MANDIR)/man1
 	$(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(MANDIR)/man7
 	$(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(MANDIR)/man8
@@ -211,22 +196,24 @@ uninstall: uninstall-bins
 dist:	distclean
 	autoheader
 	autoconf
-	if test $(LYNX) ; then rm -f README ; $(LYNX) -dump README.html > README ; fi
+	if test "$(LYNX)" != "no" ; then rm -f README ; $(LYNX) -dump README.html > README ; fi
+	-chmod -R a+rX leafnode-$(VERSION)
+	rm -rf leafnode-$(VERSION)
 	mkdir -p leafnode-$(VERSION)
-	cp $(MANFILES) leafnode.h acconfig.h $(SRCFILES) \
+	cp $(MANFILES) $(HDRFILES) $(SRCFILES) \
 		INSTALL README* CREDITS TODO ChangeLog FAQ \
 		config.example config.h.in configure.in Makefile.in \
 		configure install-sh aclocal.m4 \
 		update.sh makerpm.sh leafnode-$(VERSION).lsm \
 		leafnode-$(VERSION)
-	chmod 644 leafnode-$(VERSION)/*
+	chmod a+r leafnode-$(VERSION)/*
 	cp -R doc_german leafnode-$(VERSION)/
 	cp -R doc_catalan leafnode-$(VERSION)
 	chmod 755 leafnode-$(VERSION)/doc_german
 	chmod 755 leafnode-$(VERSION)/doc_catalan
 	mkdir -p  leafnode-$(VERSION)/tools
 	chmod 755 leafnode-$(VERSION)/tools
-	cp tools/* leafnode-$(VERSION)/tools/
+	cp tools/*.pl leafnode-$(VERSION)/tools/
 	chmod 755 leafnode-$(VERSION)/*sh
 	chmod 755 leafnode-$(VERSION)/configure
 	chmod 755 leafnode-$(VERSION)/tools/*
@@ -234,7 +221,7 @@ dist:	distclean
 	gzip -f9 leafnode-$(VERSION).tar
 	mkdir -p  leafnode-$(VERSION)/pcre
 	chmod 755 leafnode-$(VERSION)/pcre
-	cp pcre/* leafnode-$(VERSION)/pcre/
+	find pcre -not -type d | xargs -i cp "{}" leafnode-$(VERSION)/pcre/
 	chmod 755 leafnode-$(VERSION)/pcre/perltest
 	tar cf leafnode-pcre-$(VERSION).tar leafnode-$(VERSION)
 	gzip -f9 leafnode-pcre-$(VERSION).tar
@@ -271,7 +258,12 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
-rpm: dist
-	@./makerpm.sh $(RPM) $(VERSION) $(USRDIR) $(BINDIR) $(MANDIR) $(LOCKFILE) $(SPOOLDIR) $(AWK) $(LIBDIR) $(PREFIX_USR)
+leafnode.spec: leafnode.spec.in config.status
+	./config.status
+
+rpm: dist leafnode.spec
+	-ln -s `pwd`/leafnode-$(VERSION).tar.gz $(RPMSRC)/SOURCES
+	-ln -s `pwd`/leafnode.spec $(RPMSRC)/SPECS
+	rpm -ba $(RPMSRC)/SPECS/leafnode.spec
 
 # DO NOT DELETE

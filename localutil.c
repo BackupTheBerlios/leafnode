@@ -86,7 +86,7 @@ void insertlocal(const char *name) {
  * news.group.name[whitespace]Description
  */
 void readlocalgroups( void ) {
-    char *l, *p;
+    unsigned char *l, *p;
     FILE *f;
 
     strcpy( s, spooldir );
@@ -104,9 +104,9 @@ void readlocalgroups( void ) {
     while ( (l = getaline( f )) != NULL ) {
 	p = l;
 
-	while ( p && *p && !isspace((unsigned int)*p) )
+	while ( p && *p && !isspace((int)*p) )
 	    p++;
-	while ( p && *p && isspace((unsigned int)*p) )
+	while ( p && *p && isspace((int)*p) )
 	    *p++ = '\0';
 
 	/* l points to group name, p to description */

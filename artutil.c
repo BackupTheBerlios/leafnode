@@ -36,9 +36,9 @@ char *mgetheader ( const char *hdr, char *buf ) {
 		p++;
 	    q = strchr( p, '\n' );
 	    if ( p && q ) {
-		value = critmalloc( q-p+2, "Allocating space for header value" );
-		memset( value, 0, q-p+2 );
-		strncpy( value, p, q-p );
+		value = critmalloc( (size_t)(q-p+2), "Allocating space for header value" );
+		memset( value, 0, (size_t)(q-p+2) );
+		strncpy( value, p, (size_t)(q-p) );
 	     }
 	} else {
 	     q = strchr( p, '\n' );
@@ -53,7 +53,8 @@ char *mgetheader ( const char *hdr, char *buf ) {
  */
 char * fgetheader( FILE * f, const char * header ) {
     char * hdr, *p ;
-    int hlen, next;
+    size_t hlen;
+    int next;
 
     if ( !f )
 	return NULL;

@@ -48,6 +48,9 @@
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
+/* Define if you have the getline function.  */
+#undef HAVE_GETLINE
+
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
 
