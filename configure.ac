@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040116a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.84 $)
+AC_REVISION($Revision: 1.85 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -42,8 +42,9 @@ then
   done
 fi])
 rm -f configure-dummy.c configure-dummy.o
-GCC_FLAGS=$ac_cv_prog_gcc_flags
-AC_SUBST(GCC_FLAGS)
+CFLAGS="$CFLAGS $ac_cv_prog_gcc_flags"
+export CFLAGS
+AC_SUBST(CFLAGS)
 
 dnl check which user to use
 AC_MSG_CHECKING(runas-user)
@@ -148,16 +149,15 @@ SPOOLDIR=$enableval
 AC_MSG_RESULT($SPOOLDIR)
 AC_SUBST(SPOOLDIR)
 
-AC_MSG_CHECKING(confdir)
+AC_MSG_CHECKING(sysconfdir)
 dnl check where to put the confdir
 if test "x$sysconfdir" = 'x${prefix}/etc' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
-  CONFDIR='/etc'
+  CONFDIR='/etc/leafnode'
 else
     case "$sysconfdir" in
-	*/leafnode)  CONFDIR=${sysconfdir%%/leafnode} ;;
-	*/leafnode/) CONFDIR=${sysconfdir%%/leafnode/} ;;
-	*)           CONFDIR="$sysconfdir" ;;
+	*/) CONFDIR="${sysconfdir%%/}" ;;
+	*)  CONFDIR="${sysconfdir}" ;;
     esac
 fi
 AC_MSG_RESULT($CONFDIR)
@@ -167,9 +167,8 @@ if test "x$CONFDIR" != "x$sysconfdir"; then
   AC_MSG_WARN([use --sysconfdir='\${prefix}/etc' to get])
   AC_MSG_WARN([the default autoconf behaviour])
 fi
-sysconfdir=$CONFDIR
+sysconfdir="$CONFDIR"
 AC_SUBST(sysconfdir)
-AC_MSG_NOTICE(note that "leafnode" is automatically appended to $sysconfdir)
 
 dnl check for rpm build dir
 AC_MSG_CHECKING(rpm build dir)
@@ -316,7 +315,6 @@ if test x$silent != xyes ; then
     echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
     printf "prefix:      " ; eval echo "$prefix"
     printf "sysconfdir:  " ; eval echo "$sysconfdir"
-    printf "             " ; echo 'note that "leafnode" is automatically appended to sysconfdir'
     printf "spooldir:    " ; eval echo "$SPOOLDIR"
     printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
     printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
