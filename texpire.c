@@ -799,8 +799,8 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     }
     if (debugmode & DEBUG_EXPIRE)
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	       "%s: expire %lu, low water mark %lu, high water mark %lu",
-	       n, expire, first, last);
+	       "%s: expire %ld, low water mark %lu, high water mark %lu",
+	       n, (long)expire, first, last);
     if (expire <= 0) {
 	return;
     }
@@ -1016,7 +1016,6 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-    time_t now;
     int option, reply;
     char *conffile = NULL;
     const char *const myname = "texpire";
@@ -1093,8 +1092,6 @@ main(int argc, char **argv)
 	fprintf(stderr, "%s: no expire time\n", argv[0]);
 	exit(2);
     }
-
-    now = time(NULL);
 
     expiregroups();
     writeactive();
