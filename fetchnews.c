@@ -419,7 +419,7 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
 	else if (h < 1)
 	    h = 1;
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: backing up from %lu to %lu\n", g->name, h, *first);
+	       "%s: backing up from %lu to %lu", g->name, h, *first);
 	*first = h;
     }
 
@@ -429,12 +429,12 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
 	       g->name, *first, window, *last);
 	if (*first > (*last + 5)) {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: switched upstream servers? %lu > %lu\n",
+		   "%s: switched upstream servers? %lu > %lu",
 		   g->name, *first, *last);
 	    *first = window;	/* check all upstream articles again */
 	} else {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: rampant spam cancel? %lu > %lu\n",
+		   "%s: rampant spam cancel? %lu > %lu",
 		   g->name, *first - 1, *last);
 	    *first = *last - 5;	/* re-check last five upstream articles */
 	}
