@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.83 2003/03/13 00:08:29 emma Exp $ */
+/* $Id: leafnode.h,v 1.84 2003/05/05 21:02:18 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -432,6 +432,7 @@ extern "C" {
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
 	int timeout;		/* timeout in seconds before we give up */
+	int post_anygroup;
 	enum feedtype feedtype;
 	char active;
     };

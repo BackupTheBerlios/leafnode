@@ -192,3 +192,7 @@ server = news.hiof.no
 ## to using XOVER if you use delaybody mode or filtering.
 # server = dont.like.xover
 # usexhdr = 1
+
+## Set this if your server does not offer the groups, but forwards
+## postings into its groups (post-only servers may need this):
+# post_anygroup = 1

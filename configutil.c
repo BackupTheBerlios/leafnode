@@ -454,6 +454,11 @@ readconfig(/*@null@*/ const char *configfile)
 				"config: only_groups_pcre = %s", value);
 		    }
 		    break;
+		case CP_POSTANY:
+		    p->post_anygroup = atoi(value);
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			    "config: post_anygroup = %d", p->post_anygroup);
+		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			   "Config line \"%s=%s\" unhandled, abort.",
@@ -497,6 +502,7 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
     p->timeout = 30;	/* default 30 seconds */
     p->port = port;
     p->usexhdr = 0;	/* default: use XOVER */
+    p->post_anygroup = 0;	/* default: check group availability first */
     p->username = NULL;
     p->password = NULL;
     p->active = TRUE;
