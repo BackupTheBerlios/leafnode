@@ -1,9 +1,43 @@
 #include <string.h>
+#include <ctype.h>
 
 #include "fetchnews.h"
 #include "system.h"
 #include "leafnode.h"
 #include "ln_log.h"
+
+static int get_nr(char *s, int count, int *dst);
+static int scan_date(char *l, struct tm *tm);
+
+int
+get_nr(char *s, int count, int *dst)
+{
+    int i;
+
+    *dst = 0;
+
+    for (i = 0; i < count; i++) {
+	if (!isdigit(s[i])) return FALSE;
+	*dst *= 10;
+	*dst += s[i] - '0';
+    }
+
+    return TRUE;
+}
+
+int
+scan_date(char *l, struct tm *tm)
+{
+    SKIPWORD(l);
+    if (strlen(l) != 14) return FALSE;
+
+    return get_nr(l,    4, &tm->tm_year) &&
+    	   get_nr(l+4,  2, &tm->tm_mon) &&
+	   get_nr(l+6,  2, &tm->tm_mday) &&
+	   get_nr(l+8,  2, &tm->tm_hour) &&
+	   get_nr(l+10, 2, &tm->tm_min) &&
+	   get_nr(l+12, 2, &tm->tm_sec);
+}
 
 /* send DATE command to upstream server and complain if the clocks are
  * more than 15 minutes apart.
@@ -31,9 +65,7 @@ check_date(const struct serverlist *server)
     }
 
     /* upstream supports the DATE command */
-    if (sscanf(lastline, "%*d %4d%2d%2d%2d%2d%2d",
-		&tm.tm_year, &tm.tm_mon, &tm.tm_mday,
-		&tm.tm_hour, &tm.tm_min, &tm.tm_sec) < 6) {
+    if (scan_date(lastline, &tm)) {
 	/* too few fields */
 	if ((debugmode & debugmask) == debugmask) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CSERVER, "check_date: %s: too few fields in DATE reply "

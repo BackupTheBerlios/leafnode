@@ -9,6 +9,7 @@
 #include "format.h"
 #include "mastring.h"
 #include "activutil.h"
+#include "get.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -391,6 +392,49 @@ freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a)
     free(a);
 }
 
+static int check_old_format(char *l);
+static int
+check_old_format(char *l)
+{
+    int i;
+
+    if (*l++ == ' ') return FALSE;
+    while(*l++ != ' ' && *l);
+    if (*l++ != ' ') return FALSE;
+
+    for (i = 0; i < 3; i++) {
+	if (!isdigit(*l++)) return FALSE;
+	while(isdigit(*l++));
+	if (*l++ != ' ') return FALSE;
+    }
+
+    if(!isspace(*l++)) return FALSE;
+
+    return TRUE;    
+}
+
+static int read_group_parameters(char *l, struct newsgroup *g, unsigned long *age);
+static int
+read_group_parameters(char *l, struct newsgroup *g, unsigned long *age)
+{
+    g->status = *l++;
+    if (*l++ != '\t') return FALSE;
+
+    if(!get_ulong(l, &g->last)) return FALSE;
+    for (; *l && isdigit(*l); l++);
+    if (*l++ != '\t') return FALSE;
+
+    if(!get_ulong(l, &g->first)) return FALSE;
+    for (; *l && isdigit(*l); l++);
+    if (*l++ != '\t') return FALSE;
+
+    if(!get_ulong(l, age)) return FALSE;
+    for (; *l && isdigit(*l); l++);
+    if (*l++ != '\t') return FALSE;
+
+    return TRUE;
+}
+
 /*
  * read active file into memory
  */
@@ -430,7 +474,7 @@ readactive(void)
 	unsigned long temp;
 
 	r = strchr(p, '\t');
-	if (!r && sscanf(p, "%*[^ ] %*u %*u %*u %*s")) {
+	if (!r && check_old_format(p)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "groupinfo in old format. You MUST run "
 		       "fetchnews -f in order to fix this.");
@@ -439,8 +483,7 @@ readactive(void)
 	}
 	if (!r
 	    || (*r++ = '\0',
-		sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
-		       &g->first, &temp) != 4)
+		!read_group_parameters(r,g, &temp))
 	    || !strchr("ymn", g->status)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "Groupinfo file damaged, ignoring line: %s", p);

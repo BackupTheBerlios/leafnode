@@ -171,8 +171,6 @@ Matthias:
 3.3 run everything through various static and dynamic checkers
     (efence, dmalloc, lclint)
 
-3.3 get rid of _all_ sscanf (Matthias Andree)
-
 3.3 how to make newsgroup names 8-bit compliant? E.g., how to produce
     a newsgroups line of the form
 	Newsgroups: norge.østfold
@@ -235,6 +233,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2004-02-06 Hynek Schlawack
+	   get rid of _all_ sscanf
 
 2004-02-06 Hynek Schlawack, Matthias Andree
 	   try to post an article to *every* server before moving into
