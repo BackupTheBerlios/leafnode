@@ -5,9 +5,20 @@ newsq \- view the leafnode news queue
 .B newsq
 .SH "DESCRIPTION"
 .BR newsq
-outputs a summary of news that is in leafnode's outgoing news queue. This is
+outputs a summary of news that is in leafnode's out.going, in.coming and
+failed.postings news queues.
+.P
+In out.going, leafnode queues
 news that has been posted locally on your site and not yet upload the the
 upstream news server.
+.P
+In in.coming, leafnode queues news destined to the
+local system that it could
+not store into the groups at the time it was posted (because, for
+example, texpire or fetchnews were running).
+.P
+failed.postings carries all articles that have been rejected by upstream
+servers.
 .SH AUTHOR
 This manual page was written by Joey Hess,
-for the Debian GNU/Linux system.
+for the Debian GNU/Linux system, and updated by Matthias Andree.
