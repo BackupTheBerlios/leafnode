@@ -49,8 +49,6 @@ Ralfs TODO:
 	* Leftover link in temp.files for each (successfully?) posted article.
 	  Reported by Robert Marshall in
 	  <3D39D38D.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>.
-	* :active.read must not be updated on NEWGROUPS, or the active will
-	  never be refetched as a whole.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
 	* Fix handling of pseudo article.
 	* XPAT hdr range *PATTERN WITH SPACES* does not work, cf. RFC2980
@@ -271,6 +269,11 @@ FIXED ITEMS:
 
 2002-09-07 Matthias Andree
 	   no longer store articles in backup.moderated.
+
+2002-09-07 Matthias Andree
+	   :active.read must not be updated on NEWGROUPS, or the active will
+	   never be refetched as a whole. (duplicate report was filed by
+	   Jörg as CVSTrac #5).
 
 2002-08-21 Jörg Dietrich
 	   dopost: Newsgroups: is not checked for valid groups
