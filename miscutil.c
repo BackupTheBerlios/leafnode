@@ -356,7 +356,6 @@ initinteresting(void)
 	}
 	if (k != k2) {
 	    /* key was already present in tree */
-	    free(k);
 	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
 		   "directory lists same file \"%s\" more than once!? "
 		   "Confused, aborting.", k);
@@ -687,11 +686,11 @@ cmdlinetolist(const char *cmdline)
 struct msgidtree {
     struct msgidtree *left;
     struct msgidtree *right;
-    int art;
+    unsigned long art;
     char msgid[1];
 };
 
-							/*@only@*//*@null@*/ static struct msgidtree *head;
+/*@only@*//*@null@*/ static struct msgidtree *head;
 							/* starts as NULL */
 void
 insertmsgid(const char *msgid, unsigned long art)
@@ -730,7 +729,7 @@ insertmsgid(const char *msgid, unsigned long art)
     }
 }
 
-int
+unsigned long
 findmsgid(const char *msgid)
 {
     struct msgidtree *a;
