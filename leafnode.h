@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.78 2002/10/23 16:27:12 emma Exp $ */
+/* $Id: leafnode.h,v 1.79 2002/10/26 23:44:35 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -692,7 +692,11 @@ extern "C" {
 
     /* cmp_firstcolumn.c */
     int cmp_firstcolumn(const void *a, const void *b,
-		    /*@unused@*/ const void *config __attribute__ ((unused)));
+		    /*@unused@*/ const void *c
+#ifndef __cplusplus
+	    __attribute__((unused))
+#endif
+	    );
 
 /* debugutil.c */
 /* set this to 1 for debugging */
