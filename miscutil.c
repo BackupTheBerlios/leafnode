@@ -114,9 +114,14 @@ whoami(void)
 int
 initvars(const char *const progname, int logtostdout)
 {
+    mode_t oum;
+
     /*@-noeffect@*/
     (void)progname;		/* shut up compiler warnings */
     /*@=noeffect@*/
+
+    oum = umask((mode_t)07);
+    (void)umask((mode_t)07 | oum);
 
     whoami();
     validatefqdn(logtostdout);
