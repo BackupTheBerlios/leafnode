@@ -350,7 +350,7 @@ store_stream(FILE * in /** input file */ ,
 	    continue;		/* skip if duplicate */
 	if ((create_all_links
             || is_interesting(name)
-            || is_alllocal(name) /* FIXME: alllocal or local? */)
+            || is_localgroup(name))
             && !is_dormant(name))
         {
 	    g = findgroup(name, active, -1);
