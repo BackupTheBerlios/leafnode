@@ -3,6 +3,7 @@
  * Copyright 2001 - 2002 by Matthias Andree <matthias.andree@gmx.de>
  * \copyright 2001 - 2002
  * \author Matthias Andree
+ * \bugs Can corrupt .overview files when used across NFS.
  * Modified by Volker Apelt <volker_apelt@yahoo.de>.
  * Copyright of the modifications 2002.
  */
@@ -32,7 +33,14 @@
 #include <dmalloc.h>
 #endif
 
-/*
+/**
+ 
+   WARNING:
+============= 
+   This function relies on O_APPEND for updating the .overview files, which
+   WILL NOT WORK on NFS.
+
+
    PLAN:
    - 1. open new article with temporary file name
    - 2a. write headers, dropping xref headers
@@ -493,6 +501,8 @@ store_stream(FILE * in /** input file */ ,
 		    /* FIXME: will getxover cope with hosed
 		     * overview files? ENOSPC is a candidate... */
 		    (void)writes(fdo, mastr_str(xowrite));
+		    /* no fsync here, .overview is not precious as it
+		     * can be regenerated */
 		    (void)close(fdo);
 		}
 	    }
