@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.53 2004/01/16 20:29:02 emma Exp $
+# $Id: Makefile.am,v 1.54 2004/01/16 21:46:44 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -56,7 +56,6 @@ liblnutil_a_SOURCES	= \
 	cmp_firstcolumn.c \
 	configparam.c \
 	configparam.h \
-	configparam_data.c \
 	configutil.c \
 	critmem.h \
 	critmem_calloc.c \
@@ -155,6 +154,7 @@ liblnutil_a_SOURCES	= \
 	writes.c \
 	xoverutil.c
 nodist_liblnutil_a_SOURCES= \
+	configparam_data.c \
 	config.c
 
 # PROGRAMS lists the programs to build
@@ -188,7 +188,6 @@ EXTRA_DIST = \
 	arc4random.3 \
 	arc4random.c \
 	arc4random.h \
-	config_defs.h \
 	config.table \
 	config.h.in \
 	COPYING.LGPL \
@@ -197,7 +196,7 @@ EXTRA_DIST = \
 	Doxyfile \
 	ENVIRONMENT \
 	FAQ \
-	genconfigparam_data.awk \
+	genconfigdefs.awk genconfigparam_data.awk \
 	leafnode.spec \
 	leafnode.spec.in \
 	mergesort.3 \
@@ -215,7 +214,8 @@ BUILT_SOURCES = \
 
 config_paths.h: Makefile
 	echo >$@  '#define GZIP  ((const char *)"$(GZIP)")' && \
-	echo >>$@ '#define BZIP2 ((const char *)"$(BZIP2)")' || rm -f $@
+	echo >>$@ '#define BZIP2 ((const char *)"$(BZIP2)")' \
+	|| { rm -f $@ ; false ; }
 
 # special rule to prevent recursion on liblnutil.a
 amiroot_SOURCES		= amiroot.c
@@ -237,8 +237,8 @@ newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 t_getwatermarks_SOURCES	= t.getwatermarks.c
 
-DISTCLEANFILES = config.c config_defs.h configparam_data.c README \
-	config.table.sorted config_paths.h
+DISTCLEANFILES = $(BUILT_SOURCES) README \
+	config.table.sorted
 
 # GENERATED SOURCES ========================================
 config.c: Makefile
@@ -252,29 +252,17 @@ config.c: Makefile
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
-#	@echo >>.$@ 'const char *compileinfo = "*** leafnode @PACKAGE_VERSION@ ***\ncompile date:' "`env - PATH=/bin:/usr/bin TZ=GMT date`" '\ncompile machine: ' "`uname -a`" '\\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)";'
-	if test -f $@ && cmp >/dev/null .$@ $@ && rm -f .$@ ; then touch $@ ; else rm -f $@ ; mv .$@ $@ ; fi
+	if cmp >/dev/null .$@ $@ ; then touch $@ ; rm -f .$@ ; else mv .$@ $@ ; fi
 
-config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h
-	@echo creating $@
-	@$(AWK) -F, '\
-	BEGIN { \
-		print "/* file generated from $(srcdir)/config.table, do not edit! */\n"; \
-		print "enum {" \
-		} \
-	{\
-		print $$2 ","; \
-		} \
-	END { \
-		print "};" \
-		}' <$(srcdir)/config.table >$@ || rm -f $@
+config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h genconfigdefs.awk
+	$(AWK) -F, -f $(srcdir)/genconfigdefs.awk \
+	<$(srcdir)/config.table >$@ || { rm -f $@ ; false; }
 
 configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
 	rm -f config.table.sorted
 	./b_sortnl <$(srcdir)/config.table >config.table.sorted
-	$(AWK) -f $(srcdir)/genconfigparam_data.awk <config.table.sorted >.$@ \
-	&& { rm -f $@ ; mv -f .$@ $@ ; }
-
+	$(AWK) -f $(srcdir)/genconfigparam_data.awk <config.table.sorted >$@ \
+	|| { rm -f $@ ; false ; }
 
 .PHONY:	update
 update:
