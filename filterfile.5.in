@@ -112,6 +112,17 @@ zero, the article is not fetched; otherwise it is fetched.
 
 .RE
 
+.SH EFFICIENCY
+.PP
+For efficient filtering, you should prefer upstream newsservers that
+support the "XOVER" command, and only use filter criteria that can be
+satisfied from overview data. This means only filter on these headers
+with "pattern": Subject, From, Date, Message-ID, References, Bytes, Lines.
+
+Filtering maxage, minlines, maxlines, maxbytes is fine. maxcrosspost
+filtering currently is expensive, and will only apply after the whole
+article has been downloaded.
+
 .SH EXAMPLES
 
 .PP
