@@ -1513,7 +1513,7 @@ main(int argc, char **argv)
     static char *msgid = NULL;
     static char *newsgrp = NULL;
     char *t;
-    int did_not_fork, err;
+    int err;
     static /*@observer@*/ const char *const myname = "fetchnews";
 
     verbose = 0;
@@ -1540,73 +1540,88 @@ main(int argc, char **argv)
     }
     flag = FALSE;
     while ((option = getopt(argc, argv, "VD:HBPF:S:N:M:fnvx:p:t:")) != -1) {
-	if (parseopt("fetchnews", option, optarg, conffile, sizeof(conffile))) {
-	    ;
-	} else if (option == 't') {
+	if (parseopt("fetchnews", option, optarg, conffile, sizeof(conffile)))
+	    continue;
+	switch (option) {
+	case 't':
 	    throttling = getparam(optarg);
-	} else if (option == 'x') {
+	    break;
+	case 'x':
 	    extraarticles = getparam(optarg);
-	} else if ((option == 'S') && optarg && strlen(optarg)) {
-	    struct serverlist *sl;
-	    char *p;
+	    break;
+	case 'S':
+	    if (optarg && strlen(optarg)) {
+		struct serverlist *sl;
+		char *p;
 
-	    if (!flag) {
-		/* deactive all servers but don't delete them */
-		sl = servers;
-		while (sl) {
-		    sl->active = FALSE;
-		    sl = sl->next;
-		}
-		flag = TRUE;
-	    }
-	    sl = findserver(optarg);
-	    if (sl) {
-		sl->active = TRUE;
-	    } else {
-		/* insert a new server in serverlist */
-		sl = (struct serverlist *)
-		    critmalloc(sizeof(struct serverlist),
-			       "allocating space for server name");
-
-		sl->name = critstrdup(optarg, "main");
-		/* if port definition is present, cut it off */
-		if ((p = strchr(sl->name, ':')) != NULL) {
-		    *p = '\0';
-		}
-		sl->descriptions = TRUE;
-		sl->next = servers;
-		sl->timeout = 30;	/* default 30 seconds */
-		sl->port = 0;	/* default port */
-		/* if there is a port specification, override default: */
-		if ((p = strchr(optarg, ':')) != NULL) {
-		    p++;
-		    if (p && *p) {
-			sl->port = strtol(p, NULL, 10);
+		if (!flag) {
+		    /* deactive all servers but don't delete them */
+		    sl = servers;
+		    while (sl) {
+			sl->active = FALSE;
+			sl = sl->next;
 		    }
+		    flag = TRUE;
 		}
-		sl->username = NULL;
-		sl->password = NULL;
-		sl->active = TRUE;
-		servers = sl;
+		sl = findserver(optarg);
+		if (sl) {
+		    sl->active = TRUE;
+		} else {
+		    /* insert a new server in serverlist */
+		    sl = (struct serverlist *)
+			critmalloc(sizeof(struct serverlist),
+				"allocating space for server name");
+
+		    sl->name = critstrdup(optarg, "main");
+		    /* if port definition is present, cut it off */
+		    if ((p = strchr(sl->name, ':')) != NULL) {
+			*p = '\0';
+		    }
+		    sl->descriptions = TRUE;
+		    sl->next = servers;
+		    sl->timeout = 30;	/* default 30 seconds */
+		    sl->port = 0;	/* default port */
+		    /* if there is a port specification, override default: */
+		    if ((p = strchr(optarg, ':')) != NULL) {
+			p++;
+			if (p && *p) {
+			    sl->port = strtol(p, NULL, 10);
+			}
+		    }
+		    sl->username = NULL;
+		    sl->password = NULL;
+		    sl->active = TRUE;
+		    servers = sl;
+		}
 	    }
-	} else if ((option == 'N') && optarg && strlen(optarg)) {
-	    newsgrp = critstrdup(optarg, "main");
-	} else if ((option == 'M') && optarg && strlen(optarg)) {
-	    msgid = critstrdup(optarg, "main");
-	} else if (option == 'n') {
+	    break;
+	case 'N':
+	    if (optarg && strlen(optarg))
+		newsgrp = critstrdup(optarg, "main");
+	    break;
+	case 'M':
+	    if (optarg && strlen(optarg))
+		msgid = critstrdup(optarg, "main");
+	    break;
+	case 'n':
 	    noexpire = 1;
-	} else if (option == 'f') {
+	    break;
+	case 'f':
 	    forceactive = 1;
-	} else if (option == 'P') {
+	    break;
+	case 'P':
 	    if (!msgid)
 		postonly = 1;
-	} else if (option == 'H') {
+	    break;
+	case 'H':
 	    if (!msgid && testheaderbody(option))
 		headerbody = 1;
-	} else if (option == 'B') {
+	    break;
+	case 'B':
 	    if (!msgid && testheaderbody(option))
 		headerbody = 2;
-	} else {
+	    break;
+	default:
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -1734,7 +1749,6 @@ main(int argc, char **argv)
 	fflush(stdout);		/* to avoid double logging of stuff */
     }
 /*    delposted(starttime); *//* FIXME */
-    did_not_fork = 0;
     if (!postonly) {
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles fetched, %lu killed, in %ld seconds",
@@ -1744,7 +1758,8 @@ main(int argc, char **argv)
 	case -1:		/* problem */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "%s: fork: %m, running on parent schedule", myname);
-	    did_not_fork = 1;
+	    fixxover();
+	    unlink(lockfile);
 	    break;
 	case 0:		/* child */
 	    setsid();
@@ -1757,10 +1772,6 @@ main(int argc, char **argv)
 	default:		/* parent */
 	    break;
 	}
-    }
-    if (did_not_fork) {
-	fixxover();
-	unlink(lockfile);
     }
 /*    delposted(starttime);  *//* FIXME */
     wait(0);

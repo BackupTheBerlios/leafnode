@@ -190,20 +190,22 @@ int
 parseopt(const char *progname, int option,
 	 /*@null@*/ const char *opta, /*@unique@*/ char *conffile, size_t conffilesize)
 {
-    if (option == 'V') {
+    switch (option) {
+    case 'V':
 	printf("%s %s\n", progname, version);
 	exit(0);
-    } else if (option == 'v') {
+    case 'v':
 	verbose++;
 	return TRUE;
-    } else if (option == 'D') {
+    case 'D':
 	if (opta && *opta)
 	    debugmode = atoi(opta);
 	else
 	    debugmode = ~0;
 	return TRUE;
-    } else if ((option == 'F') && opta != NULL && *opta) {
-	return mastrncpy(conffile, opta, conffilesize) ? 1 : 0;
+    case 'F':
+	if (opta != NULL && *opta)
+	    return mastrncpy(conffile, opta, conffilesize) ? 1 : 0;
     }
     return FALSE;
 }
