@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.49 2003/08/11 16:07:09 emma Exp $
+# $Id: Makefile.am,v 1.50 2003/12/18 14:20:09 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -234,6 +234,7 @@ texpire_SOURCES		= texpire.c
 checkgroups_SOURCES	= checkgroups.c
 newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
+t_getwatermarks_SOURCES	= t.getwatermarks.c
 
 DISTCLEANFILES = config.c config_defs.h configparam_data.c README \
 	config.table.sorted config_paths.h
