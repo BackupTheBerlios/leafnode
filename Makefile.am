@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.29 2002/07/08 11:42:43 emma Exp $
+# $Id: Makefile.am,v 1.30 2002/07/08 11:44:25 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -13,7 +13,7 @@ LYNX		= @LYNX@
 # external variables
 BINDIR		= @bindir@
 SBINDIR		= @sbindir@
-LIBDIR		= @sysconfdir@/leafnode
+SYSCONFDIR	= @sysconfdir@/leafnode
 VERSION		= @VERSION@
 
 CFLAGS		= @CFLAGS@ @GCC_FLAGS@
@@ -215,7 +215,7 @@ config.c: Makefile
 	@echo >>.$@ " */"
 	@echo >>.$@ "const char *bindir = \"$(BINDIR)\";"
 	@echo >>.$@ "const char *spooldir = \"$(SPOOLDIR)\";"
-	@echo >>.$@ "const char *libdir = \"$(LIBDIR)\";"
+	@echo >>.$@ "const char *sysconfdir = \"$(SYSCONFDIR)\";"
 	@echo >>.$@ "const char *lockfile = \"$(LOCKFILE)\";"
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
 	@echo >>.$@ "const char *GZIP = \"$(GZIP)\";"
@@ -248,7 +248,7 @@ configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
 
 .PHONY:	update
 update:
-	@./update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE) $(RUNAS_USER) $(RUNAS_GROUP)
+	@./update.sh $(SPOOLDIR) $(SYSCONFDIR) $(LOCKFILE) $(RUNAS_USER) $(RUNAS_GROUP)
 
 install-data-hook:
 # directories
@@ -267,7 +267,7 @@ install-data-hook:
 	  ./amiroot && chgrp $(RUNAS_GROUP) $$p ; true ; \
         fi
 # don't use test -e, it's broken on Solaris (only in /usr/bin/test)
-	p=$(DESTDIR)$(LIBDIR)/local.groups ; \
+	p=$(DESTDIR)$(SYSCONFDIR)/local.groups ; \
 	test -f $$p || cp /dev/null $$p
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
@@ -279,8 +279,8 @@ install-data-hook:
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
 
 uninstall-local:
-	-rm -f $(LIBDIR)/config.example
-	-rmdir $(LIBDIR)
+	-rm -f $(SYSCONFDIR)/config.example
+	-rmdir $(SYSCONFDIR)
 	-rm -r $(SPOOLDIR)/leaf.node
 	-rmdir $(SPOOLDIR)/in.coming
 	-rmdir $(SPOOLDIR)/out.going
