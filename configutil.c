@@ -30,6 +30,7 @@
 /*
  * misc. global variables, documented in leafnode.h
  */
+char *mta = 0;
 time_t default_expire = 0;
 struct expire_entry *expire_base = 0;
 unsigned long artlimit = 0;
@@ -155,6 +156,12 @@ readconfig(char *configfile)
 		    debug = debugmode = strtol(value, NULL, 10);
 		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			       "config: debugmode is %d", debugmode);
+		    break;
+		case CP_MTA:
+		    mta = critstrdup(value, "readconfig");
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: mta is %s", mta);
 		    break;
 		case CP_USER:
 		    p->username = critstrdup(value, "readconfig");
@@ -400,6 +407,10 @@ readconfig(char *configfile)
     fclose(f);
     if (!default_expire)
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "no expire declaration in config file");
+    if (!mta) {
+	mta = critstrdup(DEFAULTMTA, "readconfig");
+    }
+
     free(param);
     free(value);
     return 0;
