@@ -74,8 +74,10 @@ static const struct mydir dirs[] = {
 int
 initvars(const char *const progname)
 {
+#ifndef TESTMODE
     uid_t ui;
     gid_t gi;
+#endif /* not TESTMODE */
     struct mydir const *md = &dirs[0];
 
     /*@-noeffect@*/
@@ -436,7 +438,7 @@ lookup(/*@null@*/ const char *msgid)
     static unsigned int namelen = 0;
     unsigned int r;
     unsigned int i;
-    char *p, *q;
+    char *p;
     const char *const myname = "lookup";
 
     if (!msgid || !*msgid)
@@ -454,7 +456,7 @@ lookup(/*@null@*/ const char *msgid)
 
     p = mastrcpy(name, spooldir);
     p = mastrcpy(p, "/message.id/");
-    q = mastrcpy(p + 4, msgid);
+    (void)mastrcpy(p + 4, msgid);
     msgid_sanitize(p + 4);
     r = msgid_hash(p + 4);
     str_ulong0(p, r, 3);
