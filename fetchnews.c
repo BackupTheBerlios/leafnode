@@ -1482,14 +1482,14 @@ int
 main(int argc, char **argv)
 {
     int option, reply, flag;
-    time_t starttime;
+    volatile time_t starttime;	/* keep state across setjmp */
     time_t lastrun = 0;
     char conffile[PATH_MAX + 1];
-    static char *msgid = NULL;
-    static char *newsgrp = NULL;
+    char *volatile msgid = NULL;
+    char *volatile newsgrp = NULL;
     char *t;
     int err;
-    static /*@observer@*/ const char *const myname = "fetchnews";
+    static const char myname[] = "fetchnews";
 
     verbose = 0;
     postonly = 0;
@@ -1524,7 +1524,7 @@ main(int argc, char **argv)
 	    extraarticles = getparam(optarg);
 	    break;
 	case 'S':
-	    if (optarg && strlen(optarg)) {
+	    {
 		struct serverlist *sl;
 		char *p;
 
@@ -1556,12 +1556,8 @@ main(int argc, char **argv)
 		    sl->timeout = 30;	/* default 30 seconds */
 		    sl->port = 0;	/* default port */
 		    /* if there is a port specification, override default: */
-		    if ((p = strchr(optarg, ':')) != NULL) {
-			p++;
-			if (p && *p) {
-			    sl->port = strtol(p, NULL, 10);
-			}
-		    }
+		    if ((p = strchr(optarg, ':')) != NULL && *++p)
+			sl->port = strtol(p, NULL, 10);
 		    sl->username = NULL;
 		    sl->password = NULL;
 		    sl->active = TRUE;
@@ -1570,12 +1566,10 @@ main(int argc, char **argv)
 	    }
 	    break;
 	case 'N':
-	    if (optarg && strlen(optarg))
-		newsgrp = critstrdup(optarg, "main");
+	    newsgrp = critstrdup(optarg, "main");
 	    break;
 	case 'M':
-	    if (optarg && strlen(optarg))
-		msgid = critstrdup(optarg, "main");
+	    msgid = critstrdup(optarg, "main");
 	    break;
 	case 'n':
 	    noexpire = 1;
