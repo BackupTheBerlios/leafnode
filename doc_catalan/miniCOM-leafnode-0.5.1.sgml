@@ -1,0 +1,415 @@
+<!doctype linuxdoc system>
+
+<!-- Breu explicació sobre la instal·lació de leafnode -->
+
+<article>
+
+<!-- Títol, autor, data i resum -->
+
+<title> Leafnode 1.9.x mini COM
+<author> Carles Sadurní Anguita <tt>sadurni@jazzfree.com</tt>
+<date> v0.5.2, 7 de desembre de 1999
+
+<!-- Taula de continguts -->
+
+<toc>
+
+<!-- Començament del document -->
+
+<sect> Qüestions prèvies
+<p> 
+Aquest miniCOM és la primera contribució de l'autor per a CALIU (grup
+d'usuaris de Linux en català). Des de la versió 0.5.0, podeu trobar-lo en la
+pàgina de leafnode (<url url="http://wpxx02.toxi.uni-wuerzburg.de/~krasel/leafnode.html">), a més de la de CALIU (<url url="http2//caliu.ct">).  
+
+<sect1> Llicència 
+<p>
+Aquest document es distribueix sota la GNU General Public License. En podeu
+obtenir una còpia a <url url="http://www.gnu.org">.
+
+<sect1> Garantia
+<p>
+El document es distribueix sense cap mena de garantia. L'autor no és
+responsable dels problemes que, directament o indirectament, es puguen
+produir pel fet d'haver seguit aquestes instruccions. Ara bé, si hi
+trobeu cap error us agrairé molt que m'ho feu saber.
+
+<sect1> Referències
+<p>
+Per a redactar el miniCOM, a part d'aprofitar els comentaris de les persones
+que participen en <tt>es.comp.os.linux</tt> (que durant l'estiu de 1999 ha
+estat dividit en <tt>es.comp.os.linux.misc</tt>,
+<tt>es.comp.os.linux.instalacion</tt>, <tt>es.comp.os.linux.redes</tt> i
+<tt>es.comp.os.linux.programacion</tt>), m'he basat en els següents textos:
+
+<itemize>
+      <item> INSTALL, README i pàgines del manual de les diverses versions
+de leafnode.
+      <item> Monkiki. <em>Configurando el sistema: las news</em>.
+      (<url url="http://www.arrakis.es/~eb5ccf/monkiki/home.html">)  
+      <item> Santiago Romero Iglesias. ``Conexión y configuración de internet
+desde linux: news off-line con leafnode''. <em>NetOnline</em> núm. 15. Prensa
+Técnica, Madrid, novembre 1998. (<url url="http://www.ctv.es/USERS/sromero">)
+		<item> Florian Kuehnert. <em>News Leafsite mini-HOWTO</em>, v0.3,
+gener de 1998.
+
+</itemize>
+
+<sect1> Història 
+<p>
+
+<itemize>
+	<item> Versió 0.1.0. 6 d'abril de 1999. Primera versió del document
+distribuïda a través de la llista de CALIU. Pendent de reescriure la
+introducció.
+
+	<item> Versió 0.2.0. 14 d'abril de 1999. Per petició de Carles Pina,
+inclusió d'una breu referència al funcionament de texpire. Correcció
+d'algunes qüestions menors i modificació de la taula de continguts. Pendent
+de reescriure la introducció.
+
+	<item> Versió 0.2.1. 15 d'abril de 1999. Corregits estilísticament
+alguns fragments. No distribuïda.
+
+	<item> Versió 0.2.2. 21 d'abril de 1999. Conversió a SGML per
+indicació dels companys de CALIU. No distribuïda.
+
+	<item> Versió 0.3.0. 24 d'abril de 1999. Indicacions per a la versió
+1.9.2. Pendent de reescriure la introducció.
+
+	<item> Versió 0.3.1. 11 de maig de 1999. Correccions d'estil. No
+distribuïda.
+
+	<item> Versió 0.4.0. 19 de juliol de 1999. Modificacions per
+l'aparició de la versió 1.9.3. Pendent de reescriure la introducció.
+
+	<item> Versió 0.4.1. 20 de juliol de 1999. Modificacions mínimes per
+la decisió de Cornelius Krasel, mantenidor de leafnode, de llançar la versió
+1.9.4 per a resoldre el problema que presentava la 1.9.3 en la instal·lació.
+Lleugers retocs estilístics.
+
+	<item> Versió 0.5.0. 1 d'agost de 1999. Correcció d'algunes errades
+lingüístiques i ampliació d'alguns punts per indicació de Joan Moratinos.
+Lleugers retocs estilístics.
+
+	<item> Versió 0.5.1. 6 de desembre de 1999. Breus referències al pedaç per
+a la versió 1.9.4 (a causa de l'efecte 2000) i a l'aparició de la versió
+1.9.5. Petites correccions.
+
+	<item> Versió 0.5.2. 7 de desembre de 1999. De nou assistim al
+llançament precipitat d'una nova versió del miniCOM per la rapidíssima
+aparició de leafnode-1.9.6, el qual corregeix un error relativament
+important de l'anterior (vegeu l'arxiu CHANGES).
+
+</itemize>
+
+
+<sect> Introducció
+<p>
+Leafnode converteix l'ordinador en un servidor de notícies.
+Quan us connecteu al servidor de notícies que us assigna el proveïdor
+d'accés (<tt>news.bcn.ttd.net</tt>, posem per cas), leafnode copia al disc
+dur tots els missatges dels grups especificats (per exemple
+<tt>soc.culture.catalan</tt> i <tt>es.comp.os.linux.misc</tt>); després, amb
+un programa client (slrn, netscape...) qualsevol usuari (per exemple la vostra
+germana) pot llegir les notícies i enviar-hi articles off-line. També permet
+aplicar filtres per evitar el tristament famós <em>spam</em>. Leafnode
+consumeix pocs recursos i pràcticament no calen tasques de manteniment. Ara bé,
+no ha estat concebut per a servir a 30 usuaris simultàniament, ni per a
+treballar amb 3000 grups de notícies.
+
+
+<sect> Aconseguir leafnode
+<p>
+Leafnode forma part d'algunes distribucions de Linux; sempre, però, podeu
+trobar-ne l'última versió en
+<url url="http://wpxx02.toxi.uni-wuerzburg.de/~krasel/leafnode.html">.   
+
+ 
+<sect> Procés d'instal·lació
+<p>
+Primer que tot, mireu si en el sistema hi ha un usuari anomenat news. En
+cas contrari, creeu-lo (si no sabeu com, escriviu <tt>man adduser</tt>).
+
+<p>
+Si disposeu d'un paquet <em>rpm</em> o <em>deb</em>, instal·leu-lo de la
+forma habitual i passeu a l'apartat següent. Si teniu l'arxiu
+<tt>leafnode-1.9.x.tar.gz</tt>, descomprimiu-lo dins <tt>/tmp</tt> i seguiu
+les instruccions de l'arxiu INSTALL (les quals traduïm ací, amb algun
+comentari addicional).
+
+<sect1> Descompressió
+<p>
+Canvieu al directori <tt>/tmp</tt> (<tt>cd tmp</tt>) i escriviu 
+
+<verb>
+ tar -zxvf leafnode-1.9.x.tar.gz
+</verb>
+
+(òbviament, caldrà especificar la ruta on es troba l'arxiu).  Després
+d'executar tar, dins el directori <tt>/tmp</tt> trobareu un subdirectori
+anomenat <tt>leafnode-1.9.x</tt> amb els fitxers font i la documentació:
+entreu-hi (<tt>cd leafnode-1.9.x</tt>).
+
+<sect1> Nota sobre l'efecte 2000
+<p> Les versions posteriors a la 1.9.4 no pateixen l'efecte 2000. La versió 1.9.4, per contra, a
+partir de l'1 de gener de 2000, considerarà que tots els grups són nous;
+Cornelius Krasel ha posat en la pàgina de leafnode un pedaç que resol aquest
+problema.
+
+<p> L'autor d'aquest document s'ha instal·lat la versió 1.9.6; però si
+decidiu continuar usant la 1.9.4, apedaceu-la:
+
+<verb>
+gunzip ln.y2k.gz
+</verb>
+
+col·loqueu-vos dins el directori leafnode-1.9.4 (<tt>cd leafnode-1.9.4</tt>) i
+executeu
+
+<verb>
+patch &lt; /ruta/ln.y2k
+</verb>
+després compileu normalment. 
+
+
+<sect1> Compilació
+<p>
+No patiu, el procés de compilació és molt senzill. 
+
+<p>
+Primer cal crear un arxiu <tt>Makefile</tt>, el qual conté la informació del
+sistema que cal per a compilar el programa: quin compilador teniu, on es
+troben determinades biblioteques, etc. Sortosament la creació del dit fitxer
+es realitza automàticament si executeu
+
+<verb>
+ ./configure
+</verb>
+
+Si tot ha anat bé veureu un munt de missatges del tipus
+
+<verb>
+checking &lt;alguna cosa&gt;
+</verb>
+
+i un altre que diu
+
+<verb>
+creating Makefile
+</verb>
+
+Si teniu cap problema obtindreu un avís (no troba tal arxiu, el compilador
+és massa antic, etc.). 
+
+ Genereu els executables amb
+
+<verb>
+make
+</verb>
+
+Ja teniu els programes compilats.
+
+<sect1> Instal·lació
+<p> 
+Si instal·leu la versió 1.9.3, mireu dins el directori
+<tt>leafnode-1.9.3</tt>; hi ha un arxiu anomenat pcre.7, moveu-lo al
+subdirectori <tt>pcre</tt> i seguïu la instal·lació normalment (aquesta és
+la causa principal de la ràpida aparició de la versió 1.9.4).
+ 
+<p>
+Escriviu
+
+<verb>
+make install
+</verb>
+
+perquè cada fitxer siga copiat en el lloc adient. En aquest cas, els
+executables (fetchnews, texpire, leafnode, checkgroups i applyfilter) són
+copiats en <tt>/usr/local/sbin</tt>; l'arxiu de configuració en
+<tt>/etc/leafnode/</tt> (<tt>/usr/lib/leafnode</tt> en la versió 1.9); i
+les pàgines del manual en <tt>/usr/local/man</tt>.
+
+<p>
+NOTA: Fins a la versió 1.9.2 fetchnews s'anomenava fetch.
+
+<p>
+Si instal·leu la versió 1.9.3 o una de superior i en teníeu qualsevol de les
+anteriors a la 1.9.3b5 (beta), feu
+
+<verb>
+make update
+</verb>
+
+<sect> Configuració mínima
+
+<sect1> Servidor
+<p>
+Dins el directori <tt>/etc/leafnode</tt> trobareu un arxiu anomenat
+<tt>config.example</tt>. Copieu-lo canviant-li el nom per <tt>config</tt>
+(<tt>cp config.example config</tt>). Editeu <tt>config</tt>, busqueu la
+línia que comença amb 
+
+<verb>
+server=  
+</verb>
+
+i poseu-hi el nom del vostre servidor de notícies (per exemple 
+<tt>news.dragonet.es</tt>).
+
+<p>
+Comproveu que en l'arxiu <tt>/etc/inetd.conf</tt> hi ha una línia com aquesta
+
+<verb>
+nntp	stream	tcp  nowait  news  /usr/sbin/tcpd   /usr/local/sbin/leafnode
+</verb>
+
+<p>
+Cal fer tres observacions:
+<enum>
+	<item> Entre cada parella de paràmetres heu d'inserir un tabulador
+(mai espais).
+
+	<item> La ruta per als arxius tcpd i leafnode pot variar (els paquets
+<em>rpm</em>, per exemple, col·loquen leafnode en <tt>/usr/sbin/</tt>).
+
+	<item> Encara que és possible usar leafnode sense tcpd (en aquest cas
+en la línia esmentada no hauria d'aparéixer <tt>/usr/sbin/tcpd</tt>), el
+mantenidor del programa ho desaconsella explícitament ja que pot comprometre
+la seguretat del sistema.
+
+</enum>
+
+<p>
+Executeu
+
+<verb>
+kill -HUP `cat /var/run/inetd.pid`
+</verb>
+
+Aquesta ordre obliga a rellegir l'arxiu que hem modificat: el servidor de
+notícies ja funciona. 
+
+Per tal d'evitar accessos no desitjats al vostre ordinador, afegiu a
+l'arxiu <tt>/etc/hosts.deny</tt> la línia següent: 
+
+<verb>
+leafnode: ALL EXCEPT LOCAL
+</verb>
+
+Açò evita que leafnode siga accessible des d'un ordinador alié; si voleu
+accedir-hi des d'una altra màquina haureu d'indicar-ne la IP en
+<tt>/etc/hosts.allow</tt>.
+
+<sect1> Client
+<p>
+Per tal que els lectors/clients de notícies es connecten a l'ordinador
+local (i no a news.mad.ttd.net, per exemple), creeu l'arxiu
+<tt>/etc/nntpserver</tt> i escriviu-hi
+
+<verb>
+localhost
+</verb>
+
+<p>
+També podeu assignar el valor <em>localhost</em> a la variable NNTPSERVER; si
+utilitzeu <em>bash</em> és prou que afegiu aquestes dues línies en
+<tt>/etc/profile</tt> 
+
+<verb>
+NNTPSERVER = localhost
+export NNTPSERVER
+</verb>
+
+<p>
+Si voleu utilitzar el Netscape com a client heu de posar <tt>localhost</tt>
+en <tt>Edit -> Preferences -> Mail & groups -> Groups server</tt>.
+
+<p>
+Nota: Algunes versions de Netscape han donat problemes com a
+clients de leafnode (els quals semblen resolts en les versions més recents). 
+
+
+<sect> Funcionament
+
+<sect1> La primera vegada
+<p>
+Connecteu a Internet de la forma habitual i executeu <tt>fetchnews -vvv</tt>
+(l'opció -v indica al programa que informe de les accions que realitza; com
+més <em>vv</em> més informació dóna). La primera vegada, leafnode descarrega
+el nom i la descripció de cadascun dels grups que ofereix el proveïdor; per
+tant, en funció del nombre de grups, del mòdem i del trànsit, el procés pot
+durar fins una hora.
+
+<p>
+Arranqueu el client (slrn, netscape...) i subscriviu-vos-hi als grups que us
+interessen.  Si ara mireu dins el directori
+<tt>/var/spool/news/interesting.groups</tt> trobareu una sèrie d'arxius amb
+zero bytes el nom dels quals correspon al dels grups a què us heu subscrit. Si
+n'hi apareix cap que no heu seleccionat esborreu-lo tranquil·lament (és producte
+del comportament una mica especial d'alguns lectors).
+
+<p>
+Torneu a executar fetchnews. El programa baixarà tots els articles dels
+grups a què us heu subscrit. 
+
+<p>
+Si tot ha anat bé, ja podeu esborrar el directori
+<tt>/tmp/leafnode-1.9.x</tt> (si heu instal·lat leafnode des d'un paquet
+<em>.tar.gz</em>, és clar). Simplement feu 
+
+<verb>
+rm -fr /tmp/leafnode-1.9.x
+</verb>
+
+<p>
+Ara bé, és convenient conservar l'arxiu <tt>leafnode-1.9.x.tar.gz</tt>.
+
+<sect1> Funcionament habitual
+<p>
+A partir d'aquest moment, és prou d'executar <tt>fetchnews -v</tt> per
+recollir els articles nous. 
+
+<p>
+Cal dir, però, que leafnode només copia els missatges nous dels grups que
+han estat llegits en els últims dos dies; la data que utilitza per a
+saber-ho és la dels arxius de <tt>/var/spool/news/interesting.groups</tt>.
+
+<p>
+Per tant, si heu estat uns dies sense llegir les notícies, feu (com a
+administrador)
+
+<verb>
+touch /var/spool/news/interesting.groups/*
+</verb>
+
+abans de executar fetchnews. 
+
+<p>
+Després de recollir els articles, el programa actualitza els arxius
+<tt>.overview</tt>. En les versions més antigues, en acabar, semblava que no
+tornava el <em>prompt</em>. La solució era, simplement, prémer RETURN. A
+partir de la versió 1.9.4 aquest detall ja està resolt.
+
+<p>
+Evidentment, si no esborreu de tant en tant part dels articles omplireu el
+disc dur en poques setmanes (penseu que en la jerarquia
+<tt>es.comp.os.linux.*</tt> trobem ara per ara més de dos cents missatges
+nous al dia). El programa texpire s'encarrega d'esborrar els missatges que
+pertanyen als fils (<em>threads</em>) que ningú no ha llegit en els
+<em>n</em> dies anteriors. Podeu canviar el valor del paràmetre <em>n</em>
+editant l'arxiu <tt>/usr/lib/leafnode/config</tt>.
+Modifiqueu el valor de 
+
+<verb>
+expire = n 
+</verb>
+
+<em>n</em> ha de ser un nombre enter major o igual que 1.
+
+<p>
+L'autor del programa recomana usar texpire en combinació amb cron. L'autor
+d'aquest document ho fa manualment (també amb bons resultats). 
+
+
+</article>

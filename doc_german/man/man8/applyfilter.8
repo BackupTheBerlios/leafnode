@@ -1,0 +1,85 @@
+.TH applyfilter 8 "19 Jan 1999" "" \" -*- nroff -*-
+.\"
+.\" Written and copyright 1999 by Cornelius Krasel
+.\" <krasel@wpxx02.toxi.uni-wuerzburg.de>
+.\" See file COPYING for restrictions on the use of this software.
+.\"
+.\" hilit19 is stupid: "
+.SH BEZEICHNUNG
+applyfilter - filtere den lokalen Newsbestand
+
+.SH SYNTAX
+applyfilter - v [Newsgruppe]
+	
+.SH BESCHREIBUNG
+
+.B Leafnode 
+ist ein USENET-Software-Paket, das für kleine Sites
+gedacht ist, wo es wenige User und nur geringe
+Festplatten-Kapazität gibt, aber trotzdem eine große Zahl von
+Gruppen gewünscht wird.
+.PP
+.B Applyfilter 
+ist das Programm, mit dem Sie Ihren lokalen
+Newsbestand nach einem Satz von Mustern (s. 
+.B DATEIEN
+) filtern
+können. Wenn der Header eines Artikels einer der Filterregeln
+entspricht, wird der betreffende Artikel gelöscht.
+.PP	
+.B Applyfilter 
+setzt seine UID auf "news".
+	
+.SH PARAMETER
+.TP
+.I -v 	
+(verbose) Veranlaßt 
+.B applyfilter
+, mehr Ausgaben zu produzieren.
+.TP
+.I Newsgruppe
+ist die Newsgruppe, auf die Sie den Filter anwenden
+möchten.
+
+.SH DATEIEN
+
+Die Filterdatei, deren Pfad in 
+.I /etc/leafnode/config 
+definiert
+wird, enthält einen Satz von Regeln, die auf die Newsgruppen
+angewendet werden. Jede Regel muß in einer eigenen Zeile
+stehen. Leere Zeilen und Kommentare (die mit # eingeleitet
+werden müssen) sind zulässig und werden ignoriert. 
+.PP	
+Jede Filterregel besteht aus einem regulären Ausdruck. Die
+folgenden Regeln löschen z. B. alle Crosspostings nach
+alt.flame.
+.PP
+^Newsgroups:.*[, ]alt.flame$
+.br
+^Newsgroups:.*[, ]alt.flame,
+.PP
+^Newsgroups: legt fest, daß das Muster nur auf den
+"Newsgroups"-Header angewendet werden soll. Nach dem Header muß
+eine Zeichenfolge kommen, die entweder mit einem Leerzeichen
+oder einem Komma endet. Danach muß alt.flame erscheinen,
+entweder am Ende der Zeile (erster Eintrag), oder gefolgt von
+weiteren, mit Komma abgetrennten Newsgruppen (zweiter
+Eintrag).
+	
+.SH AUTOR
+Cornelius  Krasel  <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Copyright 1999.   
+.PP	 
+Die ersten Versionen von leafnode wurden von Arnt Gulbrandsen 
+<agulbra@troll.no> geschrieben; Copyright 1995-96 Troll Tech AS,
+Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.PP
+Deutsche Übersetzung: Alexander Reinwarth <a.reinwarth@gmx.de>
+	
+.SH SIEHE AUCH
+.BR leafnode (8)
+,
+.BR fetchnews (8)
+,
+.BR texpire (8) 

@@ -1,0 +1,117 @@
+1. Since version 1.9, leafnode uses GNU autoconf to determine what
+   machine it will run on. Type
+	sh ./configure
+   to create an appropriate Makefile and config.h .
+   If you have and want to use IPV6, invoke "configure" with the
+   --with-ipv6 flag.
+
+   Remember that when you are updating a previously installed version
+   of leafnode, you need to configure the new version of leafnode to
+   overwrite the old one. You do this with the "configure --prefix"
+   option. For example, if leafnode had been previously installed in
+   /opt, you would configure leafnode with the command
+   "./configure --prefix=/opt".
+
+2. Type
+	make
+   There should be no errors. Dependent on your compiler, you might get
+   the warning:
+     /fetchnews.c: In function `nntpactive':
+     /fetchnews.c:1062: warning: `%y' yields only last 2 digits of year
+   Don't worry about it.
+
+3. Create a "news" user if you don't have one.
+
+4. Type
+	make install
+   If you prefer an installation with the binaries stripped free of
+   symbols, use
+	make install-strip
+   instead.
+
+5. If you are updating leafnode from a version before 1.9.3 (including
+   all 1.9.3 beta versions before 1.9.3b5), "make update". This will call
+   the update.sh shell script provided with leafnode. Your groupinfo file
+   will be reformatted and some other files will be moved around. In case
+   something goes wrong, you will find your old groupinfo file in
+   /var/spool/news/leaf.node/groupinfo.old. If everything works out
+   correctly, you can delete this file (it is not needed any more).
+
+6. Edit $(LIBDIR)/config ($(LIBDIR) defaults to /etc/leafnode, but can be
+   adjusted in the Makefile). For documentation, see config.example and
+   leafnode(8). It is absolutely necessary to change the "server"
+   parameter to point it to your upstream news server (generally
+   the one of your IP provider). Make sure $NNTPSERVER or
+   /etc/nntpserver points to your own host so clients will talk to
+   leafnode rather than try to go to the upstream server.
+   If you want to use filtering of the incoming spool, see "FILTER FILE"
+   in the README.
+
+7. Set up a cron job (as user "news") to run texpire every night or
+   maybe every week.  Here is my crontab line, which runs nightly:
+
+0 4 * * * /usr/local/sbin/texpire
+
+   I did "crontab -u news -e" as root to edit the crontab file, and added
+   this line.  Substituting "1" for the third "*", thus:
+
+0 4 * * 1 /usr/local/sbin/texpire
+
+   tells cron to run texpire at 4am Monday morning.
+
+8. Make sure fetchnews is run at the appropriate time.  If you have a
+   full-time link, run it out of cron (as "news" again), if not, run it
+   when your connection to the net is established.  If it is run as root,
+   it will change user to "news". If you use PPP, you can run fetchnews from
+   /etc/ppp/ip-up.
+
+9. Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
+   NNTP connections.  Here is my inetd.conf line:
+
+nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
+
+   This starts leafnode for all connections on the nntp port, subject to
+   /etc/hosts/allow and /etc/hosts.deny screening.  If you don't have
+   /usr/sbin/tcpd you might use this line instead:
+
+nntp    stream  tcp     nowait  news    /usr/local/sbin/leafnode
+
+   Using leafnode without tcpd is strongly discouraged since it opens up your
+   news server to abuse.
+
+   After these changes, force inetd to read the changed configuration file
+   by sending it the HANGUP signal. To achieve this, issue the following
+   command (as root):
+
+kill -HUP `cat /var/run/inetd.pid`
+
+10.If you have tcpd installed, write the following into /etc/hosts.deny
+
+leafnode: ALL EXCEPT LOCAL
+
+   to protect your news server from abuse. If you want to make leafnode
+   accessible to additional IP numbers/domains, add them in /etc/hosts.allow
+   in the format described above. See man hosts_access(5) and 
+   man hosts_options(5) (if applicable) for more information. 
+
+11.Run fetchnews.  The first run will take some time since fetchnews reads a
+   list of all newsgroups from your upstream server.  With an 28.8 modem, it
+   can take as long as 60 minutes (depending on how many newsgroups your
+   provider offers). To see fetchnews working, run it with -vvv. If you
+   update leafnode from a version previous to 1.6, the format of the
+   groupinfo file has changed. You should therefore run fetchnews with the
+   parameter -f.
+
+12.Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
+   pointing to your own host). Select the groups you want to read in
+   the future. You will find them empty except a default article.
+   Reading this article is necessary with some newsreaders to select
+   the groups for further fetching.
+
+   After this, you should have empty files in
+   /var/spool/news/interesting.groups/ for every group you want to read.
+
+13.Run fetchnews again. This run should pick up all the groups you want
+   to read.
+
+Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>

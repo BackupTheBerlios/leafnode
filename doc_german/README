@@ -1,0 +1,39 @@
+In diesem Paket befindet sich die deutsche Übersetzung eines großen
+Teils der Dokumentation zu leafnode in der Version 1.9.3. Die aktuelle
+Version der Übersetzung inclusive evtl. Fehlerkorekturen finden Sie
+unter http://www.reinwarth.de/alexander/linux/leafnode.html.
+
+Diese Übersetzung wurde geschrieben, um Anwendern dieser Software, die
+der englischen Sprache nicht mächtig sind, eine Hilfe bei der
+Installation und Wartung ihres Newsservers zu geben.  
+
+Im Unterverzeichnis /txt finden Sie neben der Übersetzung der README-
+und INSTALL-Texte die Manual-Seiten der einzelnen Programme des
+leafnode-Pakets in reinem Textformat (mit deutschen Sonderzeichen),
+die Sie mit einem beliebigen Editor Ihrer Wahl lesen können. 
+
+In den Unterverzeichnis von /man liegen die man-pages groff-formatiert
+vor, sodaß Sie sie mit dem Program man lesen können (alternativ
+funktioniert natürlich auch groff -Tlatin1 -man datei|less).  
+
+Hierzu sollten Sie die Dateien z.B. nach /usr/man/de/man1 und
+/usr/man/de/man8 kopieren und die Umgebungsvariable MANPATH
+entsprechend ergänzen, indem Sie in Ihrer .bashrc und/oder
+.bash_profile  (Natürlich nur dann, wenn Sie die bash benutzen :-)
+etwa folgenden Eintrag vornehmen:    
+
+export MANPATH='/usr/man/de:/usr/man:/usr/local/man:/usr/X11R6/man'       
+
+Der Verweis auf das Verzeichnis, in das Sie die Dateien kopiert haben,
+muß hierbei ganz vorne stehen. 
+
+Eine große Bitte: Versuchen Sie Ihre eventuellen Probleme mit leafnode
+zuerst anhand der vorliegenden Dokumentation zu lösen und wenden Sie
+sich erst danach an die Newsgruppe de.comm.software.newsserver. Auch
+wenn Sie Ihren Server unter Linux betreiben, sind Fragen zu leafnode
+in den de.comp.os.unix.linux.*-Gruppen off topic.
+
+Und nun viel Spaß beim RTFM!
+
+Alexander Reinwarth
+<a.reinwarth@gmx.de>

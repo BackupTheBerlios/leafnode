@@ -1,0 +1,122 @@
+Arnt Gulbrandsen <agulbra@troll.no> was the sole author of Leafnode up to
+	version 1.4.
+Markus Enzenberger <enz@cip.physik.uni-muenchen.de> wrote the delaybody
+	code.
+Alexander Reinwarth <a.reinwarth@gmx.de> and Alexander Stielau
+	<aleks@zedat.fu-berlin.de> wrote the German documentation.
+
+Other people who have reported or fixed bugs in Leafnode:
+
+<henke@phoenix.net>
+<kise@imicom.or.jp>
+<wiml@netcom.com>
+A. Olaru <aolaru@datacomm.ch>
+Akim Demaille <akim@epita.fr>
+Alexander Rudyk <alexrudyk@arnet.de>
+Anders Dinsen <dinsen@danbbs.dk>
+Andy Doran <andy@psn.ie>
+Andy Piper <squiggle@ukgateway.net>
+Arkadiusz Mi¶kiewicz <misiek@misiek.eu.org>
+Arne Wichmann <aw@anhrefn.saar.de>
+Axel Eble <aeble@controlware.de>
+Benjamin Schweizer <SternSZ@gmx.de>
+Bjørn Frantzen <bjoff@bgnett.no>
+Brent J. Nordquist <brent-nordquist@bethel.edu>
+Brian Ewins <brian.ewins@bt.com>
+Bruno Rohee <rohee@OpenBSD.ORG>
+Carles Sadurní Anguita <sadurni@benidorm.net>
+Carsten Bobek <c.bobek@gmx.de>
+Christian Fertig <fertig@informatik.uni-frankfurt.de>
+Christian Winter <thepoet1@rz.fh-augsburg.de>
+Daniel Barron <daniel@jadeb.com>
+Daniel Fraga <chapolin@inc101.internetcom.com.br>
+David Steuber <david@david-steuber.com>
+Diana Schirmer <diana.schirmer@t-online.de>
+Diedrich Ehlerding <diedrich.ehlerding@t-online.de>
+Dirk Dettmering <dettmer@pc16154.pharmazie.uni-marburg.de>
+Donald M. Burns <donald@sequel.demon.co.uk>
+Edgar Toernig <froese@gmx.de>
+Erik Beckers <erik.beckers@planet-interkom.de>
+Evert Meulie <evert@royal.net>
+Friedhelm Hinrichs <F.Hinrichs@tu-bs.de>
+Gerd R. Greye <gerd.greye@pironet.netsurf.de>
+Giulio <giuliox@tin.it>
+Greg Weeks <greg@durendal.tzo.com>
+Hannes Birnbacher <ad-soft@t-online.de>
+Harald Kretzschmar <hk@thuer.slf.uunet.de>
+Holger Graf <Holger.Graf@gmx.net>
+Holger Repp <retaliator@sbsd.de>
+Jarle Rongved <rongved@online.no>
+Jeff East <an972@freenet.carleton.ca>
+Jeff Grossman <jeff@stikman.com>
+Jeffrey Goldberg <J.Goldberg@cranfield.ac.uk>
+Jens-Uwe Rumstich <rumstich@informatik.hu-berlin.de>
+Jo Moskalewski <JoMo@schwaben.de>
+Joe Hutchinson <joeh@netspace.net.au>
+Joerg Dietrich <joerg@dietrich.net>
+Joey Hess <joey@kitenet.net>
+John R. Schrader <jrschrader@mainz-online.de>
+Johnny Tevessen <j.tevessen@gmx.net>
+Jose Rosales <jrosales@tdv.net>
+Juergen Richter <richter@wohnheim.uni-ulm.de>
+Juergen Vollmer <vollmer@cocolab.de>
+Juha Pohjalainen <jmp@iki.fi>
+Karsten Merker <merker@guug.de>
+Kent B. Hansen <kent.hansen@bigfoot.com>
+Klaus Berger <klausmartin.berger@gmx.net>
+Lenz Grimmer <grimmer@suse.de>
+Maarten Geurts <mgeurts@tip.nl>
+Malte Gell <malte.gell@gmx.net>
+Manfred Haertel <Manfred.Haertel@rz-online.de>
+Marcus Szumigala <MSzumigala@gmx.net>
+Mark Brown <broonie@tardis.ed.ac.uk>
+Mark Hannon <mark.hannon@stockholm.mail.telia.com>
+Matt Armstrong <matt@lickey.com>
+Matthias Andree <mandree@dosis.uni-dortmund.de>
+Matthias Flohr <mflohr@gmx.de>
+Max Matveev <max@melbourne.sgi.com>
+Michael Dreher <micha@planet-interkom.de>
+Michael Guertler <guertler@cs.bonn.edu>
+Michael Mauch <elmicha@unidui.uni-duisburg.de>
+Michael Mayer <mmayer@muenster.de>
+Michael Schuetz <michael.schuetz@tu-clausthal.de>
+Michael Schwendt <sidplay@geocities.com>
+Michael Stroeder <s_stroed@ira.uka.de>
+Nick Drage <nick-drage@gmx.ch>
+Otto Niesser <Otto.Niesser@nbgm.siemens.de>
+Pasqualino Casciano <pasqualino.casciano@stud.lrz-muenchen.de>
+Peter Hirdina <Peter.Hirdina@gmx.net>
+Peter Katzmann <peter.katzmann@edag.de>
+Peter Kronfuss <pkronfuss@ycom.or.at>
+Peter Mutsaers <plm@xs4all.nl>
+PhiR <Gerlach@mygale.org>
+Philippe De Muyter <phdm@macqel.be>
+Qing Liu <liu@math.u-bordeaux.fr>
+Radoslaw Gancaraz <r_g@priv2.onet.pl>
+Randolf Skerka <Randolf.Skerka@gmx.de>
+Rene Wuttke <rene@wuttke.net>
+Rey IJben <rey@linuxrules.xs4all.nl>
+Riccardo Tromba <inafir@tin.it>
+Richard Poole <rp202@rp202.demon.co.uk>
+Richard van Denzel <richardd@interaccess.nl>
+Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>
+Ron Rosson <insane@oneinsane.net>
+Sebastien Bellefeuille <sebas@magma.ca>
+Stefan Ladwig <stefan.ladwig@privat.kkf.net>
+Stefan Luetkebrune <s.luetkebrune@ndh.net>
+Stefan Troeger <stefan.troeger@wirtschaft.tu-chemnitz.de>
+Stephan Block <block@enst.fr>
+Steven Flintham <steven@lemma.demon.co.uk>
+Sven Paulus <sven@karlsruhe.org>
+Taisuke Yamada <tai@imasy.or.jp>
+Ted Marston <ted@nowtsfree.freeserve.co.uk>
+Thomas J. Merritt <tjm@codegen.com>
+Thomas Themel <tthemel@gmx.net>
+Timo Giesselmann <gmann@on-line.de>
+Tobias Burnus <tobias.burnus@uumail.de>
+Tom Schlangen <t.schlangen@ndh.net>
+Torsten Berger <ToBerger@t-online.de> 
+Trever Adams <highlander@teleteam.net>
+Vladimir Dozen <dozen@do-labs.spb.ru>
+Vladimir Litovka <doka@root.webest.com>
+Walt Mankowski <waltman@netaxs.com>

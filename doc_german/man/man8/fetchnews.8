@@ -1,0 +1,189 @@
+.TH fetchnews 8 "24 Jun 1999" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: fetchnews.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "
+.SH BEZEICHNUNG
+fetchnews - hole und sende News via NNTP
+
+.SH SYNTAX
+.B fetchnews [-v] [-x Zahl] [-l] [-n] [-f] [-P] 
+	
+.SH BESCHREIBUNG
+.B Leafnode 
+ist ein USENET-Software-Paket, das für kleine Sites
+gedacht ist, wo es wenige User und nur geringe
+Festplatten-Kapazität gibt, aber trotzdem eine große Zahl von
+Gruppen gewünscht wird.
+.PP
+.B Leafnode 
+ist so designt, daß es Fehler selbständig reparieren
+und keinerlei manuelle Pflege benötigen soll.
+.PP
+.B Fetchnews
+(das bis Version 1.9.2 "fetch" hieß)
+ist das Programm, das neue Artikel vom Upstream-Server
+lädt und lokal geschriebene Artikel an diesen weiterreicht.
+	
+.SH PARAMETER
+.TP
+.I -v 	
+(verbose = wortreich) Veranlaßt 
+.B fetch
+, mehr Ausgaben zu produzieren. Maximal vier 
+.I -v
+\'s können angegeben werden, je mehr 
+.I -v
+\'s, desto mehr Text wird ausgegeben.
+.TP
+.I -v 
+Zeigt unkritische Fehler an.
+.TP
+.I -vv	
+Zeigt alle Gruppen-Befehle an
+.TP
+.I -vvv 
+Zeigt alle Artikel-Befehle an.
+.TP
+.I -vvvv
+Für Debugging-Zwecke. Erwarten Sie nicht, daß die zusätzlichen Ausgaben 
+Sinn ergeben.
+.TP
+.I "-x Zahl" 
+Gehe Zahl Artikel zurück und lade fehlende vom 
+Upstream-Server.
+.TP
+.I -l
+(l = local) Verwende nur den primären Upstream-Server. Dies erhöht
+die Geschwindigkeit des Vorganges erheblich.
+.TP
+.I -n	
+Lösche die Verknüpfungen im Verzeichnis
+.I /var/spool/news/interesting.groups 
+nicht. So kann das automatische Abbestellen von Newsgruppen unterbunden
+werden.
+.TP
+.I -f
+(force) Lade die Liste der verfügbaren Newsgruppen vom
+Upstream-Server. Dies sollte nur selten geschehen, da
+es einige Zeit benötigt.	
+.TP
+.I -P
+Sende nur die Artikel, die sich in
+.I /var/spool/news/out.going 
+befinden und lade keine neuen Artikel vom Server.
+		
+.SH DATEIEN UND KONFIGURATION
+
+Bitte lesen sie in 
+.B leafnode
+(8) nach, um eine Aufstellung der
+betroffenen Dateien und der Konfigurationsmöglichkeiten von
+fetch zu erhalten.
+	
+.SH ALGORITHMUS
+
+Dies ist eine kurze Beschreibung dessen, was 
+.B fetchnews 
+tut.
+.PP
+Zuerst sendet 
+.B fetchnews
+, nachdem eine Verbindung mit dem
+Upstream-Server hergestellt wurde, alle Artikel, die sich in
+.I /var/spool/news/out.going 
+befinden mittels 
+.B Post
+. Schlägt
+dieses Kommando fehl, wird der betreffende Artikel in das
+Verzeichnis 
+.I /var/spool/news/failed.postings 
+verschoben, das
+der Systemadministrator von Zeit zu Zeit aufräumen sollte. Die
+Dateien zurück nach 
+.I /var/spool/news/out.going 
+zu verschieben
+reicht aus, um die entsprechenden Artikel beim nächsten Lauf
+von 
+.B fetchnews 
+zu versenden.
+.PP
+Als nächstes empfängt 
+.B fetchnews
+die Liste der vorrätigen
+Gruppen des Upstream-Servers mittels "LIST ACTIVE" und "LIST
+NEWSGROUPS" und fertigt daraus die von 
+.B leafnode 
+an. (Dieser Schritt wird meistens weg optimiert.)
+.PP
+Zuletzt durchläuft 
+.B fetchnews
+die Liste der Newsgruppen, indem es
+ein "GROUP-", ein "XHDR Message-ID"- und eine Anzahl von
+"HEAD"- und "BODY"-Kommandos für jede gelesene Gruppe
+ausführt. 
+	
+.SH ANMERKUNGEN
+.B Fetchnews 
+benutzt weder "NEWNEWS" noch "XOVER". "NEWNEWS" wird nicht
+eingesetzt, da dies oft sehr teuer werden kann, XOVER wird nicht
+ausgeführt, da die erhaltenen Informationen auch in den Daten
+der Artikel-Header vorhanden sind.
+.PP
+Fetchnews unterstützt lokale Newsgruppen, die anderen Programme
+des leafnode-Paketes allerdings nicht.
+.PP
+Die einzige Möglichkeit, zu kontrollieren, welche Newsgruppen
+lokale Benutzer lesen können, besteht darin, welche Gruppen
+.B fetchnews 
+beim Upstream-Server lesen kann. Dies beschränkt
+allerdings keine Crosspostings. Wenn Ihre Site groß genug ist,
+daß Sie den Zugriff auf Newsgruppen kontrollieren müssen,
+sollten Sie sich überlegen, einen Newsserver einzusetzen, der
+für große Sites geplant ist.
+.PP
+.B Fetchnews 
+setzt seine UID auf "news", da fast alle Probleme, die
+ich mit 
+.B leafnode 
+hatte, auf Dateien zurückzuführen waren, für
+die der User "news" keine Schreibberechtigung hatte.
+	
+.SH BUGS
+.B Fetchnews 
+ignoriert "Supersedes"- und "Also-Cancel"-Header. Dies
+muß korrigiert werden.
+.PP
+.B Fetchnews 
+löscht niemals eine Gruppe aus der Liste der aktiven
+Newsgruppen.
+	
+.SH AUTOR
+Die ersten Versionen von fetchnews wurden von Arnt Gulbrandsen 
+<agulbra@troll.no>  unter dem Namen fetch geschrieben; 
+Copyright 1995 Troll Tech AS,
+Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.PP
+Weiterentwickelt wurde fetch von Cornelius  Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de>, Randolf Skerka
+<Randolf.Skerka@gmx.de>  und Markus Enzenberger 
+<enz@cip.physik.uni-muenchen.de>.
+Copyright (an den Veränderungen) 1997-1999.
+.PP
+Die ursprüngliche Entwicklung wurde durch Uninett AS 
+(http://www.uninett.no/) finanziert.
+.PP 
+Deutsche Übersetzung: Alexander Reinwarth <a.reinwarth@gmx.de>
+	
+.SH SIEHE AUCH
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR leafnode (8),
+.BR texpire (8),
+.B "RFC 977"

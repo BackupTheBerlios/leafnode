@@ -1,0 +1,466 @@
+.TH leafnode 8 "21 Nov 1998" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: leafnode.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "                    
+
+.SH BEZEICHNUNG
+
+leafnode - ein NNTP server für kleine Sites (mit Wählverbindung)
+
+.SH SYNTAX
+.B leafnode
+
+.SH BESCHREIBUNG
+
+.B Leafnode 
+ist ein USENET-Software-Paket, das für kleine Sites gedacht  ist, wo
+es wenige User und nur geringe Festplatten-Kapazität gibt, aber
+trotzdem eine große Zahl von Gruppen gewünscht wird.
+.PP
+.B Leafnode 
+ist so designt, daß es Fehler selbständig reparieren und keinerlei
+manuelle Pflege benötigen soll. 
+.PP
+Das 
+.B leafnode
+-Programm selbst ist der NNTP-Server. Es wird von
+.I
+/etc/inetd.conf 
+gestartet, wenn jemand News lesen möchte. Die anderen Teile des
+Paketes,
+.B fetchnews 
+und 
+.B texpire
+, sind dafür zuständig, News von anderen Servern zu holen und nach
+einer gewissen Zeit zu löschen. 
+
+.SH
+ZUGANGSKONTROLLE
+
+.B Leafnode 
+bietet keinerlei Autentifizierungs- oder Zugangskontrolle an. Eine
+solche zu implementieren, ist eine Aufgabe, die nicht für jeden
+einzelnen Dienst neu vorgenommen werden sollte. 
+.PP
+Ich empfehle stattdessen, daß zu diesem Zweck entweder ein firewall
+oder tcpd zum Einsatz kommen sollte. 
+
+.SH
+DATEIEN UND VERZEICHNISSE
+
+Für alle folgenden Dateien und Verzeichnisse muß der User "news"
+Schreibrechte besitzen. 
+.PP
+.I
+/etc/leafnode/config 
+enthält die Konfigurationseinstellungen für leafnode.(s. a.
+.B KONFIGURATION
+) 
+.PP
+.I /var/spool/news 
+enthält die News-Artikel, so enthält z.B. das Verzeichnis 
+.I
+/var/spool/news/alt/fan/agulbra 
+die Artikel der Newsgruppe alt.fan.agulbra. Jedes Verzeichnis enthält
+die Artikel in durchnumerierten Dateien (Dezimalzahlen, streng monoton
+steigend) und eine spezielle Datei  
+.I .overview
+, die die "Subject"-, "From"-, "Date"-, "Message-ID"-, "References"-,
+"Bytes"- und "Lines"-Header für jeden einzelnen Artikel der Gruppe
+enthält. 
+.PP
+Mehrere Unterverzeichnisse haben spezielle Aufgaben:
+.PP
+.I /var/spool/news/leaf.node
+enthält diejenigen Dateien, die
+.B leafnode
+während des Betriebs anlegt, zum Beispiel die
+.BR groupinfo-Datei
+, die Informationen über jede einzelne
+USENET-Gruppe enthält. Diese Datei wird von 
+.BR fetchnews
+(8) erstellt,
+Sie können diese Datei jederzeit neu erstellen lassen, indem
+Sie 
+.BR fetchnews 
+mit dem Parameter -f aufrufen (s. 
+.BR fetchnews
+(8)).
+.PP
+.I /var/spool/news/out.going
+enthält lokale Artikel, die von
+.BR fetchnews
+(8) an den Upstream-Server weitergereicht werden sollen.
+.PP
+.I /var/spool/news/failed.postings
+enthält lokale Postings, die vom Upstream-Server zurückgewiesen
+wurden.
+.BR Fetchnews
+erstellt Dateien in diesem Verzeichnis, allerdings löscht keines der 
+.BR leafnode
+-Programme dort Dateien.
+.PP
+.I /var/spool/news/message.id
+enthält harte Links zu jedem Artikel; dies ersetzt die 
+.B dbz
+Datenbank,
+die größere Server einsetzen. (Ein solches Verzeichnis ist auf kleinen
+Servern, für die  
+.BR leafnode
+gedacht ist, effizienter, skaliert dafür aber sehr schlecht.)
+.PP
+.I /var/spool/news/interesting.groups 
+enthält  pro Gruppe, die ein NNTP-Klient angefordert hat, eine Datei. 
+.BR Leafnode 
+führt die Operation touch(1) auf die relevante Datei aus, wenn ein
+LISTGROUP-, XOVER-, XHDR-, STAT-, HEAD-, BODY- oder ARTICLE-Befehl
+direkt nach einem GROUP-Befehl ausgeführt wird. 
+.BR fetchnews
+(8) lädt die Artikel derjenigen Gruppen, auf deren Dateien entweder 
+.IP
+- innerhalb der letzten zwei Tage, oder
+.IP	
+- mehr als einmal und mindestens einmal in der vergangenen
+Woche zugegriffen wurde.
+.PP
+.I /etc/inetd.conf 
+enthält die Zeile, die 
+.BR leafnode 
+startet. Es
+wird dringend angeraten, 
+.BR leafnode 
+vom User "news" starten zu
+lassen. 
+
+.SH KONFIGURATION
+
+Die komplette Konfiguration wird in der Datei
+.I /etc/leafnode/config 
+vorgenommen. Es gibt kein graphisches
+Werkzeug, um 
+.BR leafnode 
+zu konfigurieren.
+.PP
+Die Datei hat eine Art Unix-Standard-Format: Nur ein Argument pro
+Zeile, Kommentare werden durch # eingeleitet und durch das Zeilenende
+beendet. Im Folgenden werden die möglichen Parameter anhand einiger
+Beispiele erklärt. 
+.PP
+.B OBLIGATORISCHE PARAMETER
+.TP
+server = news02.bigprovider.com
+"server" wird von 
+.B fetchnews
+(8) benutzt, um festzustellen, von welchem Server es News
+herunterladen und wohin es neue Artikel posten soll (der primäre
+News-Server). Sie brauchen auf diesem Server Lese- und Schreibrechte.
+Im obigen Beispiel ist news02.bigprovider.com der primäre News-Server.
+
+.TP	
+expire = 5
+"expire" ist die Anzahl der Tage, die ein Thread aufbewahrt werden
+soll. Im Beispiel wird ein Thread fünf Tage, nachdem er zuletzt
+gelesen wurde, durch
+.BR texpire
+gelöscht. 
+.PP
+.B
+SERVERABHÄNGIGE OPTIONALE PARAMETER
+.TP
+supplement = sex.and.warez.com
+Sie können weitere, ergänzende Newsserver angeben, von denen leafnode
+versuchen wird, Artikel zu laden. Es ist möglich, mehr als einen
+weiteren News-Server anzugeben. Wenn Sie das Recht haben, über diese
+Server zu posten, werden Ihre Artikel auch an diese Server
+weitergegeben.  
+.TP	
+username = meinname
+Wenn einer Ihrer News-Server eine Authentifizierung erwartet, können
+Sie hier Ihren Usernamen auf diesem System eingeben. Dieses Feld darf
+mehrmals erscheinen, einmal nach jeder Server-Definition. 
+.TP	
+password = meinpasswort
+Wenn einer Ihrer News-Server eine Authentifizierung erwartet, können
+Sie hier Ihr Paßwort auf diesem System eingeben. Dieses Feld darf
+mehrmals erscheinen, einmal nach jeder Server-Definition. Da das
+Paßwort im Klartext angegeben wird, ist es ratsam, die Rechte an der
+config-Datei so stark wie möglich einzuschränken, da sonst andere
+Benutzer Ihres Rechners Ihr/e Paßwort/Paßwörter herausfinden könnten. 
+.TP	
+timeout = 30
+Normalerweise versucht 
+.B leafnode 
+10 Sekunden lang, mit einem Server Verbindung aufzunehmen und gibt
+diesen Versuch dann auf. Wenn Sie einen langsamen Server haben, können
+Sie  
+.B leafnode 
+mehr Zeit dafür geben, indem Sie timeout auf einen höheren Wert setzen
+(im Beispiel 30 Sekunden). "timeout" kann für jeden server einzeln
+angepaßt werden. 
+.TP	
+nodesc = 1
+Manche Server liefern die Beschreibungen der Newsgroups nicht korrekt
+an, da sie das "LIST NEWSGROUPS"-Kommando nicht verstehen. Fügen Sie
+in diesem Fall nach dem "server"/"supplement"-Eintrag diese Zeile ein.
+.TP
+port = 8000
+Mit den Grundeinstellungen versucht leafnode sich mit dem
+Upstream-Server über den NNTP-Port (119) zu verbinden. Wenn ihr Server
+auf einem anderen Port läuft, können Sie ihn hier angeben. Dieses Feld
+darf mehrmals erscheinen, einmal nach jeder Server-Definition. 
+.TP
+.B SERVERUNABHÄNGIGE OPTIONALE PARAMETER
+.TP
+hostname = host.domain.country
+.B leafnode 
+generiert die Message-ID ausgehender Artikel aus dem Namen Ihres
+Rechners. Manche Upstream-Server verlangen allerdings Message-IDs
+einer bestimmten Art. In diesem Fall können Sie den Teil der
+Message-ID nach dem @ auf einen beliebigen Wert setzen. Die Verwendung
+von "hostname" zur Erzeugung einer Phantasie-Message-ID ist zwar
+möglich, ich rate aber dringend davon ab. 
+.TP
+create_all_links = 1 
+Üblicherweise speichert 
+.B fetchnews 
+Artikel nur in den Newsgruppen, die in 
+.I /var/spool/news/interesting.groups
+vorhanden sind, wenn Sie create_all_links auf 1 setzen, erstellt 
+.B fetchnews 
+jedoch für jede Newsgruppe, die es im "Newsgroups:"-Header findet,
+einen harten Link. Dies kann interessant für Sie sein, wenn Sie ein
+Score- oder Kill-File auf den "Xref:"-Header anwenden möchten.  
+.TP	
+maxfetch = 1000
+"maxfetch" begrenzt die Anzahl der Artikel, die
+.B fetchnews
+(8) vom Upstream-Server laden darf. Die Benutzung dieses Parameters
+ist jedoch nicht zu empfehlen, da Sie sonst nicht alle Artikel einer
+Gruppe bekommen. In der Grundeinstellung gibt es keine Obergrenze. 
+.TP	
+initialfetch = 1
+"initialfetch" beschränkt die Anzahl der Artikel, die von einer vorher
+noch nicht bezogenen Gruppe geladen werden sollen. Normalerweise
+werden alle alten Artikel geladen, was allerdings sehr zeitaufwendig
+werden kann, wenn in dieser Gruppe sehr viele Artikel gepostet werden.
+Dies entspricht einem Wert von 0 für initialfetch; wenn Sie keine
+alten Artikel empfangen möchten, setzen Sie den Wert, wie im Beispiel,
+auf 1. 
+.PP
+groupexpire sehr.volle.Gruppe = 1
+.TP
+groupexpire sehr.volle.Hierarchie.* = 1
+"groupexpire" macht es möglich, unterschiedliche Haltezeiten für
+verschiedene Gruppen festzulegen. Die Haltezeit wird in Tagen
+angegeben, der Wert wird von 
+.B texpire 
+(8) benutzt. Sie können so viele
+groupexpire-Einträge anlegen wie Sie möchten und dabei
+.B glob 
+(7)-Wildcards verwenden.
+.TP	
+maxage = 10
+Wenn ein Artikel auf dem Upstream-Server auftaucht, der älter als
+"maxage" Tage ist, wird er von fetchnews nicht geladen, auch wenn er noch
+nicht lokal vorhanden ist. Dies ist nützlich, wenn Ihr Upstream-Server
+gelegentlich den 'Schluckauf' bekommt. Die Standardeinstellung beträgt
+10 Tage; wenn Sie maxage deaktivieren möchten, tragen Sie einen
+möglichst großen Wert ein, z. B. 100000 (also ca. 270 Jahre) 
+.TP
+maxlines = 2000
+Wenn Sie es vermeiden möchten, sehr große Artikel zu laden, setzen Sie
+den "maxlines"-Parameter auf die Anzahl der Zeilen, die ein Artikel
+höchstens haben darf. Üblicherweise ist dieses Feature deaktiviert. 
+.TP	
+minlines = 2
+Manchmal werden Newsgruppen mit leeren Artikeln geflutet. Um solche
+Artikel abzuweisen, können sie "minlines" verwenden. "minlines" auf
+einen Wert größer als 4 zu setzen, ist wahrscheinlich keine gute Idee,
+da dann u. U. auch echte Artikel abgelehnt werden könnten.
+Üblicherweise ist dieses Feature deaktiviert. 
+.TP	
+maxbytes = 100000
+Wenn Sie große Artikel ablehnen möchten, können Sie statt "maxlines"
+auch "maxbytes" verwenden. Auch dieses Feature ist normalerweise
+deaktiviert. 
+.TP	
+maxcrosspost = 5
+Wenn Sie Spam bekämpfen möchten, können Sie alle Artikel filtern, die
+über mehr als "maxcrosspost" Gruppen crossgepostet werden. Den Wert
+von "maxcrosspost" zu niedrig anzusetzen ist wahrscheinlich keine gute
+Idee. Auch dieses Feature ist standardmäßig deaktiviert. 
+.TP	
+filterfile = /etc/leafnode/filter
+leafnode kann die Header eingehender Artikel nach regulären Ausdrücken
+filtern, die in "filterfile" gespeichert sind. Das Format dieser
+Filterdatei ist einfach, ein regulärer Ausdruck pro Zeile. Entspricht
+einer der regulären Ausdrücke dem Header eines eingehenden Artikels,
+wird der Body dieses Postings abgelehnt. Dieses Feature ist
+üblicherweise deaktiviert. 
+.TP	
+timeout_short = 2
+Normalerweise wird eine Gruppe, die nur zufällig abonniert wurde, 2
+Tage lang bezogen. Hier können Sie diese Zeit abändern. 
+.TP
+timeout_long = 7
+Normalerweise wird eine Gruppe, die nicht mehr gelesen wird, noch
+sieben Tage lang bezogen. Diese Zeitspanne kann hier geändert werden. 
+.TP
+timeout_active = 90 
+Normalerweise wird das Active-File alle 90 Tage vom Upstream-Server
+gezogen. Dieser Abstand kann verändert werden, indem Sie
+"timeout_active" einen anderen Wert zuweisen. Bedenken sie dabei aber,
+daß beim Laden des Active-Files von einem Server, der ca 20000 Gruppen
+vorrätig hat, rund ein Megabyte an Informationen übertragen werden. 
+.TP	
+delaybody = 1 
+Wenn dieser Parameter gesetzt ist, lädt 
+.B fetchnews 
+(8) nur die Header eines Artikels zur Ansicht. Nur, wenn die Header
+gelesen werden, lädt  
+.B fetchnews 
+(8) beim nächsten Start auch den Body des Postings. Sie können so
+Plattenplatz und On-Line-Zeit sparen. 
+.TP	
+debugmode = 1
+Wenn Sie diesen Parameter angeben, geben 
+.B fetchnews 
+(8),
+.B texpire
+(8) und 
+.B leafnode 
+(8) Debugging-Informationen
+via 
+.B syslog 
+(8) nach news.debug aus. Benutzen Sie diese
+Option, wenn Sie Probleme mit Ihrem Feed haben.
+	
+.SH PROTOKOLL
+
+.B leafnode 
+unterstützt die folgenden NNTP-Befehle.
+.TP	
+.B ARTICLE 
+Gibt die Header und den Body eines Artikels zurück.
+.B leafnode 
+unterstützt diesen Befehl nicht vollständig. Die Message-ID und die
+Artikelnummer dürfen nicht in der Reply-Zeile erscheinen. Dies berührt
+jedoch keinen getesteten Newsreader. 
+.TP
+.B BODY
+Gibt den Body eines Artikels zurück. (s. 
+.B ARTICLE
+)
+.TP
+.B GROUP
+Setzt den Gruppen- und Artikel-Zeiger und gibt die Statusinformationen
+der betreffenden Gruppe zurück. 
+.TP	
+.B HEAD
+Gibt die Header eines Artikels zurück. (s. 
+.B ARTICLE)
+.TP
+.B HELP
+Der Befehl wird akzeptiert, die Ausgabe dürfte allerdings nicht sehr
+hilfreich sein.  
+.TP	
+.B IHAVE	
+Der Befehl ist 
+.B leafnode 
+zwar bekannt, wird aber zurückgewiesen (s. 
+.B fetchnews 
+(8)).
+.TP	
+.B LAST
+Setzt den Artikel-Zeiger um eins zurück.
+.TP
+.B LIST 
+Zeigt eine Liste der verfügbaren Newsgruppen an.
+.TP
+.B LIST OVERVIEW.FMT
+Zeigt einige Erweiterungen an.
+.TP
+.B LISTGROUP
+Zeigt entweder die Artikel der aktuellen Gruppe, oder, falls der Name
+eine Newsgruppe als Argument übergeben wird, die Artikel der
+angegebenen Gruppe an. 
+.TP 
+.B MODE
+Wird zwar akzeptiert, aber ignoriert.
+.TP
+.B NEWGROUPS
+Zeigt neu angelegte Newsgruppen an.
+.TP
+.B NEWNEWS
+Wird zwar akzeptiert, liefert aber nur eine leere Antwort zurück.
+Dieser Befehl macht für  
+.B leafnode
+keinen Sinn.
+.TP	
+.B NEXT
+Setzt den Artikel-Zeiger um eins vor.
+.TP 
+.B POST
+Postet einen neuen Artikel, dabei wird die Syntax nur dürftig
+überprüft.  
+.B fetchnews
+(8) sendet diesen Artikel dann zum Upstream-Server.
+.TP
+.B QUIT
+Beendet das Lesen von News.
+.TP
+.B SLAVE	
+Wird akzeptiert, aber ignoriert.
+.TP
+.B STAT
+Zeigt die Verfügbarkeit eines Artikels an. (s.
+.B ARTICLE
+)
+.TP
+.B XHDR
+Wird akzeptiert, unterstützt aber nur die "Subject"-, "From"-,
+"Date"-, "Message-ID"-, "References"-, "Bytes"- und "Lines"-Header. 
+.TP
+.B XOVER
+Gibt die "Subject"-, "From"-, "Date"-, "Message-ID"-, "References"-,
+"Bytes"- und "Lines"-Header des angegebenen Artikels zurück. 
+.PP 
+Die restlichen Befehle, die im NNTP-RFC angegeben sind oder von
+anderen Servern hinzugefügt wurden, werden nicht unterstützt, um
+leafnode einfach und fehlerfrei zu erhalten. 
+	
+.SH BUGS
+Keine bekannt.
+	
+.SH AUTOR
+Die ersten Versionen von leafnode wurden von Arnt Gulbrandsen 
+<agulbra@troll.no> geschrieben; Copyright 1995 Troll Tech AS,
+Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.PP
+Weiterentwickelt wurde leafnode von Cornelius  Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de>, Randolf Skerka
+<Randolf.Skerka@gmx.de>  und Markus Enzenberger 
+<enz@cip.physik.uni-muenchen.de>.
+Copyright (an den Veränderungen) 1997-1999.
+.PP
+Die ursprüngliche Entwicklung wurde durch Uninett AS 
+(http://www.uninett.no/) finanziert.
+.PP
+Deutsche Übersetzung: 
+Alexander Reinwarth <a.reinwarth@gmx.de>
+	
+.SH SIEHE AUCH
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR fetchnews (8),
+.BR texpire (8),
+.BR checkgroups (8),
+.BR glob (7),
+.B RFC 977

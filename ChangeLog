@@ -1,0 +1,1036 @@
+History of 2.0b3 -- changes since 2.0b2:
+
+fetchnews:
+=========
+
+271000: yesterday we did a number of "if ( port == 119)" constructs.
+	Only today we realized that, if the default port is used,
+	"port" is set to zero. Made the proper changes.
+261000: made several changes to accommodate retrieving news from the
+	same server on different ports. Unfortunately I have no idea
+	any more who sent me the patch.
+261000: nntpactive(): To avoid a compiler warning, we let strftime()
+	produce a four-digit year; in the next line, we skip the
+	first two digits, though. Code written by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+261000: doxover(): the generated pseudoheader now also contains a
+	Bytes: header. Patch by Joerg Dietrich <joerg@dietrich.net>.
+261000: getarticle(): killfilter() was employed regardless of the
+	filtermode. Bug spotted by Joerg Dietrich <joerg@dietrich.net>.
+
+libutil:
+=======
+
+271000: artutil.c: store() didn't initialize the static variable cg
+	which might have resulted in a core dump. Fixed. Problem
+	reported by Stefan Fleiter <stefan.fleiter@gmx.de>.
+271000: made strdup.c a separate file. Unfortunately it doesn't compile
+	at all, and I don't know why.
+271000: added a vsnprintf() by Theo de Raadt with BSD license that
+	also contains snprintf(). Therefore I removed both the
+	snprintf() and vsnprintf() from miscutil.c. This fixes the
+	problem outlined below.
+261000: artutil: storearticle() did not honour "create_all_links". Patch
+	by Joerg Dietrich <joerg@dietrich.net>.
+261000: configutil: filtermode now set by default to (FM_XOVER & FM_HEAD) .
+251000: miscutil: inserted a very crude replacement for vsnprintf()
+	using vsprintf() to make Leafnode compile on OSF1. It is clear
+	that vsprintf() is prone to buffer overflow attacks.
+
+nntpd:
+=====
+
+261000: fopenart(): if a local group is visited, no pseudoarticle is
+	present. Suggested by Joerg Dietrich <joerg@dietrich.net>.
+251000: did not compile with IPV6 because the logging of connections
+	always assumed IPV4 addresses. Error reported by Mark Brown
+	<broonie@sirena.org.uk>. Very crude fix by omitting any
+	reporting if compiled with IPV6.
+
+rnews:
+=====
+
+261000: rnews didn't know local groups. Patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+
+Miscellaneous:
+=============
+
+261000: leafnode.h: included <sys/types.h> to account for "size_t".
+	Suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+261000: removed miscellaneous references to COPYING. Noted first by
+	Phil Hunt <philh@comuno.freeserve.co.uk>.
+251000: leafnode.h: added vsnprintf() prototype
+251000: leafnode.h: size_t may only occur in a file after stdio.h has
+	been included, otherwise gcc on OSF1 will barf. Error reported
+	by Joerg Dietrich <joerg@dietrich.net>.
+
+----------------------------------------------------------------------------
+
+History of 2.0b2 -- changes since 2.0b1:
+
+libutil:
+=======
+
+251000: xoverutil: gfixxover(): argument of isspace() was not casted
+	to unsigned char. Reported by Joerg Dietrich <joerg@dietrich.net>.
+251000: miscutil: snprintf(): unused variable rval was present.
+	Reported by Joerg Dietrich <joerg@dietrich.net>.
+251000: artutil: mgetheader(): argument of isspace() was not casted to
+	unsigned char; instead the result of isspace() was casted. Bug
+	reported by Joerg Dietrich <joerg@dietrich.net>.
+
+nntpd:
+=====
+251000: list(): argument of tolower() was not casted to unsigned char.
+	Reported by Joerg Dietrich <joerg@dietrich.net>.
+
+Miscellaneous:
+=============
+
+251000: leafnode.h: added a declaration of snprintf() for systems
+	which don't provide is (snprintf() is defined in miscutil.c).
+	Bug reported by Joerg Dietrich <joerg@dietrich.net>.
+251000: README: added a section on deinstallation. Suggested by
+	Juergen Salk <juergen.salk@gmx.de>.
+251000: Makefile.in: if no pcrelib is installed, "make uninstall" or
+	"make uninstall-bins" will now remove pcre.7 as well. Patch
+	provided by Juergen Salk <juergen.salk@gmx.de>.
+251000: Makefile.in: "make install" now also creates
+	/var/spool/news/local.groups . Suggested by Stefan Fleiter
+	<stefan.fleiter@gmx.de>.
+
+----------------------------------------------------------------------------
+
+History of 2.0b1 -- changes since 1.9.4:
+
+applyfilter:
+===========
+
+181000: for some reason, applyfilter doesn't work.
+181000: applyfilter was always called with argv[1]. Now it is called
+	with argv[optind] which ensures that the newsgroup is correct.
+080900: adjusted main() to new format of parseopt().
+080900: adjusted main() to new format of readconfig().
+120300: fixed call of lockfile_exists() to accommodate new format. Patch
+	by Joerg Dietrich <joerg@dietrich.net>.
+010899: terminate if filterfile is not present. Bug reported by
+	Marcus Szumigala <MSzumigala@gmx.net>.
+210799: fix .overview file after killing articles
+
+fetchnews:
+=========
+
+181000: doxover(): articles were actually not marked for download even
+	if filtering was successful
+181000: doxover(): an essential piece of code was missing to assemble an
+	article header from the xover line. Fixed.
+171000: doxhdr(): the message ids are now not logged anymore
+131000: doxover(): output of XOVER not logged any more
+121000: two new global variables, groupfetched and groupkilled, to count
+	fetched and killed articles per group.
+121000: doxover() loses one parameter which wasn't used anyway.
+280900: -F works again through new function getconffile().
+270900: switched back to reading config file *before* evaluating options.
+	However, this breaks -F.
+270900: managed to change the behavior of -S so that usernames and
+	passwords in the config file are used but servers *only* in
+	the config file are not.
+270900: new function do_server() which incorporates some functionality
+	of the former main().
+140900: moved supersede() into artutil.c. Patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+140900: checkinteresting() should only be called if fetchnews is
+	invoked without -n. Fixed by Joerg Dietrich <joerg@dietrich.net>.
+140900: F: was missing in the getopt() call. Reported by Joerg
+	Dietrich <joerg@dietrich.net>.
+080900: added option "-M message-id" to retrieve only a single message-id
+080900: added option "-F configfile" to read from a different configuration
+	file
+080900: adjusted main() to new format of parseopt().
+080900: adjusted main() to new format of readconfig()
+060900: if "LIST NEWSGROUPS news.group.name" does not work for the first
+	new group, no second attempt to get a groupname is made. Suggested
+	by Carlos Robinson <cerobinson@teleline.es>.
+060900: some minor changes in main() and getfirstlast() (mostly removal
+	of debugging messages).
+040800: implemented catching of SIGUSR1 and SIGUSR2 to increase or
+	decrease verbosity on the fly. Patch by Colin Brough
+	<Colin.Brough@btinternet.com>.
+040800: implemented the new locking mechanism for fetchnews, to avoid
+	getting into troubles with the nntpd. Written by Joerg
+	Dietrich <joerg@dietrich.net>.
+040800: new function checkforpostings(). This avoids connecting with any
+	upstream server if there is nothing to post and fetchnews is
+	invoked with -P.
+280700: new function freeserverlist(), needed by main().
+280700: main(): regrouped some invokements.
+280700: main(): removed unused variable "usesupplement".
+280700: main(): implemented -S option, after a patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+280700: main(): the configuration must be read before parsing the options.
+	Patch by Joerg Dietrich <joerg@dietrich.net>.
+280700: getgroup(): since the return value of getfirstlast() can be
+	negative, the variable x containing it cannot be unsigned. Bug
+	fixed by Joerg Dietrich <joerg@dietrich.net>.
+280700: getarticle(): free used memory. Patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+280700: getarticle(): Joerg Dietrich <joerg@dietrich.net> added support for
+	Supersedes. TODO: this should only be conditionally switched on.
+280700: getfirstlast(): if the server does have an empty group, return
+	FALSE. Patch by Joerg Dietrich <joerg@dietrich.net>.
+280700: getfirstlast(): if more "extraarticles" are requested than there
+	are articles on the server, the function became confused (because
+	negative numbers were generated). Fixed by Joerg Dietrich
+	<joerg@dietrich.net>.
+280700: sigcatch() also catches SIGALRM now. Patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+140700: moved age() to filterutil.c
+140700: doxover(): moved killing of maxage, maxlines, minlines, maxbytes
+	and maxcrosspost into filterutil.c. This has the advantage that
+	it is possible to apply these criteria in a newsgroup-specific
+	fashion.
+140700: getgroup(): removed the check to interesting.groups. Instead,
+	we check all groups once at the startup of fetchnews (and
+	texpire).
+120700: new function doxhdr() which is called if there are no filter
+	settings for a newsgroup. This should improve the speed because
+	in that case only Message-IDs and not complete headers have to
+	be transferred. Based on a posting to de.comm.software.newsserver
+	by Juergen Strohmayer <usenet@bigfoot.de>.
+010700: nntpactive(): since some wierd news servers have not implemented
+	LIST ACTIVE, use LIST instead
+120300: doxover(): removed strtok() code from 180100 because it didn't
+	work at all. Replaced it with the original code of 170100 and
+	re-inserted the bugfix from 230200. This code may still not be
+	fully correct.
+120300: fixed calls of lockfile_exists() to accommodate new format.
+	Patch by Joerg Dietrich <joerg@dietrich.net>.
+040300: insertgroup(): if fetchnews -f was called, creation time was
+	not set to 0. Bug discovered and fixed by Joerg Dietrich
+	<joerg@dietrich.net>.
+230200: doxover(): when maxage was set to 0, all articles were killed.
+	Bug reported by Johannes Stezenbach.
+130200: nntpactive(): new groups reported by NEWGROUPS were not inserted
+	in the groupinfo file (and would have been inserted with a wrong
+	date). Bug found and fixed by Joerg Dietrich <joerg@dietrich.net>.
+180100: rewrote doxover() based on code by Vladimir Dozen
+	<dozen@do-labs.spb.ru>.
+130199: if "LIST NEWSGROUPS" returned just "215" without any text, fetchnews
+	became confused. Reported by Pasqualino Casciano
+	<pasqualino.casciano@stud.lrz-muenchen.de>.
+130100: ismsgidonserver(): waited for more lines after a 430 error message.
+	Bug discovered and fixed by Joerg Dietrich <joerg@dietrich.net>.
+080100: doxover(): more informative error message if XOVER fails
+080100: doxover() returns now the correct values if all articles are
+	already downloaded.
+010100: ismsgidonserver() now uses HEAD instead of STAT since STAT
+	implementation is buggy with some nntp servers (problem
+	reported by Qing Liu <liu@math.u-bordeaux.fr>).
+211299: automatic unsubscription of groups got lost in the rewriting
+	process. Fixed (I used the leafnode-1.9.8 variant).
+291199: ismsgidonserver() re-written to care for buggy nntpcache (at least
+	some versions of nntpcache reply to STAT <msgid> with "223", even
+	if there is no article <msgid>).
+251199: lockfile is unlocked after writing active file since we don't
+	need to lock for writing overview files (at least I have not
+	encountered any locking problems with overview files so far,
+	and the nntpd doesn't lock either).
+181199: removed all the old code since the new one was working quite
+	satisfactorily as of 151199.
+181199: case of newsgroups is not changed anymore.
+151199: mgetheader(): various additions of globalfetched and globalkilled
+	made by Joerg Dietrich <joerg@dietrich.net>.
+151199: mgetheader(): space allocated for pseudo headers was not initialized
+	properly. Bug found and patched by Joerg Dietrich
+	<joerg@dietrich.net>.
+091199: getarticle(): before writing Xref: headers, an empty line was
+	inserted. Bug found and patched by Joerg Dietrich
+	<joerg@dietrich.net>.
+091199: getarticle(): fopenmsgid() was called with the message id, not
+	the pathname. Bug found and patched by Joerg Dietrich 
+	<joerg@dietrich.net>.
+091199: getarticle(): Xref: from upstream header should not be saved.
+	Bug found and patched by Joerg Dietrich <joerg@dietrich.net>.
+061199: filtering on maxlines and minlines did not always work. Bug found
+	and patched by Joerg Dietrich <joerg@dietrich.net>.
+041199: (old) getgroup(): if a header was not found, fetchnews would segfault.
+	Bug found and fixed by Arkadiusz Mi¶kiewicz <misiek@misiek.eu.org>.
+	(I thought I had fixed this already. Apparently not.)
+011199: mgetheader() did look for headers at the end of the line instead of
+	the beginning. Fixed.
+011199: age() now checks whether it gets a full "Date:" header or only the
+	date without the header.
+011199: doxover() debugged with ddd uncovered several small errors which
+	prevented the new getgroup() from running properly.
+271099: made a few changes to updateactive(): when atime of active.read was
+	newer than current date, it was not changed. Now, fetchnews also
+	produces a warning if this happens.
+251099: made a few changes to (old)getgroup()
+161099: Joerg Dietrich <joerg@dietrich.net> fixed a bug in doxover() which
+	prevented xoverlines from being parsed correctly.
+081099: getbody() deleted.
+081099: rewrote getmarked() because it was seriously f...ed up. It now
+	uses the new function getarticle() instead of getbody().
+061099: introduced new #define OLDVERSION which is set for the old version
+	and should be unset when trying to compile (and test) the new version
+	which still contains a gazillion of bugs.
+061099: delposted(): now we delete everything that was created in out.going
+	before fetchnews started instead of making lists. Saves memory and
+	is conceptually simpler (except if somebody has changed the clock
+	between the actual posting event and the call of fetchnews).
+031099: postarticles(): added a missing fclose() and a missing closedir()
+	when a timeout occurred during posting. Bug reported by Brian
+	Ewins <brian.ewins@bt.com>.
+220999: nntpactive(): if upstream server understands XGTITLE, new groups
+	and their descriptions were not entered in active file. Fixed
+	(hopefully). Bug discovered by Carsten Bobek <c.bobek@gmx.de>.
+140999: fixed a bug in getparam(): numerical parameters were not evaluated
+	correctly
+120999: getfirstlast(): now properly yields parameters
+230899: continued the "big rewrite". New functions are:
+	- getarticles(): get all articles in a newsgroup using overlapping
+	  NNTP commands.
+	- getarticle(): getting the single article. This function is not
+	  written yet.
+	- legalheaders(): check if a message has all legal headers present
+	- getmsgid(): extract message-id from headers in memory
+180899: usage(): program was still called "fetch". Reported by Christian
+	Fertig <fertig@informatik.uni-frankfurt.de>.
+180899: oldgetgroup(): if there were more than one blank between header
+	and header contents, the contents were mangled (not properly
+	truncated, that is). Bug reported by Gerd R. Greye
+	<gerd.greye@pironet.netsurf.de>.
+050899: removed all calls of tgetaline() since it did not work as
+	intended.
+270799: getgroup(): xover header are now filtered.
+260799: added check for message ids in getgroup().
+260799: messed around with processupstream() which didn't read its written
+	data properly
+250799: started the big rewrite of getgroup() (old getgroup() is called
+	oldgetgroup() in the meanwhile). New functions are:
+	- getfirstlast()
+	  find out which are the first and last articles to get
+	- doxover()
+	  get headers with XOVER, filter for various things and store them
+	  if delaybody is used
+	- fopenmsgid()
+	  store an article under /var/spool/news/message.id/ and create
+	  subdirectories if needed
+	- getarticle()
+	  get the article. Not written yet. May be split into gethead()
+	  and getbody() (not sure yet).
+240799: handling of long ints was still incorrect in getgroup(). Fixed.
+230799: fetchnews now also catches SIGTERM.
+210799: getgroup() returns now unsigned long instead of int
+210799: processupstream(): declared newserver as "unsigned long" to improve
+	compatibility
+210799: activated -H and -B switches (most of the code was already present
+	in 1.9.4)
+
+libutil:
+=======
+
+231000: filterutil: messed around with killfilter() a bit more. Now it
+	seems to work.
+231000: filterutil: readfilter(): pcre_compile() was called with wrong
+	variable "l" instead of "value". Fixed by Joerg Dietrich
+	<joerg@dietrich.net>.
+231000: filterutil: killfilter(): parameters for call of findinheaders()
+	were switched.  Switched back by Joerg Dietrich <joerg@dietrich.net>.
+231000: filterutil: killfilter(): no check whether findinheaders() found
+	something before calling strtol(). This could lead to crashes.
+	Fixed by Joerg Dietrich <joerg@dietrich.net>.
+231000: filterutil: findinheaders() should not match on the whole line
+	but only on the length of "needle". Fixed by Joerg Dietrich
+	<joerg@dietrich.net>.
+181000: configutil: removed obsolete filter variables
+181000: miscutil: parseopt() does not log options any more
+181000: xoverutil: getxoverline() inserted tabs into the xoverline if
+	they were present in multiline headers. This confused texpire.
+171000: activutil: if insertgroup was called with a description of NULL,
+	it would crash because strdup(NULL) was called. Now "desc" is
+	checked beforehand.
+131000: miscutil: getoptarg() now uses findopt().
+131000: miscutil: new function findopt() which determines whether an
+	option is present on the command line without using getopt().
+131000: miscutil: renamed getconffile() to getoptarg() and allowed the
+	specification of the option. This makes the function more
+	universal.
+280900: miscutil: new function getconffile() allows parsing of command
+	line for a config file without using getopt(). Therefore, we
+	can still use getopt() after reading the config file, thus making
+	it possible to override settings in the config file.
+280900: miscutil: getaline() now uses GNU getline() if present. First
+	suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+270900: configutil: readconfig(): added "debugmode" option again because
+	I frequently forgot to type -D at the command line.
+270900: configutil: readconfig(): made servers again a global variable.
+	I am surprised that the original code had apparently worked
+	occasionally.
+190900: artutil: insertgroup() sets count for each group to 0.
+190900: artutil: readactive() sets count for each group to 0.
+140900: xoverutil: getxoverline() now preserves atime and utime of a file.
+	Patch by Joerg Dietrich <joerg@dietrich.net>. I am not sure
+	whether this is really needed because getxoverline() should
+	ideally be only called once - but it makes things more robust.
+140900: artutil: storearticle() now can and will supersede articles.
+	Patch by Joerg Dietrich <joerg@dietrich.net>. I am not sure
+	whether this is desirable; at least one should be able to
+	configure it.
+140900: artutil: added supersede() from fetchnews. Patch by Joerg
+	Dietrich <joerg@dietrich.net>.
+080900: miscutil: parseopt() modified to adjust new option -F.
+080900: configutil: readconfig() now takes two parameters to make it
+	possible to read different config files
+040900: miscutil: getaline() modified according to Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+300800: activutil: found the newly introduced bug in readactive(). We
+	accidentally replaced also the last NUL byte with a space which
+	was stupid (and it was pure luck that it did not cause segfaults
+	so far).
+290800: activutil: readactive() threw around with complaints about
+	truncated groupinfo files. Fixed a first bug which might cause
+	crashes because we wrote into unallocated memory. This does
+	not fix the complaints, however.
+240800: miscutil: getaline() still had problems with NUL bytes. Now these
+	are replaced with spaces.
+040800: xoverutil: getxover() could not handle negative return values from
+	findxover which resulted in coredumps (the variable was declared as
+	"unsigned"). Fixed.
+040800: miscutil: findinlist(): if "needle" is a NULL pointer, return
+	NULL.
+030800: xoverutil: findxover() now returns (again?) -1 on error. (Since
+	an array can have an object indexed with 0, this object would
+	have never returned.)
+030800: activutil: fixed a bug in insertgroup(): the description was not
+	strdup()ed, leading to possible memory overwrites by other things.
+	This was only discovered when implementing local groups.
+280700: configutil: readconfig() now returns 0 in case of success and a
+	positive error number in case of failure which then can be
+	translated by the calling program (with strerror()). This should
+	reduce the number of inquiries concerning unreadable config files
+	somewhat.
+280700: configutil: readconfig() now returns servers as parameter, if
+	possible. Advantage: one global variable less.
+240700: miscutil: getaline(): doubling bytes again in an exponential
+	fashion; in addition patch for NUL bytes, provided by Matthias
+	Andree <matthias.andree@gmx.de>.
+170700: miscutil: initvars(): messed around with setuid() and getuid().
+	It should now again be possible to install fetchnews setuid news.
+	This ability was lost in the transition from 1.9.7 to 1.9.8.
+170700: miscutil: getaline() would double the line length when reading
+	incomplete lines. Now it allocates bytes in a linear fashion.
+140700: filterutil: new functions findinheader() and age() (the latter
+	comes virtually unchanged from fetchnews.c)
+140700: filterutil: changes in newfilter(), readfilter() and most
+	massively in killfilter() to accommodate group-wise "maxage",
+	"maxlines", "minlines", "maxbytes" and "maxcrosspost".
+140700: localutil: islocalgroup() declaration changed to remove a warning
+140700: miscutil: new function checkinteresting() goes through the
+	interesting.groups directory and deletes everything that is
+	not interesting.
+120700: nntputil: AUTHINFO USER and AUTHINFO PASS are now logged on
+	the debug facility. Username and password are, of course, not
+	logged.
+050700: miscutil: nntp traffic is only logged if programs are invoked
+	with at least two -D.
+050700: miscutil: islocal() replaced with islocalgroup() in localutil
+050700: new file localutil.c
+010700: xoverutil: removed stripspace() completely from the code that
+	creates the overview lines. This means that leading and trailing
+	blanks are not removed any more in any header line, nor are
+	consecutive blanks compressed. Suggested by Thomas Zajic
+	<zlatko@gmx.at>.
+010700: miscutil: added snprintf() from leafnode-1.9.14.
+010700: activutil: insertgroup() gets an additional parameter containing
+	the group description. We need this for local groups.
+010700: activutil: removed a superfluous "#include <string.h>"
+190300: activutil: mergeactive() now sets the "name" of the first
+	unused slot to NULL. Suggested by Claude Michel <cpjm@free.fr>.
+	(This may or may not cause a small memory leak.)
+120300: configutil: included some strategically placed "debug = 0" and
+	"debug = debugmode" lines in readconfig() to avoid logging the
+	whole file every time.
+120300: xoverutil: new function gfixxover() fixes overview lines for
+	each group in a comma-delimited string. Written by Joerg
+	Dietrich <joerg@dietrich.net>.
+120300: miscutil: new function islocal() checking whether a group is
+	local. Written by Joerg Dietrich <joerg@dietrich.net>.
+120300: miscutil: isinteresting() rewritten for local groups by
+	Joerg Dietrich <joerg@dietrich.net>.
+120300: miscutil: lockfile_exists now uses fcntl() to check for
+	already running instances of fetchnews (or other programs in
+	the leafnode suite). Rewritten by Joerg Dietrich
+	<joerg@dietrich.net>.
+120300: artutil: now function lookup_xref(). This function looks up a
+	group in an xref line and returns the article number if the
+	group is present, otherwise NULL. Written by Joerg Dietrich
+	<joerg@dietrich.net>.
+120300: activutil: fakeactive() now also checks local groups. Patch by
+	Joerg Dietrich <joerg@dietrich.net>.
+100300: artutil: storearticle() was still broken. Massive patch by Joerg
+	Dietrich <joerg@dietrich.net>. (Joerg had submitted a similar
+	patch before but I apparently misplaced it.)
+040300: artutil: fgetheader() will now remove the : by itself even
+	if not given in the "header" parameter.
+040300: activutil: insertgroup() changed creation times of already
+	existing groups, causing them to be displayed as new. Bug
+	independently fixed by Johannes Stezenbach and Joerg Dietrich
+	<joerg@dietrich.net>.
+040300: activutil: helpfindgroup() modified which speeds up the time to find
+	a group. Prompted by benchmarking the code to some code written by
+	Tony de Haan <tony@iae.nl>.
+040300: miscutil: new functions stringlistlen() and cmdlinetolist(),
+	written by Andreas Ferber <aferber@techfak.uni-bielefeld.de>.
+230200: xoverutil: getxoverline() now ignores Lines: headers and computes
+	the correct number by itself. Suggested by Johannes Stezenbach.
+220200: miscutil: replaced the fnmatch() code in ngmatch() with Rich
+	Salz's original wildmat().
+130200: activutil: fixed small bug introduced yesterday
+120200: activutil: Lloyd Zusman <ljz@asfast.com> discovered and plugged
+	a memory hole in readactive(): new function freeactive().
+290100: activutil: changegroupdesc() crashed when receiving NULL pointers.
+	Bug fixed by Joerg Dietrich <joerg@dietrich.net>.
+290100: miscutil: ngmatch(): case-insensitive regexp now indeed terminates
+	with '\0'. Bug fixed by Joerg Dietrich <joerg@dietrich.net>.
+180100: activutil: writeactive() does not write empty records any more.
+	Code taken from 1.9.10b2.
+180100: readactive: first and last article set to 1 if they are 0.
+180100: xoverutil: improved code for deletion of illegal articles after
+	bug reports by Andy Piper <squiggle@ukgateway.net>.
+080100: xoverutil: return value of mkstemp() was tested in the wrong way.
+	Fixed.
+080100: activutil: fakeactive() successfully debugged. This means that all
+	functions in activutil.c have been successfully tested.
+080100: activutil: helpfindgroup() now uses signed longs instead of
+	unsigned ones. This solves a lot of problems.
+080100: activutil: insertgroup() could not deal with already existing
+	groups. Fixed.
+080100: activutil: readactive() missed a free( buf ). Fixed.
+070100: activutil: fakeactive() now disregards subgroups starting with
+	digits (this still doesn't help against group names which consist
+	entirely of digits, such as alt.2600)
+070100: activutil_new moved to activutil
+070100: moved isinteresting() from activutil to miscutil.
+070100: miscutil: removed "active = NULL" from initvars().
+060100: activutil: completely rewritten to use arrays instead of trees,
+	unfinished version stored in activutil_new.c. readactive()
+	and writeactive() have already been tested successfully.
+060100: configutil: no more "debugmode" parameter. Use -D instead.
+060100: miscutil: ngmatch() converts a pattern that does not contain
+	ranges into a case-insensitive pattern before using fnmatch()
+	on it.
+060100: filterutil: implemented more intricate filtering rules. This
+	involved a major rewrite of readfilter() and dofilter() (now
+	called killfilter()) and the new functions newfilter(),
+	selectfilter() and freefilter().
+040100: miscutil: replaced ngmatch() with the version from leafnode-1.9.7.
+	This makes string comparison sometimes case-insensitive and fixes
+	a bug reported by Daniel Barron <daniel@jadeb.com>: in config.h.in,
+	HAVE_FNMATCH is defined; but in miscutil.c, HAVE_FNMATCH_H was used.
+030100: miscutil: initvars(): setreuid() and setregid() are replaced
+	by setuid() and setgid() if possible. Patch by Bruno Rohee
+	<rohee@OpenBSD.ORG>.
+030100: xoverutil: getxover(): open(mktemp()) replaced with mkstemp()
+	if possible. Patch by Bruno Rohee <rohee@OpenBSD.ORG>.
+011299: configutil: readconfig(): parameter was missing if an username
+	was found in a file without a server. Reported by Bruno Rohee
+	<rohee@OpenBSD.ORG>.
+251199: xoverutil: getxoverline() now also allows tabs behind the colon
+	in headers. Problem reported by Radoslaw Gancaraz <r_g@priv2.onet.pl>.
+221199: miscutil: chdirgroup(): tolower() now casts its argument like
+	isspace() etc.
+221199: miscutil: lockfile_exists(): getpid() now casted to int.
+191199: activutil: readactive(): if reading is truncated, st.st_size is now
+	cast to int. Submitted by Bruno Rohee <rohee@OpenBSD.ORG>.
+191199: activutil: helpwriteactive(): g->age casted to unsigned long.
+	Submitted by Bruno Rohee <rohee@OpenBSD.ORG>.
+191199: activutil: readactive(): when groupinfo was not a regular file,
+	leafnode would crash. Bug discovered and fixed by Bruno Rohee
+	<rohee@OpenBSD.ORG>.
+181199: activutil: writeactive() does not change case of newsgroups anymore.
+181199: miscutil: removed lowercase() (not necessary anymore).
+181199: miscutil: made the replacement code for fnmatch() case-insensitive.
+091199: filterutil: dofilter() returned a hit when no filter file was
+	present. Bug found and fixed by Joerg Dietrich <joerg@dietrich.net>.
+091199: xoverutil: hopefully the last patch (this time to findxover() which
+	would be unable to find certain articles and segfault with others).
+	Bug found by Joerg Dietrich <joerg@dietrich.net>.
+081199: xoverutil: some more patching in getxover() to get everything right.
+071199: xoverutil: spent about four hours hunting a bug which lead to a
+	segfault (xcount was set 1 too high in getxover() which resulted
+	in the crash of writexover()). I have no idea when this problem
+	was introduced as I had not encountered any problems with crashes
+	since 011199.
+031199: miscutil: daylight savings time was not correctly honoured in
+	rfctime(). Bug reported by Diedrich Ehlerding
+	<diedrich.ehlerding@t-online.de>.
+011199: xoverutil: writexover() would always forget to write the overview
+	record for the latest article.
+011199: configutil: when setting the core limit, the struct is now first
+	initialized by calling getrlimit().
+011199: miscutil: initvars() now always sets the access rights for
+	/var/spool/news/out.going to rwsr-xr-x.
+281099: miscutil: patched rfctime() to remove unnecessary variables (leftovers
+	from leafnode-1.4) and to accommodate new member of struct tm, based
+	on a patch by Michael Mauch <michael.mauch@gmx.de>
+231099: configutil: removed "newsrc" option
+231099: configutil: new option "pseudoarticle" to use an arbitrary
+	pseudoarticle
+091099: miscutil: new version appendtolist() adds a new entry to a
+	stringlist. Replaces lots of code at different places in
+	fetchnews.c.
+220999: activutil: a closedir() was missing in fakeactive(). Bug discovered
+	and fixed by Brian Ewins <Brian.Ewins@gssec.bt.co.uk>.
+200999: xoverutil: fixed a bug in getxover() which was introduced on
+	290899 and caused fetch to crash (a pointer was freed twice).
+300899: artutil: applied a patch from Greg Weeks <greg@durendal.tzo.com>
+	to storearticle() which makes rnews work properly in pipes.
+290899: xoverutil: rewrote getxover() completely. The .overview file
+	is now also written if files are deleted. Furthermore, there
+	should be no more memory shortage if there are articles with
+	very different numbers in a newsgroup. (This bug was first
+	reported by Giulio <giuliox@tin.it>.)
+	New functions:
+	- findxover() and helpfindxover(): find the index entry for an
+	  article number. findxover() is also called by nntpd.
+	- _compxover(): sorts the .overview file with qsort(3).
+280899: xoverutil: removed some error messages from getxover() which
+	were mostly bogus (because you got them if a newsgroup started
+	with a digit).
+280899: nntputil is included into libutil.a again
+240899: nntputil is not included into libutil.a anymore
+240899: nntputil: rewrote putaline() (needs no global lineout anymore)
+230899: filterutil: dofilter() gets article number as additional parameter
+190899: xoverutil: getxover(): would try to get xover information from
+	directories starting with digits. Bug reported by a number of
+	people, among them Jeff Grossman <jeff@stikman.com>.
+190899: xoverutil: getxover(): the .overview file could be left open if
+	some other condition than its opening failed. Fixed.
+090899: activutil: isinteresting() missed a few closedir() calls
+050899: nntputil: tgetaline() removed
+050899: configutil: new global variable "filtermode" which cannot yet
+	be set. Will allow choosing between filtering xover headers or
+	real article headers.
+050899: configutil: servers now logged to LOG_DEBUG, not LOG_INFO
+010899: filterutil: filterlist is initially NULL
+010899: filterutil: readfilter() now returns FALSE if filterfile could not
+	be read.
+250799: filterutil: compiling filter verbose message switched off again
+240799: activutil: isinteresting() now uses readdir() instead of stat
+	(i.e. it will not access the inode any more); the parameter
+	is now declared "const".
+220799: xoverutil: getxover() checked wrong condition if a file was
+	"illegal". Bug discovered and fixed by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+210799: xoverutil: new function writexover().
+210799: changed type of xfirst/xlast to unsigned long.
+210799: moved initialization of xfirst/xlast/xover structure from miscutil.c
+	to xoverutil.c (declaration).
+210799: artutil: switched various format strings from int to unsigned long
+210799: activutil: switched format in helpwriteactive() to unsigned long
+210799: configutil: switched artlimit and initiallimit from int to unsigned
+	long.
+210799: activutil: readactive(): initialized desc to NULL. Patch by
+	Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: configutil: readconfig(): initialized p and q to NULL. Patch by
+	Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: miscutil: declared namelen as unsigned int instead of int. Patch
+	by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: nntputil: removed a register declaration from nntpconnect() and
+	made two variables static (removes pgcc warnings and solves some
+	ominous problems). Patch by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+210799: xoverutil: do not expire files starting with '.'. Based on a
+	patch by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: configutil: new parameter "newsrc" (not used yet)
+210799: filterutil: compiling filters is shown when being verbose
+
+newsq:
+=====
+
+080900: adjusted main() to new format of parseopt().
+291199: should now also print correctly if sizeof(off_t) == 8
+221199: #include <sys/types.h> (required by HP/UX and possibly others)
+
+nntpd:
+=====
+
+190900: dogroup() now indeed returns the approximate number of articles
+	in the group, not just (g->last - g->first) .
+180900: changed doselectedheader() to return 420 if no article is in the
+	specified range.
+170900: Joerg Dietrich <joerg@dietrich.net> fixed broken doselectedheader().
+170900: Joerg Dietrich <joerg@dietrich.net> changed all calls of
+		ngmatch( l->string, pattern )
+	to
+		ngmatch( (const char*)&(l->string), pattern ).
+	This is necessary because a stringlist entry l is not a struct of
+	two pointers (one to the next entry, the other to the string) but
+	contains the actual string.
+140900: removed some more superfluous \r\n in various nntpprintf() calls
+	(patch by Joerg Dietrich <joerg@dietrich.net>).
+130900: doxover(): XOVER for an empty range returned 224, not 420.
+	Fixed.
+130900: doxover(): XOVER returned all articles, not only the current one.
+	Fixed.
+080900: new option -F to read from different config file.
+080900: adjusted main() to new format of parseopt().
+080900: adjusted main() to new format of readconfig().
+040900: doselectedheader(): "XHDR [header] <message-id>" always returned
+	the first header of strlen(header) in the file, without checking
+	for identity. Bug reported by Andrzej Radecki <radecki@wpk.p.lodz.pl>.
+080800: doselectedheader(): now also can return a Newsgroups: header for
+	pseudoarticles if "XHDR Newsgroups" is requested. Suggested by
+	Karen Nakamura <mail@gpsy.com> because MT Newswatcher needs it.
+040800: new function gmtoff(), written by Joerg Dietrich <joerg@dietrich.net>,
+	calculates a reliable difference between localtime and GMT. Some
+	help from Oisin Curtin <ocurtin@usa.net> and Radoslaw Gancarz
+	<r_g@priv2.onet.pl>.
+030800: dohelp(): added "list overview.fmt"
+030800: dolist(): removed a few superfluous \r\n
+030800: main(): added invocation of readlocalgroups(). This makes local
+	groups work with the nntpd.
+030800: nntpprintf(): now fflush() stdout after printing. This seems to
+	fix a problem of incomplete threading in tin.
+050700: removed the "justaftergroup" mechanism. Instead, groups are now
+	marked if one of the following NNTP commands is encountered:
+	- GROUP if the group was already interesting
+	- LISTGROUP
+	- XHDR
+	- XPAT
+	- XOVER
+	- ARTICLE
+050700: dogroup() now marks a group as interesting if it was already in
+	the list of interesting groups, but not otherwise. This solves
+	some problems with Knode. Suggested by Christian Gebauer
+	<gebauer@bigfoot.com>.
+050700: calls to islocal() replaced with calls to islocalgroup().
+010700: dopost(): if owndn is set, it is now also included in the Path:
+	(not only used for the message ID). Suggested by Mark Brown
+	<broonie@tardis.ed.ac.uk>.
+310300: donewnews() and donewgroups(): external variable timezone does
+	not exist on BSD. Replaced with tm_gmtoff.
+120300: dopost(): articles are now immediately sorted into the spool.
+	This is achieved by fork()ing. nntpd ignores SIGCHLD therefore
+	(in main()).
+	One problem is that now fetchnews and the nntpd cannot be
+	run at the same time (?).
+120300: dogroup() now always calls rereadactive() before looking for the
+	groupname. Patch by Joerg Dietrich <joerg@dietrich.net>.
+120300: markinterest() returns immediately (and does not touch files in
+	$SPOOLDIR/interesting.groups) if a group is local.
+100300: NEWGROUPS and NEWNEWS now only care for timezone if the client does
+	not explicitely request "GMT". Patch by Joerg Dietrich
+	<joerg@dietrich.net>.
+040300: parser() now also understands PAT in addition to XPAT.
+040300: dohelp() adjusted for NEWNEWS capabilities.
+040300: new function donewnews() to support NEWNEWS. This function is
+	still somewhat crude in that it does not care for timezones.
+040300: NEWGROUPS now also cares for timezone. Patch by Johannes
+	Stezenbach.
+040300: Andreas Ferber <aferber@techfak.uni-bielefeld.de> merged
+	doxpat() and doxhdr() into new function doselectedheader().
+	doxpat() and doxhdr() remain as small wrappers.
+270200: fprintpseudobody(): now contains new URL for leafnode. Reported
+	by Thomas Bader <thomasb@trash.net>.
+230200: dohelp() and dolist() adjusted for new XPAT capabilities.
+230200: new function doxpat(), written by Andreas Ferber
+	<aferber@techfak.uni-bielefeld.de>. This enables the nntpd
+	to understand the XPAT command.
+130200: removed shadow code from doauthinfo() (does not work because
+	nntpd never runs as root).
+160100: doxhdr() now returns (none) if asked for XHDR REFERENCES of an
+	article. Suggested by Ted Marston <ted@nowtsfree.freeserve.co.uk>;
+	increases compatibility with xrn.
+080100: donewgroups() and list() do not traverse trees any more but just
+	zoom through the whole array of "active". This avoids a lot of
+	recursive invoking of functions and therefore may be faster.
+030100: donewgroups(): some buggy newsreaders send date in the form YYYMMDD.
+	We now parse these dates successfully. Bug first reported by
+	Nick Drage <nick-drage@gmx.ch>.
+211299: markinterest() changed both mtime and atime if file was already
+	present. Fixed. (A problem with the expiry mechanism had been
+	reported by several people but it was quite difficult to track it
+	down.)
+101299: if the domainname is set in the config file, it is now also used
+	in the Path:. Suggested by Klaus Berger <klausmartin.berger@gmx.net>.
+011299: dopost(): if spoolfile could not be opened, argument was missing
+	in syslog() call. Reported by Bruno Rohee <rohee@OpenBSD.ORG>.
+251199: dopost() now also allows tabs behind the colon of headers.
+181199: case of newsgroups is not changed anymore.
+041199: parser() now also skips leading spaces.
+011199: removed rereadactive() calls from parser() and put them into
+	dolist() and dogroup(). This should save a little time.
+231099: new function fprintpseudobody(): print body of an arbitrary
+	pseudoarticle and do certain replacements
+171099: donewgroups(): fixed a bug with the year 2000 (centuries were not
+	handled properly). Reported by Michael Schuetz
+	<michael.schuetz@tu-clausthal.de>.
+171099: main(): nntpd did not complain if it could not read configuration
+	file. Bug reported by Alexander Rudyk <alexrudyk@arnet.de>.
+081099: dopost(): leafnode now doesn't accept postings if headers are
+	longer than 1000 chars. It is not very strict, e.g. it doesn't
+	check for multiline headers. (IMO, it shouldn't care at all
+	and in fact is capable of transferring headers of arbitrary
+	length, but several users requested this "feature".) Requested by,
+	among others, Diedrich Ehlerding <Diedrich.Ehlerding@t-online.de>.
+081099: fixed a bug in markdownload(). For some reason, local article
+	numbers were logged, not message-ids. I have no idea when this
+	bug crept in, but it explains the long number of complaints about
+	the delaybody function not working properly.
+031099: fixed a typo in the pseudoarticle (found by Jeffrey Goldberg,
+	<J.Goldberg@cranfield.ac.uk>)
+240999: added syslog connection logging (patch by Brent J. Nordquist,
+	<brent-nordquist@bethel.edu>)
+220999: parser(): if an unknown command was received, the nntpd sent an
+	empty line in addition to the "500" reply (probably introduced
+	on 260799). Fixed.
+260799: parser(): if command line length == 0, now continue silently (works
+	better with Netscape?). Possible problem reported by Manfred
+	Haertel <Manfred.Haertel@rz-online.de>.
+260799: some small changes by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+260799: new function nntpprintf(), written by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+210799: implemented AUTHINFO USER and AUTHINFO PASS, based on /etc/passwd
+	or /etc/shadow. With some help from a patch for PAM by Mark Brown
+	<broonie@tardis.ed.ac.uk>.
+	Problem: if one uses /etc/shadow, authentification will fail because
+	nntpd is running as uid news and therefore cannot access the
+	shadowed password file.
+210799: declared artno as unsigned long (not long). Patch by Matthias
+	Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: fopenpseudoart: article number now unsigned long. Patch by
+	Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+
+rnews:
+=====
+
+(rnews was originally written for a planned 1.10 version and has on
+ 210799 become part of 2.0.)
+
+080900: adjusted main() to new format of parseopt().
+120300: fixed call of lockfile_exists() to accommodate new format. Patch
+	by Joerg Dietrich <joerg@dietrich.net>.
+100300: some patches to avoid full logging of articles in rnews (by
+	Joerg Dietrich <joerg@dietrich.net>). According to him, rnews
+	does not work in pipes yet.
+171299: uncompressfile(): replaced exit() with _exit().
+210799: rnews included into version 2.0 (does not compile successfully yet,
+	because decompression and xoverfile fixing don't work yet)
+270699: copyfile() moved to miscutil.c (patch by Joerg Dietrich
+	<joerg@dietrich.net>)
+100699: rnews did not work properly with directories. The reasons were
+        twofold: first, rnews refused to work with relative directories;
+	second, rnews didn't account for chdir()s used when storing the
+	article (with storearticle()). Bugs described and fixed by Joerg
+	Dietrich <joerg@dietrich.net>.
+030699: copyfile() would try to read after the end of news batches. Bug
+	detected and fixed by Joerg Dietrich <joerg@dietrich.net>.
+030699: copyfile(): renamed variable "total" to "copied" to clarify its
+	use.
+120499: rnews always wanted to read something from stdin. Fixed.
+120499: rnews now properly recognizes when decompression failed and removes
+	temp files
+110499: rnews can now also read stuff from stdin
+020499: first working version of rnews
+
+texpire:
+=======
+
+231000: save_thread(): Joerg Dietrich <joerg@dietrich.net> removed a bug
+	introduced by me probably on 180800.
+190900: dogroup() failed if there was (for whatever reason) no .overview
+	file. Now, if no .overview file can be found, getxover() is
+	invoked.
+140900: getxover() is invoked at the end of a run.
+140900: threading now is only ensured down to a certain depth defined by
+	THREADSAFETY. Patch by Joerg Dietrich <joerg@dietrich.net>.
+080900: new option -F to read from different config file
+080900: adjusted main() to new format of parseopt().
+080900: adjusted main() to new format of readconfig().
+210800: modified dogroup() - hopefully now every single article is by
+	default tagged for deletion and will only be rescued if certain
+	conditions are fulfilled.
+210800: texpire crashed with a segmentation fault if no active file could
+	be read. Bug described by Shaul Karl <shaulk@israsrv.net.il>; patch
+	by Mark Brown <broonie@tardis.ed.ac.uk>.
+180800: texpire contains some bug when allocating the overview info. This
+	is very obvious if you swap the pointer to overview to the end of
+	the exp{ } struct - texpire will then collapse with a segfault. I
+	have not located the problem yet, however.
+180800: added some comments when trying to understand the new threading
+	code by Joerg Dietrich.
+140700: included call to checkinteresting().
+010700: expiregroup(): checks now also if the pointer g exists. Bug reported
+	by Peter Katzmann <peter.katzmann@knuut.de>.
+120300: replaced some strange succession of rewinddir() ... closedir() with
+	a closedir() call. Based on a suggestion of Stephen Marley
+	<stephen@home.uklinux.net> for leafnode-1.9.x.
+120300: fixed call of lockfile_exists() to accommodate new format. Patch
+        by Joerg Dietrich <joerg@dietrich.net>.
+290100: speedup patch by Joerg Dietrich <joerg@dietrich.net>
+090100: code cleanup in savethread() by Joerg Dietrich <joerg@dietrich.net>
+090100: fix expiregroup(), by Joerg Dietrich <joerg@dietrich.net>
+090100: Joerg Dietrich <joerg@dietrich.net> added option -D.
+080100: expiregroup(): rewritten for use of arrays instead of trees.
+211299: dogroup(): article numbers are not reset when a group is empty
+	because this results in new articles not being displayed in
+	low-traffic groups.
+011299: dogroup(): converted some %d to %lu when printing "artno". Reported
+	by Bruno Rohee <rohee@OpenBSD.ORG>.
+011299: lookup_expire() now defined as "static time_t".
+251199: texpire now indeed expires articles by thread. Patch by Joerg
+	Dietrich <joerg@dietrich.net> which introduces two new functions,
+	xoverextract() and savethread(), and patches dogroup(). This
+	patch is supposed to also fix the memory allocation problem when
+	article numbers are *very* different.
+280899: dogroup(): when determining the first and last articles in the
+	group, we now stat() every article and check whether it is a
+	regular file. This saves troubles with groups like alt.2600
+	where a directory alt/2600 exists and the 2600 was mistaken as
+	an article number. Bug first reported by Holger Repp
+	<retaliator@sbsd.de> and explained by Jeff Grossman
+	<jeff@stikman.com>.
+
+Miscellaneous:
+=============
+
+181000: removed COPYING (license is now in README)
+181000: partially updated README (from a new README.html)
+181000: updated the leafnode.8 manpage
+181000: leafnode.h: removed obsolete external variables
+181000: updated the fetchnews.5 manpage
+171000: adjusted README
+121000: replaced all (hopefully) occurrences of the old leafnode URL with
+	http://www.leafnode.org/.
+270900: leafnode.h: struct serverlist has new flag "active" which is
+	set to TRUE for servers that should be indeed queried. This
+	allows specification of several servers with "fetchnews -S".
+190900: leafnode.h: removed "int alive" from struct newsgroup and
+	inserted "unsigned long count" instead.
+060900: makerpm.sh: patch by Karsten Merker <merker@linuxtag.org> to
+	accommodate new names of tarballs created on 090800.
+090800: Makefile.in: "make dist" now generates two tarballs, one with and
+	one without PCRE code. Based on a suggestion of Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+180700: replaced all occurrences of exit(1) with exit(EXIT_FAILURE).
+170700: Makefile.in: fetchnews is now installed mode 6755. Together with
+	the changes in initvar() this should solve the FAQ of "how can I run
+	fetchnews as user?". Suggested by Gunnar Ritter <g-r@bigfoot.de>.
+170700: adjusted configure.in
+050700: FAQ: added an explanation how to use sudo, originally written
+	by Gerhard Schromm <Gerhard.Schromm@student.uni-ulm.de>.
+050700: leafnode.h: added extensions of localutil.c
+050700: Makefile.in: added localutil.c
+010700: makerpm.sh: now also works with SuSE. Patch by Juergen Salk
+	<juergen.salk@gmx.net>.
+310300: configure.in: now also test for snprintf() and vsnprintf(). So far
+	this has no consequences - we don't yet have a replacement which
+	is licensed under a free non-GPL license.
+190300: Makefile.in: man pages now installed with "install" instead of "cp".
+	Suggested by Mike Castle <dalgoda@ix.netcom.com>.
+120300: leafnode.h: additional functions added by Joerg Dietrich
+	<joerg@dietrich.net>.
+120300: Makefile.in: "make install" now creates additional directory
+	$SPOOLDIR/local.groups . Patch by Joerg Dietrich <joerg@dietrich.net>.
+100300: Makefile.in: "make dist" now includes the FAQ in the .tar.gz file.
+	Noted by Joerg Dietrich <joerg@dietrich.net>.
+100300: Makefile.in: "make clean" now also removes rnews. Patch by Joerg
+	Dietrich <joerg@dietrich.net>.
+240200: FAQ now contains a paragraph why Leafnode is not licensed under
+	the GPL.
+130200: fixed small bug in configure.in which was introduced yesterday
+130200: merged configure.in with the 1.9.11 version
+120200: configure.in now checks for system includes. Suggested by Matthias
+	Andree <mandree@dosis.uni-dortmund.de>
+120200: FAQ added from 1.9.10
+310100: added "char status" to newsgroups definition in leafnode.h
+310100: "supplement" removed from documentation.
+180100: ./configure now also checks for strtok().
+160100: changes in config.example and leafnode.8 suggested by Mark Brown
+	<broonie@tardis.ed.ac.uk>.
+130100: some changes in Makefile.in suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+080100: leafnode.h: removed unnecessary elements "left" and "right" from
+	struct newsgroup.
+070100: Makefile.in: "make install" now sets /etc/leafnode/config* to mode
+	600 and user:group "news".
+060100: fetchnews.8: rewritten to make room for new options (some of which
+	are currently still unimplemented)
+060100: Makefile.in: re-added -lpcre to the rule for making applyfilter
+030100: Makefile.in: /var/spool/news/failed.postings was not installed
+	during "make install"
+030100: added checks for setuid(), setgid() and mkstemp() to configure.in.
+	Patch by Bruno Rohee <rohee@OpenBSD.ORG>.
+211299: added "fetchnews -n" to the troubleshooting section of the README.
+151299: corrected a small bug in makerpm.sh (version was hard-coded). Problem
+	reported by Riccardo Tromba <inafir@tin.it>.
+131299: Karsten Merker <merker@guug.de> reanimated makerpm.sh of 1.9.6 and
+	added some changes to Makefile.in. I have tried to transplant these
+	changes to the 2.0 version as well.
+011299: removed lookup_expire() from leafnode.h
+301199: configure.in: removed size determination of off_t entirely.
+301199: configure.in: discovered a bug in autoconf-2.13 which prevents
+	correct determination of sizeof(off_t). Akim Demaille <akim@epita.fr>
+	showed me a way how to circumvent it.
+291199: configure.in: check sizeof(off_t)
+251199: configure.in: now detect BSD4.2-style syslog. Appropriate changes
+	have been included in the various C files (involving the openlog()
+	call).
+211199: config.example: added "hostname" parameter.
+211199: updated INSTALL file.
+211199: lsort now properly closes its input file. Fix by Joerg Dietrich
+	<joerg@dietrich.net>.
+211199: minor fix in lsort to accommodate really long groupinfo files
+	(i is now unsigned long instead of int), written by Joerg
+	Dietrich <joerg@dietrich.net>.
+181199: lsort now properly sorts the stuff (sorted only small files
+	previously). Problem was that qsort uses pointers to the
+	array members instead of the members itself.
+171199: new program lsort, written by Joerg Dietrich <joerg@dietrich.net>
+	to circumvent problems with buggy sort versions from old GNU
+	textutils (1.11).
+171199: Makefile.in: directories not built anymore when installing (this
+	is done on demand instead).
+091199: "filterfile" parameter was not mentioned in config.example.
+	Reported by Malte Gell <malte.gell@gmx.net>.
+051199: fixed a bug in configure.in which prevented proper detection of
+	tm_gmtoff. Problem reported by Ron Rosson <insane@oneinsane.net>.
+281099: changed configure.in to accommodate new members of struct tm in
+	miscutil.c
+181099: removed "#include <sys/types.h>" and "#include <regex.h>" from
+	leafnode.h (not needed since we use PCRE)
+091099: some miscellaneous patches by Joerg Dietrich <joerg@dietrich.net>
+	to make leafnode glibc2-compatible.
+081099: leafnode.h: BODY_DOWNLOAD_LIMIT deleted (not needed anymore)
+240999: update.sh: some constructs replaced with more portable one. Patch
+	by Brent J. Nordquist <brent-nordquist@bethel.edu>.
+090899: update.sh now uses /bin/sh instead of /bin/bash. Suggested by
+	Richard van Denzel <richardd@interaccess.nl>.
+260799: added catalan mini-HOWTO by Carles Sadurní Anguita
+	<sadurni@benidorm.net>.
+260799: fiddled with autoconf (updated configure)
+220799: configure.in: --without-ipv6 would not work as an option. Bug
+	reported by Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>,
+	patch by Mark Brown <broonie@tardis.ed.ac.uk>.
+210799: leafnode.h: switched "first" and "last" in newsgroup declaration
+	from int to unsigned long.
+210799: INSTALL: explanation how to upgrade an installed SuSE RPM with newer
+	leafnode sources provided by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+210799: Makefile: new "make uninstall-bins" removes only executables and
+	manpages. Patch by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: Makefile: "make clean" removes now emacs-style backup files as well.
+	Patch by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: Makefile: $MAKEFLAGS now declared as -$(MAKEFLAGS). This solves
+	the problem that leafnode does not compile under HP/UX and allows
+	"make -k". Patch by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+210799: integrated rnews from 1.10b2 into leafnode package
+
+=============================================================================
+
+The changelog of versions before 2.0 can be found at
+	http://wpxx02.toxi.uni-wuerzburg.de/~krasel/ln.changes.html
+

@@ -1,0 +1,73 @@
+
+
+
+applyfilter(8)                                     applyfilter(8)
+
+
+BEZEICHNUNG
+       applyfilter - filtere den lokalen Newsbestand
+
+
+SYNTAX
+       applyfilter - v [Newsgruppe]
+
+BESCHREIBUNG
+       Leafnode  ist  ein  USENET-Software-Paket,  das für kleine
+       Sites gedacht ist, wo es wenige User und nur geringe Fest­
+       platten-Kapazität  gibt, aber trotzdem eine große Zahl von
+       Gruppen gewünscht wird.
+
+       Applyfilter ist das Programm, mit dem  Sie  Ihren  lokalen
+       Newsbestand  nach  einem  Satz  von Mustern (s.  DATEIEN )
+       filtern können. Wenn der Header eines Artikels  einer  der
+       Filterregeln  entspricht,  wird  der  betreffende  Artikel
+       gelöscht.
+
+       Applyfilter setzt seine UID auf "news".
+
+PARAMETER
+       -v     (verbose) Veranlaßt applyfilter , mehr Ausgaben  zu
+              produzieren.
+
+       Newsgruppe
+              ist die Newsgruppe, auf die Sie den Filter anwenden
+              möchten.
+
+
+DATEIEN
+       Die  Filterdatei,  deren  Pfad   in   /etc/leafnode/config
+       definiert wird, enthält einen Satz von Regeln, die auf die
+       Newsgruppen angewendet werden. Jede  Regel  muß  in  einer
+       eigenen Zeile stehen. Leere Zeilen und Kommentare (die mit
+       # eingeleitet werden  müssen)  sind  zulässig  und  werden
+       ignoriert.
+
+       Jede Filterregel besteht aus einem regulären Ausdruck. Die
+       folgenden Regeln löschen z.  B.  alle  Crosspostings  nach
+       alt.flame.
+
+       ^Newsgroups:.*[, ]alt.flame$
+       ^Newsgroups:.*[, ]alt.flame,
+
+       ^Newsgroups:  legt fest, daß das Muster nur auf den "News­
+       groups"-Header angewendet werden soll. Nach dem Header muß
+       eine  Zeichenfolge  kommen, die entweder mit einem Leerze­
+       ichen  oder  einem  Komma  endet.  Danach  muß   alt.flame
+       erscheinen,  entweder  am Ende der Zeile (erster Eintrag),
+       oder gefolgt von weiteren, mit  Komma  abgetrennten  News­
+       gruppen (zweiter Eintrag).
+
+AUTOR
+       Cornelius   Krasel  <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+       Copyright 1999.
+
+       Die ersten Versionen von leafnode  wurden  von  Arnt  Gul­
+       brandsen <agulbra@troll.no> geschrieben; Copyright 1995-96
+       Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway,
+       fax +47 22646949.
+
+       Deutsche   Übersetzung:   Alexander   Reinwarth   <a.rein­
+       warth@gmx.de>
+
+SIEHE AUCH
+       leafnode(8) , fetchnews(8) , texpire(8)

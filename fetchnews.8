@@ -1,0 +1,197 @@
+.TH fetchnews 8 "24 Jun 1999" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: fetchnews.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "
+.SH NAME
+fetchnews \- fetch news via NNTP
+
+.SH SYNOPSIS
+.B fetchnews -V
+.br
+.B fetchnews [-Dv] [-F configfile] -M message-id
+.br
+.B fetchnews [-BDfHnPv] [-F configfile] [-x number] [-S server[:port]] [-N newsgroup] [-t #]
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.PP
+The design of
+.B leafnode
+is intended to self-repair after problems, and to require no
+manual maintenance.
+.PP
+.B Fetchnews
+(formerly called "fetch") is the program which submits and retrieves new
+articles to or from the upstream NNTP server.
+
+.SH OPTIONS
+.TP
+.I -B
+Get only article bodies. Works only if "delaybody" option is set in the
+configuration file (see below.)
+.TP
+.I -D
+Switch on debug mode. This will log a lot of information via syslog to
+the facility "news" with the priority "debug". Useful for tracking down
+problems with your upstream server(s). If debug mode has already been
+set in the config file, increase verbosity.
+.TP
+.I -F configfile
+Read configuration from an alternate config file instead of
+/etc/leafnode/config.
+.TP
+.I -f
+Force rereading of whole active file from all upstream servers. This is
+usually occurring only very infrequently because it takes a long time.
+.TP
+.I -H
+Get only article headers. Works only if "delaybody" option is set in the
+configuration file (see below).
+.TP
+.I -M message-id
+Get only article with this message-id.
+.TP
+.I -n
+Don't unlink files in the
+.I interesting.groups
+directory. This avoids automatic unsubscription of newsgroups.
+.TP
+.I -N newsgroup
+Get only articles posted to "newsgroup". You can specify this option
+multiple times.
+.TP
+.I -P
+Only post articles that have accumulated in the
+.I out.going
+directory but do not fetch articles from upstream servers.
+.TP
+.I -S server[:port]
+Only get articles on "server". You can specify this option multiple times
+with different servers if you want to query several servers at once.
+.br
+If a server is running its NNTP service not on the standard port, you
+can specify an alternative port by adding a colon and the port number
+immediately behind the server name, without any whitespace inbetween.
+.TP
+.I -t number
+Wait this many seconds before fetching next article. Useful if you need
+bandwidth for something else but makes fetching slow.
+.TP
+.I -v
+Be verbose.  A maximum of four
+.I -v
+can be used (the more v, the more verbose):
+.TP
+.I -v
+Warn about non-critical errors.
+.TP
+.I -vv
+Be verbose whenever a group command occurs.
+.TP
+.I -vvv
+Be verbose whenever an article command occurs.
+.TP
+.I -vvvv
+For debugging purposes. Don't expect the additional output to make sense.
+.TP
+.I -V
+Print version number and exit.
+.TP
+.I "-x number"
+Go
+.I number
+articles back and try to re-fetch what's missing. Chiefly used for
+debugging purposes.
+
+.SH "FILES AND CONFIGURATION"
+.BR leafnode (8)
+for the list of files affected, and for information on configuring
+.B fetchnews.
+If you want to use filtering, see also
+.BR leafnode (5)
+for the format of the filterfile and
+.BR pcre (7)
+on the format of perl-compatible regular expressions.
+
+.SH ALGORITHM
+Here is a brief description of what
+.B fetchnews
+does.
+.PP
+First, after connecting to the upstream NNTP server,
+all articles in
+.I /var/spool/news/out.going
+are posted using POST.  If a posting fails, that article is moved to
+.I /var/spool/news/failed.postings
+which an administrator has to clean up once in a while.  Moving a file
+back to
+.I /var/spool/news/out.going 
+is sufficient to resubmit it.
+.PP
+Second, the upstream server's list of newsgroups (obtained using LIST
+ACTIVE and LIST NEWSGROUPS) is merged into
+.BR leafnode "'s"
+(this step is most often optimized away by using NEWGROUPS).
+.PP
+Third,
+.B fetchnews
+iterates over the list of newsgroups, performing a GROUP, an XHDR
+Message-ID and a number of HEAD and BODY commands for each group which
+has been read recently.
+
+.SH NOTES
+.B Fetchnews
+does not use NEWNEWS because it is often very expensive on the remote
+server.
+.PP
+The only way to control what newsgroups are accessible to local users
+is to control what the upstream server lets
+.B fetchnews
+read, and that will not keep out all crossposts (endemic in e.g. the
+alt.sex groups).  If your site is big enough that you need to control
+newsgroup access, consider using a news server which is designed for a
+big site.
+.PP
+.B Fetchnews
+sets its real and effective uid to "news", because almost all of the
+problems I have had with
+.B leafnode
+are due to files which aren't writable for user news.
+
+.SH BUGS
+.B Fetchnews
+ignores "Also-Cancel" headers.
+.PP
+Fetchnews cannot delete groups from the list of active newsgroups
+without getting full active files from all upstream servers.
+Strictly spoken, this is not a fetchnews bug but a weakness of the
+underlying NNTP protocol.
+
+.SH AUTHOR
+Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96
+Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
+22646949.
+.PP
+Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>,
+Markus Enzenberger <enz@cip.physik.uni-muenchen.de>
+and Randolf Skerka <Randolf.Skerka@gmx.de>.
+Copyright of the modifications 1997-2000.
+
+.SH SEE ALSO
+.BR fetchnews (5),
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR leafnode (8),
+.BR texpire (8),
+.BR pcre (7),
+.B "RFC 977"

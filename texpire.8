@@ -1,0 +1,118 @@
+.TH texpire 8 "21 Nov 1998" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: texpire.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "
+.SH NAME
+texpire \- delete old news article threads
+
+.SH SYNOPSIS
+.B texpire -V
+br
+.B texpire [-Dv] [-F configfile] [-f]
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.PP
+The design of
+.B leafnode
+is intended to repair any problems itself, to detect what newsgroups
+the users read, and to require no manual manual maitenance.
+.PP
+.B Texpire
+is the program which deletes old articles from the local news spool.
+
+.SH OPTIONS
+.TP
+.I -D
+Switch on debug mode. This will log a lot of information via syslog to
+the facility "news" with the priority "debug". Useful for tracking down
+problems with your upstream server(s). If debug mode has already been
+set in the config file, increase verbosity.
+.TP
+.I -F configfile
+Read configuration from an alternate config file instead of
+/etc/leafnode/config.
+.TP
+.I -f
+Force expire. Expire will be made regardless of the access time of the file.
+Especially useful if you regularly backup your news spool or do other things
+to it where you open files in there.
+.TP
+.I -v
+Be verbose.  A maximum of four
+.I -v
+can be used (the more v, the more verbose).  Don't expect all the output
+to make sense.
+.TP
+.I -V
+Print texpire version information and exit.
+
+.SH FILES
+See
+.BR leafnode (8)
+for the list of files affected.
+
+.SH NOTES
+.B Texpire
+is thread-based, not article-based.  It deletes a thread when no
+postings in it have been accessed in N days, where N is configurable,
+and the oldest article in the thread is older than N days.
+.PP
+It would be nice if
+.B texpire
+could figure out N itself, for instance by deleting until X MB space
+is free, but it is a bit hard to find the amount of free disk space
+portably.  That policy also implies that news should use whatever disk
+space is left over by other uses, which is IMHO a bad policy, because
+the news service's quality will degrade as other uses need more and
+more space,
+.I without any conscious decision
+to use less space for news.
+.PP
+.B Texpire
+sets its real and effective uid to "news" (if it can), because almost
+all of the problems I have had with
+.B leafnode
+are due to files which aren't writable for user "news".
+
+.SH BUGS
+.B Texpire
+may not delete an article as soon it should in certain circumstances;
+eventually it will.
+.PP
+If a group is removed by hand from the
+.I /var/spool/news/leaf.node/groupinfo
+file but the group's articles not deleted,
+.B texpire
+may never delete these articles.
+.PP
+.B Texpire
+ignores "Expires" headers.
+.PP
+.B Texpire
+is unable to delete articles in groups which have very different numbers.
+
+.SH AUTHOR
+Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
+Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
+22646949.
+.PP
+Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Copyright of the modifications 1997-1999.
+
+.SH SEE ALSO
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR leafnode (8),
+.BR fetchnews (8),
+.B "RFC 977"

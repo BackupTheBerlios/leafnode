@@ -1,0 +1,68 @@
+.TH checkgroups 8 "21 Nov 1998" "" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: checkgroups.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "          
+.SH BEZEICHNUNG
+
+texpire \- Updaten von Gruppenbeschreibungen
+
+.SH SYNTAX
+.B checkgroups [Skript]
+
+.SH BESCHREIBUNG
+.B Leafnode
+ist ein USENET-Software-Paket, das für kleine Sites gedacht  ist, wo
+es wenige User und nur geringe Festplatten-Kapazität gibt, aber
+trotzdem eine große Zahl von Gruppen gewünscht wird.
+.PP
+.B Checkgroups
+ist das Programm, das sogenannte Checkgroups-Skripte verarbeitet, um
+neue, bzw. erneuerte Gruppenbeschreibungen in die groupinfo-Datei
+( üblicherweise 
+.I /var/spool/news/leafnode/groupinfo 
+) aufzunehmen.
+.PP
+.B Checkgroups
+setzt dabei seine UID auf "news".
+
+.SH PARAMETER
+.TP
+.I SKRIPT
+ist eine Datei, die in jeder Zeile den Namen und die Kurzbeschreibung
+einer Gruppe enthält, die durch Leerzeichen getrennt sein müssen.
+Solche Skripte werden häufiger von Newsadministratoren gepostet, z. B.
+in der bionet.*-Hierarchie.
+
+.SH AUTOR
+
+Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>. 
+.PP
+Die ersten Versionen von leafnode wurden von Arnt Gulbrandsen
+<agulbra@troll.no> geschrieben; Copyright 1995 Troll Tech AS,
+Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.PP
+Weiterentwickelt wurde leafnode von Cornelius  Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de>, Randolf Skerka
+<Randolf.Skerka@gmx.de>  und Markus Enzenberger
+<enz@cip.physik.uni-muenchen.de>.
+Copyright (an den Veränderungen) 1997-1999.
+.PP
+Die ursprüngliche Entwicklung wurde durch Uninett AS
+(http://www.uninett.no/) finanziert.
+.PP
+Deutsche Übersetzung:
+Alexander Reinwarth <a.reinwarth@gmx.de>  
+
+.SH SIEHE AUCH
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR leafnode (8),
+.BR texpire (8),
+.B "RFC 977"   

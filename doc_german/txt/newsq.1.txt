@@ -1,0 +1,48 @@
+
+
+
+NEWSQ(1)                                                 NEWSQ(1)
+
+
+BEZEICHNUNG
+       newsq - zeige die zu postenden Artikel an
+
+SYNTAX
+       newsq
+
+BESCHREIBUNG
+       Leafnode  ist  ein  USENET-Software-Paket,  das für kleine
+       Sites gedacht  ist, wo es  wenige  User  und  nur  geringe
+       Festplatten-Kapazität  gibt, aber trotzdem eine große Zahl
+       von Gruppen gewünscht wird.
+
+       newsq ist das  Programm,  das  die  zu  postenden  Artikel
+       anzeigt,  die  im  Verzeichnis  /var/spool/news/out.going/
+       aufbewahrt werden.
+
+AUTOR
+       Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+
+       Die ersten Versionen von leafnode  wurden  von  Arnt  Gul­
+       brandsen  <agulbra@troll.no>  geschrieben;  Copyright 1995
+       Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway,
+       fax +47 22646949.
+
+       Weiterentwickelt  wurde  leafnode  von  Cornelius   Krasel
+       <krasel@wpxx02.toxi.uni-wuerzburg.de>,   Randolf    Skerka
+       <Randolf.Skerka@gmx.de>      und     Markus    Enzenberger
+       <enz@cip.physik.uni-muenchen.de>.    Copyright   (an   den
+       Veränderungen) 1997-1999.
+
+       Die  ursprüngliche  Entwicklung  wurde  durch  Uninett  AS
+       (http://www.uninett.no/) finanziert.
+
+       Diese Manual-Seite wurde von  Joey  Hess  für  das  Debian
+       GNU/Linux Projekt geschrieben.
+
+       Deutsche   Übersetzung:   Alexander   Reinwarth   <a.rein­
+       warth@gmx.de>
+
+SIEHE AUCH
+       leafnode(8), texpire(8), applyfilter(8), fetchnews (8)
+

@@ -1,0 +1,133 @@
+1. Seit Version 1.9 verwendet leafnode GNU autoconf, um herauszufinden,
+   auf was fuer einem Rechner es installiert werden soll. Wenn man
+        sh ./configure
+   ausfuehrt, werden ein rechnerspezifisches Makefile und ein passendes
+   config.h erstellt.
+   Wenn Sie IPV6 haben und verwenden möchten, rufen sie configure mit
+   dem Parameter --with-ipv6 auf.
+
+2. Durch Eingabe von
+        make
+   wird der Quelltext compiliert. Es sollten keine Fehler auftreten.
+
+3. Legen Sie einen User "news" an, wenn es einen solchen bisher nicht
+   gibt.
+
+4. Die Eingabe von
+        make install
+   installiert Leafnode.
+
+5. Wenn Sie von einer alten leafnode-Version vor 1.9.3 (einschliesslich
+   aller Betaversionen bis incl. 1.9.3b5) updaten, muessen Sie "make
+   update" eingeben. Dadurch wird das beiliegende Shellscript
+   update.sh abgearbeitet. Es formatiert die groupinfo-Datei um und
+   verschiebt einige Dateien in andere Ordner. Falls dabei etwas
+   schiefgehen sollte, finden Sie die alte groupinfo-Datei unter
+   /var/spool/news/leaf.node/groupinfo.old . Wenn "make update"
+   fehlerfrei funktioniert hat, kann diese Datei geloescht werden; sie
+   wird nicht mehr benoetigt.  
+
+6. Passen Sie die $(LIBDIR)/config mit einem Editor an Ihre Verhaeltnisse
+   an. Die Syntax der Datei ist in config.example und leafnode(8)
+   dokumentiert. Es ist unbedingt notwendig, beim Wert fuer "server" den
+   eigenen Upstream-Newsserver (in der Regel ist das der Newsserver Ihres
+   Providers) einzutragen. In die Environment-Variable $NNTPSERVER oder die
+   Datei /etc/nntpserver muss der Name des eigenen Rechners eingetragen
+   werden, damit Newsreader auch wirklich auf Leafnode zugreifen und
+   nicht auf den Upstream-Server.
+   Wenn Sie die eingehenden News filtern moechten, finden Sie Einzelheiten
+   dazu weiter unten unter FILTER-DATEI.
+
+7. Richten Sie fuer den User "news" einen cron-Job ein, der jede Nacht
+   (oder auch nur einmal pro Woche) texpire ausfuehrt. Meine entsprechende
+   crontab-Zeile sieht folgendermassen aus (texpire laeuft jede Nacht
+   um 4:00):
+
+0 4 * * * /usr/local/sbin/texpire
+
+   Um die Crontab-Datei zu editieren, habe ich als root "crontab -u news -e"
+   eingegeben und obige Zeile eingefuegt. Wenn man den dritten "*" durch
+   eine "1" ersetzt,
+
+0 4 * * 1 /usr/local/sbin/texpire
+
+   dann wird texpire nur jeden Montag um 4:00 ausgefuehrt. Weitere
+   Informationen ueber das Generieren von Crontab-Zeilen finden Sie
+   in der manpage zu crontab(5).
+
+8. Stellen Sie sicher, dass fetchnews zu einer geeigneten Zeit
+   aufgerufen wird. Wenn Sie ueber eine Standleitung verfuegen, ist es
+   am besten, fetchnews von cron ausfuehren zu lassen (wieder als User
+   "news"); anderenfalls muss fetchnews ausgefuehrt werden, waehrend
+   Sie online sind. Wenn fetchnews vom User "root" gestartet wird,
+   wird es zum User "news" wechseln. Falls Sie PPP benutzen, koennen
+   Sie fetchnews aus /etc/ppp/ip-up starten. 
+
+9. Editieren Sie /etc/inetd.conf so, dass $(BINDIR)/leafnode bei ankommenden
+   NNTP-Verbindungen gestartet wird. Bei mir sieht die entsprechende Zeile
+   folgendermassen aus:
+
+nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leaf=
+node
+
+   Dadurch wird leafnode fuer alle Verbindungen auf dem nntp-Port
+   gestartet, wenn der Inhalt der Dateien /etc/hosts.allow und
+   /etc/hosts.deny nicht dagegen sprechen. Wenn auf Ihrem System kein
+   /usr/sbin/tcpd installiert ist, koennten Sie stattdessen die folgende
+   Zeile verwenden:
+
+nntp    stream  tcp     nowait  news    /usr/local/sbin/leafnode
+
+   Die Verwendung von Leafnode ohne tcpd sollte allerdings vermieden
+   werden, weil ohne tcpd-Zugangskontrolle Ihr Rechner durch andere
+   Leute missbraucht werden kann.
+
+   Wenn Sie /etc/inetd.conf editiert haben, muessen Sie dem inetd diese
+   Veraenderungen mitteilen. Der inetd wertet sein Konfigurationsfile
+   erneut aus, wenn Sie ihm ein HANGUP-Signal schicken. Dies tun Sie,
+   indem Sie als root eingeben:
+
+kill -HUP `cat /var/run/inetd.pid`
+
+10.Wenn auf Ihrem Rechner tcpd installiert ist, sollten Sie die folgende
+   Zeile in die Datei /etc/hosts.deny eintragen:
+
+leafnode: ALL EXCEPT LOCAL
+
+   Damit schuetzen Sie ihren Server vor Missbrauch durch andere Leute.
+   Wenn Sie die Benutzung von Leafnode fuer andere IP-Adressen oder
+   Domains ermoeglichen wollen, muessen Sie diese im gleichen Format
+   in /etc/hosts.allow eintragen.
+
+11.Fuehren Sie fetchnews aus. Der erste Aufruf von fetchnews wird
+   einige Zeit dauern,  weil fetchnews eine Liste aller auf dem
+   Upstream-Server vorhanden Gruppen einliest. Mit einem 28.8 Modem
+   kann dies bis zu 60 Minuten dauern (abhaengig davon, wieviele
+   Gruppen Ihr Provider anbietet). Um zu sehen, was fetchnews gerade
+   tut, koennen Sie es mit der Option -vvv starten. 
+   Wenn Sie leafnode von einer Version vor 1.6updaten rufen Sie
+   fetchnews bitte mit dem Parameter -f auf, da sich das Format der
+   groupinfo-Datei geändert hat. 
+   
+12.Lesen Sie News mit einem NNTP-faehigen Newsreader (in $NNTPSERVER oder
+   /etc/nntpserver muss dazu Ihr eigener Rechner eingetragen sein).
+   Waehlen Sie die Gruppen aus, die Sie in Zukunft lesen moechten. Diese
+   sind zunaechst einmal leer, abgesehen von einem Platzhalterartikel.
+   Bei einigen Newsreadern ist es notwendig, dass Sie diesen Artikel
+   in jeder gewuenschten Gruppe lesen, damit die Gruppe in Zukunft
+   abonniert wird.
+
+   Danach sollten Sie fuer jede selektierte Gruppe eine leere Datei
+   in /var/spool/news/interesting.groups/ vorfinden.
+
+13.Lassen Sie fetchnews noch einmal laufen; nun sollten fuer alle
+   ausgewaehlten Gruppen Artikel geholt werden. Es empfiehlt sich
+   dabei, initialfetch auf einen sinnvollen Wert zu setzen, da
+   leafnode sonst alle Artikel holt, die upstream vorhanden sind (und
+   das kann dauern).  
+
+Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+Deutsche Uebersetzung: Alexander Stielau <aleks@zedat.fu-berlin.de>
+                       Alexander Reinwarth <a.reinwarth@gmx.de>
+		       Klaus Fischer <fischer@reutlingen.netsurf.de>
+

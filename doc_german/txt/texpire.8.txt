@@ -1,0 +1,98 @@
+
+
+
+texpire(8)                                             texpire(8)
+
+
+BEZEICHNUNG
+       texpire - lösche alte News-Threads
+
+
+SYNTAX
+       texpire [-v] [-f]
+
+
+BESCHREIBUNG
+       Leafnode  ist  ein  USENET-Software-Paket,  das für kleine
+       Sites gedacht ist, wo es wenige User und nur geringe Fest­
+       platten-Kapazität  gibt, aber trotzdem eine große Zahl von
+       Gruppen gewünscht wird.
+
+       Leafnode ist so designt, daß es Fehler selbständig repari­
+       eren und keinerlei manuelle Pflege benötigen soll.
+
+       Texpire  ist  das  Programm,  das alte Artikel vom lokalen
+       Rechner löscht.
+
+
+PARAMETER
+       -v     (verbose = wortreich) Veranlaßt texpire, mehr  Aus­
+              gaben  zu  produzieren.   Bis  zu vier -v ´s können
+              angegeben werden, je mehr -v ´s,  desto  mehr  Text
+              wird  ausgegeben. Erwarten sie nicht, daß alle Aus­
+              gaben von texpire Sinn ergeben.
+
+       -f     (force)   Erzwingt   das   Löschen   von   Artikeln
+              unabhängig  davon,  wann  zum  letzten  Mal auf sie
+              zugegriffen wurde.
+
+
+DATEIEN
+       Lesen sie bitte in leafnode (8) nach, um eine  Aufstellung
+       der relevanten Dateien zu erhalten.
+
+ANMERKUNGEN
+       Texpire  ist  Thread-,  nicht  Artikel-basiert.  Es löscht
+       diejenigen Threads, in denen in den letzten N  Tagen  kein
+       Artikel gelesen wurde und deren ältester Artikel älter als
+       N Tage ist, wobei N konfigurierbar ist.
+
+       Es wäre schön, wenn texpire N selbst bestimmen könnte,  z.
+       B. indem es solange Artikel löscht, bis X Megabyte auf der
+       Festplatte frei sind, aber es ist  schwierig,  den  freien
+       Plattenspeicher  auf unterschiedlichen Systemen zu bestim­
+       men.  Diese Vorgehensweise würde auch dazu führen, daß der
+       News-Server  nur  den  Platz  zur Verfügung hätte, den die
+       anderen Benutzer übriglassen; dies ist aber meiner Meinung
+       nach  eine    schlechte Idee, da die Qualität des Dienstes
+       mit der  Menge  des  von  anderen  Benutzern  verbrauchten
+       Platzes  sinken würde, ohne daß man eine bewußte Entschei­
+       dung getroffen hätte, weniger  Speicherplatz  für  USENET-
+       News zu verwenden.
+
+       Texpire setzt seine UID auf "news", da fast alle Probleme,
+       die ich mit leafnode  hatte,  auf  Dateien  zurückzuführen
+       waren,  für  die der User "news" keine Schreibberechtigung
+       hatte.
+
+BUGS
+       Texpire löscht Artikel manchmal  nicht  so  früh,  wie  es
+       sollte, sondern erst später.
+
+       Wird    eine    Newsgruppe    manuell    aus   der   Datei
+       /var/spool/news/leaf.node/groupinfo  gelöscht,  ohne  auch
+       die  Artikel  dieser Gruppe zu löschen, wird texpire diese
+       Artikel niemals löschen.
+
+       Texpire ignoriert "Expires"-Header.
+
+       Texpire  kann  Artikel  in  Gruppen   mit   stark   unter­
+       schiedlichen Zahlen nicht löschen.
+
+AUTOR
+       Die ersten Versionen von texpire wurden von Arnt Gulbrand­
+       sen <agulbra@troll.no> geschrieben; Copyright  1995  Troll
+       Tech  AS,  Postboks 6133 Etterstad, 0602 Oslo, Norway, fax
+       +47 22646949.
+
+       Weiterentwickelt  wurde  texpire   von  Cornelius   Krasel
+       <krasel@wpxx02.toxi.uni-wuerzburg.de>.  Copyright  (an den
+       Veränderungen) 1997-1999.
+
+       Deutsche   Übersetzung:   Alexander   Reinwarth   <a.rein­
+       warth@gmx.de>
+
+SIEHE AUCH
+       tcpd(8), hosts.allow(5), leafnode(8), fetchnews(8), RFC 977
+
+

@@ -1,0 +1,366 @@
+                        INHALTSVERZEICHNIS
+
+- ÜBERBLICK
+- DATEIEN UND VERZEICHNISSE
+- DIE FILTERDATEI
+- INSTALLATION
+- UPDATE VON VERSIONEN < 1.6
+- UPDATE VON VERSIONEN < 1.9.3
+- FEHLERSUCHE
+
+
+			    ÜBERBLICK
+
+Leafnode ist ein USENET-Software-Paket, das für kleine Sites mit
+wenigen Lesern und einer langsamen Netzanbindung entwickelt wird. 			    
+
+Es besteht aus mehreren Programmen, von denen drei für die Funktion
+wichtig sind und mehreren Beigaben:
+
+ - leafnode ist der NNTP-Server. Er kommuniziert mit den üblichen
+   Newsreadern und speichert die Leserdaten.
+
+ - fetchnews lädt die Artikel vom Upstream-Server. Es entscheidet anhand
+   der von leafnode gesammelten Daten, aus welchen Gruppen Postings
+   heruntergeladen werden.
+
+ - texpire löscht alte und uninteressante Postings. Es löscht alle
+   alten Threads, die nicht in letzter Zeit gelesen wurden.
+
+Dies sind die Beigaben:
+
+ - Mit applyfilter können Artikel, die einem bestimmten Muster
+   entsprechen, lokal gelöscht werden.
+
+ - checkgroups fügt die Beschreibung der Newsgruppen in die
+   Newsgruppen-Datenbank ein.
+
+ - newsq zeigt die Artikel an, die beim nächsten Lauf von fetchnews
+   zum Upstream-Server geschickt werden sollen.
+   
+Es werden nur diejenigen Gruppen vom Upstream-Server geladen, die in
+der vergangenen Woche von einem lokalen Benutzer gelesen wurden. Wird
+eine Gruppe nicht mehr gelesen, lädt fetchnews eine Woche später keine
+Artikel aus dieser Gruppe mehr, beginnt jemand eine neue Gruppe zu
+lesen, versucht fetchnews beim nächsten Lauf soviel Artikel wie
+möglich aus dieser Gruppe zu bekommen. (Anmerkung des Übersetzers: Die
+Anzahl wird durch die Parameter maxfetch und initialfetch in der
+config-Datei begrenzt.)  
+
+Eigenschaften von Leafnode:
+
+ - Verbraucht im Gegensatz zu anderen NNTP-Servern sehr wenig
+   Plattenplatz und Bandbreite. Dies stimmt aber eher für eine Site mit
+   3 Benutzern als für eine mit 30. Bei 300 Benutzern stimmt es wohl
+   überhaupt nicht mehr.
+   
+ - Einfache Konfiguration und Pflege. Leafnode bemüht sich sehr, Fehler
+   selbsttätig zu korrigieren
+
+ - Die lokal vorhandenen News können sehr einach durch eigene Skripte
+   manipuliert werden. Einige kleine Beispiele hierfür finden sich im
+   Unterverzeichnis tools/ .
+
+Schwächen von Leafnode:
+
+ - Leafnode 'verliert' News. In fast jeder Fehlersituation versucht
+   leafnode diese zu bereinigen, indem es das den Fehler auslösenden
+   Posting löscht.
+
+ - Leafnode skaliert sehr schlecht.
+ 
+Die neueste Version von leafnode steht immer unter
+	http://wpxx02.toxi.uni-wuerzburg.de/~krasel/leafnode.html
+zur Verfügung.
+
+Außerdem gibt es eine Mailing-Liste für leafnode. Um in sie
+aufgenommen zu werden, braucht man lediglich eine mail mit "Subscribe"
+im Betreff an 
+	leafnode-list@wpxx02.toxi.uni-wuerzburg.de
+zu schicken.
+
+                    DATEIEN UND VERZEICHNISSE
+
+Leafnode legt seine Dateien in drei verschiedenen Verzeichnissen ab:
+im spool-Verzeichnis, im library-Verzeichnis und im
+binaries-Verzeichnis.
+
+Im spool-Verzeichnis liegen die gespeicherten News, das active-File
+und einige kurzlebige Konfigurationsdateien. Außerdem gibt es hier
+einige spezielle Verzeichnisse, mehr Informationen dazu gibt es in 
+man leafnode(8). Die Grundeinstellung für das spool-Verzeichnis ist
+/var/spool/news, sie kann aber bei der Compilierung geändert werden.
+
+Im library-Verzeichnis liegen die langlebigen Konfigurationsdateien.
+Es ist üblicherweise /etc/leafnode, kann aber geändert werden.
+
+Das binaries-Verzeichnis /usr/local/sbin enthält die ausführbaren
+Programme texpire, fetchnews und leafnode. Auch dieses Verzeichnis
+kann angepaßt werden.
+
+Außerdem wird im Verzeichnis /usr/local/bin das Programm newsq
+abgelegt.
+
+
+                         DIE FILTER-DATEI
+
+Seit Version 1.8 unterstützt leafnode das Filtern ankommender Artikel-
+header nach beliebigen regulären Ausdrücken. Diese Moeglichkeit ist
+normalerweise abgeschaltet; um sie zu aktivieren, müssen Sie eine
+Datei anlegen (die "Filter-Datei"), die die gewünschten Ausdrücke
+enthaelt. Ausserdem müssen Sie leafnode mitteilen, wo diese Datei
+gefunden werden kann. Dies geschieht durch Eintrag einer Zeile der Art
+
+filterfile = /path/to/your/filterfile
+
+in die Datei $(LIBDIR)/config.
+
+Die Filterdatei hat das folgende Format:
+1) Pro Zeile darf ein regulärer Ausdruck stehen
+2) Kommentarzeilen werden durch ein # am Zeilenanfang gekennzeichnet
+3) Leerzeilen sind zulässig und werden ignoriert
+
+Hier ein kleines Beispiel, das alle Artikel abweist, die nach alt.flame
+gepostet werden:
+
+^Newsgroups:.*[, ]alt.flame$
+^Newsgroups:.*[, ]alt.flame,
+
+Der Ausdruck
+
+^Newsgroups:.*alt.flame
+
+funktioniert nicht richtig, weil er auch Postings nach alt.flame.nice oder
+comp.alt.flame abweist.
+
+Ab Version 1.9.3 benutzt leafnode Perl-kompatible reguläre Ausdrücke,
+die in Philip Hazels PCRE-Bibliothek implementiert sind.
+Perl-kompatible reguläre Ausdrücke sollten in jedem vernünftigem Buch
+über Perl erklärt sein; außerdem gibt es im O'Reilly-Verlag ein ganzes
+Buch über reguläre Ausdrücke. Eine ziemlich technische Erklärung gibt
+es in man 3 pcre.
+
+
+                           INSTALLATION
+
+Die Installation von leafnode wird im Text INSTALL_de erklärt.
+
+
+                      UPDATE VON VERSIONEN < 1.6
+
+Es gibt einige größere Unterschiede zwischen den aktuellen Versionen
+von leafnode und denen vor 1.6, einschließlich 1.6alpha
+
+1) Das Format der groupinfo-Datei hat sich verändert
+
+2) Einige Dateien (einschließlich der groupinfo-Datei ) liegen nicht 
+   mehr im Verzeichnis /usr/lib/leafnode/, sondern in
+   /var/spool/news/leaf.node/
+
+3) Die Artikel-Informationen für den Upstream-Server wurden aus der
+   groupinfo-Datei herausgenommen und bilden nun eine eigene Datei.
+
+Um ein funktionierendes Update zu erhalten, muß man nach dem
+erfolgreichen Durchlauf von "make install" als root "make update"
+ausführen, in INSTALL_de wird dies jedoch genauer erklärt.
+
+
+                       UPDATE VON VERSIONEN < 1.9.3
+
+Es gibt einen weiteren Unterschied im Gegensatz zu früheren Versionen
+(Dies betrifft auch alle leafnode-1.9.3beta-Versionen bis
+einschließlich leafnode-1.9.3beta5):
+
+Die groupinfo-Datei ist nun abhängig von der Groß- und und
+Kleinschreibung der Gruppennamen sortiert. Um ein funktionierendes Update zu erhalten, muß man nach dem
+erfolgreichen Durchlauf von "make install" als root "make update"
+ausführen, in INSTALL_de wird dies jedoch genauer erklärt.
+
+
+                          FEHLERSUCHE
+
+Dies sind die Lösungen zu häufig auftretenden Problemen:
+
+
+Problem: Ich möchte meinen Upstream-Server ändern.
+Lösung:  Ich habe das zwar noch nie getan, leafnode sollte aber keine
+	 Probleme damit haben. Angenommen, der neue Server heißt 
+	 "neuer.upstream.server"  und der alte "alter.upstream.server",
+	 empfehle ich folgende Vorgehensweise.
+	   1) Fügen Sie folgende Zeilen in Ihre config-Datei ein
+	   	supplement = neuer.upstream.server
+		maxfetch = 100
+	      Sollten Sie maxfetch auf einem anderen Wert stehen haben,
+	      reduziere Sie ihn vorübergehend.
+	   2) Starten Sie fetchnews.
+	   3) Ersetzen Sie 
+		server = alter.upstream.server
+	      durch
+		server = neuer.upstream.server
+	      und löschen Sie die Zeilen, die in Schritt 1) eingefügt
+	      wurden.
+	  Das war's!
+
+
+Problem: fetchnews 'hängt sich auf', nachdem es etwas wie "corrected
+         123 lines in
+	 /var/spool/news/de/comp/os/unix/linux/misc/.overview"
+	 ausgegeben hat. 
+Lösung:  Dies ist überhaupt kein Problem, sondern das ganz normale
+         Verhalten von fetchnews.
+         
+	 Nachdem es alle Artikel geladen und gespeichert hat, startet
+         leafnode einen Sub-Prozeß, der ein paar Aufräumarbeiten
+         durchführt und beendet sich. Dieser Prozeß wird nicht mehr
+         von der Shell kontrolliert, auch wenn er noch auf das
+         Terminal schreibt. Die Shell kann nicht erfassen, wann dieser
+         Prozeß endet und darum keinen Prompt ausgeben.
+
+Problem: Ich kann meinen Newsserver nicht erreichen.
+Lösung:  Höchstwahrscheinlich stimmt etwas in Ihrem Setup nicht.
+         Es gibt mehrere Möglichkeiten: 
+	  1) inetd läuft nicht, überprüfen Sie dies mit "ps axu | grep
+	     inetd" 
+	  2) inetd läuft, aber die Einträge in /etc/inetd.conf sind
+	     falsch. Überprüfen Sie die logfiles (üblicherweise 
+	     /var/log/messages oder /var/log/syslog), ob dort
+	     Fehlermeldungen von inetd auftauchen.
+	  3) inetd läuft und der Eintrag in /etc/inetd.conf ist
+	     korrekt, aber der tcpd verbietet den Zugriff auf den
+	     Server (in /var/log/messages müßte etwas wie
+	     "leafnode: connection refused from ..." auftauchen).
+	     Überprüfen Sie die Dateien /etc/hosts.allow und
+	     /etc/hosts.deny. Ein Beispiel für einen funktionierenden
+	     Eintrag dort findet sich auch in INSTALL_de. 
+	  4) Ein weiterer, schlecht konfigurierter NNTP-Server läuft
+	     bereits. Schalten Sie ihn ab.
+         Man kann das Setup übrigens testen, indem man mit 
+	 "telnet localhost 119" manuell eine Verbindung zum NNTP-Server
+	 herstellt. Dabei sollte man ungefähr folgende Ausgabe 
+	 erhalten:
+	 	200 Leafnode NNTP Daemon, version xx running at yy
+	 wobei xx die Versionsnummer und yy Ihr Hostname ist.
+	 Mit "quit" kann man diese Verbindung wieder beenden.
+	 Sollten Sie diese Nachricht nicht erhalten, gehen Sie
+	 Schritte 1) - 4) erneut durch.
+
+Problem: tin beklagt sich, daß die Datei "/var/lib/news/active" nicht
+         existiert.
+Lösung:  Entweder haben Sie  die falsche Version von tin gestartet
+         (Die, die direkt aus dem spool-Verzeichnis liest) oder Ihre
+	 groupinfo-Datei ist defekt.
+         Im ersten Fall müssen Sie tin mit "tin -r" aufrufen, falls dies
+	 nicht hilft, versuchen Sie, Ihre groupinfo-Datei neu erstellen
+	 zu lassen, indem Sie fetchnews mit -f starten.
+	
+Problem: Wenn ich mit Netscape News suche, erhalte ich die
+         Fehlermeldung "unknown command".
+Lösung:  Um in den News zu suchen benötigten ältere Netscape-Versionen
+         einen News-Server, der den XPAT-Befehl unterstützt. Leafnode 
+	 tut dies nicht. Wenn Sie wirklich Netscape benutzen wollen,
+	 setzen Sie  eine  Version ab 4.5 ein und klicken Sie auf den
+	 Button "options" im "search messages"-Dialog. In dem jetzt
+	 erscheinenden Fenster müssen Sie "on your local system"
+	 auswählen. 
+
+Problem: fetchnews lädt keine Artikel
+Lösung:  a) Ihre groupinfo-Datei ist defekt, erstellen Sie sie neu indem
+            Sie fetchnews mit "fetchnews -f" neu starten.
+	 b) Die Rechte in /var/spool/news stimmen nicht. /var/spool/news
+	    und alle Unterverzeichnisse müssen drwxrwsr-x-Rechte
+	    haben und dem User und der Gruppe news gehören.
+
+Problem: fetchnews beendet sich mit einem "segmentation fault".
+Lösung:  Das sollte nicht passieren. Falls fetchnews beim Posten
+         abstürzt, hilft es, nur die zu postenden Artikel mit
+	 "fetchnews -P" zu posten. Stürzt es beim Download ab, sollte
+	 der mehrmalig  Aufruf von fetchnews Abhilfe schaffen und alle
+	 neuen Artikel holen. 
+
+Problem: Mein Newsreader beschwert sich über häufige Timouts des
+	 NNTP-Servers.
+Lösung:  Auch dies ist wahrscheinlich Folge einer defekten
+	 groupinfo-Datei. Erstellen Sie sie mit "fetchnews -f" neu.
+
+Problem: leafnode erstellt fehlerhafte/unvollständige Message-IDs.
+Lösung:  Wahrscheinlich hat Ihre Maschine keinen oder nur einen
+	 unvollständigen Hostnamen. Leafnode versucht den Hostnamen
+	 herauszufinden, indem es gethostname(2) aufruft und den
+	 zurückgelieferten Wert an einen gethostbyname(3)-Aufruf
+	 weitergibt. Wenn Sie den Hostnamen mit hostname(1) und 
+	 domainname(1) korrigieren, sollten Sie auch korrekte
+	 Message-IDs erhalten. Falls Sie das nicht wollen, könn Sie
+	 auch den Teil der Message-ID, der nach dem @ folgt ändern,
+	 indem Sie
+	
+	 "hostname = richtiger.hostname" 
+	 
+	 in Ihre config-Datei einfügen. (s.a. man 8 leafnode)
+	 
+	 (Anmerkung des Übersetzers: Anscheinend bietet es sich manchem
+	 Spaßvogel an, auf diese Weise  irgendwelche Fantasiedomains
+	 in seiner Message-ID zu verwenden. Davon kann allerdings nur 
+	 abgeraten werden! Bei Fragen hierzu stehen die Experten in
+	 de.admin.netabuse.news gerne zur Verfügung. :-)
+	
+Problem: fetchnews hat Probleme, neue Newsgruppen zu bekommen.
+Lösung:	 Möglicherweise unterstützt Ihr Upstream-Server weder das
+	 "XGTITLE news.group.name"- noch das 
+	 "LIST NEWSGROUPS news.group.name"-Kommando. Fügen Sie in diesem
+	 Fall "nodesc" Ihrem Servereintrag dazu, wie es in man 8
+	 leafnode und der config.example-Datei beschrieben ist.
+	 
+Problem: texpire löscht keine Artikel
+Lösung:	 Starten Sie texpire mit dem Parameter -f. So werden Artikel etwas
+	 früher gelöscht, da der Zeitpunkt des letzten Zugriffes
+	 ignoriert wird.
+	 
+	 Sollten Sie dringend Platz in Ihrem Spool-Verzeichnis
+	 brauchen, reduzieren Sie in der config-Datei die Zeit, die Artikel
+	 vorgehalten werden sollen und rufen Sie texpire -f erneut auf.
+	 
+Problem: Wenn ich leafnode im "delaybody"-Modus betreibe, kann ich mit
+	 Netscape/Outlook Express nur die Header der Artikel sehen.
+Lösung:	 Dies ist ein Problem von Netscape und Outlook Express, nicht
+         von leafnode. Diese Newsreader speichern gelesene Artikel im
+	 Cache und weigern sich aus irgendeinem seltsamen Grund,
+	 einmal gelesene Artikel erneut zu laden.  
+	 Um Netscape dazu zu zwingen, leeren Sie den Cache und versuchen es
+	 nochmal oder besorgen sich besser einen vernünftigen
+	 Newsreader. (Falls jemand eine Lösung für Outlook Express
+	 findet, wäre ich für eine email dankbar.
+
+Wenn Sie Probleme mit leafnode haben, können Sie sehr viel über
+das, was leafnode tut, herausfinden, indem Sie "debugmode = 1" in die
+config-Datei aufnehmen und anschließend das Logging für "news"
+einschalten. Leafnode (also: fetchnews, texpire und der NNTP-Daemon)
+können jede Menge informativen Output erzeugen.
+
+Um das Logging einzuschalten, tut man am besten folgendes:
+
+1) Fügen Sie in /etc/syslogd.conf eine Zeile ein, die wie die folgende
+   aussieht:
+	news.=debug	/var/log/news.debug
+   Die beiden Felder müssen durch einen Tabulator, nicht durch
+   Leerzeichen voneinander getrennt werden.
+   
+2) Starten Sie den syslog-Daemon neu (als root)
+     kill -HUP `cat /var/run/syslog.pid`
+   oder
+     kill -HUP `cat /var/run/syslogd.pid`
+   (distributionsabhängig).
+
+Achtung: Das logfile kann sehr schnell sehr groß werden ...
+
+Möglicherweise möchten Sie auch das Mini-Leafsite-HOWTO von Florian Kuehnert
+<sutok@gmx.de> lesen, das leider noch für für leafnode-1.4 geschrieben
+wurde und darum ein wenig veraltet ist. Es ist an den üblichen Orten
+(sunsite und mirrors) erhältlich.
+
+Wenn Sie im Usenet Fragen zu leafnode stellen wollen, können Sie dies
+in de.comm.software.newsserver tun. (In englischer Sprache steht auch
+die Gruppe news.software.nntp zur Verfügung.)
+
+Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+
+Übersetzung: Alexander Reinwarth <a.reinwarth@gmx.de>

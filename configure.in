@@ -1,0 +1,169 @@
+dnl autoconf script for leafnode
+dnl written by Cornelius Krasel, 1999
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(leafnode.h)
+AC_CONFIG_HEADER(config.h)
+
+dnl Checks for programs.
+AC_PROG_AWK
+AC_PROG_CC
+dnl If we're using gcc, enable some warnings
+if test "$GCC" = yes
+then
+GCC_FLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
+fi
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_CHECK_PROG( AR, ar, ar )
+AC_PATH_PROG( RPM, rpm )
+
+dnl Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+
+AC_CHECK_HEADERS(errno.h fcntl.h limits.h sys/time.h syslog.h unistd.h ap_config.h)
+
+dnl Check whether all necessary include files are there
+AC_MSG_CHECKING(for system include files)
+AC_CACHE_VAL(cf_cv_sysheaders, AC_TRY_COMPILE([
+#include <sys/param.h>],[
+    return 0; ],
+  [ cf_cv_sysheaders="yes" ],
+  [ cf_cv_sysheaders="no" ])
+  )
+if test "$cf_cv_sysheaders" = "yes"
+then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  AC_MSG_ERROR(Kernel sources not installed - unable to continue)
+fi
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+
+dnl Check for libcrypt
+AC_CHECK_LIB(crypt, crypt)
+
+dnl Check for PCRE library.
+AC_CHECK_HEADER(pcre.h)
+if test "$ac_cv_header_pcre_h" = yes
+then
+  AC_CHECK_LIB(pcre, pcre_compile)
+fi
+if test "$ac_cv_lib_pcre_pcre_compile" != yes
+then
+  AC_DEFINE(NEW_PCRE_COMPILE)
+  PCRELIB=libpcre.a
+else
+  AC_DEFINE(HAVE_LIBPCRE)
+  AC_MSG_CHECKING(for pcre_compile version)
+  AC_CACHE_VAL(cf_cv_new_pcre_compile,[AC_TRY_COMPILE([
+#include <pcre.h>],[
+	char * pattern;
+	int options;
+	const char **errptr;
+	int *erroffset;
+	const unsigned char *tableptr;
+	pcre_compile(pattern, options, errptr, erroffset, tableptr); ],
+  [ cf_cv_new_pcre_compile="yes" ],
+  [ cf_cv_new_pcre_compile="no" ])
+  ])
+  if test $cf_cv_new_pcre_compile = "yes"
+  then
+    AC_MSG_RESULT(2.01)
+    AC_DEFINE(NEW_PCRE_COMPILE)
+  else
+    AC_MSG_RESULT(2.00)
+  fi
+  AC_MSG_CHECKING(for pcre_exec version)
+  AC_CACHE_VAL(cf_cv_new_pcre_exec,[AC_TRY_COMPILE([
+#include <pcre.h>],[
+	const pcre *pattern;
+	const pcre_extra *extra;
+	const char *subject;
+	int length;
+	int options;
+	int *ovec;
+	int ovecsize;
+	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize); ],
+   [ cf_cv_new_pcre_exec="no" ], [ cf_cv_new_pcre_exec="yes" ])
+  ])
+  if test $cf_cv_new_pcre_exec = "yes"
+  then
+    AC_MSG_RESULT(2.06)
+    AC_DEFINE(NEW_PCRE_EXEC)
+  else
+    AC_MSG_RESULT(2.05)
+  fi
+fi
+AC_SUBST(PCRELIB)
+
+dnl Check for timezone and related stuff
+AC_MSG_CHECKING(for gmtoff in struct tm)
+AC_CACHE_VAL(cf_cv_have_gmtoff,[AC_TRY_COMPILE([
+#include <time.h>],[
+	time_t now;
+	long gmtoff;
+	struct tm gmt;
+	now = time(0);
+	gmt = *(gmtime(&now));
+	gmtoff = gmt.tm_gmtoff; ],
+   [ cf_cv_have_gmtoff="yes" ], [ cf_cv_have_gmtoff="no" ])
+])
+if test $cf_cv_have_gmtoff = "yes"
+then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_GMTOFF)
+else
+  AC_MSG_RESULT(no)
+fi
+
+dnl Checks for library functions.
+AC_FUNC_FNMATCH
+AC_TYPE_SIGNAL
+AC_FUNC_STRFTIME
+AC_FUNC_UTIME_NULL
+AC_CHECK_FUNCS(getcwd gethostname gettext mkdir mktime regcomp rmdir socket strdup strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf)
+
+# Whenever both -lsocket and -lnsl are needed, it seems to be always the
+# case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
+# to be in LIBS before the setsockopt checks are performed.  *However*,
+# on SINIX-N 5.43, this is false, and gethostent seems to be a better
+# candidate. So, let's use it below instead of gethostbyname, and see.
+# Stolen from GNU tar 1.12
+
+AC_CHECK_FUNC(gethostent)
+if test $ac_cv_func_gethostent = no; then
+  AC_CHECK_LIB(nsl, gethostent)
+fi
+AC_CHECK_FUNC(setsockopt)
+if test $ac_cv_func_setsockopt = no; then
+  AC_CHECK_LIB(socket, setsockopt)
+fi
+
+### The 'pcre' library uses non-standard #define's
+test ".$ac_cv_func_strerror" != ".yes" && \
+test ".$cf_cv_have_sys_errlist" = ".yes" && \
+	PCRE_DEFINES="$PCRE_DEFINES -DSTRERROR_FROM_ERRLIST"
+test ".$ac_cv_func_memmove" != ".yes" && \
+test ".$cf_cv_good_bcopy" = ".yes" && \
+	PCRE_DEFINES="$PCRE_DEFINES -DUSE_BCOPY"
+
+dnl check whether called with --with-ipv6
+AC_ARG_WITH(ipv6,
+[  --with-ipv6             support IPv6 ],
+  if test "$withval" != "no" ; then
+    AC_DEFINE(HAVE_IPV6)
+  fi
+)
+
+AC_SUBST(PCRE_DEFINES)
+AC_SUBST(GCC_FLAGS)
+
+AC_OUTPUT(Makefile pcre/Makefile)

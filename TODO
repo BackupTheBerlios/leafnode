@@ -1,0 +1,48 @@
+This file is both a buglist and a wishlist. Comments are appreciated.
+
+--Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+
+BUGS:
+====
+
+- maxage doesn't work
+
+general:
+=======
+
+- apply all the patches :-)
+- determine interesting groups from .newsrc
+- how to make newsgroup names 8-bit compliant? E.g., how to produce
+  a newsgroups line of the form
+	Newsgroups: norge.østfold
+  Some readers encode this as ISO-8859-1 but this apparently is not
+  understood upstream. It is also against the RFCs. son-of-rfc1036
+  says that all data must be transmitted with ASCII < 127.
+  draft-ietf-nntpext-base-07.txt says that the character set for all
+  NNTP commands is UTF-8 (unicode!). Another possible draft is
+  draft-ietf-usefor-article-01.txt (chapter 5.5.) which is not very
+  helpful either.
+
+fetchnews:
+=========
+
+- groupinfo wird nach timeout und anschliessendem sigint nicht upgedated!
+- wenn connection nicht erfolgreich ist, haengt der rechner
+- problems with timeout. If timeout occurs, fetchnews should send itself
+  SIGINT.
+- starts with an initialfetch (!)
+- interrupt fetch every 100 postings and then reconnect, to beat the
+  INN configuration
+- delaybody only for certain groups?
+- articles are possibly lost when incorrectly linked (i.e. if
+  /var/spool/news/message.id/xxx/<bla@fasel> is already present
+  but /var/spool/news/news/group/name/nnnnnn is not).
+
+nntpd:
+=====
+
+- Control-Nachrichten und Artikel in moderierte Newsgroups werden auch
+  angezeigt. (Letzteres ist u.U. gar nicht so tragisch, denn es verhindert,
+  dass Newbies ihre "moderierten" Postings wiederholt abschicken.)
+- Memory leak in nntpd.
+

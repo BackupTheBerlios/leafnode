@@ -1,0 +1,67 @@
+.TH checkgroups 8 "21 Nov 1998" "" \" -*- nroff -*-
+.\"
+.\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
+.\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+.\"
+.\" Use, modification and distribution is allowed without limitation,
+.\" warranty, or liability of any kind.
+.\"
+.\" $Id: checkgroups.8,v 1.1 2000/11/12 17:40:35 emma Exp $
+.\"
+.\" hilit19 is stupid: "
+.SH NAME
+checkgroups \- update group descriptions
+
+.SH SYNOPSIS
+.B checkgroups -V
+br
+.B checkgroups [checkgroups script]
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.PP
+.B Checkgroups
+is the program which parses checkgroup scripts to include new/updated
+group descriptions into the active file (which is usually
+/var/spool/news/leaf.node/groupinfo).
+.PP
+.B Checkgroups
+sets its real and effective uid to "news".
+
+.SH OPTIONS
+.TP
+.I -D
+Switch on debug mode. This will log a lot of information via syslog to
+the facility "news" with the priority "debug". Useful for tracking down
+problems. If debug mode has already been set in the config file, increase
+verbosity.
+.TP
+.I -v
+Be more verbose.
+.TP
+.I -V
+Print version number and exit.
+.TP
+.I checkgroups script
+is a file which contains the newsgroup name and the description on one
+line, separated by a whitespace. Checkgroups scripts are sometimes sent
+out by news administrators (e.g. in the bionet.* hierarchy).
+
+.SH AUTHOR
+Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Copyright 1997-1999.
+.PP
+Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
+and is copyright 1995-96 
+Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
+22646949.
+
+.SH SEE ALSO
+.BR tcpd (8),
+.BR hosts.allow (5),
+.BR leafnode (8),
+.BR texpire (8),
+.B "RFC 977"

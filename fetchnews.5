@@ -1,0 +1,234 @@
+.TH fetchnews 5 "06 Jan 2000" \" -*- nroff -*-
+.SH NAME
+fetchnews \- fetch news via NNTP
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.PP
+.B Fetchnews
+(formerly called "fetch") is the program which submits and retrieves new
+articles to or from the upstream NNTP server. It has a filtering facility
+which makes it possible to select for or against certain articles, based
+on what is stored in the article headers. The headers are matched against
+patterns stored in a file which
+.B Fetchnews
+determines from the
+.I filterfile
+entry in the main leafnode configuration file.
+
+.PP
+The
+.I filterfile
+stores a number of entries in the following format.
+.RS
+newsgroups = [wildmat]
+.br
+[pattern to recognize]
+.br
+action = kill|select|[score]
+.RE
+Based on these entries,
+.BR fetchnews
+decides whether to retrieve an article from the upstream server or not.
+The entries are considered from the top down.
+
+.PP
+The
+.BR newsgroups
+parameter determines which newsgroup(s) the following patterns should be
+applied to. You can use
+.I wildmat
+expressions as explained below. A newsgroups parameter can be set for
+more than one pattern/action pair. It is valid until the next newsgroups
+parameter turns up.
+
+.PP
+The
+.BR pattern
+.BR to
+.BR recognize
+can be one of the following:
+.TP
+pattern = [pcre]
+Filter on any pattern that may occur in a header. Leafnode uses
+Perl-compatible regular expressions (PCRE) which are explained in
+a separate manual page (pcre(7)).
+.TP
+maxage = [days]
+Filter on age of articles in days. Articles that are older are
+selected for the consecutive action.
+.TP
+minlines = [n]
+Filter on the length of articles in lines. Articles that have less
+than n lines are selected for the consecutive action.
+.TP
+maxlines = [n]
+Filter on the length of articles in lines. Articles that have more
+than n lines are selected for the consecutive action.
+.TP
+maxbytes = [n]
+Filter on the length of articles in bytes. Articles that have more
+than n bytes are selected for the consecutive action.
+.TP
+maxcrosspost = [n]
+Filter on the number of groups the article is posted to. Articles
+that are posted to more than n groups are selected for the
+consecutive action.
+
+.PP
+The
+.BR action
+parameter finally determines what fetchnews should do when encountering
+a pattern. Since each action is dependent on a pattern, both of them must
+be defined. There are three actions to choose from:
+
+.RS
+.PP
+.I kill
+.br
+The article in question is not fetched if the pattern has been matched.
+No further patterns are considered.
+
+.PP
+.I select
+.br
+The article in question is fetched if the pattern has been matched. No
+further patterns are considered.
+
+.PP
+[
+.I score
+]
+.br
+.I score
+is a positive or negative integer value. The value is added to the score
+of the article if the pattern has been matched. Further patterns are
+considered. If, after consideration of all patterns, the score is below
+zero, the article is not fetched; otherwise it is fetched.
+
+.RE
+
+.SH EXAMPLES
+
+.PP
+The first example shows how to avoid "fast money"-type postings in all
+newsgroups:
+
+.RS
+newsgroups = *
+.br
+pattern = ^Subject:.*fast.?money
+.br
+action = kill
+.RE
+
+This pattern is applied to all newsgroups. Only the Subject:-line is matched
+(if the "^" was omitted, other headers containing "Subject:.*fast.?money"
+would be matched as well). The amount of characters between the header
+name and the "fast" may be arbitrary ("." means "any char" and the "*"
+designates that an arbitrary number, including zero, of these characters
+may be there) while between "fast" and "money" there must be at least one
+other character (designated by the "?"). For further explanations of
+Perl-compatible regular expressions, see 
+.I
+pcre(7)
+.
+
+.PP
+The second example shows how to avoid articles in a specific newsgroup
+unless they deal with a certain subject:
+
+.RS
+newsgroups = alt.hippopotamus
+.br
+pattern = ^Subject:.*[Hh]ippo
+.br
+action = select
+.br
+pattern = ^Subject:.*
+.br
+action = kill
+.RE
+
+Working from the top down, fetchnews will immediately select all articles
+in alt.hippopotamus that contain "Hippo" or "hippo" in the subject. If
+this expression is not matched, all articles will match the second
+expression and therefore be not fetched.
+
+.PP
+Finally, the third example shows another way to select certain articles,
+using scoring.
+
+.RS
+newsgroups = alt.hippopotamus.*
+.br
+pattern = ^Subject:.*[Hh]ippo
+.br
+action = 5
+.br
+pattern = ^Subject:.*telekinesis
+.br
+action = -3
+.RE
+
+We are interested in hippopotamus but not in telekinesis. This filter will
+kill all postings to the alt.hippopotamus hierarchy which deal with the
+latter, except if they report telekinesis in connection with hippos. (Of
+course, there may be other ways to achieve the same result.)
+
+.PP
+While in these examples filtering was always done on the Subject: line,
+there is no reason not to apply filters to arbitrary headers, e.g.
+certain posters, MIME-encoded postings or whatever you can imagine.
+
+.SH WILDMATS
+The
+.I wildmat
+format was first developed by Rich Salz based on the format used in the
+UNIX "find" command to articulate file names. It was developed to provide
+a uniform mechanism for matching patterns in the same manner that the
+UNIX shell matches filenames. Patterns are implicitely anchored at the
+beginning and end of each string when testing for a match. There are
+five pattern matching operations other than a strict one-to-one match
+between the pattern and the source to be checked for a match. The first
+is an asterisk (*) to match any sequence of zero or more characters. The
+second is a question mark (?) to match any single character. The third
+specifies a specific set of characters. The set is specified as a list
+of characters, or as a range of characters where the beginning and end
+of the range are separated by a minus (or dash) character, or as any
+combination of lists and ranges. The dash can also be included in the
+set as a character if it is the beginning or end of the set. This set is
+enclosed in square brackets. The close square bracket (]) may be used in
+a set if it is the first character in the set. The fourth operation is
+the same as the logical not of the third operation and is specified the
+same way as the third with the addition of a caret character (^) at the
+beginning of the test string just inside the open square bracket. The
+final operation uses the backslash character to invalidate the special
+meaning of the open square bracket ([), the asterisk, backslash or the
+question mark. Two backslashes in sequence will result in the evaluation
+of the backslash as a character with no special meaning.
+
+.PP
+.BR Leafnode
+modifies the wildmat format somewhat: patterns that do not specify
+a range of characters are matched in a case-insensitive manner. This
+is necessary since newsgroups names are de facto not matched in a
+case-sensitive manner. If you want to enforce case-sensitive pattern
+matching, include a range somewhere in your pattern.
+
+.SH BUGS
+Neither the newsgroups name nor the pattern may contain a hash mark (#).
+
+.SH AUTHOR
+This manual page was written by Cornelius Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de> with some inspiration from Lloyd
+Zusman <ljz@asfast.com>. The section on wildmats was
+taken from draft-ietf-nntpext-imp-03.txt
+
+.SH SEE ALSO
+.BR leafnode (8),
+.BR fetchnews (8),
+.BR pcre (7).

@@ -1,0 +1,73 @@
+.TH rnews 8 "19 Jan 1999" "" \" -*- nroff -*-
+.\"
+.\" Written and copyright 1999 by Cornelius Krasel
+.\" <krasel@wpxx02.toxi.uni-wuerzburg.de>
+.\" See README for restrictions on the use of this software.
+.\"
+.\" hilit19 is stupid: "
+.SH NAME
+rnews \- sort batch files into spool
+
+.SH SYNOPSIS
+.B rnews -V
+br
+.B rnews [-v|D] [file|directory]
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.PP
+.B Rnews
+is the program that sorts files into your newsspool.
+.B Rnews
+can currently sort compressed and uncompressed news batches as well as news
+articles.
+.B Rnews
+expects the news batch either in a file, directory or on stdin. If provided
+with the name of a directory, it will open the directory and sort all files
+inside this directory into the news spool. Rnews will not recursively descend
+through directories.
+.PP
+.B Rnews
+sets its real and effective uid to "news".
+
+.SH OPTIONS
+.TP
+.I -D
+Switch on debug mode. This will log a lot of information via syslog to
+the facility "news" with the priority "debug". Useful for tracking down
+problems. If debug mode has already been set in the config file, increase
+verbosity.
+.TP
+.I -V
+Show version information and exit.
+.TP
+.I -v
+Be verbose. A maximum of four -v can be used.
+.TP
+.I file
+Sort this file into the newsspool. The file can also be a rnews batch,
+optionally compressed.
+.TP
+.I directory
+Sort the contents of this directory into the newsspool.
+
+.SH FILES
+.PP
+.B Rnews
+makes some use of the /tmp directory.
+
+.SH AUTHOR
+Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Copyright 1999.
+.PP
+Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
+and is copyright 1995-96 
+Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
+22646949.
+
+.SH SEE ALSO
+.BR leafnode (8),
+.BR gzip (1)
