@@ -15,6 +15,7 @@
 #include "msgid.h"
 #include "groupselect.h"
 #include "fetchnews.h"
+#include "mysetvbuf.h"
 
 #include <sys/types.h>
 #include <ctype.h>
@@ -1741,6 +1742,11 @@ processupstream(struct serverlist *cursrv, const char *const server,
 	       "Could not open %s for writing: %m", newfile);
 	goto out;
     }
+
+    /* make newfile line buffered so it is somewhat up to date even if
+     * fetchnews crashes hard. In case of error, log, but continue. */
+    if (mysetvbuf(f, NULL, _IOLBF, 256))
+	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot set line buffer mode for %s: %m", newfile);
 
     while ((ng = readinteresting(r))) {
 	struct newsgroup *g;
