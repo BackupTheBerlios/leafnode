@@ -1307,8 +1307,9 @@ splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
 
 /**
  * get active file from cursrv
+ * \returns 0 for success, non-0 for error.
  */
-static void
+static int
 nntpactive(struct serverlist *cursrv, int fa)
 {
     struct stat st;
@@ -1350,7 +1351,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	if (nntpreply(cursrv) != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
 	    mastr_delete(s);
-	    return;
+	    return 1;
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, ".") != 0)) {
 	    char *r;
@@ -1369,7 +1370,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	if (!l) {
 	    /* timeout */
 	    mastr_delete(s);
-	    return;
+	    return 1;
 	}
 	mergegroups();		/* merge groups into active */
 	helpptr = groups;
@@ -1412,7 +1413,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
 		    "%s: reading all newsgroups failed", cursrv->name);
 	    mastr_delete(s);
-	    return;
+	    return 1;
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    last = first = 0;
@@ -1444,10 +1445,6 @@ nntpactive(struct serverlist *cursrv, int fa)
 		"%s: read %lu newsgroups", cursrv->name, count);
 
 	mergegroups();
-	/*		if (!l)
-			timeout 
-			mastr_delete(namelast);
-			return; */
 
 	if (cursrv->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
@@ -1470,14 +1467,14 @@ nntpactive(struct serverlist *cursrv, int fa)
 			    "%s: reading newsgroups descriptions failed: %s",
 			    cursrv->name, l);
 		    mastr_delete(s);
-		    return;
+		    return 1;
 		}
 	    } else {
 		ln_log(LNLOG_SERR, LNLOG_CSERVER,
 			"%s: reading newsgroups descriptions failed",
 			cursrv->name);
 		mastr_delete(s);
-		return;
+		return 1;
 	    }
 	    while (l && (strcmp(l, "."))) {
 		p = l;
@@ -1487,7 +1484,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    }
 	    if (!l) {
 		mastr_delete(s);
-		return;		/* timeout */
+		return 1;		/* timeout */
 	    }
 	}
 	/* touch file */
@@ -1498,6 +1495,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	}
     }
     mastr_delete(s);
+    return 0;
 }
 
 /* post article in open file f, return FALSE if problem, return TRUE if ok */
@@ -1872,7 +1870,9 @@ do_server(struct serverlist *cursrv, int forceactive)
     check_date(cursrv);
 
     /* get list of newsgroups or new newsgroups */
-    nntpactive(cursrv, forceactive);
+    if (nntpactive(cursrv, forceactive)) {
+	flag |= f_error;
+    }
 
     /* post articles */
     if (action_method & FETCH_POST) {
@@ -1989,6 +1989,13 @@ static int markactive(enum actmark am)
     }
     mastr_delete(c);
     return e;
+}
+
+static void
+error_refetch(const char *e) {
+    ln_log(LNLOG_SERR, LNLOG_CTOP,
+	    "ERROR: FETCHNEWS MUST REFETCH THE WHOLE ACTIVE FILE NEXT RUN.");
+    ln_log(LNLOG_SERR, LNLOG_CTOP, "REASON: %s", e);
 }
 
 /**
@@ -2117,9 +2124,14 @@ main(int argc, char **argv)
 	fprintf(stderr, "Cannot catch SIGUSR2.\n");
     else if (sigsetjmp(jmpbuffer, 1) != 0) {
 	servers = NULL;		/* in this case, jump the while ... loop */
-	rc = 2;			/* and prevent writing "complete markers"
-				   if we omit this, we may never get rid of
-				   deleted newsgroups */
+	if (!rc) {
+	    rc = 2;			/* and prevent writing "complete
+					   markers" if we omit this, we
+					   may never get rid of deleted
+					   newsgroups */
+	    if (forceactive)
+		error_refetch("caught signal that caused a premature abort.");
+	}
     } else {
 	canjump = 1;
     }
@@ -2131,11 +2143,16 @@ main(int argc, char **argv)
 	if (current_server->active) {
 	    err = do_server(current_server, forceactive);
 	    if (err == -2) {
+		abort(); /* -2 is undocumented for do_server! */
 		rc = 1;
-		break; 
+		break;
 	    }
-	    if (err == -1 && rc == 0)
+	    if (err == -1 && rc == 0) {
+		if (forceactive) {
+		    error_refetch("could not successfully talk to all servers.");
+		}
 		rc = 2;
+	    }
 	    if (err == 0) {
 		break;	/* no other servers have to be queried */
 	    }
@@ -2153,7 +2170,11 @@ main(int argc, char **argv)
 	    mergeactives(oldactive, active);
 	    free(oldactive);
 	}
-	writeactive();
+	if (writeactive()) {
+	    rc = 1;
+	    error_refetch("error writing active file to disk.");
+	    markactive(AM_KILL);
+	}
 	if (rc == 0 && forceactive)
 	    markactive(AM_UPDATE);
 
