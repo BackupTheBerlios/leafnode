@@ -38,7 +38,7 @@ mastr_oom(void)
 #define min(a,b) ((a < b) ? (a) : (b))
 
 mastr *
-mastr_new(long size)
+mastr_new(size_t size)
 {
     mastr *n = malloc(sizeof(mastr));
 
@@ -62,7 +62,7 @@ mastr_new(long size)
 mastr *
 mastr_newstr(const char *s)
 {
-    long l;
+    size_t l;
     mastr *n;
 
     if (!s)
@@ -78,7 +78,7 @@ mastr_newstr(const char *s)
 int
 mastr_cpy(mastr * m, const char *s)
 {
-    long l = strlen(s);
+    size_t l = strlen(s);
 
     if (!m)
 	return 0;
@@ -97,7 +97,7 @@ mastr_cpy(mastr * m, const char *s)
 int
 mastr_cat(mastr * m, /*@observer@*/ const char *const s)
 {
-    long li = strlen(s);
+    size_t li = strlen(s);
 
     if (!m)
 	return 0;
@@ -158,7 +158,7 @@ mastr_vcat(mastr * m, ...)
 }
 
 int
-mastr_resizekill(mastr * m, long l)
+mastr_resizekill(mastr * m, size_t l)
 {
     char *n;
 
@@ -178,7 +178,7 @@ mastr_resizekill(mastr * m, long l)
 }
 
 int
-mastr_resizekeep(mastr * m, long l)
+mastr_resizekeep(mastr * m, size_t l)
 {
     char *n;
 
@@ -235,22 +235,25 @@ mastr_trimr(mastr * m)
     while (--p >= m->dat && isspace((unsigned char)*p));
     /*@=whileempty@*/
     *++p = '\0';
-    m->len = p - m->dat;
+    m->len = (size_t)(p - m->dat);
 }
 
 ssize_t
 mastr_getln(mastr * m, FILE * f,
 	    ssize_t maxbytes /** if negative: unlimited */ )
 {
+    /* FIXME: make this overflow safe, size_t vs. ssize_t. */
     char buf[40];
-    ssize_t bufsiz = sizeof buf;
+    ssize_t bufsiz = (ssize_t)sizeof buf;
     ssize_t r;
     char *c;
 
     mastr_clear(m);
 
     for (;;) {
-	r = _getline(buf, maxbytes > 0 ? min(bufsiz, maxbytes) : bufsiz, f);
+	r = _getline(buf,
+		     (size_t)(maxbytes > 0 ? min(bufsiz, maxbytes) : bufsiz),
+		     f);
 	if (r < 0)
 	    return r;
 	if (r + m->len >= m->bufsize)
@@ -258,14 +261,14 @@ mastr_getln(mastr * m, FILE * f,
 		mastr_oom();
 		/*@notreached@*/ return 0;
 	    }
-	memcpy(m->dat + m->len, buf, r);
+	memcpy(m->dat + m->len, buf, (size_t)r);
 	if (maxbytes > 0)
 	    maxbytes -= r;
 	m->len += r;
-	if (r == 0 || (c = memchr(buf, '\n', r)))
+	if (r == 0 || (c = memchr(buf, '\n', (size_t)r)))
 	    break;
     }
-    return m->len;
+    return (ssize_t)(m->len);
 }
 
 /* chop off last character of string */
