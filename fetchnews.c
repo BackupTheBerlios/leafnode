@@ -1455,6 +1455,8 @@ do_server(/*@null@*/ char *msgid, time_t lastrun, /*@null@*/ char *newsgrp)
 	    /* if retrieval of the message id is successful at one
 	       server, we don't have to check the others */
 	    if (getbymsgid(msgid)) {
+		globalfetched += groupfetched;	/* FIXME: initialize! */
+		globalkilled += groupkilled;
 		return TRUE;
 	    }
 	} else {
@@ -1487,6 +1489,7 @@ main(int argc, char **argv)
     char *volatile newsgrp = NULL;
     char *t;
     int err;
+    volatile int rc = 0;
     static const char myname[] = "fetchnews";
 
     verbose = 0;
@@ -1717,6 +1720,8 @@ main(int argc, char **argv)
     }
 /*    delposted(starttime); *//* FIXME */
     if (!postonly) {
+	if (msgid && globalfetched == 0)
+	    rc = 1;
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles fetched, %lu killed, in %ld seconds",
 	       myname, globalfetched, globalkilled, time(0) - starttime);
@@ -1749,5 +1754,5 @@ main(int argc, char **argv)
 	freeallfilter(filter);
     freelocal();
     freeconfig();
-    exit(0);
+    exit(rc);
 }
