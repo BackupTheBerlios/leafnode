@@ -1,6 +1,7 @@
-20030713a: Changes since 20030712a:
+20030714a: Changes since 20030712a:
 - Bugfix: fix double free() in filter handling. Reported by Robert J. Clark.
 - Bugfix: fix some memory leaks.
+- Change: Post first, then fetch. Suggested by Jörg Lüders.
 
 20030712a: Changes since 20030710a:
 - Bugfix: Filtering by regexp was broken (inverse logic) unless

@@ -1,6 +1,11 @@
+2003-07-14  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030712a =
+	* fetchnews.c: Post first, then fetch.  
+
 2003-07-13  Matthias Andree <matthias.andree@gmx.de>
 
-	= snapshot 20030713a =
+	* ChangeLog, NEWS, configure.ac: Prepare 20030713a snapshot.  
 	* configutil.c, fetchnews.c: Fix memory leak.  
 	* filterutil.c: Fix double free() in free_entry when more than one
 	entry for a newsgroup definition is present, fix minor memory leaks.  
