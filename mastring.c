@@ -26,6 +26,7 @@ mastr_oom(void)
 #endif
     ;
 
+/*@noreturn@*/
 static __inline__ void
 mastr_oom(void)
 {
@@ -42,10 +43,10 @@ mastr_new(size_t size)
 {
     mastr *n = malloc(sizeof(mastr));
 
-    assert(size >= 0);
+    assert(size != 0);
     if (!n) {
 	mastr_oom();
-	/*@notreached@*/ return 0;
+	/*@notreached@*/ return NULL;
     }
     n->bufsize = size + 1;
     if (!(n->dat = malloc(n->bufsize))) {
@@ -85,7 +86,7 @@ mastr_cpy(mastr * m, const char *s)
     if (!s)
 	return 0;
     if (l >= m->bufsize)
-	if (!mastr_resizekill(m, l)) {
+	if (NULL == mastr_resizekill(m, l)) {
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
@@ -104,9 +105,9 @@ mastr_cat(mastr * m, /*@observer@*/ const char *const s)
     if (!s)
 	return 0;
     if (li + m->len >= m->bufsize)
-	if (!mastr_resizekeep(m, li + m->len)) {
+	if (NULL == mastr_resizekeep(m, li + m->len)) {
 	    mastr_oom();
-	    /*@notreached@*/ return 0;
+	    /*@notreached@*/ return NULL;
 	}
     strcpy(m->dat + m->len, s);
     m->len += li;

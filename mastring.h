@@ -11,21 +11,21 @@ mastrncpy(/*@out@*/ /*@unique@*/ /*@returned@*/ char *dest, const char *src, siz
 
 struct mastr {
     char *dat;
-    int bufsize;
-    int len;
+    size_t bufsize;
+    size_t len;
 };
 
 typedef struct mastr mastr;
 
 #define MASTR_OOM_ABORT 1
 
-/*@only@*/ mastr *mastr_new(long);
+/*@only@*/ mastr *mastr_new(size_t);
 /*@only@*/ mastr *mastr_newstr(const char *);
 int mastr_cpy(mastr *, const char *);
 int mastr_cat(mastr *, /*@observer@*/ const char *);
 int mastr_vcat(mastr *, ...);
-int mastr_resizekeep(mastr *, long);
-int mastr_resizekill(mastr *, long);
+int mastr_resizekeep(mastr *, size_t);
+int mastr_resizekill(mastr *, size_t);
 ssize_t mastr_getln(mastr *, FILE *, ssize_t maxbytes);
 #define mastr_autosize(m) do { (void)mastr_resizekeep(m, m->len); } while(0)
 void mastr_delete(/*@only@*/ mastr *);
