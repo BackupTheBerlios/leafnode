@@ -32,20 +32,16 @@ urgence:
 
 1.1 fix posting issues, introduce per-server queues?
 
+1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch
+
 1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
-    sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
+    sein, geht das Posting versch,A|(Btt. Ohne Fehlermeldung." Ivo Schwalbe,
     <51nig9.kv.ln@abu.ivos.de>
     NOTE: only worked around, not fixed.
     TODO: only delete articles successfully posted
 
-1.1 tin claims "no articles" for all local groups.
-    IN: 2002-01-06
-    FROM: Lutz Frommberger, 2002-01-06. Private mail, ID:
-	  <E16MzOy-0000An-00@dali.aufgebot.gov>
-    STATE: NEW
-
 1.1 groupinfo not updated after timeout + subsequent SIGINT
-    bug confirmed by Jörg Dietrich 2002-01-04
+    bug confirmed by J,Av(Brg Dietrich 2002-01-04
     ACTION: fix
 
 2.2 insertgroups/mergegroups global/static variables suck big time
@@ -77,9 +73,6 @@ urgence:
 
 2.2 Fix and amend copyright statements and licenses.
 
-2.2 groupinfo is not updated for local groups (article low/high marks)
-    when these are reinserted.
-
 2.2 strings returned by {f,m,}getheader must be freed (Stefan Wiens)
     ACTION: work in progress.
     FIX: Use garbage collector instead?
@@ -95,24 +88,13 @@ urgence:
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
 
-2.2 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
+2.2 "rnews does not work in pipes", J,Av(Brg Dietrich, Raymond Scholz,
     <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
     See 0.0 above as well.
 
-2.3 "Das ist eine Macke von Leafnode. Wird von einem Server die
-    komplette Gruppenliste geholt, so werden neu hinzugekommene Gruppen
-    bei NEWGROUPS nicht aufgeführt. Der Reader findet sie daher nicht
-    ohne weiteres." (Stefan Wiens, de.comm.software.newsserver
-    2000-12-07, Message-ID: <wkr93lxerw.fsf@helium.eswe.dyndns.org>)
-    Transl: if a complete group list is fetched from a server, newly
-    appeared groups are not offered in NEWGROUPS.
-    ACTION: fix.
-    Idea #1: Possibly emit list from mergegroups
-    Idea #2: diff newsgroups list before and after group list fetch
-    Idea #3: Store newsgroups in timestamped file.
-
-2.3 if XHDR and XOVER fail, fall back to HEAD!
-    ACTION: implement HEAD
+3.3 offer a per-server switch to select how the list of downloadable
+    articles is fetched, offer xover, xhdr, newnews and "auto" which
+    tries these methods in exactly this order.
 
 3.3 rnews is currently deactivated. Work in progress. Will have to
     reintroduce rnews and find a way to feed news batches to UUCP mode
@@ -130,7 +112,7 @@ urgence:
 
 3.3 add IHAVE support for feeding upstream
 
-3.3 Suggestion by Jörg Mensmann: only pick groups from supplement that
+3.3 Suggestion by J,Av(Brg Mensmann: only pick groups from supplement that
     have not been fetched before (or filter groups by server)
 
 3.3 don't supersede() articles unconditionally
@@ -139,7 +121,7 @@ urgence:
 
 3.3 authentication interface:
     make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt?
-    Use Bruce Günter's credential validation module?
+    Use Bruce G,A|(Bnter's credential validation module?
 
 3.3 ACLs (possibly including identd) or regexp to prevent groups from
     being shown (mind ARTICLE <message@id> and check against Xref or
@@ -162,7 +144,7 @@ urgence:
 
 3.3 how to make newsgroup names 8-bit compliant? E.g., how to produce
     a newsgroups line of the form
-	Newsgroups: norge.østfold
+	Newsgroups: norge.,Ax(Bstfold
     Some readers encode this as ISO-8859-1 but this apparently is not
     understood upstream. It is also against the RFCs. son-of-rfc1036
     says that all data must be transmitted with ASCII < 127.
@@ -225,6 +207,28 @@ urgence:
 ========================================================================
 FIXED ITEMS:
 
+2002-02-11 tin claims "no articles" for all local groups.
+           Lutz Frommberger, 2002-01-06. Private mail, ID:
+	   <E16MzOy-0000An-00@dali.aufgebot.gov>
+	   Fixed by Jörg Dietrich.
+
+2002-02-11 groupinfo is not updated for local groups (article low/high marks)
+	   when these are reinserted.
+	   Fixed by Jörg Dietrich.
+
+2002-02-11 "Das ist eine Macke von Leafnode. Wird von einem Server die
+	   komplette Gruppenliste geholt, so werden neu hinzugekommene
+	   Gruppen bei NEWGROUPS nicht aufgef,A|(Bhrt. Der Reader findet sie
+	   daher nicht ohne weiteres." (Stefan Wiens,
+	   de.comm.software.newsserver 2000-12-07, Message-ID:
+	   <wkr93lxerw.fsf@helium.eswe.dyndns.org>) Transl: if a
+	   complete group list is fetched from a server, newly appeared
+	   groups are not offered in NEWGROUPS.
+	   Idea #1: Possibly emit list from mergegroups
+	   Idea #2: diff newsgroups list before and after group list fetch
+	   Idea #3: Store newsgroups in timestamped file.
+   	   Fixed by Jörg Dietrich.
+
 2002-02-04 leafnode may store newly fetched articles into the gaps if groupinfo
            is not current. groupinfo may be out of date after a crash, fix
            watermarks.
@@ -262,7 +266,7 @@ DROPPED ITEMS:
 
 2002-01-06 report Raymond Scholz, rnews doesn't read from pipes.
            ACTION: reimplement rnews from scratch.
-	   (duplicate report, merged with Jörg Dietrich's)
+	   (duplicate report, merged with J,Av(Brg Dietrich's)
 
 2002-01-06 gethostbyname is not subject to timeout control
 	   (rely on the OS to do that)

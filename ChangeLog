@@ -1,3 +1,81 @@
+2002-02-11  Matthias Andree  <matthias.andree@gmx.de>
+
+	* Makefile.am: Add touch.c to liblnutil_a_SOURCES.
+	* leafnode.h: Add touch().
+	* fetchnews.c: No longer call mastr_new() with 0 argument, but 256
+	instead. Use the new touch() function from touch.c instead of
+	doing the touch ourselves.
+
+	* activutil.c: Kill trailing whitespace.
+	* store.c: Drop touch(), now in a separate file (also needed by
+	fetchnews).
+
+	* touch.c: New file. This adds a write() to work around a Linux
+	reiserfs bug which does not change the mtime when ftruncate() is
+	called. A bug report has been sent to the ReiserFS mailing list,
+	Message-ID: <m3vgd4bwgc.fsf@merlin.emma.line.org>
+
+	* AUTHORS: Restore and update this file.
+	* mastring.c: Replace long by size_t.
+	* mastring.h: Replace long by size_t.
+	* xoverutil.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* texpire.c: Merge Jörg Dietrich's patch to fix fetchnews -f water
+	mark issues.
+
+	* store.c: Merge Jörg Dietrich's patch to fix fetchnews -f water
+	mark issues.
+
+	* nntpd.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* moderated.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* localutil.c: Merge Jörg Dietrich's patch to update the local
+	groups format comment.
+
+	* leafnode.h: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* fetchnews.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* checkgroups.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* applyfilter.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* activutil.c: Merge Jörg Dietrich's patch to fix fetchnews -f
+	water mark issues.
+
+	* mastring.c: Add some cosmetic fluff to quiet splint.
+	* activutil.c: Add some cosmetic fluff to quiet splint.
+	* fetchnews.c: Add note that NNTPcache replies to NEWNEWS with 502
+	AND a dot line (the latter violates the RFC).
+	* configure.ac: Bump version.
+	* README.html: Document that local.groups allows comments.
+	* localutil.c: Allow comment lines in local.groups. Comment lines
+	start with a hash mark ("#"). NOTE: blank lines are NOT
+	allowed. The hash mark must be the first character and must not be
+	preceded by white space. Suggested by Arne Hanssen.
+
+2002-02-10  Matthias Andree  <matthias.andree@gmx.de>
+
+	* configparam.c: Add copyright notice.
+	* Makefile.am: Dropped copyfile.c from liblnutil_a_SOURCES, it was
+	unused.
+
+	* copyfile.c: dropped, unused.
+	* README.html: Add CVS Version ID.
+	* README.html: Add docs on the --with-dmalloc ./configure option.
+	* configparam.c: Reorder #include directives, putting dmalloc.h
+	last, to fix compile problems when configured
+	--with-dmalloc. Found after dmalloc related inquiry by Jörg
+	Dietrich.
+
 2002-02-04  Matthias Andree  <matthias.andree@gmx.de>
 
 	=== RELEASE 2.0b8_ma10pre2 ===
