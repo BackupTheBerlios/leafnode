@@ -1867,7 +1867,8 @@ do_server(struct serverlist *cursrv, int forceactive)
     }
 
     /* do regular fetching of articles, headers, delayed bodies */
-    if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
+    if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)
+	    && !cursrv->noread) {
 	res = processupstream(cursrv, cursrv->name,
 		cursrv->port, forceactive);
 	if (res != 1)

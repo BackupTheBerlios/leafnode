@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.101 2004/07/06 08:57:30 emma Exp $ */
+/* $Id: leafnode.h,v 1.102 2004/08/15 21:37:43 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -446,6 +446,7 @@ struct serverlist {
     int usexhdr;		/* use XHDR instead of XOVER if sensible */
     int descriptions;	/* download descriptions as well */
     int noactive;		/* if true, do not request group lists */
+    int noread;			/* if true, do not request articles */
     int timeout;		/* timeout in seconds before we give up */
     int post_anygroup;
     enum feedtype feedtype;

@@ -414,6 +414,13 @@ readconfig(/*@null@*/ const char *configfile)
 				   "config: no LIST NEWSGROUPS for %s",
 				   p->name);
 		    break;
+		case CP_NOREAD:
+		    p->noread = TRUE;
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: not fetching articles from %s",
+				   p->name);
+		    break;
 		case CP_INITIAL:
 		    initiallimit = strtoul(value, NULL, 10);
 		    if (debugmode & DEBUG_CONFIG)
@@ -535,6 +542,7 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
     p->name = critstrdup(name, "readconfig");
     p->descriptions = TRUE;
     p->noactive = FALSE;
+    p->noread = FALSE;
     p->next = NULL;
     p->timeout = 30;	/* default 30 seconds */
     p->port = port;
