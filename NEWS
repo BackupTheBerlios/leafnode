@@ -1,3 +1,7 @@
+Changes since 20040305a:
+- Bugfix: XPAT, XHDR, NEWNEWS caused a segmentation fault when issued 
+  without argument. Reported by Robert Grimm.
+
 20040305a: Changes since 20040227a:
 - Robustness: Leafnode programs refuse to start when an unknown or
   unsupported authentication method is configured.

@@ -969,15 +969,16 @@ parsedate_newnews(const struct stringlisthead *l, const int gmt)
 static time_t
 donew_common(const struct stringlisthead *l)
 {
-    struct stringlistnode *n = l->head;
+    struct stringlistnode *n;
     int gmt, len;
     time_t age;
 
-    len = stringlistlen(l);
-    if (len < 2) {
+    if (!l || (len = stringlistlen(l)) < 2) {
 	nntpprintf("502 Syntax error");
 	return -1;
     }
+
+    n = l->head;
 
     gmt = (len >= 3 && !strcasecmp(n->next->next->string, "gmt"));
 
@@ -1870,8 +1871,12 @@ doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long 
     /* NOTE: XHDR is not to change the current article pointer, thus,
        we're using call by value here */
     struct stringlisthead *l = cmdlinetolist(arg);
+    int len = 0;
 
-    switch (stringlistlen(l)) {
+    if (l)
+	len = stringlistlen(l);
+
+    switch (len) {
     case 1:
 	doselectedheader(group, l->head->string, NULL, NULL, &artno);
 	/* discard changes to artno */
@@ -1894,7 +1899,7 @@ doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long 
        we're using call by value here */
     struct stringlisthead *l = cmdlinetolist(arg);
 
-    if (stringlistlen(l) < 3) {
+    if (!l || stringlistlen(l) < 3) {
 	nntpprintf("502 Usage: PAT header first[-[last]] pattern or "
 		   "PAT header message-id pattern");
     } else {
