@@ -134,7 +134,7 @@ static void texpire_log_unlink(const char *file, const char *logprefix)
 	if (errno != ENOENT)
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/%s: %m", logprefix, file);
     } else {
-	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
     }
 }
 
@@ -870,8 +870,11 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 		    return;
 		}
 	    }
+	} else {
+	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "not removing %s because it is interesting or dormant.", n);
 	}
     }
+
     /* Once we're done and there's something left we have to update the
      * .overview file. Otherwise unsubscribed groups will never be
      * deleted.
