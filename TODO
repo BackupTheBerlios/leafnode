@@ -292,6 +292,9 @@ Ralfs TODO:
 FIXED ITEMS:
 
 2002-05-01 Ralf Wildenhues
+	   NEWNEWS and NEWGROUPS MUST not alter state information!
+
+2002-05-01 Ralf Wildenhues
 	   When POSTing an article with an upstream-already-used MID, the
 	   new article is not moved out of in.coming, causing errors at
 	   each fetchnews invocation.
@@ -380,10 +383,6 @@ FIXED ITEMS:
 
 ========================================================================
 DROPPED ITEMS:
-
-2002-05-01 Ralf Wildenhues
-	   NEWNEWS and NEWGROUPS MUST not alter state information!
-	   (cannot be reproduced any more)
 
 2002-04-13 Matthias Andree
 	Ralf asked:
