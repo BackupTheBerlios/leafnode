@@ -8,6 +8,7 @@
  * See README for restrictions on the use of this software.
  */
 #include "leafnode.h"
+#include "mastring.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -89,10 +90,10 @@ show_queue(const char *s)
 int
 main(int argc, char **argv)
 {
-    char s[PATH_MAX + 1];	/* FIXME */
     int option;
     int ret = 0;
     long c;
+    mastr *s = mastr_new(PATH_MAX);
 
     while ((option = getopt(argc, argv, "VD:")) != -1) {
 	if (!parseopt("newsq", option, NULL, NULL, 0)) {
@@ -103,35 +104,37 @@ main(int argc, char **argv)
 
     printf("Articles awaiting post to upstream servers:\n"
 	   "-------------------------------------------\n");
-    sprintf(s, "%.*s/out.going", (int)sizeof(s) - 20, spooldir);
-    if ((c = show_queue(s)) < 0) {
+    mastr_vcat(s, spooldir, "/out.going", 0);
+    if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
 	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
-
+    mastr_clear(s);
 
     printf("\n");
     printf("Articles awaiting store to local groups:\n"
 	   "----------------------------------------\n");
-    sprintf(s, "%.*s/in.coming", (int)sizeof(s) - 20, spooldir);
-    if ((c = show_queue(s)) < 0) {
+    mastr_vcat(s, spooldir, "/in.coming", 0);
+    if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
 	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
+    mastr_clear(s);
 
     printf("\n");
     printf("Articles in failed.postings:\n" "----------------------------\n");
-    sprintf(s, "%.*s/failed.postings", (int)sizeof(s) - 20, spooldir);
-    if ((c = show_queue(s)) < 0) {
+    mastr_vcat(s, spooldir, "/failed.postings", 0);
+    if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
 	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
+    mastr_delete(s);
 
     exit(ret ? EXIT_FAILURE : EXIT_SUCCESS);
 }

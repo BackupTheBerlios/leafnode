@@ -352,16 +352,16 @@ readactive(void)
     int n;
     FILE *f;
     struct newsgroup *g;
-    char s[PATH_MAX];		/* FIXME: possible overrun below */
-    char *t;
+    mastr *s = mastr_new(1024);
 
     freeactive(active);
     active = 0;
-    t = mastrcpy(s, spooldir);
-    t = mastrcpy(t, GROUPINFO);
+    mastr_vcat(s, spooldir, GROUPINFO, 0);
 
-    if ((f = fopen(s, "r")) == NULL) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
+    if ((f = fopen(mastr_str(s), "r")) == NULL) {
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
+		   mastr_str(s));
+	mastr_delete(s);
 	return;
     }
 
@@ -429,6 +429,7 @@ readactive(void)
 
     /* don't check for errors, we opened the file for reading */
     (void)fclose(f);
+    mastr_delete(s);
 }
 
 /* only read active if it has changed or not been loaded previously */
