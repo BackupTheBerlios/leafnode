@@ -36,9 +36,8 @@ int getwatermarks(unsigned long *f, unsigned long *l,
 	    unsigned long i;
 
 	    count ++;
-	    q = NULL;
 	    i = strtoul(nga->d_name, &q, 10);
-	    if (*q == '\0') {
+	    if (q != NULL && *q == '\0') {
 		if (i < first) {
 		    first = i;
 		}
