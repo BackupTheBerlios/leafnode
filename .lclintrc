@@ -1,7 +1,5 @@
+-weak
 -warnunixlib
 +unixlib
--predboolint
 -DHAVE_CONFIG_H
 -booltype bool
--exitarg
-+boolint
