@@ -139,6 +139,11 @@ Ralfs TODO:
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
 
+3.3 do parallel fetch
+    models: 1- thread 2- fork() 3- select()-based
+    problems: 1- groupinfo 2- .overview 3- avoid EEXIST 4- avoid locks
+    or semaphores
+
 3.3 heed Expires: header in texpire
 
 3.3 offer a per-server switch to select how the list of downloadable
