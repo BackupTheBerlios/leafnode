@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.5 2002/01/11 00:02:47 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.6 2002/04/03 21:52:04 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -68,8 +68,7 @@ Don't unlink files in the
 directory. This avoids automatic unsubscription of newsgroups.
 .TP
 .I -N newsgroup
-Get only articles posted to "newsgroup". You can specify this option
-multiple times.
+Get only articles posted to "newsgroup".
 .TP
 .I -P
 Only post articles that have accumulated in the
