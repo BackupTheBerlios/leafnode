@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.24 2004/08/15 21:37:43 emma Exp $
+.\" $Id: leafnode.8.in,v 1.25 2004/08/19 19:19:06 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -288,8 +288,8 @@ it will never ever overwrite an existing message ID. By default,
 it tries to do this from the name of your computer. However, some
 upstream servers demand message IDs of a certain type. In this case,
 you can override the name of your computer by setting "hostname" to
-a sensible value. The use of "hostname" to create fancy message IDs
-is possible, but strongly discouraged.
+a sensible value. The abuse of this option can cause your upstreams to
+silently drop your postings!
 .TP
 log_poster_ip = 1
 If you set this option, leafnode will add a "X-Leafnode-NNTP-Posting-Host"

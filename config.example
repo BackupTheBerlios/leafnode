@@ -117,10 +117,14 @@ expire = 20
 
 ## If your newsreader does not supply a Message-ID for your postings
 ## Leafnode will supply one, using the hostname of the machine it is
-## running on.  If this hostname is not suitable, this parameter can be
-## used to override it.  Do not use a fantasy name, it may interfere with
-## the propagation of your messages.  Most modern newsreaders do provide
-## a Message-ID. Optional.
+## running on.
+## NOTICE: You should not usually use this parameter but configure the hostname
+## properly instead. If that is not feasible or to choose a certain role
+## of a multi-homed host, this parameter can be
+## used to override the host name.
+## WARNING: Do not use a fantasy name, it may cause your
+## articles to be rejected or silently dropped on upstream servers!
+## Optional.
 # hostname = host.domain.country
 
 ## Some people want their postings to only show up when they have been
