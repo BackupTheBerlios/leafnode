@@ -1,288 +1,409 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
-<HTML>
-<HEAD><TITLE>Leafnode manual</TITLE></HEAD>
-<BODY>
+"http://www.w3.org/TR/html4/loose.dtd">
 
-<h2 align=center>LEAFNODE</h2>
+<html>
+  <head>
+    <meta name="generator" content=
+    "HTML Tidy for Linux/x86 (vers 1st April 2002), see www.w3.org">
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=iso-8859-1">
 
-<P>Preface: This documentation is about to be migrated to a different
-format. Do not file bug reports against section numbering or references within
-this document.
+    <title>Leafnode manual</title>
 
-<P>Version ID of this document: $Id: README.html,v 1.24 2003/07/10 22:58:59 emma Exp $
+    <style type="text/css">
+ h4.c5 {text-align: center}
+ p.c4 {font-weight: bold}
+ p.c3 {text-align: center}
+ h3.c2 {text-align: center}
+ h2.c1 {text-align: center}
+            </style>
+  </head>
 
-<h3 align=center>Table of Contents</h3>
+  <body>
+    <h2 class="c1">LEAFNODE</h2>
 
-<OL>
-<LI>Overview
-<LI>Installation
-<LI>Update from previous versions
-    <OL>
-    <LI>Update from versions &lt; 2.0b8_ma8
-    <LI>Update from versions &lt; 2.0
-    <LI>Update from versions &lt; 1.9.3
-    <LI>Update from versions &lt; 1.6
-    </OL>
-<LI>Files and directories
-    <OL>
-    <LI>The main configuration file
-    <LI>The filter file
-    </OL>
-<LI>Local newsgroups
-<OL>
-<LI>Moderated newsgroups
-</OL>
-<LI>Deinstallation
-<LI>Frequently asked questions
-<LI>Copyright
-</OL>
+    <p>Preface: This documentation is about to be migrated to a
+    different format. Do not file bug reports against section
+    numbering or references within this document.</p>
 
-<hr>
+    <p>Version ID of this document: $Id: README.html,v 1.24
+    2003/07/10 22:58:59 emma Exp $</p>
 
-<h3 align=center>1. OVERVIEW</h3>
+    <h3 class="c2">Table of Contents</h3>
 
-<p>Leafnode is a USENET software package designed for small sites, with a
-few tens of readers and only a slow link to the net. It is developed
-on Linux, but has been reported to compile and run also under any BSD
-flavour, Solaris and Irix.
+    <ol>
+      <li>Overview</li>
 
-<p>The Leafnode package consists of several programs, three essential ones
-and several add-ons.
+      <li>Installation</li>
 
-<UL>
-<LI><u>Leafnode</u> is the NNTP server.  It talks to the normal news clients,
-    and stores readership data.
-<LI><u>Fetchnews</u> is the NNTP news-gatherer.  It looks at the readership
-    data Leafnode stores, and selects what groups to pull news from. It
-    also transfers your contributions to one or more upstream servers.
-<LI><u>Texpire</u> is responsible for deleting old and uninteresting news.  It
-    deletes all discussion threads that are old and not recently read.
-</UL>
+      <li>
+        Update from previous versions 
 
-<p>
-These are the additional tools:
+        <ol>
+          <li>Update from versions &lt; 2.0b8_ma8</li>
 
-<UL>
-<LI><u>Applyfilter</u> lets you delete articles from your local news spool
-    which fit a certain pattern.
-<LI><u>Checkgroups</u> inserts the titles of newsgroups into the newsgroup
-    database.
-<LI><u>Newsq</u> shows which news are waiting to be transferred to your
-    upstream server(s).
-<LI><u>Rnews</u> sorts an UUCP batch or articles downloaded by other means 
-    into the news spool.
-</UL>
+          <li>Update from versions &lt; 2.0</li>
 
-<p>Only groups that someone has been reading in the past week are fetched
-from the upstream NNTP server.  When someone stops reading a group,
-fetchnews will stop reading that group a week later (this is the default
-which can be configured), and when someone starts reading a group, fetchnews
-will grab all the articles it can in that group the next time it runs.
+          <li>Update from versions &lt; 1.9.3</li>
 
-<p>Leafnode's distinguishing features are:
+          <li>Update from versions &lt; 1.6</li>
+        </ol>
+      </li>
 
-<UL>
-<LI>Leafnode is written with the novice user in mind. It is very
-    easy to install and configure and requires no manual intervention
-    once installed. Leafnode tries very hard to recover automatically
-    from error situations.
-<LI>Compared to other servers, leafnode uses very little disk space
-    and bandwidth. Of course this also depends on how many users
-    are accessing your server and is probably not true for 300-user
-    sites.
-<LI>The newsspool can be easily manipulated by small scripts because
-    it is maintained in plain file format. Some tiny examples are
-    in the subdirectory tools/ .
-</UL>
+      <li>
+        Files and directories 
 
-<p>
-Of course, Leafnode also has weaknesses. Some of these are:
+        <ol>
+          <li>The main configuration file</li>
 
-<UL>
-<LI>In just any error situation, leafnode tries to fix its problems by
-    deleting the offending article. This can cause leafnode to lose news.
-<LI>Due to its open architecture, Leafnode scales very badly.
-</UL>
+          <li>The filter file</li>
+        </ol>
+      </li>
 
-<p>The current version of leafnode is available from http://www.leafnode.org/ .
+      <li>
+        Local newsgroups 
 
-<p>There is also a leafnode mailing list. Send mail to
-<p align=center>
-	leafnode-list@wpxx02.toxi.uni-wuerzburg.de
-<p>with "Subscribe" in the Subject: to subscribe.
+        <ol>
+          <li>Moderated newsgroups</li>
+        </ol>
+      </li>
 
-<hr>
+      <li>Deinstallation</li>
 
-<h3 align=center>2. INSTALLATION</h3>
+      <li>Frequently asked questions</li>
 
-<OL>
-<LI>Leafnode does not currently work on SunOS 4.</LI>
-<LI>Leafnode depends on the PCRE regular-expression matching library. It ships
-as binary package with many current Linux/BSD distributions, and is also
-available as port for *BSD (Debian users: try "apt-get install libpcre3
-libpcre3-dev"). Just install the binary package for your operating
-system if it ships with one. If it comes without PCRE, don't worry, the
-installation from source is simple. To install PCRE, do (AS NORMAL USER, NOT AS root!)
-<OL>
-<LI>Download the current PCRE version from <a
-href="http://www.pcre.org/">http://www.pcre.org/</a>.
-<LI>Unpack PCRE: gunzip -c | tar xvf -
-<LI>cd pcre-3.9 <BR><I>(This is for PCRE-3.9, for other versions, replace that by the path that tar wrote when unpacking.)</I>
-<LI>type <KBD>./configure && make</KBD> <br><i>there should be no errors</i>
-<LI>become root
-<LI>as root, do <KBD>make install</KBD>
-<LI>as root, do <KBD>ldconfig</KBD> <br><i>this may not be needed on all
-systems, but better safe than sorry</i>
-<LI>exit your root shell
-<LI>DONE!
-</OL>
-<LI>Leafnode uses GNU autoconf to determine the configuration of the
-machine it will be compiled on. It also uses GNU automake for all the standard
-features that GNU automake offers. Type (AS NORMAL USER, NOT AS root!)
+      <li>Copyright</li>
+    </ol>
+    <hr>
+
+    <h3 class="c2">1. OVERVIEW</h3>
+
+    <p>Leafnode is a USENET software package designed for small
+    sites, with a few tens of readers and only a slow link to the
+    net. It is developed on Linux, but has been reported to compile
+    and run also under any BSD flavour, Solaris and Irix.</p>
+
+    <p>The Leafnode package consists of several programs, three
+    essential ones and several add-ons.</p>
+
+    <ul>
+      <li><u>Leafnode</u> is the NNTP server. It talks to the
+      normal news clients, and stores readership data.</li>
+
+      <li><u>Fetchnews</u> is the NNTP news-gatherer. It looks at
+      the readership data Leafnode stores, and selects what groups
+      to pull news from. It also transfers your contributions to
+      one or more upstream servers.</li>
+
+      <li><u>Texpire</u> is responsible for deleting old and
+      uninteresting news. It deletes all discussion threads that
+      are old and not recently read.</li>
+    </ul>
+
+    <p>These are the additional tools:</p>
+
+    <ul>
+      <li><u>Applyfilter</u> lets you delete articles from your
+      local news spool which fit a certain pattern.</li>
+
+      <li><u>Checkgroups</u> inserts the titles of newsgroups into
+      the newsgroup database.</li>
+
+      <li><u>Newsq</u> shows which news are waiting to be
+      transferred to your upstream server(s).</li>
+
+      <li><u>Rnews</u> sorts an UUCP batch or articles downloaded
+      by other means into the news spool.</li>
+    </ul>
+
+    <p>Only groups that someone has been reading in the past week
+    are fetched from the upstream NNTP server. When someone stops
+    reading a group, fetchnews will stop reading that group a week
+    later (this is the default which can be configured), and when
+    someone starts reading a group, fetchnews will grab all the
+    articles it can in that group the next time it runs.</p>
+
+    <p>Leafnode's distinguishing features are:</p>
+
+    <ul>
+      <li>Leafnode is written with the novice user in mind. It is
+      very easy to install and configure and requires no manual
+      intervention once installed. Leafnode tries very hard to
+      recover automatically from error situations.</li>
+
+      <li>Compared to other servers, leafnode uses very little disk
+      space and bandwidth. Of course this also depends on how many
+      users are accessing your server and is probably not true for
+      300-user sites.</li>
+
+      <li>The newsspool can be easily manipulated by small scripts
+      because it is maintained in plain file format. Some tiny
+      examples are in the subdirectory tools/ .</li>
+    </ul>
+
+    <p>Of course, Leafnode also has weaknesses. Some of these
+    are:</p>
+
+    <ul>
+      <li>In just any error situation, leafnode tries to fix its
+      problems by deleting the offending article. This can cause
+      leafnode to lose news.</li>
+
+      <li>Due to its open architecture, Leafnode scales very
+      badly.</li>
+    </ul>
+
+    <p>The current version of leafnode is available from
+    http://www.leafnode.org/ .</p>
+
+    <p>There is also a leafnode mailing list. Send mail to</p>
+
+    <p class="c3">leafnode-list@wpxx02.toxi.uni-wuerzburg.de</p>
+
+    <p>with "Subscribe" in the Subject: to subscribe.</p>
+    <hr>
+
+    <h3 class="c2">2. INSTALLATION</h3>
+
+    <ol>
+      <li>Leafnode does not currently work on SunOS 4.</li>
+
+      <li>
+        Leafnode depends on the PCRE regular-expression matching
+        library. It ships as binary package with many current
+        Linux/BSD distributions, and is also available as port for
+        *BSD (Debian users: try "apt-get install libpcre3
+        libpcre3-dev"). Just install the binary package for your
+        operating system if it ships with one. If it comes without
+        PCRE, don't worry, the installation from source is simple.
+        To install PCRE, do (AS NORMAL USER, NOT AS root!) 
+
+        <ol>
+          <li>Download the current PCRE version from <a href=
+          "http://www.pcre.org/">http://www.pcre.org/</a>.</li>
+
+          <li>Unpack PCRE: gunzip -c | tar xvf -</li>
+
+          <li>cd pcre-3.9<br>
+           <i>(This is for PCRE-3.9, for other versions, replace
+          that by the path that tar wrote when unpacking.)</i></li>
+
+          <li>type <kbd>./configure &amp;&amp; make</kbd><br>
+           <i>there should be no errors</i></li>
+
+          <li>become root</li>
+
+          <li>as root, do <kbd>make install</kbd></li>
+
+          <li>as root, do <kbd>ldconfig</kbd><br>
+           <i>this may not be needed on all systems, but better
+          safe than sorry</i></li>
+
+          <li>exit your root shell</li>
+
+          <li>DONE!</li>
+        </ol>
+      </li>
+
+      <li>
+        Leafnode uses GNU autoconf to determine the configuration
+        of the machine it will be compiled on. It also uses GNU
+        automake for all the standard features that GNU automake
+        offers. Type (AS NORMAL USER, NOT AS root!) 
 <pre>
          /bin/sh ./configure
 </pre>
-to create an appropriate Makefile and config.h. If leafnode cannot find your
-PCRE, it is probably an old version without pcre-config, or pcre-config is not
-in your path. Either add the directory containing pcre-config to your $PATH, or
-call configure like this (we assume PCRE is in /opt/pcre-3.9):
-
+        to create an appropriate Makefile and config.h. If leafnode
+        cannot find your PCRE, it is probably an old version
+        without pcre-config, or pcre-config is not in your path.
+        Either add the directory containing pcre-config to your
+        $PATH, or call configure like this (we assume PCRE is in
+        /opt/pcre-3.9): 
 <pre>
          env CPPFLAGS="-I/opt/pcre-3.9" LDFLAGS="-L/opt/pcre-3.9" /bin/sh ./configure
 </pre>
+        NOTE: on some machines, when PCRE is linked against a
+        shared library, you will need to add /opt/pcre-3.9 to
+        LD_LIBRARY_PATH or to /etc/ld.so.conf. 
 
-NOTE: on some machines, when PCRE is linked against a shared library, you will need
-to add /opt/pcre-3.9 to LD_LIBRARY_PATH or to /etc/ld.so.conf.
-
-<P>The configure script can take some flags (replace DIR by a directory name,
-FILE by a file name):
+        <p>The configure script can take some flags (replace DIR by
+        a directory name, FILE by a file name):</p>
 <pre>
---spooldir=DIR		  To override the default /var/spool/news,
-			  where leafnode puts its news spool.
+--spooldir=DIR            To override the default /var/spool/news,
+                          where leafnode puts its news spool.
 
---lockfile=FILE		  To override the default /var/run/news/fetchnews.lock,
-			  where leafnode puts its lock file.
+--lockfile=FILE           To override the default /var/run/news/fetchnews.lock,
+                          where leafnode puts its lock file.
 
---prefix=DIR		  Leafnode installs itself normally in the /usr/local/sbin
-			  directory. If you want to use another directory, use this
-			  flag. For example, if you want to install leafnode in
-			  /usr/sbin, use --prefix=/usr
+--prefix=DIR              Leafnode installs itself normally in the /usr/local/sbin
+                          directory. If you want to use another directory, use this
+                          flag. For example, if you want to install leafnode in
+                          /usr/sbin, use --prefix=/usr
 
 --sysconfdir=DIR          Default path for configuration is /etc when
-			  --prefix is not used or set to /usr, and PREFIX/etc
-			  otherwise.  You can use this to change the config file
-			  location from its default.
-			  IMPORTANT NOTE: leafnode will automatically
-			  append "leafnode" to the sysconfdir, so if you
-			  want your configuration in
-			  /etc/news/leafnode/, use --sysconfdir=/etc/news
+                          --prefix is not used or set to /usr, and PREFIX/etc
+                          otherwise.  You can use this to change the config file
+                          location from its default.
+                          IMPORTANT NOTE: leafnode will automatically
+                          append "leafnode" to the sysconfdir, so if you
+                          want your configuration in
+                          /etc/news/leafnode/, use --sysconfdir=/etc/news
 
 --with-dmalloc            Lets leafnode include dmalloc header files and link
-			  against libdmalloc. Only useful for debugging, not
-			  needed for normal operation. This option requires
-			  dmalloc, available from http://dmalloc.com/.
+                          against libdmalloc. Only useful for debugging, not
+                          needed for normal operation. This option requires
+                          dmalloc, available from http://dmalloc.com/.
 
 --with-runas-user=USER    Lets leafnode run as user USER, defaults to "news".
 </pre>
+        <strong>BEWARE:</strong> Former versions always defaulted
+        their sysconfdir to /etc/leafnode. Current versions only
+        override sysconfdir to /etc/leafnode if configured without
+        --prefix or with --prefix=/usr. That way, if
+        --prefix=/opt/leafnode, the sysconfdir goes to
+        /opt/leafnode/etc, which is more appropriate.
+      </li>
 
-<strong>BEWARE:</strong> Former versions always defaulted their sysconfdir to
-/etc/leafnode. Current versions only override sysconfdir to /etc/leafnode if
-configured without --prefix or with --prefix=/usr. That way, if
---prefix=/opt/leafnode, the sysconfdir goes to /opt/leafnode/etc, which
-is more appropriate.
-
-<LI>Type
+      <li>
+        Type 
 <pre>
           make
 </pre>
-There should be no errors.
+        There should be no errors.
+      </li>
 
-<LI>Become root.
+      <li>Become root.</li>
 
-<LI>As root, create user and group "news" (or the configured user and group)
-if you don't have those already. 
+      <li>As root, create user and group "news" (or the configured
+      user and group) if you don't have those already.</li>
 
-<LI>Type
+      <li>
+        Type 
 <pre>
           make install
 </pre>
-If you prefer an installation with the binaries stripped free of symbols,
-use
+        If you prefer an installation with the binaries stripped
+        free of symbols, use 
 <pre>
-	  make install-strip
+          make install-strip
 </pre>
-instead.
+        instead.<br>
+         <i>For packagers: if you want to prefix all installation
+        paths with a common prefix, e. g. to support RPM's
+        BuildRoot feature: You can use <kbd>make install-strip
+        DESTDIR=/var/tmp/leafnode-root</kbd>.</i>
+      </li>
 
-<br><I>For packagers: if you want to prefix all installation paths with a common
-prefix, e. g. to support RPM's BuildRoot feature: You can use
-<KBD>make install-strip DESTDIR=/var/tmp/leafnode-root</KBD>.</I>
+      <li>
+        Configure syslog so it captures news logging, most systems
+        do NOT log news stuff by default. 
 
-<LI>If you are updating leafnode from a previous version, see the section
-"Updating" below.
+        <ol>
+          <li>
+            Edit /etc/syslog.conf. Unless you already have
+            news.info logging, add a line like this: 
+<pre>
+news.info               /var/log/news
+</pre>
 
-<LI>Edit $(LIBDIR)/config. $(LIBDIR) defaults to /etc/leafnode, but can be
-adjusted at build time. For documentation, see below or config.example
-and leafnode(8). <strong>Mandatory edits to the config file are:</STRONG>
-<UL>
-<LI>server -- this must point to your upstream news server.
-<LI>expire -- how many days will downloaded articles remain in the spool.
-</UL>
+            <p>Your syslog.conf may already suggest a different
+            file. If your syslog.conf suggests news.info logging,
+            use that, but be sure to activate it in case it's
+            commented out: remove leading hash marks and white
+            space.</p>
 
-Make sure the environment variable $NNTPSERVER
-or /etc/nntpserver points to your own host so clients will talk to
-leafnode rather than try to go to the upstream server.
+            <p>Also make sure you use TABs between news.info and
+            the path.</p>
+          </li>
 
-<p>If you want to use filtering of the incoming spool, see the section on
-the filter file below.
+          <li>Send syslogd a HUP signal. <kbd>kill -1 `cat
+          /var/log/syslogd.pid`</kbd> usually does the job, if it
+          doesn't, retry with "syslogd" replaced by "syslog".</li>
+        </ol>
+      </li>
 
-<LI>Set up a cron job (as user "root" or "news") to run texpire every night
-or maybe every week. Here is my crontab line, which runs nightly:
+      <li>If you are updating leafnode from a previous version, see
+      the section "Updating" below.</li>
+
+      <li>
+        Edit $(LIBDIR)/config. $(LIBDIR) defaults to /etc/leafnode,
+        but can be adjusted at build time. For documentation, see
+        below or config.example and leafnode(8). <strong>Mandatory
+        edits to the config file are:</strong> 
+
+        <ul>
+          <li>server -- this must point to your upstream news
+          server.</li>
+
+          <li>expire -- how many days will downloaded articles
+          remain in the spool.</li>
+        </ul>
+        Make sure the environment variable $NNTPSERVER or
+        /etc/nntpserver points to your own host so clients will
+        talk to leafnode rather than try to go to the upstream
+        server. 
+
+        <p>If you want to use filtering of the incoming spool, see
+        the section on the filter file below.</p>
+      </li>
+
+      <li>
+        Set up a cron job (as user "root" or "news") to run texpire
+        every night or maybe every week. Here is my crontab line,
+        which runs nightly: 
 <pre>
 0 4 * * * /usr/local/sbin/texpire
 </pre>
-I did "crontab -u news -e" as root to edit the crontab file, and added
-this line.  Substituting "1" for the third "*", thus:
+        I did "crontab -u news -e" as root to edit the crontab
+        file, and added this line. Substituting "1" for the third
+        "*", thus: 
 <pre>
 0 4 * * 1 /usr/local/sbin/texpire
 </pre>
-tells cron to run texpire at 4am every Monday morning.
+        tells cron to run texpire at 4am every Monday morning.
+      </li>
 
-<LI>Make sure fetchnews is run at the appropriate time. If you have a
-full-time link, run it out of cron (as "news" again); if not, run it
-when your connection to the net is established. If it is run as root
-it will change to user "news". If you use PPP, you can run fetchnews
-from /etc/ppp/ip-up (or /etc/ppp/ip-up.local, depending on your OS).
+      <li>Make sure fetchnews is run at the appropriate time. If
+      you have a full-time link, run it out of cron (as "news"
+      again); if not, run it when your connection to the net is
+      established. If it is run as root it will change to user
+      "news". If you use PPP, you can run fetchnews from
+      /etc/ppp/ip-up (or /etc/ppp/ip-up.local, depending on your
+      OS).</li>
 
-<LI>We assume that you have tcpd installed, it ships with most
-distributions. If you don't have it, fetch it from
-ftp://ftp.porcupine.org/pub/security/, it's in tcp_wrappers, and install
-it. It's preferable if you compile it with -DHOSTS_OPTIONS, and the
-examples below assume you did.
+      <li>We assume that you have tcpd installed, it ships with
+      most distributions. If you don't have it, fetch it from
+      ftp://ftp.porcupine.org/pub/security/, it's in tcp_wrappers,
+      and install it. It's preferable if you compile it with
+      -DHOSTS_OPTIONS, and the examples below assume you did.</li>
 
-<LI>Choose either of these alternatives:
-<UL>
-<LI>Alternative #1: If your system uses inetd (most commercial unices,
-*BSD). Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
-NNTP connections.  Here is my inetd.conf line:
+      <li>
+        Choose either of these alternatives: 
+
+        <ul>
+          <li>
+            Alternative #1: If your system uses inetd (most
+            commercial unices, *BSD). Edit /etc/inetd.conf so that
+            $(BINDIR)/leafnode is executed for incoming NNTP
+            connections. Here is my inetd.conf line: 
 <pre>
 nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
 </pre>
-
-<I>Note: some systems install tcpd to a different path, but it's
-uncommon. Change the first path accordingly if your tcpd resides in
-/usr/etc or /usr/lbin.</i>
-
-After these changes, force inetd to read the changed configuration file
-by sending it the HANGUP signal. To achieve this, issue the following
-command (as root):
+            <i>Note: some systems install tcpd to a different path,
+            but it's uncommon. Change the first path accordingly if
+            your tcpd resides in /usr/etc or /usr/lbin.</i> After
+            these changes, force inetd to read the changed
+            configuration file by sending it the HANGUP signal. To
+            achieve this, issue the following command (as root): 
 <pre>
 kill -HUP `cat /var/run/inetd.pid`
 </pre>
+          </li>
 
-<LI>Alternative #2: If your system has xinetd instead. Add this to your
-xinetd.conf (this example assumes xinetd 2.3.3 or newer):
-
+          <li>
+            Alternative #2: If your system has xinetd instead. Add
+            this to your xinetd.conf (this example assumes xinetd
+            2.3.3 or newer): 
 <pre>
 service nntp
 {
@@ -297,377 +418,419 @@ service nntp
         per_source      = 3
 }
 </pre>
+            Then send xinetd an USR2 signal to make it reread its
+            configuration. See the <b>xinetd.conf</b>(5) manual
+            page for details. <i>Note: some systems install tcpd to
+            a different path, but it's uncommon. Change the first
+            path accordingly if your tcpd resides in /usr/etc or
+            /usr/lbin.</i>
+          </li>
+        </ul>
+      </li>
 
-Then send xinetd an USR2 signal to make it reread its configuration. See
-the <B>xinetd.conf</B>(5) manual page for details.
-
-<I>Note: some systems install tcpd to a different path, but it's
-uncommon. Change the first path accordingly if your tcpd resides in
-/usr/etc or /usr/lbin.</i>
-
-</UL>
-<LI>Write the following into /etc/hosts.deny:
+      <li>
+        Write the following into /etc/hosts.deny: 
 <pre>
 leafnode: ALL
 </pre>
-and into /etc/hosts.allow:
+        and into /etc/hosts.allow: 
 <pre>
 leafnode: 127.0.0.1
 </pre>
-to protect your news server from abuse. If you want to make leafnode
-accessible to additional IP numbers/domains, add them in /etc/hosts.allow
-in the format described above. See hosts_access(5) and hosts_options(5)
-(if applicable) for more information about tcp wrappers.
+        to protect your news server from abuse. If you want to make
+        leafnode accessible to additional IP numbers/domains, add
+        them in /etc/hosts.allow in the format described above. See
+        hosts_access(5) and hosts_options(5) (if applicable) for
+        more information about tcp wrappers.
+      </li>
 
-<LI><I>(optional)</I>
-If you want to allow read-only access, you can set the NOPOSTING
-environment variable, for example, put this into /etc/hosts.allow:
-
+      <li>
+        <i>(optional)</i> If you want to allow read-only access,
+        you can set the NOPOSTING environment variable, for
+        example, put this into /etc/hosts.allow: 
 <pre>
 leafnode: 192.168.0.4: setenv NOPOSTING "You may only read."
 </pre>
+        The contents of this variable are printed at the end of the
+        banner, with control characters (as per iscntrl(3))
+        replaced by an underscore.
+      </li>
 
-The contents of this variable are printed at the end of the banner, with
-control characters (as per iscntrl(3)) replaced by an underscore.
-
-<LI><I>(optional)</I>
-If you want to allow clients read access to local or global subscribed
-groups, but do not want to allow them to subscribe to new groups, you can
-set the NOSUBSCRIBE environment variable. When this variable is set, a
-client will never see a pseudo article. For example, if clients from
-127.0.0.1 and 192.168.0.42 may subscribe new groups, and all other
-192.168.0.* hosts may read the existing groups but not subscribe to new
-groups, put this into /etc/hosts.allow (this assumes libwrap/tcpd
-have been compiled with -DPROCESS_OPTIONS):
-
+      <li>
+        <i>(optional)</i> If you want to allow clients read access
+        to local or global subscribed groups, but do not want to
+        allow them to subscribe to new groups, you can set the
+        NOSUBSCRIBE environment variable. When this variable is
+        set, a client will never see a pseudo article. For example,
+        if clients from 127.0.0.1 and 192.168.0.42 may subscribe
+        new groups, and all other 192.168.0.* hosts may read the
+        existing groups but not subscribe to new groups, put this
+        into /etc/hosts.allow (this assumes libwrap/tcpd have been
+        compiled with -DPROCESS_OPTIONS): 
 <pre>
 leafnode: 127.0.0.1 192.168.0.42: ALLOW
 leafnode: 192.168.0.0/24: setenv NOSUBSCRIBE 1
 leafnode: ALL: DENY
 </pre>
+      </li>
 
-<LI>Run fetchnews. The first run will take some time since fetchnews reads
-a list of all newsgroups from your upstream server. In the worst case,
-this can take up to 60 minutes, depending on how many newsgroups your
-provider offers and how reliable your modem connection is. To see
-fetchnews working, run it with -vvv.
+      <li>Run fetchnews. The first run will take some time since
+      fetchnews reads a list of all newsgroups from your upstream
+      server. In the worst case, this can take up to 60 minutes,
+      depending on how many newsgroups your provider offers and how
+      reliable your modem connection is. To see fetchnews working,
+      run it with -vvv.</li>
 
-<LI>Run texpire. It will create directories missing after the first install.
+      <li>Run texpire. It will create directories missing after the
+      first install.</li>
 
-<LI>Exit your root shell.
+      <li>Exit your root shell.</li>
 
-<LI>Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
-pointing to your own host). Select the groups you want to read in
-the future. You will find them empty except a default article.
-Reading this article is necessary with some newsreaders to select
-the groups for further fetching.
+      <li>
+        Read news using an NNTP client (with $NNTPSERVER or
+        /etc/nntpserver pointing to your own host). Select the
+        groups you want to read in the future. You will find them
+        empty except a default article. Reading this article is
+        necessary with some newsreaders to select the groups for
+        further fetching. 
 
-<p>After this, you should have empty files in
-/var/spool/news/interesting.groups/ for every group you want to read.
+        <p>After this, you should have empty files in
+        /var/spool/news/interesting.groups/ for every group you
+        want to read.</p>
+      </li>
 
-<LI>Become root and run fetchnews again, then exit your root shell.
-This run should pick up all the groups you want to read.
-</OL>
+      <li>Become root and run fetchnews again, then exit your root
+      shell. This run should pick up all the groups you want to
+      read.</li>
+    </ol>
+    <hr>
 
-<hr>
+    <h3 class="c2">3. UPDATE FROM PREVIOUS VERSIONS</h3>
 
-<h3 align=center>3. UPDATE FROM PREVIOUS VERSIONS</h3>
+    <h3 class="c2">3.1 Update from versions &lt; 2.0b8_ma8</h3>
 
-<h3 align=center>3.1 Update from versions &lt; 2.0b8_ma8</h3>
+    <p>The local.groups and groupinfo files and the hash function
+    for message.id have changed from any former version to
+    2.0b8_ma8.</p>
 
-<p>The local.groups and groupinfo files and the hash function for message.id
-have changed from any former version to 2.0b8_ma8.
+    <p><strong>IMPORTANT:</strong>To fix the "remote" groups, run
+    <kbd>fetchnews -f</kbd> -- it will take some time, because if
+    refetches the whole active file, but that's needed anyhow to
+    figure the group status (posting allowed/not allowed/moderated
+    group).</p>
 
-<P><STRONG>IMPORTANT:</STRONG>To fix the "remote" groups, run <KBD>fetchnews
--f</KBD> -- it will take some time, because if refetches the whole
-active file, but that's needed anyhow to figure the group status
-(posting allowed/not allowed/moderated group).
-
-<p>To fix <strong>local.groups</strong>, if you have perl installed:
-
-<PRE>
+    <p>To fix <strong>local.groups</strong>, if you have perl
+    installed:</p>
+<pre>
   perl -ple 's /\s+/\ty\t/' -i.bak /etc/leafnode/local.groups
-</PRE>
+</pre>
+    This will make a backup of your original
+    /etc/leafnode/local.groups in /etc/leafnode/local.groups.bak. 
 
-This will make a backup of your original /etc/leafnode/local.groups in
-/etc/leafnode/local.groups.bak.
+    <p>If you don't have Perl, use a text editor that preserves
+    HTAB characters, change all while space to TAB and insert an
+    additional field reading just y:</p>
 
-<p>If you don't have Perl, use a text editor that preserves HTAB
-characters, change all while space to TAB and insert an additional field
-reading just y:
+    <blockquote>
+      Before: local.test some test group<br>
+       After: local.testTAByTABsome test group
+    </blockquote>
+    <br>
+     Use the real TAB character rather than TAB. <br>
+     To fix the spool for message.ids, run <kbd>texpire -r</kbd>
+    <br>
+     The changes written in section 3.2 below also apply. 
 
-<blockquote>
-Before: local.test some test group
-<br>After:  local.testTAByTABsome test group
-</blockquote>
+    <h3 class="c2">3.2 Update from versions &lt; 2.0</h3>
 
-<br>Use the real TAB character rather than TAB.
+    <p>From 1.9.x to 2.0 there were some changes to options in the
+    main configuration file. The options "maxage", "maxlines",
+    "minlines", "maxbytes" and "maxcrosspost" have become obsolete
+    in the main configuration file and have to be specified in the
+    filter file instead. The advantage of this is that you can do
+    much finer selection on these criteria now.</p>
 
-<br>To fix the spool for message.ids, run <kbd>texpire -r</kbd>
-
-<br>The changes written in section 3.2 below also apply.
-
-<h3 align=center>3.2 Update from versions &lt; 2.0</h3>
-
-<p>From 1.9.x to 2.0 there were some changes to options in the main
-configuration file. The options "maxage", "maxlines", "minlines",
-"maxbytes" and "maxcrosspost" have become obsolete in the main
-configuration file and have to be specified in the filter file
-instead. The advantage of this is that you can do much finer
-selection on these criteria now.
-
-<p>To replace, for example, a "maxage = 5" specification in the
-main configuration file, you should add the following to your
-filter file:
-
+    <p>To replace, for example, a "maxage = 5" specification in the
+    main configuration file, you should add the following to your
+    filter file:</p>
 <pre>
 newsgroups = *
 maxage = 5
 action = kill
 </pre>
 
-<p>The leafnode programs will issue warnings if they encounter
-obsolete specifications in the main config file.
+    <p>The leafnode programs will issue warnings if they encounter
+    obsolete specifications in the main config file.</p>
 
-<h3 align=center>3.3 Update from versions &lt; 1.9.3</h3>
+    <h3 class="c2">3.3 Update from versions &lt; 1.9.3</h3>
 
-<p>
-From version 1.9.3 on, the groupinfo file is sorted in a case-insensitive
-manner. To update correctly, do a "make update" as root after you have
-successfully completed "make install". This will re-sort the groupinfo
-file. The old groupinfo file will be stored as groupinfo.old just in
-case something goes wrong. You also have to change your main config
-file manually as described in the last section.
+    <p>From version 1.9.3 on, the groupinfo file is sorted in a
+    case-insensitive manner. To update correctly, do a "make
+    update" as root after you have successfully completed "make
+    install". This will re-sort the groupinfo file. The old
+    groupinfo file will be stored as groupinfo.old just in case
+    something goes wrong. You also have to change your main config
+    file manually as described in the last section.</p>
 
-<h3 align=center>3.4 Update from versions &lt; 1.6</h3>
+    <h3 class="c2">3.4 Update from versions &lt; 1.6</h3>
 
-<p>
-Between leafnode-1.6alpha and leafnode-1.6, the format of the groupinfo
-file changed and some files moved to other places. To update correctly,
-do a "make update" as root after you have successfully completed
-"make install". This will reformat the groupinfo file and move the
-other files into the correct places. The old groupinfo file will be
-stored as groupinfo.old just in case something goes wrong. You also
-have to change your main config file manually as described in the
-section "Update from versions &lt; 2.0".
+    <p>Between leafnode-1.6alpha and leafnode-1.6, the format of
+    the groupinfo file changed and some files moved to other
+    places. To update correctly, do a "make update" as root after
+    you have successfully completed "make install". This will
+    reformat the groupinfo file and move the other files into the
+    correct places. The old groupinfo file will be stored as
+    groupinfo.old just in case something goes wrong. You also have
+    to change your main config file manually as described in the
+    section "Update from versions &lt; 2.0".</p>
+    <hr>
 
-<hr>
+    <h3 class="c2">4. FILES AND DIRECTORIES</h3>
 
-<h3 align=center>4. FILES AND DIRECTORIES</h3>
+    <p>Leafnode puts its files in three separate directories: The
+    spool directory, the library directory, and the binaries
+    directory. All directories can be changed at compile time.</p>
 
-<p>
-Leafnode puts its files in three separate directories: The spool
-directory, the library directory, and the binaries directory. All
-directories can be changed at compile time.
+    <p>In the spool directory you find the stored news, the active
+    file and some other short-lived configuration file. It defaults
+    to /var/spool/news and can be changed at compilation time.
+    There are some special directories here; see the leafnode(8)
+    man page.</p>
 
-<p>
-In the spool directory you find the stored news, the active file and
-some other short-lived configuration file. It defaults to /var/spool/news
-and can be changed at compilation time. There are some special
-directories here; see the leafnode(8) man page.
+    <p>The library directory contains long-lived configuration
+    files. It defaults to /etc/leafnode.</p>
 
-<p>
-The library directory contains long-lived configuration files. It
-defaults to /etc/leafnode.
+    <p>The binaries directory, /usr/local/sbin by default, contains
+    the executable programs applyfilter, texpire, fetchnews and
+    leafnode.</p>
 
-<p>
-The binaries directory, /usr/local/sbin by default, contains the
-executable programs applyfilter, texpire, fetchnews and leafnode.
+    <p>The user directory, /usr/local/bin by default, contains the
+    newsq program.</p>
 
-<p>
-The user directory, /usr/local/bin by default, contains the newsq
-program.
+    <h3 class="c2">4.1. The main configuration file</h3>
 
-<h3 align=center>4.1. The main configuration file</h3>
+    <p>The main configuration file contains settings important for
+    all programs of the leafnode suite. It defaults to
+    /etc/leafnode/config, but several configuration files can be
+    used at once by employing the -F switch of the programs.</p>
 
-<p>
-The main configuration file contains settings important for all
-programs of the leafnode suite. It defaults to /etc/leafnode/config,
-but several configuration files can be used at once by employing
-the -F switch of the programs.
+    <p>The file contains two mandatory and a number of optional
+    parameters.</p>
 
-<p>The file contains two mandatory and a number of optional parameters.
+    <p>NOTE: Global options must come first, server-specific
+    options below the server = lines.</p>
 
-<p>NOTE: Global options must come first, server-specific options below the
-server = lines.
+    <p class="c4">Mandatory parameters</p>
 
-<p><b>Mandatory parameters</b>
+    <blockquote>
+      server = news02.bigprovider.com
+    </blockquote>
+    You have to specify at least one server (except if you want
+    leafnode to serve as a local server only). Usually, this will
+    be the news server of your provider. You can specify more than
+    one server, and fetchnews will retrieve news from all of them,
+    taking care not to transfer articles multiple times to your
+    machine. Servers will be queried in the order specified in the
+    config file. 
 
-<p>
-<blockquote>server = news02.bigprovider.com</blockquote>
-You have to specify at least one server (except if you want leafnode
-to serve as a local server only). Usually, this will be the news
-server of your provider. You can specify more than one server, and
-fetchnews will retrieve news from all of them, taking care not to
-transfer articles multiple times to your machine. Servers will be
-queried in the order specified in the config file.
+    <blockquote>
+      expire = 5
+    </blockquote>
+    This parameter determines how many days threads are kept on
+    your hard disk. texpire will delete whole threads, not just
+    single articles. 
 
-<p>
-<blockquote>expire = 5</blockquote>
-This parameter determines how many days threads are kept on your
-hard disk. texpire will delete whole threads, not just single
-articles.
+    <p class="c4">Server-specific optional parameters</p>
 
-<p><b>Server-specific optional parameters</b>
+    <p>To configure interaction with the server somewhat, you can
+    change the behaviour of fetchnews by setting several
+    server-specific optional parameters. They have to be specified
+    directly after the corresponding "server" statement. A new
+    server statement in the config file will also allow new
+    optional parameters.</p>
 
-<p>
-To configure interaction with the server somewhat, you can change
-the behaviour of fetchnews by setting several server-specific
-optional parameters. They have to be specified directly after
-the corresponding "server" statement. A new server statement in
-the config file will also allow new optional parameters.
+    <blockquote>
+      username = myname<br>
+       password = mypasswd
+    </blockquote>
+    If your upstream server requires a form of authentication, you
+    can set your username and password here. 
 
-<p>
-<blockquote>username = myname<br>
-password = mypasswd</blockquote>
-If your upstream server requires a form of authentication, you
-can set your username and password here.
+    <blockquote>
+      timeout = 30
+    </blockquote>
+    It may happen that, due to a bad connection or other reasons,
+    the server stops talking to you while you fetch news. The
+    "timeout" parameter determines the number of seconds fetchnews
+    is supposed to wait for a response from the server before
+    giving up. 
 
-<p>
-<blockquote>timeout = 30</blockquote>
-It may happen that, due to a bad connection or other reasons,
-the server stops talking to you while you fetch news. The
-"timeout" parameter determines the number of seconds fetchnews
-is supposed to wait for a response from the server before
-giving up.
+    <blockquote>
+      nodesc = 1
+    </blockquote>
+    Some servers are unable to deliver descriptions of new
+    newsgroups correctly. When fetchnews encounters such a server,
+    it will print the warning 
 
-<p>
-<blockquote>nodesc = 1</blockquote>
-Some servers are unable to deliver descriptions of new newsgroups
-correctly. When fetchnews encounters such a server, it will print
-the warning
-<blockquote>
-server.name does not process LIST NEWSGROUPS news.group.name
-correctly: use nodesc
-</blockquote>
-To allow for shorter download times, you should in this case set
-"nodesc = 1" for that particular server in the configuration file.
+    <blockquote>
+      server.name does not process LIST NEWSGROUPS news.group.name
+      correctly: use nodesc
+    </blockquote>
+    To allow for shorter download times, you should in this case
+    set "nodesc = 1" for that particular server in the
+    configuration file. 
 
-<p>
-<blockquote>port = 8000</blockquote>
-Normally, fetchnews will try to retrieve news from port 119 (the
-standard nntp port) of your upstream server. If the upstream server
-runs on a different port, you can specify it with this option.
+    <blockquote>
+      port = 8000
+    </blockquote>
+    Normally, fetchnews will try to retrieve news from port 119
+    (the standard nntp port) of your upstream server. If the
+    upstream server runs on a different port, you can specify it
+    with this option. 
 
-<p><b>General optional parameters</b>
+    <p class="c4">General optional parameters</p>
 
-<p>
-<blockquote>authenticate = <i>METHOD</i></blockquote>
-Require that NNTP clients connecting to your leafnode authenticate themselves.
-The only method currently
-supported is <tt>internal</tt>. In this mode, leafnode expects a file
-<i>users</i> in its sysconfdir, /etc/leafnode/users by default, which has a
-simple format, one line per user, with the user name (which cannot contain
-spaces), then a colon, then the crypt(3) encrypted password. To
-generate these lines, you can use the Perl program <i>tools/make_pass.pl</i>,
-for example, if you want to add a user "enigma" with a password of "break!me",
-type:
-<blockquote>perl -wT tools/make_pass.pl 'enigma' 'break!me'</blockquote> 
-and copy the
-resulting line to the <i>users</i> file.<br>htpasswd as
-shipped for Apache servers should also work if in crypt(3) mode.
+    <blockquote>
+      authenticate = <i>METHOD</i>
+    </blockquote>
+    Require that NNTP clients connecting to your leafnode
+    authenticate themselves. The only method currently supported is
+    <tt>internal</tt>. In this mode, leafnode expects a file
+    <i>users</i> in its sysconfdir, /etc/leafnode/users by default,
+    which has a simple format, one line per user, with the user
+    name (which cannot contain spaces), then a colon, then the
+    crypt(3) encrypted password. To generate these lines, you can
+    use the Perl program <i>tools/make_pass.pl</i>, for example, if
+    you want to add a user "enigma" with a password of "break!me",
+    type: 
 
-<p>
-<blockquote>hostname = host.domain.country</blockquote>
-If the postings that you write do not have message IDs (generated
-by the newsreader), leafnode will generate a message ID for you.
-(It will never overwrite an already existing message ID.) Message
-IDs generated by leafnode feature ".ln" before the @ sign. The
-message ID contains the fully qualified hostname of your machine
-which may not always be what you want. In that case, you can
-override the use of the hostname by using the "hostname" option.
+    <blockquote>
+      perl -wT tools/make_pass.pl 'enigma' 'break!me'
+    </blockquote>
+    and copy the resulting line to the <i>users</i> file.<br>
+     htpasswd as shipped for Apache servers should also work if in
+    crypt(3) mode. 
 
-<p>
-<blockquote>create_all_links = 1</blockquote>
-Usually fetchnews will store articles only in the newsgroups which
-you consider interesting. Unfortunately, this makes it difficult
-to score for the number of newsgroups a message is posted to because
-the Newsgroups: header is not featured in the overview information;
-therefore you can determine the number of newsgroups an article
-is crossposted to only from the Xref: header. If "create_all_links"
-is set to 1, fetchnews will store articles in all newsgroups which
-they are posted to, making all these newsgroups turn up in the
-Xref: header.
+    <blockquote>
+      hostname = host.domain.country
+    </blockquote>
+    If the postings that you write do not have message IDs
+    (generated by the newsreader), leafnode will generate a message
+    ID for you. (It will never overwrite an already existing
+    message ID.) Message IDs generated by leafnode feature ".ln"
+    before the @ sign. The message ID contains the fully qualified
+    hostname of your machine which may not always be what you want.
+    In that case, you can override the use of the hostname by using
+    the "hostname" option. 
 
-<p>
-<blockquote>groupexpire = a.news.group 7</blockquote>
-As outlined above, texpire will expire threads after "expire" days.
-If you want to adjust expiry times for certain groups, you may use
-the "groupexpire" parameter to do just that. You can specify groups
-or use wildcards; for example
-<blockquote>groupexpire = *.announce 30</blockquote>
-will affect expiry times of all groups ending with ".announce".
+    <blockquote>
+      create_all_links = 1
+    </blockquote>
+    Usually fetchnews will store articles only in the newsgroups
+    which you consider interesting. Unfortunately, this makes it
+    difficult to score for the number of newsgroups a message is
+    posted to because the Newsgroups: header is not featured in the
+    overview information; therefore you can determine the number of
+    newsgroups an article is crossposted to only from the Xref:
+    header. If "create_all_links" is set to 1, fetchnews will store
+    articles in all newsgroups which they are posted to, making all
+    these newsgroups turn up in the Xref: header. 
 
-<p>
-<blockquote>filterfile = /etc/leafnode/filters</blockquote>
-If you want to employ filtering on incoming messages, you have to
-specify the path where the filterfile can be found. The format of
-the filterfile is described in the next chapter.
+    <blockquote>
+      groupexpire = a.news.group 7
+    </blockquote>
+    As outlined above, texpire will expire threads after "expire"
+    days. If you want to adjust expiry times for certain groups,
+    you may use the "groupexpire" parameter to do just that. You
+    can specify groups or use wildcards; for example 
 
-<p>
-<blockquote>timeout_short = 2<br>
-timeout_long = 5</blockquote>
-These two parameters determine how quickly a group is unsubscribed
-by leafnode after you have stopped reading it. If you have looked
-into the group only once, subscription is stopped after "timeout_short"
-days; if you have read it more regularly, subscription is stopped
-after "timeout_long" days. (You can stop subscription immediately
-by removing the corresponding file in /var/spool/news/interesting.groups/).
+    <blockquote>
+      groupexpire = *.announce 30
+    </blockquote>
+    will affect expiry times of all groups ending with ".announce".
+    
 
-<p>
-<blockquote>timeout_active = 90</blockquote>
-By default, fetchnews will re-read active files from the upstream
-server every 90 days. This interval can be changed by setting
-"timeout_active" to a different value. Re-reading the active file
-frequently will keep it a little bit smaller but will increase
-the on-line time.
+    <blockquote>
+      filterfile = /etc/leafnode/filters
+    </blockquote>
+    If you want to employ filtering on incoming messages, you have
+    to specify the path where the filterfile can be found. The
+    format of the filterfile is described in the next chapter. 
 
-<p>
-<blockquote>delaybody = 1</blockquote>
-This option switches fetchnews into a mode where only the headers
-of articles are fetched for visual inspection. Only the articles
-read in the newsreader will be retrieved the next time fetchnews
-is called. This can save a huge amount of disk space and download
-time but requires more manual intervention on the user side.
+    <blockquote>
+      timeout_short = 2<br>
+       timeout_long = 5
+    </blockquote>
+    These two parameters determine how quickly a group is
+    unsubscribed by leafnode after you have stopped reading it. If
+    you have looked into the group only once, subscription is
+    stopped after "timeout_short" days; if you have read it more
+    regularly, subscription is stopped after "timeout_long" days.
+    (You can stop subscription immediately by removing the
+    corresponding file in /var/spool/news/interesting.groups/). 
 
-<p>
-<blockquote>groupdelaybody = some.news.group</blockquote>
-If you want delaybody mode only for selected groups, you can enable
-this download mode for one specific group.  The global delaybody
-switch above causes all groups to be treated that way.  Use one line
-per group pattern.
+    <blockquote>
+      timeout_active = 90
+    </blockquote>
+    By default, fetchnews will re-read active files from the
+    upstream server every 90 days. This interval can be changed by
+    setting "timeout_active" to a different value. Re-reading the
+    active file frequently will keep it a little bit smaller but
+    will increase the on-line time. 
 
-<p>
-<blockquote>debugmode = 260</blockquote>
-This option forces the leafnode programs into logging lots of
-information via the syslog daemon. It is only useful if you
-want to hunt down bugs. See config.example for an explanation of the number here.
+    <blockquote>
+      delaybody = 1
+    </blockquote>
+    This option switches fetchnews into a mode where only the
+    headers of articles are fetched for visual inspection. Only the
+    articles read in the newsreader will be retrieved the next time
+    fetchnews is called. This can save a huge amount of disk space
+    and download time but requires more manual intervention on the
+    user side. 
 
-<h3 align=center>4.2. The filter file</h3>
+    <blockquote>
+      groupdelaybody = some.news.group
+    </blockquote>
+    If you want delaybody mode only for selected groups, you can
+    enable this download mode for one specific group. The global
+    delaybody switch above causes all groups to be treated that
+    way. Use one line per group pattern. 
 
-<p>The filter file format is currently described in fetchnews(5). Type man 5
-filterfile or man -s 5 filterfile to see the description.
+    <blockquote>
+      debugmode = 260
+    </blockquote>
+    This option forces the leafnode programs into logging lots of
+    information via the syslog daemon. It is only useful if you
+    want to hunt down bugs. See config.example for an explanation
+    of the number here. 
 
-<HR>
-<h3 align=center>5. LOCAL NEWSGROUPS</h3>
+    <h3 class="c2">4.2. The filter file</h3>
 
-<p>From version 2.0 on, Leafnode is able to handle local newsgroups.
-Local newsgroups are groups that exist only on your local server but not
-on upstream servers.
+    <p>The filter file format is currently described in
+    fetchnews(5). Type man 5 filterfile or man -s 5 filterfile to
+    see the description.</p>
+    <hr>
 
-<p>To create a local newsgroup, you have to think of a newsgroup name
-which should not exist on any of your upstream servers. It is therefore
-a good idea to start a new top-level hierarchy. You should also make up
-a description for your newsgroup.
+    <h3 class="c2">5. LOCAL NEWSGROUPS</h3>
 
-<p>If you choose a newsgroup name which exists already on an upstream
-server, the newsgroup is not treated as a local one.
+    <p>From version 2.0 on, Leafnode is able to handle local
+    newsgroups. Local newsgroups are groups that exist only on your
+    local server but not on upstream servers.</p>
 
-<p>Next, you write the name, status and description into the file
-/etc/leafnode/local.groups using your preferred text editor, which must
-not mangle TABs to SPACEs.
-The file should consist of lines in the format
+    <p>To create a local newsgroup, you have to think of a
+    newsgroup name which should not exist on any of your upstream
+    servers. It is therefore a good idea to start a new top-level
+    hierarchy. You should also make up a description for your
+    newsgroup.</p>
 
+    <p>If you choose a newsgroup name which exists already on an
+    upstream server, the newsgroup is not treated as a local
+    one.</p>
+
+    <p>Next, you write the name, status and description into the
+    file /etc/leafnode/local.groups using your preferred text
+    editor, which must not mangle TABs to SPACEs. The file should
+    consist of lines in the format</p>
 <pre>
 # Comment lines are allowed, with a hash at the beginning of a line.
 #
@@ -675,59 +838,61 @@ The file should consist of lines in the format
 # are not valid.
 news.group.name&lt;TAB&gt;status&lt;TAB&gt;description
 </pre>
-(replace &lt;TAB&gt; with a TAB character!)
+    (replace &lt;TAB&gt; with a TAB character!) 
 
-<p>The first column of each line is taken as the newsgroup name; the
-second as the status (y for "may be posted to", m for "moderated" -- see
-below for moderator configuration), the third column of the line is
-interpreted as description. For example, to set up a newsgroup
-"local.leafnode" which deals with Leafnode's internals, you would put a
-line
+    <p>The first column of each line is taken as the newsgroup
+    name; the second as the status (y for "may be posted to", m for
+    "moderated" -- see below for moderator configuration), the
+    third column of the line is interpreted as description. For
+    example, to set up a newsgroup "local.leafnode" which deals
+    with Leafnode's internals, you would put a line</p>
 
-<blockquote>
-local.leafnode&lt;TAB&gt;y&lt;TAB&gt;Local leafnode user group
-</blockquote>
+    <blockquote>
+      local.leafnode&lt;TAB&gt;y&lt;TAB&gt;Local leafnode user
+      group
+    </blockquote>
+    into /etc/leafnode/local.groups. (If your configuration does
+    not reside in /etc/leafnode, replace this part of the pathname
+    with the appropriate directory.) 
 
-into /etc/leafnode/local.groups. (If your configuration does not reside
-in /etc/leafnode, replace this part of the pathname with the appropriate
-directory.)
+    <h4 class="c5">5.1 MODERATED NEWSGROUPS</h4>
 
-<h4 align=center>5.1 MODERATED NEWSGROUPS</h4>
+    <p>From version 2.0 on, Leafnode also handles
+    <strong>moderated</strong> newsgroups. These are newsgroups
+    which only certain people may post into, and articles which a
+    regular (non-moderator) user posts, are mailed to the
+    moderator.</p>
 
-<P>From version 2.0 on, Leafnode also handles <strong>moderated</strong>
-newsgroups. These are newsgroups which only certain people may post
-into, and articles which a regular (non-moderator) user posts, are
-mailed to the moderator. 
+    <p>External moderated newsgroups are handled by the upstream
+    servers.</p>
 
-<P>External moderated newsgroups are handled by the upstream servers.
-
-<P>To configure the moderators for <strong>local</strong> moderated
-groups, an INN-compatible "moderators" file is used. It is named
-/etc/leafnode/moderators and has the following format:
-
-<PRE>
+    <p>To configure the moderators for <strong>local</strong>
+    moderated groups, an INN-compatible "moderators" file is used.
+    It is named /etc/leafnode/moderators and has the following
+    format:</p>
+<pre>
 pattern:moderator
-</PRE>
+</pre>
 
-<p>Empty lines and lines that start with a hash character (#) are
-considered comment lines and are ignored.
+    <p>Empty lines and lines that start with a hash character (#)
+    are considered comment lines and are ignored.</p>
 
-<p>The <strong>pattern</strong> is a normal wildmat pattern, which means
-that it's a SHELL pattern, the most useful character is the asterisk (*)
-which matches any sequence of characters. The moderator given on that
-line applies to all groups that the pattern matches. Should multiple
-lines match a group, the first match in the file "wins", the second and
-subsequent patterns are not taken into account. So put the more special
-patterns first.
+    <p>The <strong>pattern</strong> is a normal wildmat pattern,
+    which means that it's a SHELL pattern, the most useful
+    character is the asterisk (*) which matches any sequence of
+    characters. The moderator given on that line applies to all
+    groups that the pattern matches. Should multiple lines match a
+    group, the first match in the file "wins", the second and
+    subsequent patterns are not taken into account. So put the more
+    special patterns first.</p>
 
-<p>The <strong>moderator</strong> is a regular internet mail address,
-with the exception that the first occurrence of "%s" is replaced with
-the newsgroup name, with dots (.) converted to dashes (-) for INN
-compatibility.
+    <p>The <strong>moderator</strong> is a regular internet mail
+    address, with the exception that the first occurrence of "%s"
+    is replaced with the newsgroup name, with dots (.) converted to
+    dashes (-) for INN compatibility.</p>
 
-<p>Example:
-
-<PRE>
+    <p>Example:</p>
+<pre>
 # This is a comment line
 #
 # special moderator, hans@example.com is mailed all articles for
@@ -741,132 +906,148 @@ local.*:egon+%s@example.net
 #
 # Note: if you put local.special below local.*, local.special will be
 # ignored.
-</PRE>
+</pre>
+    <hr>
 
-<hr>
+    <h3 class="c2">6. DEINSTALLATION</h3>
 
-<h3 align=center>6. DEINSTALLATION</h3>
+    <p>If you want to uninstall leafnode (e.g. because you want to
+    replace it with another newsserver) and have a Makefile
+    available, you can achieve this by doing "make uninstall".</p>
 
-<p>
-If you want to uninstall leafnode (e.g. because you want to replace it
-with another newsserver) and have a Makefile available, you can
-achieve this by doing "make uninstall".
+    <p>Do <b>not</b> uninstall an old version of leafnode before
+    updating.</p>
+    <hr>
 
-<p>
-Do <b>not</b> uninstall an old version of leafnode before updating.
+    <h3 class="c2">7. FREQUENTLY ASKED QUESTIONS</h3>
 
-<hr>
+    <p>See the file FAQ.</p>
+    <hr>
 
-<h3 align=center>7. FREQUENTLY ASKED QUESTIONS</h3>
+    <h3 class="c2">8. COPYRIGHT</h3>
 
-<p>
-See the file FAQ.
+    <p>Leafnode versions through 1.4 were written by Arnt
+    Gulbrandsen &lt;agulbra@troll.no&gt; and are copyright 1995
+    Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax
+    +47 22646949.</p>
 
-<hr>
+    <p>Leafnode versions 1.5 up to 1.9.19 and 2.0b1 to 2.0b8 were
+    written by Cornelius Krasel
+    &lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are copyright
+    1997-2001.</p>
 
-<h3 align=center>8. COPYRIGHT</h3>
+    <p>Leafnode versions 1.9.20 and up were written by Matthias
+    Andree &lt;matthias.andree@gmx.de&gt; and Ralf Wildenhues
+    &lt;ralf.wildenhues@gmx.de&gt; and are © copyright 2002 -
+    2003.</p>
 
-<p>Leafnode versions through 1.4 were written by Arnt Gulbrandsen
-&lt;agulbra@troll.no&gt; and are copyright 1995 Troll Tech AS,
-Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
+    <p>Leafnode versions 2.0b8_ma and 2.0.0.* were written by
+    Matthias Andree &lt;matthias.andree@gmx.de&gt;, Ralf Wildenhues
+    &lt;ralf.wildenhues@gmx.de&gt; and Jörg Dietrich
+    &lt;joerg@dietrich.net&gt; and are © copyright 2001 - 2003.</p>
 
-<p>Leafnode versions 1.5 up to 1.9.19 and 2.0b1 to 2.0b8 were written by
-Cornelius Krasel &lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are
-copyright 1997-2001.
+    <p>Major modifications were made by<br>
+     Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
+     Kent Robotti &lt;robotti@erols.com&gt;<br>
+     Markus Enzenberger &lt;enz@cip.physik.uni-muenchen.de&gt;<br>
+     Matthias Andree &lt;matthias.andree@gmx.de&gt;<br>
+     Jörg Dietrich &lt;joerg@dietrich.net&gt;<br>
+     Stefan Wiens &lt;s.wi@gmx.net&gt;<br>
+    </p>
 
-<p>Leafnode versions 1.9.20 and up were written by Matthias Andree
-&lt;matthias.andree@gmx.de&gt; and Ralf Wildenhues
-&lt;ralf.wildenhues@gmx.de&gt; and are &copy; copyright 2002 - 2003.
+    <p>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use,
+    copy, modify, merge, publish, distribute, sublicense, and/or
+    sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following
+    conditions:</p>
 
-<p>Leafnode versions 2.0b8_ma and 2.0.0.* were written by Matthias Andree
-&lt;matthias.andree@gmx.de&gt;, Ralf Wildenhues
-&lt;ralf.wildenhues@gmx.de&gt; and J&ouml;rg Dietrich
-&lt;joerg@dietrich.net&gt; and are &copy; copyright 2001 - 2003.
+    <p>The above copyright notice and this permission notice shall
+    be included in all copies or substantial portions of the
+    Software.</p>
 
-<p>Major modifications were made by<br>
-Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
-Kent Robotti &lt;robotti@erols.com&gt;<br>
-Markus Enzenberger &lt;enz@cip.physik.uni-muenchen.de&gt;<br>
-Matthias Andree &lt;matthias.andree@gmx.de&gt;<br>
-J&ouml;rg Dietrich &lt;joerg@dietrich.net&gt;<br>
-Stefan Wiens &lt;s.wi@gmx.net&gt;<br>
+    <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+    KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+    AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+    OTHER DEALINGS IN THE SOFTWARE.</p>
 
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    <p>The getaline() and getline() routines are Copyright (c)
+    2000-2002 Matthias Andree &lt;matthias.andree@gmx.de&gt;. They
+    are licensed under the GNU Lesser General Public License (GNU
+    LGPL) 2.1. A copy of the LGPL is provided in the file
+    COPYING.</p>
 
-<p>The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+    <p>The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
+    &lt;rsalz@osf.org&gt;. The original copyright notice, taken
+    from INN 2.2.2, follows:</p>
 
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+    <blockquote>
+      Redistribution and use in any form are permitted provided
+      that the following restrictions are met: 
 
-<p>The getaline() and getline() routines are Copyright (c) 2000-2002
-Matthias Andree &lt;matthias.andree@gmx.de&gt;. They are licensed
-under the GNU Lesser General Public License (GNU LGPL) 2.1. A
-copy of the LGPL is provided in the file COPYING.
+      <ol>
+        <li>Source distributions must retain this entire copyright
+        notice and comment.</li>
 
-<p>The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
-&lt;rsalz@osf.org&gt;. The original copyright notice, taken from
-INN 2.2.2, follows:
+        <li>Binary distributions must include the acknowledgement
+        ``This product includes software developed by Rich Salz''
+        in the documentation or other materials provided with the
+        distribution. This must not be represented as an
+        endorsement or promotion without specific prior written
+        permission.</li>
 
-<blockquote>
-Redistribution and use in any form are permitted provided that the
-following restrictions are met:
-<OL>
-<LI>Source distributions must retain this entire copyright notice
-    and comment.
-<LI>Binary distributions must include the acknowledgement ``This
-    product includes software developed by Rich Salz'' in the
-    documentation or other materials provided with the
-    distribution. This must not be represented as an endorsement
-    or promotion without specific prior written permission.
-<LI>The origin of this software must not be misrepresented, either
-    by explicit claim or by omission. Credits must appear in the
-    source and documentation.
-<LI>Altered versions must be plainly marked as such in the source
-    and documentation and must not be misrepresented as being
-    the original software.
-</OL>
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-</blockquote>
+        <li>The origin of this software must not be misrepresented,
+        either by explicit claim or by omission. Credits must
+        appear in the source and documentation.</li>
 
-<p>
-The replacement vsnprintf() function was written by Theo de Raadt and
-is Copyright (c) 1997 under the following restrictions:
+        <li>Altered versions must be plainly marked as such in the
+        source and documentation and must not be misrepresented as
+        being the original software.</li>
+      </ol>
+      THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS
+      OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE
+      IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+      PARTICULAR PURPOSE.
+    </blockquote>
 
-<blockquote>
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-<OL>
-<LI>Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-<LI>Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-</OL>
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-</blockquote>
+    <p>The replacement vsnprintf() function was written by Theo de
+    Raadt and is Copyright (c) 1997 under the following
+    restrictions:</p>
 
-</BODY>
-</HTML>
+    <blockquote>
+      Redistribution and use in source and binary forms, with or
+      without modification, are permitted provided that the
+      following conditions are met: 
+
+      <ol>
+        <li>Redistributions of source code must retain the above
+        copyright notice, this list of conditions and the following
+        disclaimer.</li>
+
+        <li>Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.</li>
+      </ol>
+      THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY
+      EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+      THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+      PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+      AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+      NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+      LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+      HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+      CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+      OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+      SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    </blockquote>
+  </body>
+</html>
+
