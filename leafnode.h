@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.11 2001/12/14 03:42:30 emma Exp $ */
+/* $Id: leafnode.h,v 1.12 2001/12/18 01:16:24 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -347,13 +347,14 @@ extern "C" {
 
     struct serverlist {
 	struct serverlist *next;
-	int port;
-	int usexhdr;		/* use XHDR instead of XOVER if sensible */
-	int descriptions;	/* download descriptions as well */
-	int timeout;		/* timeout in seconds before we give up */
 	char *name;		/* Servername */
 	char *username;
 	char *password;
+	int dontpost;           /* bool: this server is never fed articles */
+	int port;               /* port, if 0, use nntp port */
+	int usexhdr;		/* use XHDR instead of XOVER if sensible */
+	int descriptions;	/* download descriptions as well */
+	int timeout;		/* timeout in seconds before we give up */
 	char active;
     };
 
@@ -562,6 +563,13 @@ extern "C" {
 
 /* mailto.c */
     int mailto(const char *address, int fd);
+
+/* gmtoff.c */
+    time_t gmtoff(void);
+
+/* moderated.c */
+    char *getmoderator(const char *group);
+    char *checkstatus(const char *groups, const char status);
 
 #if 0
 #warning "WARNING: do not disable fsync in production use"
