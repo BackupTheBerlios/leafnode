@@ -19,12 +19,14 @@
 
 #include "leafnode.h"
 
+#include <time.h>
+
+/* for memcpy(3) */
+#include <string.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
-
-#include <time.h>
 
 /** Returns number of seconds the local time zone is ahead (east) of
  * UTC, for the given time. */
@@ -32,10 +34,17 @@ time_t
 gmtoff(const time_t t1)
 {
     time_t t2;
-    struct tm *t;
+    struct tm *t, myt;
 
     t = gmtime(&t1);
-    t2 = mktime(t);
+    if (t != NULL) {
+	memcpy(&myt, t, sizeof(struct tm));
+	myt.tm_isdst = -1;
+	t2 = mktime(&myt);
+    } else {
+	/* must not happen, is a SUSv2 violation */
+	abort();
+    }
 
     return t1 - t2;
 }
