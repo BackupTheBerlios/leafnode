@@ -705,6 +705,8 @@ dogroup(const char *arg, unsigned long *artno)
     if (g) {
 	freexover();
 	xovergroup = NULL;
+	/* If this group is interesting and requested, update the time stamp
+	   so it remains interesting even without articles */
 	if (is_interesting(g->name))
 	    markinterest(g);
 	if (chdirgroup(g->name, FALSE)) {
@@ -723,42 +725,17 @@ dogroup(const char *arg, unsigned long *artno)
 		if ((d = opendir("."))) {
 		    while ((de = readdir(d))) {
 			if (de->d_name[0] != '.') {
-/* UNIX: skip hidden files */
-			    if (!check_allnum(de->d_name)) {
+                            /* UNIX: skip hidden files */
+			    if (check_allnum(de->d_name)) {
 				if (stat(de->d_name, &st)) {
 				    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
 					   "warning: cannot stat bogus file "
 					   "%s in %s: %m", de->d_name, g->name);
 				} else {
-				    if (!S_ISDIR(st.st_mode)) {
-					if (killbogus) {
-					    if (unlink(de->d_name)) {
-						ln_log(LNLOG_SERR,
-						       LNLOG_CGROUP,
-						       "cannot unlink bogus "
-						       "file %s in %s: %m",
-						       de->d_name, g->name);
-					    } else {
-						ln_log(LNLOG_SINFO,
-						       LNLOG_CGROUP,
-						       "unlinked bogus "
-						       "file %s in %s",
-						       de->d_name, g->name);
-					    }
-					} else {
-					    ln_log(LNLOG_SWARNING,
-						   LNLOG_CGROUP,
-						   "warning: "
-						   "bogus file %s in %s",
-						   de->d_name, g->name);
-					}
-
-				    } else {
+				    if (S_ISREG(st.st_mode)) {
 					i++;
 				    }
 				}
-			    } else {
-				i++;
 			    }
 			}
 		    }

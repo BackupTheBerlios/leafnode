@@ -42,7 +42,6 @@ int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
 int timeout_client = 300;
-int killbogus = 0; /** flag: if set, kill bogus files */
 int authentication = 0;		/* use authentication for NNTP access:
 				   possible values defined in leafnode.h */
 
@@ -237,13 +236,6 @@ readconfig(char *configfile)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: delaybody is %d (default 0)",
 				   delaybody);
-		    break;
-		case CP_KILLBOGUS:
-		    killbogus = strtol(value, NULL, 10) ? 1 : 0;
-		    if (debugmode & DEBUG_CONFIG)
-			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: killbogus is %d (default 0)",
-				   killbogus);
 		    break;
 		case CP_AVOIDXOVER:
 		    p->usexhdr = strtol(value, NULL, 10);

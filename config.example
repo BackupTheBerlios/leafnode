@@ -86,10 +86,6 @@ expire = 20
 ## want to uncomment this. Optional.
 # create_all_links = 1
 
-## If you want bogus files such as core deleted from newsgroups,
-## uncomment this. Optional.
-# killbogus = 1
-
 ## If you want to filter out certain regular expressions in the header,
 ## create a "filterfile" (how this is done is explained in the README)
 ## and set (optional):

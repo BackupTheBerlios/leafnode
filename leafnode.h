@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.48 2002/06/18 11:25:36 ralf Exp $ */
+/* $Id: leafnode.h,v 1.49 2002/06/21 23:40:58 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -470,7 +470,6 @@ extern "C" {
     extern /*@null@*/ char *pseudofile;	/* filename of pseudoarticle body */
     extern /*@null@*/ char *owndn;	/* own domain name, if you can't set one */
     extern /*@null@*/ struct serverlist *servers;
-    extern int killbogus;	/* kill bogus files in newsgroups */
 
     void freeconfig(void);
 
