@@ -25,7 +25,7 @@
 #include <dmalloc.h>
 #endif
 
-#define MAXHEADERSIZE 5000
+#define MAXHEADERSIZE 2047
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -42,8 +42,74 @@ usage(void)
 	    "    -D: switch on debug mode\n"
 	    "    -v: switch on verbose mode\n"
 	    "    -F: use \"configfile\" instead of %s/config\n"
+	    "    -n: dry run, do not actually delete anything\n"
 	    "See also the leafnode homepage at http://www.leafnode.org/\n",
 	    libdir);
+}
+
+/* read from fd into malloced buffer *bufp of size *size
+ * up to delim or EOF.  Buffer is adjusted to fit input.
+ * return pointer to match or end of file, NULL in case of error
+ */
+static /*@null@*/ /*@dependent@*/ char *
+readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *delim,
+    char **bufp, size_t *size)
+{
+    size_t dlen = strlen(delim) - 1;
+    size_t nread;
+    ssize_t res;
+    char *k;
+
+    nread = 0;
+    if (*size < 1 || *bufp == NULL)
+	*bufp = critmalloc((*size = MAXHEADERSIZE+1), "readtodelim");
+
+    /*@+loopexec@*/
+    for (;;) {
+	res = read(fd, *bufp + nread, *size - nread - 1);
+	if (res < 0) { /* read error/EINTR/whatever */
+	    printf("error reading %s: %s\n", name, strerror(errno));
+	    return NULL;
+	}
+
+	(*bufp)[nread + res] = '\0';
+	/* skip as much as possible */
+	k = strstr(nread > dlen ? *bufp + nread - dlen : *bufp, delim);
+
+	nread += res;
+	if (res < *size-nread-1) { /* FIXME: can short reads happen? */
+	    return k != NULL ? k : *bufp + nread;
+	}
+
+	if (k != NULL) {
+	    return k;
+	}
+
+	/* must read more */
+	*bufp = critrealloc(*bufp, (*size)*=2, "readtodelim");
+    }
+    /*@=loopexec@*/
+    /*@notreached@*/
+    return NULL;
+}
+
+/* read article headers, cut off body
+ * return 0 for success, -1 for error, -2 for article without body
+ */
+static int
+readheaders(int fd, /*@unique@*/ const char *name, char **bufp, size_t *size)
+{
+    char *k = readtodelim(fd, name, "\n\n", bufp, size);
+    if (k != NULL) {
+	if (*k == '\0')
+	    return -2;
+	else {
+	    k[1] = '\0'; /* keep last header line \n terminated */
+	    return 0;
+	}
+    } else {
+	return -1;
+    }
 }
 
 int
@@ -53,10 +119,10 @@ main(int argc, char *argv[])
     const char c[] = "-\\|/";
     int i, score, option, deleted, kept;
     unsigned long n;
-    char *l, *msgid;
-    /*@dependent@*/ char *k;
+    char *l;
+    size_t lsize;
     const char *msgidpath = "";
-    int f;
+    int fd;
     DIR *d;
     struct dirent *de;
     struct stat st;
@@ -64,9 +130,10 @@ main(int argc, char *argv[])
     struct newsgroup *g;
     char conffile[PATH_MAX];
     int err;
+    int dryrun = 0;
 
-    err = snprintf(conffile, sizeof(conffile), "%s/config", libdir);
-    if (err < 0 || err >= (int)sizeof(conffile)) {
+    err = snprintf(conffile, sizeof conffile, "%s/config", libdir);
+    if (err < 0 || err >= (int)sizeof conffile) {
 	/* overflow */
 	fprintf(stderr, "caught string overflow in configuration file name\n");
 	exit(EXIT_FAILURE);
@@ -78,9 +145,14 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    while ((option = getopt(argc, argv, "F:D:Vv")) != -1) {
-	if (!parseopt("applyfilter", option, optarg, conffile,
-		      sizeof(conffile))) {
+    while ((option = getopt(argc, argv, "F:D:nVv")) != -1) {
+	if (parseopt("applyfilter", option, optarg, conffile, sizeof conffile))
+	    continue;
+	switch (option) {
+	case 'n':
+	    dryrun = 1;
+	    break;
+	default:
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -118,7 +190,6 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
     g->first = ULONG_MAX;
-    g->last = 0ul;
     if (!chdirgroup(g->name, FALSE)) {
 	printf("No such newsgroup: %s\n", g->name);
 	unlink(lockfile);
@@ -132,9 +203,9 @@ main(int argc, char *argv[])
     i = 0;
     deleted = 0;
     kept = 0;
-    l = (char *)critmalloc(MAXHEADERSIZE + 1, "Space for article");
+    lsize = MAXHEADERSIZE + 1;
+    l = (char *)critmalloc(lsize, "Space for article");
     while ((de = readdir(d)) != NULL) {
-	msgid = 0;
 	if (!isdigit((unsigned char)de->d_name[0])) {
 	    /* no need to stat file */
 	    continue;
@@ -152,20 +223,28 @@ main(int argc, char *argv[])
 	}
 	stat(de->d_name, &st);
 	if (S_ISREG(st.st_mode)
-	    && (f = open(de->d_name, O_RDONLY))) {
-	    if (read(f, l, MAXHEADERSIZE) < 0) {
-		printf("error reading %s: %s\n", de->d_name, strerror(errno));
-	    }
-	    close(f);
-	    msgid = mgetheader("Message-ID:", l);
-	    if ((k = strstr(l, "\n\n")) != NULL) {
-		*k = '\0';	/* cut off body */
+	    && (fd = open(de->d_name, O_RDONLY))) {
+	    switch (readheaders(fd, de->d_name, &l, &lsize)) {
+	    case 0:
 		score = killfilter(myfilter, l);
-	    } else {
-		/* article has no body - delete it */
+		break;
+	    case -1:
 		score = TRUE;
+		break;
+	    case -2: /* article has no body */
+		if (delaybody)
+		    score = killfilter(myfilter, l);
+		else
+		    score = TRUE;
+		break;
+	    default:
+		/*@notreached@*/
+		score = FALSE;
 	    }
-	    if (score) {
+	    close(fd);
+
+	    if (score && !dryrun) {
+		char *msgid = mgetheader("Message-ID:", l);
 		unlink(de->d_name);
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
@@ -175,10 +254,14 @@ main(int argc, char *argv[])
 			if (unlink(msgidpath) == 0)
 			    deleted++;
 		    }
+		    free(msgid);
 		}
 		if (verbose)
 		    printf("%s %s deleted\n", de->d_name, msgidpath);
 	    } else {
+		if (score && dryrun && verbose) {
+		    printf("%s would be deleted\n", de->d_name);
+		}
 		n = strtoul(de->d_name, NULL, 10);
 		if (n) {
 		    if (n < g->first)
@@ -193,17 +276,14 @@ main(int argc, char *argv[])
 	    }
 	} else
 	    printf("could not open %s\n", de->d_name);
-	if (msgid)
-	    free(msgid);
     }
     closedir(d);
     free(l);
-    if (g->first <= g->last)
-	writeactive();
+    writeactive();
     unlink(lockfile);
     printf("%d articles deleted, %d kept.\n", deleted, kept);
     if (verbose)
 	printf("Updating .overview file\n");
     getxover(1);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
