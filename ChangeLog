@@ -1,6 +1,9 @@
 2002-01-11  Matthias Andree  <matthias.andree@gmx.de>
 
         === RELEASE 2.0b8_ma9rc2 ===
+	* nntpd.c: Fix SIGSEGV in fopenart when a non-existent article was
+	requested from a non-new or local group. This does not usually
+	happen with newsreaders. The bug was introduced in 2.0b8_ma9pre3.
 	* configure.ac: Bump version.
 	* miscutil.c: Add freeinteresting() implementation.  Change second
 	argument of findinlist to const * char const.
