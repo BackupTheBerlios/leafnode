@@ -219,8 +219,6 @@ EXTRA_DIST = \
 	tools/simple-batcher.sh \
 	$(GENERATED_MANS)
 
-CLEANFILES=	$(GENERATED_MANS)
-
 BUILT_SOURCES = \
 	config.c \
 	configparam_data.c \
@@ -253,7 +251,7 @@ leafnode_version_SOURCES= leafnode-version.c
 t_getwatermarks_SOURCES	= t.getwatermarks.c
 t_mgetheader_SOURCES=	  t.mgetheader.c
 
-DISTCLEANFILES = $(BUILT_SOURCES) README \
+DISTCLEANFILES = $(BUILT_SOURCES) README $(GENERATED_MANS) \
 	config.table.sorted
 
 # GENERATED SOURCES ========================================
