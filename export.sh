@@ -6,6 +6,7 @@ rsync -a ./ "$repo" \
     --exclude 'build*' \
     --exclude '.*.swp' \
     --exclude '*~' \
+    --exclude dox \
     --exclude 'autom4te.cache' \
     --delete --delete-excluded
 darcs whatsnew --boring -ls \
