@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.79 2002/10/26 23:44:35 emma Exp $ */
+/* $Id: leafnode.h,v 1.80 2003/01/19 17:47:02 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -180,7 +180,7 @@ extern "C" {
     int parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value);
 
     /* parse a line of form "param = value" */
-#define TOKENSIZE 80		/* needed for parsing */
+#define TOKENSIZE 1024		/* needed for parsing */
 /* changes(and optionally creates) directory */
     int chdirgroup(const char *group, int creatdir);
 
