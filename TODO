@@ -47,15 +47,6 @@ Ralfs TODO:
 	* nntpd.c: check with NNTP draft for UTF-8 stuff.  Folding should
 	  be ok now.
 	* option fqdn not explained (option hostname sufficient?)
-	* artutil.c: mgetheader is broken.  A non-folded header is
-	  always returned as NULL.  Effect: applyfilter does not work at
-	  all, dopost dows not check for dupes.
-	  2002-04-10: is this fixed now?
-	* When POSTing an article with an upstream-already-used MID, the
-	  new article is not moved out of in.coming, causing errors at
-	  each fetchnews invocation.
-	* NEWNEWS and NEWGROUPS MUST not alter state information!
-	  Fix: save&restore group.
 	* applyfilter: does not handle to-kill-crossposts correctly:
 	  only killed if removed from _all_ other groups
 	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
@@ -300,6 +291,16 @@ Ralfs TODO:
 ========================================================================
 FIXED ITEMS:
 
+2002-05-01 Ralf Wildenhues
+	   When POSTing an article with an upstream-already-used MID, the
+	   new article is not moved out of in.coming, causing errors at
+	   each fetchnews invocation.
+
+2002-05-01 Ralf Wildenhues
+	   artutil.c: mgetheader is broken.  A non-folded header is
+	   always returned as NULL.  Effect: applyfilter does not work at
+	   all, dopost dows not check for dupes.
+
 2002-04-26 Ralf Wildenhues
 	   nntpd.c: do error checking on interesting.groups/* files
 		    fix file descriptor leak
@@ -379,6 +380,10 @@ FIXED ITEMS:
 
 ========================================================================
 DROPPED ITEMS:
+
+2002-05-01 Ralf Wildenhues
+	   NEWNEWS and NEWGROUPS MUST not alter state information!
+	   (cannot be reproduced any more)
 
 2002-04-13 Matthias Andree
 	Ralf asked:
