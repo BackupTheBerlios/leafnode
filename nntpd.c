@@ -993,7 +993,9 @@ list(struct newsgroup *g, int what, char *pattern)
     if (!is_pattern(pattern)) {
 	/* accelerate */
 	ng = findgroup(pattern, active, -1);
-	printlist(ng, what);
+	if (ng) {
+	    printlist(ng, what);
+	}
     } else {
 	ng = g;
 	while (ng->name) {
