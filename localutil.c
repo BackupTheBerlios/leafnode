@@ -102,10 +102,10 @@ readlocalgroups(void)
     /*@dependent@*/ char *t;
     const char *const append = "/local.groups";
 
-    s = (char *)critmalloc(strlen(libdir) + strlen(append) + 1,
+    s = (char *)critmalloc(strlen(sysconfdir) + strlen(append) + 1,
 			   "readlocalgroups");
 
-    t = mastrcpy(s, libdir);
+    t = mastrcpy(s, sysconfdir);
     t = mastrcpy(t, append);
 
     if (!(f = fopen(s, "r"))) {

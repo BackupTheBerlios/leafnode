@@ -31,8 +31,8 @@ main(void)
 	puts(" (error)");
     fputs("bindir: ", stdout);
     puts(bindir);
-    fputs("libdir: ", stdout);
-    puts(libdir);
+    fputs("sysconfdir: ", stdout);
+    puts(sysconfdir);
     fputs("spooldir: ", stdout);
     puts(spooldir);
     fputs("lockfile: ", stdout);

@@ -2101,7 +2101,7 @@ readpasswd(void)
     struct stringlist *ptr = NULL;
     char s[PATH_MAX + 1];	/* FIXME */
 
-    sprintf(s, "%s/users", libdir);
+    sprintf(s, "%s/users", sysconfdir);
     if ((f = fopen(s, "r")) == NULL) {
 	error = errno;
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
@@ -2300,7 +2300,7 @@ main(int argc, char **argv)
 
     mysetfbuf(stdout, buf, bufsize);
 
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
+    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
 	|| (err >= (int)sizeof(conffile))) {
 	exit(EXIT_FAILURE);
     }

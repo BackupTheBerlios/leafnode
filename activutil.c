@@ -445,11 +445,11 @@ rereadactive(void)
 
     s1 = (char *)critmalloc(strlen(spooldir) + strlen(GROUPINFO) + 1,
 			    "rereadactive");
-    s2 = (char *)critmalloc(strlen(libdir) + strlen(append) + 1,
+    s2 = (char *)critmalloc(strlen(sysconfdir) + strlen(append) + 1,
 			    "rereadactive");
     t = mastrcpy(s1, spooldir);
     (void)mastrcpy(t, GROUPINFO);
-    t = mastrcpy(s2, libdir);
+    t = mastrcpy(s2, sysconfdir);
     (void)mastrcpy(t, append);
 
     if (!active)

@@ -973,7 +973,7 @@ usage(void)
 	    "    -v: more verbose (may be repeated)\n"
 	    "    -F: use \"configfile\" instead of %s/config\n"
 	    "See also the leafnode homepage at http://www.leafnode.org/\n",
-	    libdir);
+	    sysconfdir);
 }
 
 int
@@ -983,7 +983,7 @@ main(int argc, char **argv)
     int option, reply;
     char conffile[4096];
 
-    snprintf(conffile, sizeof(conffile), "%s/config", libdir);
+    snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir);
 
     ln_log_open("texpire");
 

@@ -42,7 +42,7 @@ usage(void)
 	    "    -F: use \"configfile\" instead of %s/config\n"
 	    "    -n: dry run, do not actually delete anything\n"
 	    "See also the leafnode homepage at http://www.leafnode.org/\n",
-	    libdir);
+	    sysconfdir);
 }
 
 /* read from fd into malloced buffer *bufp of size *size
@@ -130,7 +130,7 @@ main(int argc, char *argv[])
     int err;
     int dryrun = 0;
 
-    err = snprintf(conffile, sizeof conffile, "%s/config", libdir);
+    err = snprintf(conffile, sizeof conffile, "%s/config", sysconfdir);
     if (err < 0 || err >= (int)sizeof conffile) {
 	/* overflow */
 	fprintf(stderr, "caught string overflow in configuration file name\n");
