@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.75 2002/09/09 23:28:41 emma Exp $ */
+/* $Id: leafnode.h,v 1.76 2002/09/30 01:31:28 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -206,6 +206,7 @@ extern "C" {
     };
 
     extern /*@null@*/ /*@owned@*/ struct newsgroup *active;
+    extern /*@null@*/ /*@owned@*/ struct newsgroup *oldactive;
 
     void insertgroup(const char *name, const char status, long unsigned first,
 		     long unsigned last, time_t date, const char *desc)
@@ -221,7 +222,7 @@ extern "C" {
     int writeactive(void);
     void freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a);
     void mergeactives(struct newsgroup *old, struct newsgroup *newng) ;
-    struct newsgroup *cpactive(struct newsgroup *a);
+    struct newsgroup *mvactive(struct newsgroup *a);
 /*
  * local groups
  */

@@ -27,6 +27,7 @@
 
 #define GROUPINFO "/leaf.node/groupinfo"
 
+static size_t oldactivesize = 0;
 static size_t activesize = 0;
 static time_t activetime = 0;
 static ino_t activeinode = 0;
@@ -34,6 +35,7 @@ static time_t localmtime = 0;
 static ino_t localinode = 0;
 
 struct newsgroup /*@null@*/ *active  = NULL;
+struct newsgroup /*@null@*/ *oldactive  = NULL;
 
 struct nglist {
     struct newsgroup *entry;
@@ -63,11 +65,23 @@ insertgroup(const char *name, char status, long unsigned first,
     struct nglist *l;
     static /*@dependent@*/ struct nglist *lold;
     struct newsgroup *g;
+    unsigned long count = 0ul;
 
-    /* interpret INN status characters */
+    /* interpret INN status characters x->n, j->y, =->y */
     if (status == 'x') status = 'n';
     if (strchr("j=", status)) status = 'y';
 
+    if (oldactive) {
+	g = findgroup(name, oldactive, -1);
+	if (g) {
+	    last = g->last;
+	    first = g->first;
+	    count = g->count;
+	    if (g->age) age = g->age;
+	    if (g->desc) desc = g->desc;
+	}
+    }
+    
     if (active) {
 	g = findgroup(name, active, -1);
 	if (g) {
@@ -85,7 +99,7 @@ insertgroup(const char *name, char status, long unsigned first,
     g->name = critstrdup(name, "insertgroup");
     g->first = first;
     g->last = last;
-    g->count = 0;
+    g->count = count;
     g->age = age;
     g->desc = desc ? critstrdup(desc, "insertgroup") : NULL;
     g->status = status;
@@ -522,7 +536,7 @@ void mergeactives(struct newsgroup *old, struct newsgroup *new)
  * pointers in the newsgroup structure!
  * (c) 2002 Joerg Dietrich
  */
-struct newsgroup *cpactive(struct newsgroup *a)
+struct newsgroup *mvactive(struct newsgroup *a)
 {
     static struct newsgroup *b;
 
@@ -530,5 +544,8 @@ struct newsgroup *cpactive(struct newsgroup *a)
 				       sizeof(struct newsgroup),
 				       "allocating active copy");
     b = memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
+    oldactivesize = activesize;
+    active = NULL;
+    activesize = 0;
     return b;
 }

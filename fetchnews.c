@@ -1234,7 +1234,6 @@ nntpactive(int fa)
     char *l, *p, *q;
     struct stringlist *groups = NULL;
     struct stringlist *helpptr = NULL;
-    struct newsgroup *oldactive;
     mastr *s = mastr_new(LN_PATH_MAX);
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
     char portstr[20];
@@ -1332,7 +1331,6 @@ nntpactive(int fa)
 	    mastr_delete(s);
 	    return;
 	}
-	oldactive = cpactive(active);
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    last = first = 0;
 	    count++;
@@ -1385,7 +1383,6 @@ nntpactive(int fa)
 		    ln_log(LNLOG_SERR, LNLOG_CSERVER,
 			    "%s: reading newsgroups descriptions failed: %s",
 			    current_server->name, l);
-		    free(oldactive);
 		    mastr_delete(s);
 		    return;
 		}
@@ -1393,7 +1390,6 @@ nntpactive(int fa)
 		ln_log(LNLOG_SERR, LNLOG_CSERVER,
 			"%s: reading newsgroups descriptions failed",
 			current_server->name);
-		free(oldactive);
 		mastr_delete(s);
 		return;
 	    }
@@ -1404,15 +1400,10 @@ nntpactive(int fa)
 		l = getaline(nntpin);
 	    }
 	    if (!l) {
-		free(oldactive);
 		mastr_delete(s);
 		return;		/* timeout */
 	    }
 	}
-	mergeactives(oldactive, active);
-	free(oldactive); /* Do not call freeactive(). The pointers in 
-			    oldactive will be free()d by freeactive(active)
-			    at the end. */
 	/* touch file */
 	{
 	    int e = touch_truncate(mastr_str(s));
@@ -1956,8 +1947,9 @@ main(int argc, char **argv)
 
     if (!forceactive)
 	forceactive |= checkactive();
-    if (forceactive)
+    if (forceactive) {
 	markactive(AM_KILL);
+    }
 
     /* If fetchnews should post only, no lockfile or filters are required.
      * It is also sensible to check if there is anything to post when
@@ -1989,7 +1981,10 @@ main(int argc, char **argv)
     }
 
     rereadactive();
-
+    if (forceactive) {
+	oldactive = mvactive(active);
+	active = NULL;
+    }
     feedincoming();
 
     signal(SIGHUP, SIG_IGN);
@@ -2034,6 +2029,10 @@ main(int argc, char **argv)
     signal(SIGTERM, SIG_IGN);	/* FIXME */
 
     if (!postonly) {
+	if (rc != 0) {
+	    mergeactives(oldactive, active);
+	    free(oldactive);
+	}
 	writeactive();
 	if (rc == 0 && forceactive)
 	    markactive(AM_UPDATE);
