@@ -986,7 +986,7 @@ main(int argc, char **argv)
     if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "frn")) != -1) {
 	if (parseopt("texpire", option, optarg, &conffile))
 	    continue;
 	switch (option) {
