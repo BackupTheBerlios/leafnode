@@ -420,6 +420,26 @@ selectfilter(const char *groupname)
     return froot;
 }
 
+/** print additional header, like the matching line */
+static void
+regexp_addinfo(const struct filterentry *g, const char *hdr) {
+    const char *x = hdr;
+    while (*x) {
+	int len = strcspn(x, "\n");
+	int match = pcre_exec(g->expr, NULL, x, (int)strcspn(x, "\n"),
+#ifdef NEW_PCRE_EXEC
+		0,
+#endif
+		0, NULL, 0);
+	if (match >= 0) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CALL, "regexp filter: detail: \"%-.*s\""
+		    " =~ /%s/ matched", len, x, g->cleartext);
+	}
+	x += len;
+	if (*x == '\n') x++;
+    }
+}
+
 /*
  * read and filter headers.
  * Return true if article should be killed, false if not
@@ -454,6 +474,7 @@ killfilter(const struct filterlist *f, const char *hdr)
 	    if (debugmode & DEBUG_FILTER) {
 	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
 	               "regexp filter: /%s/ returned %d", g->cleartext, match);
+		if (match >= 0) regexp_addinfo(g, hdr);
 	    }
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
