@@ -35,6 +35,7 @@ expire = 20
 # groupexpire = comp.os.linux.* 5
 ## very interesting, hold longer:
 # groupexpire = any.local.newsgroup 100
+## to archive a group, just set this to 24800 for now, which is 68 years
 
 ## How many ARTICLE commands to we stuff down to the server in advance
 ## of the article just read. Some servers may not get this right,
