@@ -1,3 +1,19 @@
+2003-07-10  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030710a =
+	* configure.ac: 
+	- Bugfix: all configure --with options are now --enable options,
+	    except --with-dmalloc.  
+	- Cleanup: IPv6 configuration now uses a standard --enable option
+	    rather than env twiddling.  
+	- Robustness: make sure test commands don't get confused when the 
+	  argument start with a dash, prefix "x". Exception: test "$a" -eq
+	  0.  
+	* configure.ac: Bump version.  
+	* ENVIRONMENT, README.html, nntpd.c: Add NOSUBSCRIBE variable to
+	defeat subscribing to new groups and showing pseudo articles.
+	Suggested by Dennis Andrew Blazewicz.  
+
 2003-07-07  Matthias Andree <matthias.andree@gmx.de>
 
 	* nntpd.c: Properly initialize newsgroup data in LISTGROUP, to fix

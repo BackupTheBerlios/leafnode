@@ -1,5 +1,15 @@
+Changes since 20030706:
+- Bugfix: LISTGROUP bugfixed, LISTGROUP - XOVER now works; no longer
+  shows bogus pseudo article.
+- Bugfix: all configure --with options are now --enable options, except
+  --with-dmalloc.
+- Cleanup: IPv6 configuration now uses a standard --enable option rather
+  than env twiddling.
+- Feature: Support for NOSUBSCRIBE environment variable.
+  For documentation, see the ENVIRONMENT and README or README.html files.
+
 Changes since 20030621:
-- Support for PCRE before version 2.08 is gone, additionally,
+- Cleanup: Support for PCRE before version 2.08 is gone, additionally,
   a version that installs "pcre-config" is required, which means you'll
   need to use PCRE 3.0 or newer.
 
