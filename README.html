@@ -16,7 +16,7 @@
  p.c3 {text-align: center}
  h3.c2 {text-align: center}
  h2.c1 {text-align: center}
-            </style>
+                </style>
   </head>
 
   <body>
@@ -226,35 +226,31 @@
         <p>The configure script can take some flags (replace DIR by
         a directory name, FILE by a file name):</p>
 <pre>
---spooldir=DIR            To override the default /var/spool/news,
-                          where leafnode puts its news spool.
+--enable-spooldir=DIR  To override the default /var/spool/news,
+                       where leafnode puts its news spool unless
+                       --localstatedir is given or --prefix is given and
+                       different from /usr, in the latter case, the
+                       default is $localstatedir/spool/news
 
---lockfile=FILE           To override the default /var/run/news/fetchnews.lock,
-                          where leafnode puts its lock file.
+--prefix=DIR           Leafnode installs itself normally in the /usr/local/sbin
+                       directory. If you want to use another directory, use this
+                       flag. For example, if you want to install leafnode in
+                       /usr/sbin, use --prefix=/usr
 
---prefix=DIR              Leafnode installs itself normally in the /usr/local/sbin
-                          directory. If you want to use another directory, use this
-                          flag. For example, if you want to install leafnode in
-                          /usr/sbin, use --prefix=/usr
+--sysconfdir=DIR       Default path for configuration is /etc/leafnode when
+                       --prefix is not used or set to /usr, and PREFIX/etc
+                       otherwise.  You can use this to change the config file
+                       location from its default.
 
---sysconfdir=DIR          Default path for configuration is /etc when
-                          --prefix is not used or set to /usr, and PREFIX/etc
-                          otherwise.  You can use this to change the config file
-                          location from its default.
-                          IMPORTANT NOTE: leafnode will automatically
-                          append "leafnode" to the sysconfdir, so if you
-                          want your configuration in
-                          /etc/news/leafnode/, use --sysconfdir=/etc/news
+--with-dmalloc         Lets leafnode include dmalloc header files and link
+                       against libdmalloc. Only useful for debugging, not
+                       needed for normal operation. This option requires
+                       dmalloc, available from http://dmalloc.com/.
 
---with-dmalloc            Lets leafnode include dmalloc header files and link
-                          against libdmalloc. Only useful for debugging, not
-                          needed for normal operation. This option requires
-                          dmalloc, available from http://dmalloc.com/.
+--with-runas-user=USER Lets leafnode run as user USER, defaults to "news".
 
---with-runas-user=USER    Lets leafnode run as user USER, defaults to "news".
-
---with-pam                Enable PAM (pluggable authentication modules)
-                          support.
+--with-pam             Enable PAM (pluggable authentication modules)
+                       support.
 </pre>
         <strong>BEWARE:</strong> Former versions always defaulted
         their sysconfdir to /etc/leafnode. Current versions only
@@ -306,9 +302,9 @@
 news.info               /var/log/news
 </pre>
 
-	    <p>Note that if you want to send in a bug report and need
-	    debug logging, you'll have to replace news.info by
-	    news.debug (and send a SIGHUP, as shown below).</p>
+            <p>Note that if you want to send in a bug report and
+            need debug logging, you'll have to replace news.info by
+            news.debug (and send a SIGHUP, as shown below).</p>
 
             <p>Your syslog.conf may already suggest a different
             file. If your syslog.conf suggests news.info logging,
@@ -320,8 +316,8 @@ news.info               /var/log/news
             the path.</p>
           </li>
 
-	  <li>Create the /var/log/news file, type: <kbd>touch
-	      /var/log/news</kbd>.
+          <li>Create the /var/log/news file, type: <kbd>touch
+          /var/log/news</kbd>.</li>
 
           <li>Send syslogd a HUP signal. <kbd>kill -1 `cat
           /var/run/syslogd.pid`</kbd> usually does the job, if it
@@ -945,20 +941,21 @@ local.*:egon+%s@example.net
 
     <p>Leafnode versions 1.9.20 and up were written by Matthias
     Andree &lt;matthias.andree@gmx.de&gt; and Ralf Wildenhues
-    &lt;ralf.wildenhues@gmx.de&gt; and are © copyright 2002 -
+    &lt;ralf.wildenhues@gmx.de&gt; and are &copy; copyright 2002 -
     2003.</p>
 
     <p>Leafnode versions 2.0b8_ma and 2.0.0.* were written by
     Matthias Andree &lt;matthias.andree@gmx.de&gt;, Ralf Wildenhues
-    &lt;ralf.wildenhues@gmx.de&gt; and Jörg Dietrich
-    &lt;joerg@dietrich.net&gt; and are © copyright 2001 - 2003.</p>
+    &lt;ralf.wildenhues@gmx.de&gt; and J&ouml;rg Dietrich
+    &lt;joerg@dietrich.net&gt; and are &copy; copyright 2001 -
+    2003.</p>
 
     <p>Major modifications were made by<br>
      Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
      Kent Robotti &lt;robotti@erols.com&gt;<br>
      Markus Enzenberger &lt;enz@cip.physik.uni-muenchen.de&gt;<br>
      Matthias Andree &lt;matthias.andree@gmx.de&gt;<br>
-     Jörg Dietrich &lt;joerg@dietrich.net&gt;<br>
+     J&ouml;rg Dietrich &lt;joerg@dietrich.net&gt;<br>
      Stefan Wiens &lt;s.wi@gmx.net&gt;<br>
     </p>
 
@@ -1057,4 +1054,3 @@ local.*:egon+%s@example.net
     </blockquote>
   </body>
 </html>
-
