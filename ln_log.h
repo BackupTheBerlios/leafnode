@@ -20,11 +20,11 @@
 /* contexts */
 /* define the context the log message occurs in
    think of it as "verbose level" */
-#define LNLOG_CTOP        0	/* top level, always log */
-#define LNLOG_CSERVER     1	/* server context */
-#define LNLOG_CGROUP      2	/* group context */
-#define LNLOG_CARTICLE    3	/* article context */
-#define LNLOG_CALL	  4	/* most verbose */
+#define LNLOG_CTOP        1	/* top level, always log */
+#define LNLOG_CSERVER     2	/* server context */
+#define LNLOG_CGROUP      3	/* group context */
+#define LNLOG_CARTICLE    4	/* article context */
+#define LNLOG_CALL        5	/* most verbose */
 
 /* EXPORT */
 extern void ln_log_open(const char *ident);
