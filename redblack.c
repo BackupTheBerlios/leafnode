@@ -1,4 +1,4 @@
-static char rcsid[]="$Id: redblack.c,v 1.7 2002/07/08 00:48:01 emma Exp $";
+static char rcsid[]="$Id: redblack.c,v 1.8 2002/08/13 18:12:39 ralf Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -249,7 +249,6 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 	struct rbnode *x,*y,*z;
 	int cmp;
 	int found=0;
-	int cmpmods();
 
 	y=RBNULL; /* points to the parent of x */
 	x=rbinfo->rb_root;
@@ -1008,6 +1007,9 @@ dumptree(struct rbnode *x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.8  2002/08/13 18:12:39  ralf
+ * Remove superfluous nested function decl.
+ *
  * Revision 1.7  2002/07/08 00:48:01  emma
  * Update libredblack to 1.2.
  *
