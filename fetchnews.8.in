@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.4 2001/12/29 01:45:18 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.5 2002/01/11 00:02:47 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -15,7 +15,7 @@ fetchnews \- fetch news via NNTP
 .SH SYNOPSIS
 .B fetchnews -V
 .br
-.B fetchnews [-Dv] [-F configfile] -M message-id
+.B fetchnews [-D debugmode] [-v] [-F configfile] -M message-id
 .br
 .B fetchnews [-BDfHnPv] [-F configfile] [-x number] [-S server[:port]] [-N newsgroup] [-t #]
 
@@ -40,15 +40,16 @@ articles to or from the upstream NNTP server.
 Get only article bodies. Works only if "delaybody" option is set in the
 configuration file (see below.)
 .TP
-.I -D
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
-problems with your upstream server(s). If debug mode has already been
-set in the config file, increase verbosity.
+problems with your upstream server(s). See
+.I config.example
+for details on how to configure the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@LIBDIR@/config.
+@sysconfdir@/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is

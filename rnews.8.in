@@ -10,7 +10,7 @@ rnews \- sort batch files into spool
 
 .SH SYNOPSIS
 .B rnews -V
-br
+.br
 .B rnews [-v|D] [file|directory]
 
 .SH DESCRIPTION
@@ -35,11 +35,12 @@ sets its real and effective uid to "news".
 
 .SH OPTIONS
 .TP
-.I -D
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
-problems. If debug mode has already been set in the config file, increase
-verbosity.
+problems. See
+.I @sysconfdir@/config.example
+for details on how to configure the debug mode.
 .TP
 .I -V
 Show version information and exit.

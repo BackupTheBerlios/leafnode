@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.6 2002/01/06 04:11:05 emma Exp $
+.\" $Id: leafnode.8.in,v 1.7 2002/01/11 00:03:03 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -15,7 +15,7 @@ leafnode \- NNTP server for small (dialup) sites
 .SH SYNOPSIS
 .B leafnode -V
 .br
-.B leafnode [-D] [-F configfile]
+.B leafnode [-D debugmode] [-F configfile]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -42,14 +42,16 @@ deleting old news.
 .SH OPTIONS
 
 .TP
-.I -D
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems with your upstream server(s). If debug mode has already been
-set in the config file, increase verbosity.
+set in the config file, increase verbosity. See
+.I @sysconfdir@/config.example
+for a description of this parameter.
 .TP
 .I -F configfile
-Read configuration from an alternative file instead of @LIBDIR@/config.
+Read configuration from an alternative file instead of @sysconfdir@/config.
 .TP
 .I -V
 Report leafnode version and exit.
@@ -63,18 +65,18 @@ I recommend that either firewalling or tcpd be used for access control.
 
 .SH FILES
 All the files in
-.I @LIBDIR@
+.I @sysconfdir@
 .B must
 be readable, but not writable, by user "news".
 .PP
-.I @LIBDIR@/config
+.I @sysconfdir@/config
 contains the configuration parameters for
 .B leafnode.
 See
 .B CONFIGURATION
 below.
 .PP
-.I @LIBDIR@/users
+.I @sysconfdir@/users
 contains the passwords if authenticate = internal is set. See
 .B GENERAL OPTIONAL PARAMETERS
 below.
@@ -147,7 +149,7 @@ as user news.
 
 .SH CONFIGURATION
 All configuration is done using the file
-.I @LIBDIR@/config.
+.I @sysconfdir@/config.
 .B All global parameters must be mentioned before server and
 server-specific parameters.
 .PP
@@ -231,7 +233,7 @@ with  a password of
 perl -wT tools/make_pass.pl 'enigma' 'break!me'
 
 and copy the resulting line to the
-.I @LIBDIR@/users
+.I @sysconfdir@/users
 file.
 .TP
 hostname = host.domain.country
@@ -277,7 +279,7 @@ possible to specify
 .BR glob (7)-like
 wildcard expressions.
 .TP
-filterfile = @LIBDIR@/filters
+filterfile = @sysconfdir@/filters
 Leafnode can filter the input headers for arbitrary regular expressions.
 These are stored in a file designated "filterfile". The format of "filterfile"
 is described in
@@ -395,6 +397,29 @@ Return a range of headers for articles matched by a certain pattern.
 .PP
 The rest of the commands given in the NNTP RFC or added in other
 servers are left out in order to keep the server simple and bug-free.
+
+.SH ENVIRONMENT
+
+.TP
+.I NOPOSTING
+When this environment variable exists, the client cannot post. The
+server will send a 201 no posting banner. Additionally, if this variable
+is non-empty, its contents are appended to the initial banner.
+
+This is useful in context with hosts.allow when your leafnode runs under
+tcp_wrappers access control, for example (this assumes your libwrap is
+compiled with -DHOSTS_OPTIONS):
+
+leafnode: 192.168.1.4: allow
+.BR
+
+leafnode: 192.168.1.0/255.255.255.0:allow:setenv NOPOSTING -
+.BR
+
+leafnode: ALL: deny
+
+Would allow full access to 192.168.1.4, read-only access to the other
+IPs in 192.168.1.* an deny access from all other clients.
 
 .SH BUGS
 This manual page needs revision.
