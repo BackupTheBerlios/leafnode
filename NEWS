@@ -1,3 +1,8 @@
+Changes since 20040206a:
+- Bugfix: -M could only retrieve articles from the first server it had
+  successfully connected to. Reported by Daniel Zwick. This bug has
+  slept for a long time before being discovered recently.
+
 20040206a: Changes since 20040129a:
 - Feature: sanity check at initialization, to avoid operating on a bogus
   spooldir after updates.
