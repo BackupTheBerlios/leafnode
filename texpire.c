@@ -70,8 +70,6 @@ int debug = 0;
 static int dryrun = 0;		/* do not delete articles */
 static int use_atime = 1;	/* look for atime on articles to expire */
 static int repair_spool = 0;
-static int group_relinked = FALSE;
-				/* flags if current group has been relinked */
 
 char gdir[PATH_MAX];		/* name of current group directory */
 unsigned long deleted, kept;
@@ -520,9 +518,6 @@ relink(const char *groupname)
     char name[PATH_MAX];
     struct stat st;
 
-    if (group_relinked) {	/* FIXME: this does not belong here */
-	return;			/* once per group is enough */
-    }
     for (i = 0; i < HASHSIZE; ++i) {
 	r = hashtab[i];
 	for (r = hashtab[i]; r; r = r->nhash) {
@@ -530,15 +525,18 @@ relink(const char *groupname)
 		str_ulong(name, r->artno);
 		if (!stat(name, &st)
 		    && S_ISREG(st.st_mode)
-		    && (st.st_nlink < 2)
 		    && (m = lookup(r->mid))) {	/* repair fs damage */
 		    if (sync_link(name, m)) {
 			if (errno == EEXIST) {
-			    /* exists, but points to another file */
-			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				   "%s: cannot relink %s -> %s: file exists",
-				   groupname, name, m);
-			    delete_article(r);
+			    struct stat n;
+			    stat(m, &n);
+			    if (n.st_ino != st.st_ino) {
+				/* exists, but points to another file */
+				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				       "%s: cannot relink %s -> %s: file exists",
+				       groupname, name, m);
+				delete_article(r);
+			    }
 			} else {
 			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 				   "%s: relink %s -> %s failed: %m",
@@ -553,7 +551,6 @@ relink(const char *groupname)
 	    }
 	}
     }
-    group_relinked = TRUE;	/* don't try twice for the same group */
 }
 
 /* 
@@ -843,7 +840,6 @@ dogroup(struct newsgroup *g, time_t expire)
 	    }
 	}
     }
-    group_relinked = FALSE;
     threadlist = build_threadlist(xcount);
     totalthreads = count_threads(threadlist);
     if (repair_spool)
@@ -926,9 +922,9 @@ expiremsgid(void)
 	snprintf(s, sizeof(s), "%s/message.id/%03d", spooldir, n);
 	if (chdir(s)) {
 	    if (errno == ENOENT) {
-		ln_log(LNLOG_SWARNING, LNLOG_CTOP, 
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 		       "creating missing directory %s", s);
-		mkdir(s, 0755);
+		mkdir(s, MKDIR_MODE);
 	    }
 	    if (chdir(s)) {
 		ln_log(LNLOG_SERR, LNLOG_CTOP, "chdir %s: %m", s);
@@ -937,9 +933,13 @@ expiremsgid(void)
 	}
 
 	d = opendir(".");
-	if (!d)
+	if (!d) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
+		   "cannot open directory %s: %m", s);
 	    continue;
+	}
 	while ((de = readdir(d)) != 0) {
+	    if (de->d_name[0] == '.') continue;
 	    /* FIXME: do not stat more than once */
 	    if (stat(de->d_name, &st) == 0) {
 		if (st.st_nlink < 2 && !dryrun && !unlink(de->d_name)) {
@@ -948,8 +948,9 @@ expiremsgid(void)
 			   s, de->d_name);
 		    deleted++;
 		} else {
-		    if (S_ISREG(st.st_mode))
+		    if (S_ISREG(st.st_mode)) {
 			kept++;
+		    }
 		}
 	    }
 	}

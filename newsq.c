@@ -3,6 +3,7 @@
  *
  * Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
  * Copyright 1999.
+ * Rewritten by Matthias Andree <matthias.andree@gmx.de>. Copyright 2001.
  *
  * See README for restrictions on the use of this software.
  */
@@ -106,6 +107,17 @@ main(int argc, char **argv)
     printf("Articles awaiting store to local groups:\n"
 	   "----------------------------------------\n");
     sprintf(s, "%.*s/in.coming", (int)sizeof(s) - 20, spooldir);
+    if ((c = show_queue(s)) < 0) {
+	printf("Error occurred.\n");
+	ret = 1;
+    } else {
+	printf("%ld article%s found.\n", c, c == 1 ? "" : "s");
+    }
+
+    printf("\n");
+    printf("Articles in failed.postings:\n"
+	   "----------------------------\n");
+    sprintf(s, "%.*s/failed.postings", (int)sizeof(s) - 20, spooldir);
     if ((c = show_queue(s)) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;

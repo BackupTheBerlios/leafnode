@@ -37,7 +37,7 @@ mastr_new(long size)
 {
     mastr *n = malloc(sizeof(mastr));
 
-    assert (size >= 0);
+    assert(size >= 0);
     if (!n) {
 	mastr_oom();
 	return 0;

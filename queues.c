@@ -43,8 +43,8 @@ checkqueue(
     return FALSE;
 }
 
-/** Checks if there are postings in $(SPOOLDIR)/out.going/ 
- * \return 
+/** Checks if there are postings in $(SPOOLDIR)/out.going/
+ * \return
  *  - TRUE if there are articles
  *  - FALSE if there are no articles
  */
@@ -54,8 +54,8 @@ checkforpostings(void)
     return checkqueue("out.going");
 }
 
-/** Checks if there are postings in $(SPOOLDIR)/in.coming/ 
- * \return 
+/** Checks if there are postings in $(SPOOLDIR)/in.coming/
+ * \return
  *  - TRUE if there are articles
  *  - FALSE if there are no articles
  */

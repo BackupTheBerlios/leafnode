@@ -234,7 +234,7 @@ nntpconnect(const struct serverlist *upstream)
 		break;
 	    reply = newnntpreply(&line);
 	    if (line && strstr(line, "NewsCache")) {
-		/* NewsCache has a broken STAT implementation 
+		/* NewsCache has a broken STAT implementation
 		   always returns 203 0 Message-ID
 		   breaking our upstream dupe detection */
 		stat_is_evil = 1;
@@ -247,6 +247,20 @@ nntpconnect(const struct serverlist *upstream)
 		       "%s: connected to %s:%u, response: %d",
 		       upstream->name,
 		       inet_ntoa(s_in.sin_addr), htons(s_in.sin_port), reply);
+	    }
+	    if (line && strstr(line, "NNTPcache server V2.3")) {
+		/* NNTPcache 2.3.3 is still in widespread use, but it
+		   has Y2k bugs which have only been fixed in a beta
+		   version as of 2001-12-24. This 2.3 version is
+		   unsuitable for any use. */
+		ln_log(LNLOG_SERR, LNLOG_CSERVER,
+		       "%s: Server greeting \"%s\" hints to NNTPcache v2.3.x. "
+		       "This server has severe Y2k bugs which make it "
+		       "unsuitable for use with leafnode. "
+		       "Ask the news server administrator to update.",
+		       upstream->name, line);
+		nntpdisconnect();
+		return 0;
 	    }
 	    if (getsockopt(fileno(nntpout), SOL_SOCKET, SO_SNDBUF,
 			   (char *)&sendbuf, &optlen) == -1) {

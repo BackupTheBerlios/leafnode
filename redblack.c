@@ -1,5 +1,4 @@
-static char rcsid[] =
-    "$Id: redblack.c,v 1.2 2001/11/29 17:48:30 emma Exp $";
+static char rcsid[] = "$Id: redblack.c,v 1.3 2001/12/29 01:45:18 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -924,6 +923,9 @@ dumptree(struct rbnode * x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.3  2001/12/29 01:45:18  emma
+ * Merge 2.0b8_ma8rc* series changes.
+ *
  * Revision 1.2  2001/11/29 17:48:30  emma
  * Move 7.7pre on top to HEAD branch
  *

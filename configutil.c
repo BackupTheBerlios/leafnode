@@ -148,7 +148,7 @@ readconfig(char *configfile)
 		if (cp->scope == CS_GLOBAL && p) {
 		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 			   "config: \"%s=%s\" found in section of server %s, "
-			   "please move it to the top of any "
+			   "please move it in front of any "
 			   "server declaration", param, value, p->name);
 		}
 		switch (cp->code) {
@@ -388,6 +388,7 @@ readconfig(char *configfile)
 		    p->username = NULL;
 		    p->password = NULL;
 		    p->active = TRUE;
+		    p->dontpost = FALSE;
 		    if (!servers)
 			servers = serverlist = p;
 		    else

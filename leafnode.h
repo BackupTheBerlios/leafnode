@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.14 2001/12/20 03:21:32 emma Exp $ */
+/* $Id: leafnode.h,v 1.15 2001/12/29 01:45:18 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -39,6 +39,8 @@ extern "C" {
 #endif
 
 #define BLOCKSIZE 16384
+
+#define MKDIR_MODE 0750
 
 #define BASENAME(a) (strrchr((a), '/') ? strrchr((a), '/') : (a))
 #define WHITESPACE " \t"
@@ -348,8 +350,8 @@ extern "C" {
 	char *name;		/* Servername */
 	char *username;
 	char *password;
-	int dontpost;           /* bool: this server is never fed articles */
-	int port;               /* port, if 0, use nntp port */
+	int dontpost;		/* bool: this server is never fed articles */
+	int port;		/* port, if 0, use nntp port */
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
 	int timeout;		/* timeout in seconds before we give up */
@@ -358,7 +360,7 @@ extern "C" {
 
     extern struct expire_entry *expire_base;
 
-    extern char *mta; /* mail transfer agent for mailing to moderators */
+    extern char *mta;		/* mail transfer agent for mailing to moderators */
     /* expire for certain groups */
     extern unsigned long artlimit;
 
@@ -568,6 +570,8 @@ extern "C" {
 /* moderated.c */
     char *getmoderator(const char *group);
     char *checkstatus(const char *groups, const char status);
+
+#define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
 
 #if 0
 #warning "WARNING: do not disable fsync in production use"

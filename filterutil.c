@@ -1,11 +1,10 @@
 /**
  * \file filterutil.c
  *
- * read filter file and do filtering of messages
- * \author Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
- * \copyright Copyright 1998.
+ * Read and parse filter file and do filtering of messages.
+ * (C) 1998 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+ * modifications (C) 2001 by Matthias Andree.
  * See README for restrictions on the use of this software.
- * \bugs does not use pcre_free where appropriate.
  */
 
 #include "leafnode.h"
@@ -25,6 +24,11 @@
 struct filterlist *filter = NULL;
 
 static void free_entry(struct filterentry *e);
+
+static enum state { RF_WANTNG, RF_WANTPAT,
+		    RF_WANTNGORPAT, RF_WANTACTION } state;
+
+static const char *whatexpected(enum state s);
 
 /*
  * find "needle" in "haystack" only if "needle" is at the beginning of a line
@@ -203,33 +207,33 @@ insertfilter(struct filterlist *f, char *ng)
     oldf = f;
 }
 
-static void
-removefilter(struct filterlist *r)
+static const struct expect
 {
-    struct filterlist *of = NULL, *f = filter;
-    while(f) {
-	if (f == r) {
-	    free_entry(f->entry);
-	    if (f == filter) {
-		filter = f->next;
-		free(f);
-		break;
-	    } else {
-		of->next = f->next;
-		free(f);
-		break;
-	    }
-	}
-	of = f;
-	f = f->next;
+    const enum state state;
+    const char *msg;
+} expect[] = {
+    { RF_WANTNG, "newsgroup" },
+    { RF_WANTPAT, "pattern" },
+    { RF_WANTNGORPAT, "newsgroup or pattern" },
+    { RF_WANTACTION, "action" }
+};
+
+static const char *
+whatexpected(enum state s) {
+    const char *x = 0;
+    unsigned int i;
+
+    for (i = 0; i < sizeof(expect)/sizeof(expect[0]); i++) {
+	if (expect[i] . state == s) x = expect[i] . msg;
     }
+    return x;
 }
 
 /*
  * read filters into memory. Filters are just plain regexp's
  * return TRUE for success, FALSE for failure
  *
- * in addition, we initialize four standard regular expressions
+ * in addition, we initialize for standard regular expressions
  */
 int
 readfilter(const char *filterfilename)
@@ -241,9 +245,11 @@ readfilter(const char *filterfilename)
     const char *regex_errmsg;
     int regex_errpos;
     struct filterlist *f;
-
+    int rv = TRUE;
+    unsigned long line = 0;
     if (!filterfilename || !strlen(filterfilename))
 	return FALSE;
+
     param = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     value = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     filter = NULL;
@@ -252,29 +258,33 @@ readfilter(const char *filterfilename)
     if (!ff) {
 	ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 	       "Unable to open filterfile %s: %m", filterfilename);
-	free(param);
-	free(value);
-	return FALSE;
+	rv = FALSE;
     }
-    debug = 0;
-    while ((l = getaline(ff)) != NULL) {
+
+    state = RF_WANTNG;
+    while ((l = getaline(ff))) {
+	line++;
+	if (!*l || *l == '#') continue;
 	if (parse_line(l, param, value)) {
-	    if (strcasecmp("newsgroup", param) == 0 ||
-		strcasecmp("newsgroups", param) == 0) {
+	    if ((state == RF_WANTNG || state == RF_WANTNGORPAT) &&
+		(!strcasecmp("newsgroup", param)
+		 || !strcasecmp("newsgroups", param))) {
 		if (ng) free(ng);
 		ng = critstrdup(value, "readfilter");
-	    } else if (strcasecmp("pattern", param) == 0) {
+		state = RF_WANTPAT;
+	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) &&
+		!strcasecmp("pattern", param)) {
 		pcre *re;
 		if (!ng) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "No newsgroup for expression %s found", value);
-		    continue;
+			   "No newsgroup for pattern = %s (line %lu) found",
+			   value, line);
+		    rv = FALSE;
 		}
 		re = pcre_compile(value, PCRE_MULTILINE,
-						     &regex_errmsg,
-						     &regex_errpos,
+				  &regex_errmsg, &regex_errpos,
 #ifdef NEW_PCRE_COMPILE
-						     NULL
+				  NULL
 #endif
 		    );
 		if (re) {
@@ -284,51 +294,74 @@ readfilter(const char *filterfilename)
 		    (f->entry)->cleartext = critstrdup(value, "readfilter");
 		} else {
 		    /* could not compile */
-		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "Invalid filter pattern %s (pos %d): %s",
-			   value, regex_errpos, regex_errmsg);
-		    pcre_free(f->entry);
-		    f->entry = NULL;
+		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			   "%s: invalid pattern at line %lu: %s",
+			   filterfilename, line,
+			   regex_errmsg);
+		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			   "%s: \"%s\"", filterfilename, value);
+		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			   "%s:  %*s",
+			   filterfilename,
+			   regex_errpos + 1, "^");
+		    rv = FALSE;
 		}
-	    } else if ((strcasecmp("maxage", param) == 0) ||
-		       (strcasecmp("minlines", param) == 0) ||
-		       (strcasecmp("maxlines", param) == 0) ||
-		       (strcasecmp("maxbytes", param) == 0) ||
-		       (strcasecmp("maxcrosspost", param) == 0)) {
-		if (!ng) {
-		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "No newsgroup for expression %s found", value);
-		    continue;
-		}
+		state = RF_WANTACTION;
+	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) && (
+			   (!strcasecmp("maxage", param)) ||
+			   (!strcasecmp("minlines", param)) ||
+			   (!strcasecmp("maxlines", param)) ||
+			   (!strcasecmp("maxbytes", param)) ||
+			   (!strcasecmp("maxcrosspost", param)))) {
 		f = newfilter();
 		insertfilter(f, critstrdup(ng, "readfilter"));
 		(f->entry)->cleartext = critstrdup(param, "readfilter");
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
-	    } else if (strcasecmp("action", param) == 0) {
+		state = RF_WANTACTION;
+	    } else if (state == RF_WANTACTION
+		       && !strcasecmp("action", param)) {
 		if (!f || !f->entry || !(f->entry)->cleartext) {
-		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "No pattern found for action %s", value);
-		    removefilter(f);
-		    continue;
+		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			   "%s: No pattern found for action %s",
+			   filterfilename, value);
+		    rv = FALSE;
 		} else {
 		    (f->entry)->action = critstrdup(value, "readfilter");
 		}
+		state = RF_WANTNGORPAT;
+	    } else {
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+		       "%s: line %lu: expected %s, saw \"%s = %s\"",
+		       filterfilename, line, whatexpected(state),
+		       param, value);
+		if (state != RF_WANTNG) state = RF_WANTNGORPAT;
+		rv = FALSE;
 	    }
+	} else {
+	    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+		   "%s: Cannot parse line %lu: \"%s\"", filterfilename,
+		   line, l);
+	    rv = FALSE;
 	}
     }
-    debug = debugmode;
     fclose(ff);
-    if (ng) free(ng);
+    if (ng)
+	free(ng);
     free(param);
     free(value);
+    if (state != RF_WANTNG && state != RF_WANTNGORPAT) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "%s: premature end of file, expected %s",
+	       filterfilename, whatexpected(state));
+	rv = FALSE;
+    }
+
     if (filter == NULL) {
 	ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 	       "filterfile %s did not contain any valid patterns",
 	       filterfilename);
-	return FALSE;
-    } else {
-	return TRUE;
     }
+    return rv;
 }
 
 /*
@@ -383,7 +416,7 @@ killfilter(const struct filterlist *f, const char *hdr)
     }
     score = 0;
     match = -1;
-    while (f) {
+    for (; f; f = f->next) {
 	g = f->entry;
 	ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: trying filter for %s",
 	       g->newsgroup);
@@ -457,10 +490,14 @@ killfilter(const struct filterlist *f, const char *hdr)
 	    else
 		match = PCRE_ERROR_NOMATCH;
 	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "maxcrosspost filter: newsgroups %ld, limit %ld,"
+		   "maxcrosspost filter: newsgroups %ld, limit %ld, "
 		   "returned %d", l, g->limit, match);
 	}
+
 	if (match == 0) {
+	    /* this should have been caught by readfilter */
+	    if (!g->action) internalerror();
+
 	    /* article matched pattern/limit: what now? */
 	    if (strcasecmp(g->action, "select") == 0) {
 		return FALSE;
@@ -470,7 +507,6 @@ killfilter(const struct filterlist *f, const char *hdr)
 		score += strtol(g->action, NULL, 10);
 	    }
 	}
-	f = f->next;
     }
     if (score < 0)
 	return TRUE;

@@ -8,6 +8,8 @@
 #include "critmem.h"
 #include "ln_log.h"
 #include "get.h"
+#include "mastring.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -557,31 +559,27 @@ fixxover(void)
 {
     DIR *d;
     struct dirent *de;
-    char *s;
-    const char *b[] = { 0, 0, 0 };
+    mastr *s = mastr_new(1024);
 
-    b[0] = spooldir;
-    b[1] = "/interesting.groups";
-    b[2] = 0;
-    s = memstrcat(b);
-    if (s) {
-	d = opendir(s);
-	if (!d) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "opendir %s: %m", s);
-	    return;
-	}
+    mastr_vcat(s, spooldir, "/interesting.groups", 0);
 
-	while ((de = readdir(d))) {
-	    if ((de->d_name[0] != '.') && findgroup(de->d_name)) {
-		if (chdirgroup(de->d_name, FALSE)) {
-		    getxover();
-		    freexover();
-		}
+    d = opendir(mastr_str(s));
+    if (!d) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "opendir %s: %m", mastr_str(s));
+	mastr_delete(s);
+	return;
+    }
+
+    while ((de = readdir(d))) {
+	if ((de->d_name[0] != '.') && findgroup(de->d_name)) {
+	    if (chdirgroup(de->d_name, FALSE)) {
+		getxover();
+		freexover();
 	    }
 	}
-	closedir(d);
-	free(s);
     }
+    closedir(d);
+    mastr_delete(s);
 }
 
 void

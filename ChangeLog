@@ -1,5 +1,77 @@
+2001-12-27  Matthias Andree  <matthias.andree@gmx.de>
+
+        === RELEASE 2.0b8_ma8rc8 ===
+	* nntpd.c: Do not store postings without approved header. Fix by
+	Jörg Dietrich.
+
+	=== RELEASE 2.0b8_ma8rc7 ===
+	* Makefile.in: Fix "groupinfo missing" reported by Arne Hanssen.
+	* texpire.c: Use MKDIR_MODE for mkdir.
+	* store.c: Use MKDIR_MODE for mkdir.  Fix spurious whitespace.
+	* queues.c: Fix spurious whitespace.
+	* newsq.c: Also display failed.postings queue.
+	* miscutil.c: Use MKDIR_MODE for mkdir.
+	* mkdir_parent.c: Add mode_t mode to mkdir_parent argument list.
+	* ln_dir.h: Add mode_t mode to mkdir_parent argument list.
+	* leafnode.h: List MKDIR_MODE, default to 0750. Used for all
+	directories leafnode creates.
+	* fetchnews.c: Fix "findgroup(...) called without prior
+	readactive()", reported by Alexander Reinwarth and Michael Mauch.
+	* configutil.c: Correctly initialize dontpost field to FALSE (by
+	default, post to all servers).
+	* configure.in: Bump version.
+
+2001-12-24  Matthias Andree  <matthias.andree@gmx.de>
+
+	=== RELEASE 2.0b8_ma8rc6_jack_frost ===
+	* TODO: update.
+	* README.html: Document xinetd.
+	* fetchnews.c: No longer segfault when receiving EOF instead of an
+	article.  Abort the fetch if ARTICLE is replied to with 5XX or
+	EOF.  Add some comments.  Let getgroup detect error conditions
+	returned by chdirgroup.  Let main detect error conditions returned
+	by readfilter and refuse operation in that case.
+
+	* nntputil.c: Refuse to work with servers that have NNTPcache V2.3
+	in their greeting. NNTPcache v2.3.3 is still in widespread use,
+	but has severe Y2k bugs. This should direct inquiries to the
+	proper address.
+
+2001-12-23  Matthias Andree  <matthias.andree@gmx.de>
+
+	* leafnode.h: Add internalerror() macro.
+	* filterutil.c: The filter parser now tracks its state. This
+	should bring solid error detection and more precise error
+	reporting.  This should fix all breakage reported by Leopold
+	Tötsch.
+
+2001-12-22  Matthias Andree  <matthias.andree@gmx.de>
+
+	* configure.in: Bump version to rc6.
+	* miscutil.c: Fix documentation.  Drop a spurious abort() and
+	return error instead.
+
 2001-12-20  Matthias Andree  <matthias.andree@gmx.de>
 
+	=== RELEASE 2.0b8_ma8rc5 ===
+	* UPDATING: Add note about texpire -r.
+	* texpire.c: Remove group_relinked stuff, it's obsolete.  Make
+	repair_spool (-r) mode reinsert message.id files into the right
+	message.id/*/ subdirectory.  Skip file names beginning with a dot
+	in message.id/*/
+
+	* README.html: More updates. Report by Leopold Tötsch.
+	* leafnode.8.in: Updates. Report by Leopold Tötsch.
+	* fetchnews.8.in: Fix reference, it's fetchnews(5) not leafnode(5)
+	that describes the filters.
+	* configutil.c: Fix unclear wording as to the global vs server
+	ordering. Reported by Leopold Tötsch.
+
+	* configure.in: Bump version to ma8rc5.
+	* config.example: Updates and reordering. Report by Leopold
+	Tötsch.
+
+	=== RELEASE 2.0b8_ma8rc4 ===
 	* configure.in: Bump version.
 	* nntpd.c: Revert the pseudoarticle artno magic, it was evil and
 	broke regular HEAD/LAST/ARTICLE/BODY commands.

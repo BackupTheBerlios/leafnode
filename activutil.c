@@ -190,8 +190,7 @@ writeactive(void)
     mastr_vcat(s, spooldir, GROUPINFO ".new", 0);
     fd = open(mastr_str(s), O_WRONLY | O_CREAT | O_EXCL, 0664);
     if (fd < 0) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m",
-		   mastr_str(s));
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", mastr_str(s));
 	goto bye;
     }
 
@@ -217,11 +216,19 @@ writeactive(void)
 	if (*(g->name)) {
 	    char num[30];
 	    /* do error checking at end of loop */
- 	    fputs(g->name, a); fputc('\t', a);
- 	    fputc(g->status, a); fputc('\t', a);
- 	    str_ulong(num, g->last); fputs(num, a); fputc('\t', a);
- 	    str_ulong(num, g->first); fputs(num, a); fputc('\t', a);
- 	    str_ulong(num, g->age); fputs(num, a); fputc('\t', a);
+	    fputs(g->name, a);
+	    fputc('\t', a);
+	    fputc(g->status, a);
+	    fputc('\t', a);
+	    str_ulong(num, g->last);
+	    fputs(num, a);
+	    fputc('\t', a);
+	    str_ulong(num, g->first);
+	    fputs(num, a);
+	    fputc('\t', a);
+	    str_ulong(num, g->age);
+	    fputs(num, a);
+	    fputc('\t', a);
 	    fputs(g->desc && *(g->desc) ? g->desc : "-x-", a);
 	    fputc('\n', a);
 	    if ((err = ferror(a)))
@@ -255,7 +262,7 @@ writeactive(void)
 	ln_log_sys(LNLOG_SINFO, LNLOG_CTOP,
 		   "wrote groupinfo with %lu lines.", (unsigned long)count);
     }
- bye:
+  bye:
     mastr_delete(c);
     mastr_delete(s);
 }
@@ -327,8 +334,8 @@ readactive(void)
 	    /* old format groupinfo, must refresh */
 	}
 	if (!r || (*r++ = '\0',
- 		   sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
- 			  &g->first, &g->age) != 4)) {
+		   sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
+			  &g->first, &g->age) != 4)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "Groupinfo file possibly truncated or damaged: %s", p);
 	    break;

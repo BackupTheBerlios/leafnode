@@ -63,3 +63,4 @@ texpire.o
 try.c try-indent.c
 vsnprintf.o
 xoverutil.o
+lsort

@@ -1,17 +1,15 @@
-## This is the NNTP server leafnode fetches its news from.
-## You need read and post access to it. Mandatory.
-server = news.hiof.no
+################################################################
+##                                                            ##
+## NOTE: Server declarations now go below the global options. ##
+##                                                            ##
+################################################################
 
 ## Unread discussion threads will be deleted after this many days if
 ## you don't define special expire times. Mandatory.
 expire = 20
 
-##
-## All the following parameters are optional
-##
-
 ## To aid in debugging, here is a switch. Sum up the debug info you
-## want, or just use 2047 for "all"
+## want, or just use 2047 for "all". Optional.
 # MISC (unused): 1
 # I/O (net, disk): 2
 # Sort functions: 4
@@ -25,22 +23,25 @@ expire = 20
 # Cancelling and Superseding: 1024
 # debugmode = 1001
 
-## Non-standard expire times (glob(7) wildcard constructs possible)
-# groupexpire comp.os.linux.* = 5 # groups too big to hold articles 20 days
-# groupexpire any.local.newsgroup = 100 # very interesting, hold longer
+## Non-standard expire times (glob(7) wildcard constructs possible). Optional.
+## SYNTAX DIFFERS FROM THAT OF LEAFNODE 1.9!
+## groups too big to hold articles 20 days:
+# groupexpire = comp.os.linux.* 5
+## very interesting, hold longer:
+# groupexpire = any.local.newsgroup 100
 
 ## How many ARTICLE commands to we stuff down to the server in advance
 ## of the article just read. Some servers may not get this right,
-## set it to 1 in that case.
+## set it to 1 in that case. Optional, defaults to 5.
 # windowsize = 50
 
 ## Never fetch more than this many articles from one group in one run.
 ## Be careful with this; setting it much below 1000 is probably a bad
-## idea.
+## idea. Optional.
 # maxfetch = 2000
 
 ## Fetch only a few articles when we subscribe a new newsgroup. The
-## default is to fetch all articles.
+## default is to fetch all articles. Optional.
 # initialfetch = 100
 
 ## If you want to use leafnode like an offline newsreader (e.g. Forte
@@ -50,72 +51,64 @@ expire = 20
 ## This can save a huge amount of bandwith if only few articles are really
 ## read from groups with lots of postings.
 ## This feature works not very well with Netscape, though (which is not
-## a fault of Leafnode).
+## a fault of Leafnode). Optional.
 # delaybody = 0
 
-## To avoid spam, you can select the maximum number of crosspostings
-## that are allowed in incoming postings. Setting this below 5 is
-## probably a bad idea. The default is unlimited crossposting.
-# maxcrosspost = 5
-
-## If you suffer from repeatedly receiving old postings (this happens
-## sometimes when an upstream server goes into hiccup mode) you can
-## refuse to receive them with the parameter "maxage" which tells the
-## maximum allowed age of an article in days. The default maxage is 10
-## days.
-# maxage = 10
-
-## maxlines will make fetch reject postings that are longer than a certain
-## amount of lines.
-# maxlines = 100
-
-## minlines will make fetch reject postings that are shorter than a certain
-## amount of lines.
-# minlines = 2
-
-## maxbytes will make fetch reject postings that are larger
-# maxbytes = 50000
+##
+## maxcrosspost, maxage, maxlines, minlines, maxbytes now are configured
+## in filterfile.
+##
 
 ## timeout_short determines how many days fetch gets a newsgroup which
-## has been accidentally opened. The default is two days.
-# timeout_short = 1
+## has been accidentally opened. The default is two days. Optional.
+# timeout_short = 2
 
 ## timeout_long determines how many days fetch will wait before not getting
-## an unread newsgroup any more. The default is seven days.
-# timeout_long = 6
+## an unread newsgroup any more. The default is seven days. Optional.
+# timeout_long = 7
 
 ## timeout_active determines how many days fetch will wait before re-reading
-## the whole active file. The default is 90 days.
-# timeout_active = 365
+## the whole active file. The default is 90 days. Optional.
+# timeout_active = 90
 
 ## If you want to have your newsreader score/kill on Xref: lines, you might
-## want to uncomment this.
+## want to uncomment this. Optional.
 # create_all_links = 1
 
 ## If you want bogus files such as core deleted from newsgroups,
-## uncomment this.
+## uncomment this. Optional.
 # killbogus = 1
 
 ## If you want to filter out certain regular expressions in the header,
 ## create a "filterfile" (how this is done is explained in the README)
-## and set
-# filterfile = /path/to/your/filterfile
+## and set (optional):
+# filterfile = /etc/leafnode/filterfile
 
 ## If your newsreader does not supply a Message-ID for your postings
 ## Leafnode will supply one, using the hostname of the machine it is
-## running on.  If this hostname is not suitable, this parameter can be 
+## running on.  If this hostname is not suitable, this parameter can be
 ## used to override it.  Do not use a fantasy name, it may interfere with
 ## the propagation of your messages.  Most modern newsreaders do provide
-## a Message-ID.
+## a Message-ID. Optional.
 # hostname = host.domain.country
 
+############################################
+##                                        ##
+## SERVER declarations go below this line ##
+##                                        ##
+############################################
+
+## This is the NNTP server leafnode fetches its news from.
+## You need read and post access to it. Mandatory.
+server = news.hiof.no
+
 ## I have free access to my news server. If you don't have, comment out
-## the following two lines and change them accordingly.
+## the following two lines and change them accordingly. Optional.
 # username = gulbrandsen
 # password = secret
 
 ## Standard news servers run on port 119. If your newsserver doesn't, comment
-## out the following line and change it accordingly.
+## out the following line and change it accordingly. Optional.
 # port = 8000
 
 ## This is another news server which stores some groups that are not
@@ -125,7 +118,7 @@ expire = 20
 # username = xenu
 # password = secret
 
-## This is a news server which does not understand the 
+## This is a news server which does not understand the
 ## "LIST NEWSGROUP news.group" command. For this reason, we don't try to
 ## download newsgroups descriptions when getting new newsgroups. This is
 ## achieved by putting "nodesc = 1" somewhere behind the server

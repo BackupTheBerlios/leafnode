@@ -58,7 +58,7 @@ touch(const char *name)
     int fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     int r, e;
     if (fd >= 0) {
-	r = ftruncate(fd, 0); /* actually update mtime */
+	r = ftruncate(fd, 0);	/* actually update mtime */
 	e = errno;
 	(void)close(fd);
 	errno = e;
@@ -105,8 +105,7 @@ store_stream(FILE * in /** input file */ ,
 	     long maxbytes /** maximum byte count, -1 == unlimited */ )
 {
     int rc = -1;		/* first, assume something went wrong */
-    const char *ta[3];
-    char *tmpfn;
+    mastr *tmpfn = mastr_new(4095);
     const char *line = 0;
     char *mid = 0, *m;
     char *ngs = 0;
@@ -127,24 +126,20 @@ store_stream(FILE * in /** input file */ ,
     ssize_t s;
     mastr *ln = mastr_new(4095);	/* line buffer */
 
-    ta[0] = spooldir;
-    ta[1] = "/temp.files/store_XXXXXXXXXX";
-    ta[2] = 0;
-    tmpfn = memstrcat(ta);
+    mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", 0);
 
     /* check for OOM */
-    if (!tmpfn)
-	return -1;
     if (!head) {
-	free(tmpfn);
+	mastr_delete(tmpfn);
 	return -1;
     }
 
     /* make temp. file */
-    tmpfd = safe_mkstemp(tmpfn);
+    tmpfd = safe_mkstemp(mastr_modifyable_str(tmpfn));
     if (tmpfd < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "error in mkstemp(\"%s\"): %m", tmpfn);
-	free(tmpfn);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "error in mkstemp(\"%s\"): %m",
+	       mastr_str(tmpfn));
+	mastr_delete(tmpfn);
 	return -1;
     }
 
@@ -152,8 +147,8 @@ store_stream(FILE * in /** input file */ ,
     if (!tmpstream) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot fdopen(%d): %m", tmpfd);
 	log_close(tmpfd);
-	log_unlink(tmpfn);
-	free(tmpfn);
+	log_unlink(mastr_str(tmpfn));
+	mastr_delete(tmpfn);
 	return -1;
     }
 
@@ -296,13 +291,13 @@ store_stream(FILE * in /** input file */ ,
 	    if (g) {
 		int ls = 0;
 		(void)chdirgroup(name, TRUE);
-		if (touch(LASTPOSTING)) 
+		if (touch(LASTPOSTING))
 		    BAIL(-1, "cannot touch " LASTPOSTING);
 		for (;;) {
 		    str_ulong(nb, ++g->last);
 		    /* we use sync_link on the always-open file below */
 		    /* ls = !sync_link(tmpfn, nb); */
-		    ls = !link(tmpfn, nb);
+		    ls = !link(mastr_str(tmpfn), nb);
 		    if (ls)
 			break;
 		    if (errno == EEXIST)
@@ -310,8 +305,8 @@ store_stream(FILE * in /** input file */ ,
 		    /* FIXME: if EEXIST happens, obtain water marks anew
 		       and retry */
 		    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-			   "error linking %s into %s for %s: %m", tmpfn,
-			   nb, name);
+			   "error linking %s into %s for %s: %m",
+			   mastr_str(tmpfn), nb, name);
 		    break;
 		}
 		if (!ls) {
@@ -345,25 +340,25 @@ store_stream(FILE * in /** input file */ ,
 	    BAIL(-1, "write error");
     }
 
-    if (fflush(tmpstream)) 
+    if (fflush(tmpstream))
 	BAIL(-1, "write error");
 
     /* now create link in message.id */
     m = lookup(mid);
-    if (link(tmpfn, m)) {
-	if (errno == ENOENT) { /* message.id file missing, create */
-	    if (0 == mkdir_parent(m))
-		if (0 == link(tmpfn, m)) goto cont;
+    if (link(mastr_str(tmpfn), m)) {
+	if (errno == ENOENT) {	/* message.id file missing, create */
+	    if (0 == mkdir_parent(m, MKDIR_MODE))
+		if (0 == link(mastr_str(tmpfn), m))
+		    goto cont;
 	}
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-	       "store: cannot link %s to %s: %m", tmpfn, m);
+	       "store: cannot link %s to %s: %m", mastr_str(tmpfn), m);
 	rc = -1;
 	goto bail;
     }
- cont:
+  cont:
     if (log_fsync(fileno(tmpstream))) {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-	       "store: cannot fsync: %m");
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "store: cannot fsync: %m");
 	log_unlink(m);
 	rc = -1;
 	goto bail;
@@ -410,10 +405,8 @@ store_stream(FILE * in /** input file */ ,
 	}
 	fclose(tmpstream);
     }
-    if (tmpfn) {
-	log_unlink(tmpfn);
-	free(tmpfn);
-    }
+    log_unlink(mastr_str(tmpfn));
+    mastr_delete(tmpfn);
     return rc;
 }
 

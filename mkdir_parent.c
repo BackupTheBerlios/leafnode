@@ -14,14 +14,15 @@
 /** mkdir -p like function, but we only treat parents,
  * so passing in a file name is safe.
  */
-int mkdir_parent(const char *s) {
+int mkdir_parent(const char *s, mode_t mode) {
     char *t = strdup(s);
     char *u = t;
-    if(!t) return -1;
+    if (!t)
+	return -1;
 
-    while(*u && (u = strchr(u + 1, '/'))) {
+    while (*u && (u = strchr(u + 1, '/'))) {
 	*u = '\0';
-	if (*t && mkdir(t, 0750) && errno != EEXIST) {
+	if (*t && mkdir(t, mode) && errno != EEXIST) {
 	    free(t);
 	    return -1;
 	}

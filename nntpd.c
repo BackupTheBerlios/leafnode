@@ -45,6 +45,10 @@
 #include <sys/time.h>
 #include <utime.h>
 
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 #ifdef DEBUG_DMALLOC
 #include <dmalloc.h>
 #endif
@@ -459,7 +463,8 @@ allowposting(void)
 	if (NOPOSTING) {
 	    char *p;
 	    for (p = NOPOSTING; *p; p++) {
-		if (iscntrl((unsigned char) *p)) *p = '_';
+		if (iscntrl((unsigned char)*p))
+		    *p = '_';
 	    }
 	    allowpost = 0;
 	}
@@ -598,58 +603,51 @@ markinterest(const struct newsgroup *group)
     int not_yet_interesting;
     time_t now;
     FILE *f;
-    const char *sn[4];
-    char *s;
-
-    sn[0] = spooldir;
-    sn[1] = "/interesting.groups/";
-    sn[2] = group->name;
-    sn[3] = 0;			/* do not forget this */
+    mastr *s;
 
     if (islocalgroup(group->name))
 	return 0;		/* local groups don't have to be marked */
 
     not_yet_interesting = 0;
 
-    s = memstrcat(sn);
-    if (s) {
-	if (stat(s, &st) == 0) {
-	    /* already marked interesting, update atime */
-	    now = time(0);
-	    buf.actime = (now < st.st_atime) ? st.st_atime : now;
-	    buf.modtime = st.st_mtime;
-	    /* NOTE: as a side effect, the ctime is also set to now, so effectively, we don't need to care for  */
-	    if (utime(s, &buf)) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP,
-		       "Cannot update timestamp on %s: %m", s);
-		not_yet_interesting = 1;
-	    }
-	} else {
+    s = mastr_new(1024);
+    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, 0);
+
+    if (stat(mastr_str(s), &st) == 0) {
+	/* already marked interesting, update atime */
+	now = time(0);
+	buf.actime = (now < st.st_atime) ? st.st_atime : now;
+	buf.modtime = st.st_mtime;
+	/* NOTE: as a side effect, the ctime is also set to now, so effectively, we don't need to care for  */
+	if (utime(mastr_str(s), &buf)) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
+		   "Cannot update timestamp on %s: %m", mastr_str(s));
 	    not_yet_interesting = 1;
 	}
-
-	if (not_yet_interesting) {
-	    f = fopen(s, "w");
-	    if (f) {
-		if (fclose(f)) {
-		    int e = errno;
-		    ln_log(LNLOG_SERR, LNLOG_CGROUP,
-			   "Could not write to %s: %m", s);
-		    return e;
-		} else {
-		    return 0;
-		}
-	    } else {
-		int e = errno;
-		ln_log(LNLOG_SERR, LNLOG_CGROUP, "Could not create %s: %m", s);
-		return e;
-	    }
-	}
-	free(s);
-	return 0;
     } else {
-	return errno;
+	not_yet_interesting = 1;
     }
+
+    if (not_yet_interesting) {
+	f = fopen(mastr_str(s), "w");
+	if (f) {
+	    if (fclose(f)) {
+		int e = errno;
+		ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		       "Could not write to %s: %m", mastr_str(s));
+		return e;
+	    } else {
+		return 0;
+	    }
+	} else {
+	    int e = errno;
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "Could not create %s: %m",
+		   mastr_str(s));
+	    return e;
+	}
+    }
+    mastr_delete(s);
+    return 0;
 }
 
 /* change to group - note no checks on group name */
@@ -1413,7 +1411,6 @@ dopost(void)
 		return;
 	    }
 	    approved = getheader(inname, "Approved:");
-	    free(modgroup);
 	}
 
 	if (!moderator && !islocal(groups)) {
@@ -1429,6 +1426,11 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, s);
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
+		log_unlink(inname);
+		return;
+	    }
+	    if (modgroup && !approved) {
+		free(modgroup);
 		log_unlink(inname);
 		return;
 	    }
@@ -1663,7 +1665,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s\r\n", group->name);
 		printf(".\r\n");
-	    } else if (!strcasecmp(header, "Path:")) { 
+	    } else if (!strcasecmp(header, "Path:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s!not-for-mail\r\n", owndn ? owndn : fqdn);
 		printf(".\r\n");
@@ -2213,8 +2215,8 @@ main(int argc, char **argv)
     gmt_off = gmtoff();		/* get difference between local time and GMT */
     printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
 	   201 - allowposting(), version, owndn ? owndn : fqdn,
-	   allowposting() ? "" : " (No posting.)",
-	   allowposting() ? "" : getenv("NOPOSTING"));
+	   allowposting()? "" : " (No posting.)",
+	   allowposting()? "" : getenv("NOPOSTING"));
     fflush(stdout);
     main_loop();
     freexover();

@@ -131,7 +131,17 @@ machine it will be compiled on. Type
 <pre>
          sh ./configure
 </pre>
-to create an appropriate Makefile and config.h.
+to create an appropriate Makefile and config.h. If leafnode cannot find your
+PCRE, it is probably an old version without pcre-config, or pcre-config is not
+in your path. Either add the directory containing pcre-config to your $PATH, or
+call configure like this (we assume PCRE is in /opt/pcre-3.7):
+
+<pre>
+         env CPPFLAGS="-I/opt/pcre-3.7" LDFLAGS="-L/opt/pcre-3.7" sh ./configure
+</pre>
+
+NOTE: on some machines, when PCRE is linked against a shared library, you will need
+to add /opt/pcre-3.7 to LD_LIBRARY_PATH or to /etc/ld.so.conf.
 
 <P>The configure script can take some flags (replace DIR by a directory name,
 FILE by a file name):
@@ -187,10 +197,14 @@ to DESTDIR in a future version though.
 "Updating" below.
 
 <LI>Edit $(LIBDIR)/config. $(LIBDIR) defaults to /etc/leafnode, but can be
-adjusted in the Makefile. For documentation, see below or config.example
-and leafnode(8). It is absolutely necessary to change the "server"
-parameter to point it to your upstream news server (generally the
-one of your IP provider). Make sure the environment variable $NNTPSERVER
+adjusted at build time. For documentation, see below or config.example
+and leafnode(8). <strong>Mandatory edits to the config file are:</STRONG>
+<UL>
+<LI>server -- this must point to your upstream news server.
+<LI>expire -- how many days will downloaded articles remain in the spool.
+</UL>
+
+Make sure the environment variable $NNTPSERVER
 or /etc/nntpserver points to your own host so clients will talk to
 leafnode rather than try to go to the upstream server.
 
@@ -221,22 +235,52 @@ ftp://ftp.porcupine.org/pub/security/, it's in tcp_wrappers, and install
 it. It's preferable if you compile it with -DHOSTS_OPTIONS, and the
 examples below assume you did.
 
-<LI>Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
+<LI>Choose either of these alternatives:
+<UL>
+<LI>Alternative #1: If your system uses inetd (most commercial unices,
+*BSD). Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
 NNTP connections.  Here is my inetd.conf line:
 <pre>
 nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
 </pre>
 
 <I>Note: some systems install tcpd to a different path, but it's
-uncommon. Change the first path accordingly if your tcpd resides in /usr/etc or /usr/lbin.</i>
+uncommon. Change the first path accordingly if your tcpd resides in
+/usr/etc or /usr/lbin.</i>
 
-<p>After these changes, force inetd to read the changed configuration file
+After these changes, force inetd to read the changed configuration file
 by sending it the HANGUP signal. To achieve this, issue the following
 command (as root):
 <pre>
 kill -HUP `cat /var/run/inetd.pid`
 </pre>
 
+<LI>Alternative #2: If your system has xinetd instead. Add this to your
+xinetd.conf (this example assumes xinetd 2.3.3 or newer):
+
+<pre>
+service nntp
+{
+        flags           = NAMEINARGS NOLIBWRAP
+        socket_type     = stream
+        protocol        = tcp
+        wait            = no
+        user            = news
+        server          = /usr/sbin/tcpd
+        server_args     = /usr/local/sbin/leafnode
+        instances       = 7
+        per_source      = 3
+}
+</pre>
+
+Then send xinetd an USR2 signal to make it reread its configuration. See
+the <B>xinetd.conf</B>(5) manual page for details.
+
+<I>Note: some systems install tcpd to a different path, but it's
+uncommon. Change the first path accordingly if your tcpd resides in
+/usr/etc or /usr/lbin.</i>
+
+</UL>
 <LI>Write the following into /etc/hosts.deny:
 <pre>
 leafnode: ALL
@@ -288,8 +332,8 @@ to read.
 
 <h3 align=center>3.1 Update from versions &lt; 2.0b8_ma8</h3>
 
-<p>The local.groups and groupinfo files have changed from any former
-version to 2.0b8_ma8.
+<p>The local.groups and groupinfo files and the hash function for message.id
+have changed from any former version to 2.0b8_ma8.
 
 <P><STRONG>IMPORTANT:</STRONG>To fix the "remote" groups, run <KBD>fetchnews
 -f</KBD> -- it will take some time, because if refetches the whole
@@ -315,6 +359,8 @@ Before: local.test some test group
 </blockquote>
 
 <br>Use the real TAB character rather than TAB.
+
+<br>To fix the spool for message.ids, run <kbd>texpire -r</kbd>
 
 <br>The changes written in section 3.2 below also apply.
 
@@ -397,8 +443,10 @@ programs of the leafnode suite. It defaults to /etc/leafnode/config,
 but several configuration files can be used at once by employing
 the -F switch of the programs.
 
-<p>
-The file contains two mandatory and a number of optional parameters.
+<p>The file contains two mandatory and a number of optional parameters.
+
+<p>NOTE: Global options must come first, server-specific options below the
+server = lines.
 
 <p><b>Mandatory parameters</b>
 
@@ -483,26 +531,12 @@ they are posted to, making all these newsgroups turn up in the
 Xref: header.
 
 <p>
-<blockquote>maxfetch = 1000</blockquote>
-This makes fetchnews fetch at most 1000 articles per newsgroup per
-server. It is not really sensible (because you won't see all the
-traffic in a group), but retained for compatibility reasons.
-
-<p>
-<blockquote>initialfetch = 100</blockquote>
-If you subscribe to a new group, fetchnews will try to fetch all
-articles in that group which are on your upstream server. Obviously,
-this may cause a lot of traffic if the group is very busy. Therefore
-you can restrict the maximal number of articles to fetch in the
-first run with this option.
-
-<p>
-<blockquote>groupexpire a.news.group = 20</blockquote>
+<blockquote>groupexpire = a.news.group 7</blockquote>
 As outlined above, texpire will expire threads after "expire" days.
 If you want to adjust expiry times for certain groups, you may use
 the "groupexpire" parameter to do just that. You can specify groups
 or use wildcards; for example
-<blockquote>groupexpire *.announce = 20</blockquote>
+<blockquote>groupexpire = *.announce 30</blockquote>
 will affect expiry times of all groups ending with ".announce".
 
 <p>
@@ -529,6 +563,8 @@ server every 90 days. This interval can be changed by setting
 frequently will keep it a little bit smaller but will increase
 the on-line time.
 
+<!--
+delaybody does not currently work well, if at all.
 <p>
 <blockquote>delaybody = 1</blockquote>
 This option switches fetchnews into a mode where only the headers
@@ -536,16 +572,18 @@ of articles are fetched for visual inspection. Only the articles
 read in the newsreader will be retrieved the next time fetchnews
 is called. This can save a huge amount of disk space and download
 time but requires more manual intervention on the user side.
+//-->
 
 <p>
-<blockquote>debugmode = 1</blockquote>
+<blockquote>debugmode = 260</blockquote>
 This option forces the leafnode programs into logging lots of
 information via the syslog daemon. It is only useful if you
-want to hunt down bugs.
+want to hunt down bugs. See config.example for an explanation of the number here.
 
 <h3 align=center>4.2. The filter file</h3>
 
-<hr>
+<hr>The filter file format is currently described in fetchnews(5). Type man 5
+fetchnews or man -s 5 fetchnews to see the description.
 
 <h3 align=center>5. LOCAL NEWSGROUPS</h3>
 

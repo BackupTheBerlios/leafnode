@@ -121,33 +121,6 @@ free_strlist(char **hdl /** string array to free */ )
     }
 }
 
-/* concatenate all strings in given order into a new string which is
-   malloc()ed, return that string or 0 for error */
-char *
-memstrcat(const char *a[])
-{
-    const char **b = a;
-    char *ret, *t;
-    size_t s = 0;
-
-    while (*b) {
-	s += strlen(*(b++));
-    }
-
-    ret = (char *)malloc(s + 1);
-    if (ret) {
-	t = ret;
-	b = a;
-	while (*b) {
-	    t = mastrcpy(t, *b++);
-	}
-    } else {
-	errno = ENOMEM;
-    }
-
-    return ret;
-}
-
 /** Check if 2nd string is the same as the beginning of first string
  *  case-insensitively. 
  * \return 

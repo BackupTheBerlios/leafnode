@@ -1,5 +1,8 @@
 NOTE: the local.groups and groupinfo files have changed from any former
-version to 2.0b8_ma8pre.
+version to 2.0b8_ma8pre. Also, the hash function has changed from any
+former releases Cornelius did.
+
+1. FIX local.groups:
 
 To fix local.groups, if you have perl installed:
   perl -ple 's /\s+/\ty\t/' -i.bak /etc/leafnode/local.groups
@@ -14,6 +17,7 @@ After:  local.testTAByTABsome test group
 
 Use the real TAB character rather than TAB.
 
+2. To fix the "remote" groups, run fetchnews -f
 
-
-To fix the "remote" groups, run fetchnews -f.
+3. To fix the spool to be able to access old articles by Message-IDs,
+   run texpire -r

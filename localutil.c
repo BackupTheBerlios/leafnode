@@ -126,14 +126,14 @@ readlocalgroups(void)
 	*p++ = '\0';
 	/* l points to group name, u to status, p to description */
 	if (strcmp(u, "y") && strcmp(u, "n") && strcmp(u, "m")) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, 
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "malformatted %s: status is not one of y, n, m", s);
 	    abort();
 	}
 	if (*l) {
 	    insertgroup(l, u[0], 1, 0, time(NULL), *p ? p : "local group");
 	    insertlocal(l);
-  	}
+	}
     }
     log_fclose(f);
     mergegroups();

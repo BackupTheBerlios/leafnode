@@ -13,7 +13,8 @@
  * the caller. (c) 2001 Joerg Dietrich.
  */
 char
-*getmoderator(const char *group)
+*
+getmoderator(const char *group)
 {
     char *line, *p;
     char address[512];
@@ -23,42 +24,41 @@ char
     mastr_vcat(modpath, libdir, "/moderators", 0);
     f = fopen(mastr_str(modpath), "r");
     if (!f) {
-        ln_log(LNLOG_SERR, LNLOG_CTOP, "Could not open %s: %m",
-               mastr_str(modpath));
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "Could not open %s: %m",
+	       mastr_str(modpath));
 	mastr_delete(modpath);
-        return NULL;
+	return NULL;
     }
     while ((line = getaline(f))) {
 	if (!*line || line[0] == '#')
 	    continue;
-        if (!(p = strchr(line, ':'))) {
-            /* invalid line */
+	if (!(p = strchr(line, ':'))) {
+	    /* invalid line */
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 		   "warning: moderator line \"%s\" malformatted, skipping",
 		   line);
-            continue;
+	    continue;
 	}
-        *p++ = '\0';
-        if (wildmat(group, line)) {
+	*p++ = '\0';
+	if (wildmat(group, line)) {
 	    char *x;
 	    if ((x = strstr(p, "%s"))) {
 		char *g = critstrdup(group, "getmoderator");
 		char *t;
-		for(t=g; *t; t++)
+		for (t = g; *t; t++)
 		    if (*t == '.')
 			*t = '-';
 
 		*x = '\0';
-		snprintf(address, sizeof address, "%s%s%s",
-			 p, g, x+2);
+		snprintf(address, sizeof address, "%s%s%s", p, g, x + 2);
 		free(g);
 	    } else {
 		mastrncpy(address, p, sizeof address);
 	    }
-            fclose(f);
+	    fclose(f);
 	    mastr_delete(modpath);
-            return strdup(address);
-        }
+	    return strdup(address);
+	}
     }
     fclose(f);
     mastr_delete(modpath);
@@ -71,7 +71,8 @@ char
  * Caller must free returned pointer. (c) 2001 Joerg Dietrich.
  */
 char
-*checkstatus(const char *groups, const char status)
+*
+checkstatus(const char *groups, const char status)
 {
     char *grp;
     char *p, *q;
@@ -82,21 +83,22 @@ char
 
     SKIPLWS(grp);
     while (grp && *grp) {
-        q = strchr(grp, ',');
-        if (q) {
-            *q++ = '\0';
+	q = strchr(grp, ',');
+	if (q) {
+	    *q++ = '\0';
 	    SKIPLWS(q);
 	}
 
-        g = findgroup(grp);
-        if (g) {
-            if (g->status == status) {
-                free(p);
-                return strdup(g->name);
-            }
-        }
-        grp = q;
-	if (grp) SKIPLWS(grp);
+	g = findgroup(grp);
+	if (g) {
+	    if (g->status == status) {
+		free(p);
+		return strdup(g->name);
+	    }
+	}
+	grp = q;
+	if (grp)
+	    SKIPLWS(grp);
     }
     free(p);
     return NULL;

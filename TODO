@@ -19,7 +19,10 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
-0.0 Alexander Reinwarth: "does it work on FreeBSD?"
+0.0 AUTOMAKE
+
+0.0: getgroup callers must handle error (fetchnews.c 1285)
+     Report by William J. Brinkman
 
 0.0 rnews is currently deactivated. Work in progress. Will have to
     reintroduce rnews and find a way to feed news batches to UUCP mode

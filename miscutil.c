@@ -460,7 +460,7 @@ makedir(char *d)
 	if (!chdir(p))
 	    continue;
 	if (errno == ENOENT)
-	    if (mkdir(p, 0775)) {
+	    if (mkdir(p, MKDIR_MODE)) {
 		ln_log(LNLOG_SERR, LNLOG_CGROUP, "mkdir %s: %m", d);
 		exit(EXIT_FAILURE);
 	    }
@@ -472,9 +472,12 @@ makedir(char *d)
     return 1;
 }
 
-/* chdir to the directory of the argument if it's a valid group */
+/** convert newsgroup argument to a directory name an chdir there.
+ * \return: 1 for success, 0 for error
+ */
 int
-chdirgroup(const char *group, int creatdir)
+chdirgroup(const char *group,
+	   int creatdir /** if true, create missing directories */)
 {
     char *p;
     char s[PATH_MAX];		/* FIXME: possible overrun below */
@@ -497,7 +500,6 @@ chdirgroup(const char *group, int creatdir)
 	s[strlen(spooldir)] = '\0';
 	if (chdir(s)) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chdir(%s): %m", s);
-	    abort();
 	}
     }
     return 0;

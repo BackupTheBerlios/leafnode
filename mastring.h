@@ -33,4 +33,5 @@ void mastr_trimr(mastr * m);
 void mastr_chop(mastr * m);
 #define mastr_trim(m) do { mastr_triml(m); mastr_trimr(m); } while(0)
 #define mastr_str(m) ((const char *)(m->dat))
+#define mastr_modifyable_str(m) (m->dat)
 #endif
