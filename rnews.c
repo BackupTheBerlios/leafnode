@@ -10,6 +10,7 @@
 #include "critmem.h"
 #include "mastring.h"
 #include "ln_log.h"
+#include "config_paths.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>

@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.41 2003/01/19 17:43:48 emma Exp $
+# $Id: Makefile.am,v 1.42 2003/01/27 23:31:04 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -198,7 +198,12 @@ EXTRA_DIST = \
 BUILT_SOURCES = \
 	config.c \
 	configparam_data.c \
-	config_defs.h
+	config_defs.h \
+	config_paths.h
+
+config_paths.h: Makefile
+	echo >$@  '#define GZIP  ((const char *)"$(GZIP)")' && \
+	echo >>$@ '#define BZIP2 ((const char *)"$(BZIP2)")' || rm -f $@
 
 # special rule to prevent recursion on liblnutil.a
 amiroot_SOURCES		= amiroot.c
@@ -220,7 +225,7 @@ newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 
 DISTCLEANFILES = config.c config_defs.h configparam_data.c README \
-	config.table.sorted
+	config.table.sorted config_paths.h
 
 # GENERATED SOURCES ========================================
 config.c: Makefile
@@ -233,8 +238,6 @@ config.c: Makefile
 	@echo >>.$@ "const char *sysconfdir = \"$(SYSCONFDIR)\";"
 	@echo >>.$@ "const char *lockfile = \"$(LOCKFILE)\";"
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
-	@echo >>.$@ "const char *GZIP = \"$(GZIP)\";"
-	@echo >>.$@ "const char *BZIP2 = \"$(BZIP2)\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
 #	@echo >>.$@ 'const char *compileinfo = "*** leafnode @PACKAGE_VERSION@ ***\ncompile date:' "`env - PATH=/bin:/usr/bin TZ=GMT date`" '\ncompile machine: ' "`uname -a`" '\\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)";'
