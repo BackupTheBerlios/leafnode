@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.12 2001/12/18 01:16:24 emma Exp $ */
+/* $Id: leafnode.h,v 1.13 2001/12/18 15:57:28 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#else
+#error "HAVE_CONFIG_H is undefined. This condition is unsupported."
+#endif
 
 #include "attributes.h"
 #include "redblack.h"
@@ -64,10 +69,6 @@ extern "C" {
             } \
         }
 
-
-
-#include "config.h"		/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
-
 #ifndef HAVE_SOCKLEN_T
     typedef unsigned int socklen_t;
 #endif
@@ -105,11 +106,7 @@ extern "C" {
     int mkstemp(char *);
 #endif
 
-#ifdef HAVE_LIBPCRE
 #include <pcre.h>
-#else
-#include "pcre/pcre.h"
-#endif
 
 /*
  * end of actions due to autoconf
