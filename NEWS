@@ -1,7 +1,11 @@
-Changes since 20040116a:
-- Update: the spec file was outdated. Reported by Daniel Zwick.
+20040119a: Changes since 20040116a:
+- Update: the spec file was outdated.
 - Cleanup: Internal Makefile.am and configure.ac cleanup. Watch for
   changes in the response to --prefix and/or --sysconfdir options.
+- Bugfix: empty bindir/sysconfdir messed up in previous snapshot.
+- Bugfix: fix the leafnode-version regression that showed in 20040116a.
+Thanks to Daniel Zwick for his report and patient testing and
+to Jörg Dietrich for finding the real bug.
 
 20040116a: Changes since 20040108a:
 - Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group

@@ -1,3 +1,13 @@
+2004-01-19  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040119a =
+	* leafnode-version.c: Fix up the spooldir/lockfile changes that
+	caused a segfault.
+
+2004-01-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am: Make sure bindir and sysconfdir aren't empty.
+
 2004-01-17  Matthias Andree <matthias.andree@gmx.de>
 
 	* leafnode.spec.in:
