@@ -17,8 +17,14 @@ incompatible changes:
 - fetchnews now compares the local clock to the server's clock if the
   server supports the DATE command and complains if the two are more
   than 10 minutes apart.
+- leafnode now resolves conflicts between a group name and the same name
+  that only differs in upper vs. lower case, it prefers the lower-case
+  version.
 
 other changes:
+- fix portability to Solaris 8 (both SunPro 6 and gcc 2.95).
+- kill temp.files links for local posts, reported by Robert Marshall.
+- signal handling fixes.
 - fixed the timeout-goes-unnoticed bug, thanks to Richard van der Hoff.
 - tries to fix the infamous "unsigned -1" corruption in groupinfo.
 - build toolchain updated to automake 1.7.1/autoconf 2.54

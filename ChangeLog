@@ -1,4 +1,62 @@
+2003-01-27  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, activutil.c, activutil.h, activutil_resolve.c,
+	interesting.c, leafnode.h, miscutil.c: Forward port "case conflict"
+	resolution code from leafnode-1.  Resolve case conflicts when
+	reading interesting.groups or dormant.groups.  
+	* Makefile.am, rnews.c: Move GZIP and BZIP2 information into a new
+	header file as #define, config_paths.h. This fixes rnews compile
+	troubles on SunPro.  
+	* store.c: quench some compiler warnings.  
+	* arc4random.c, arc4random.h: Portability fixes.  
+	* README.html: Note that SunOS 4 is a no-go.  
+	* system.h: Cater for uint32_t and uint8_t.  
+	* configure.ac: Cleanup AC_CHECK_PROG vs. AC_CHECK_TOOL (same with
+	AC_PATH_*).  check for stdint.h and inttypes.h.  
+	* configutil.c: SUNpro compatibility fixes.  
+	* configure.ac: Cater for broken id(1) command in Solaris' default
+	$PATH, check /usr/xpg4/bin for id first.  
+	* timeout_getaline.c: Fix type: jmp_buf -> sigjmp_buf.  
+	* miscutil.c: Clarify error message when a file name is found
+	multiple times -- it might differ in case.  
+	* nntpd.c: Unlink temp.files/a-b-c for local posts. Reported by
+	Robert Marshall.  
+
+2003-01-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: TOKENSIZE added.  
+	* README.html: Add name of Debian package for PCRE.  
+	* configutil.c: Kill TOKENSIZE, it's in leafnode.h 
+	* leafnode.8.in: Document restriction of some strings to 1024
+	characters.  
+	* leafnode.h: Bump token size to 1024.  
+	* Makefile.am, NEWS, fetchnews.c, fetchnews.h,
+	fetchnews_check_date.c, system.h: Let fetchnews compare the local
+	clock to the server's clock and complain if they are too far apart.  
+	* leafnode.8.in: Document DATE.  
+
+2003-01-14  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* fetchnews.c: Block SIGALRM when within fetchnews' SIGINT/TERM
+	handler, turn off any alarms and ignore SIGALRM afterwards.  
+
+2003-01-13  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* mastring.c: Minor optimization: use memcpy for known length
+	strings.  
+	* fetchnews.c: Race between sigaction and sigsetjmp fixed.  Use
+	correct type sigjmp_buf.  Make msgidlist and nglist file static.  
+
+2003-01-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c, timeout_getaline.c: Kill _XOPEN_SOURCE macro, no
+	good on Solaris.  
+
 2002-12-29  Matthias Andree <matthias.andree@gmx.de>
+
+2002-12-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog: Release 2.0.0.alpha20021229a 
 
 	--- release alpha20021229a ---
 	* configure.ac: Update.
