@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.71 2004/08/23 09:45:33 emma Exp $
+# $Id: Makefile.am,v 1.72 2004/09/16 11:06:19 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -117,6 +117,8 @@ liblnutil_a_SOURCES	= \
 	queues.c \
 	redblack.c \
 	redblack.h \
+	sgetcwd.h \
+	sgetcwd.c \
 	sort.c \
 	store.c \
 	strutil.c \
@@ -250,7 +252,7 @@ config.c: Makefile
 	@echo >>.$@ "const char *version = \"@VERSION@\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
-	if cmp 2>/dev/null .$@ $@ ; then touch $@ ; rm -f .$@ ; else mv .$@ $@ ; fi
+	if cmp -s .$@ $@ ; then touch $@ ; rm -f .$@ ; else mv .$@ $@ ; fi
 
 config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h genconfigdefs.awk
 	$(AWK) -F, -f $(srcdir)/genconfigdefs.awk \
