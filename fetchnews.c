@@ -1036,7 +1036,7 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
     }
 
     if ((sscanf(l, "%3d %lu", &reply, artno) != 2) || (reply / 10 != 22)) {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 	       "Wrong reply to ARTICLE command: %s", l);
 	if (reply / 100 == 5)
 	    return -2;		/* fatal error */
