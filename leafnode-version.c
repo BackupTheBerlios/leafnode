@@ -40,10 +40,8 @@ main(void)
     puts(bindir);
     fputs("sysconfdir: ", stdout);
     puts(sysconfdir);
-    fputs("spooldir: ", stdout);
-    puts(spooldir);
-    fputs("lockfile: ", stdout);
-    puts(lockfile);
+    fputs("default spooldir: ", stdout);
+    puts(def_spooldir);
 #ifdef HAVE_IPV6
     puts("IPv6: yes");
 #else
