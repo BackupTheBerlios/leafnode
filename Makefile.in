@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.in,v 1.21 2001/12/29 11:18:05 emma Exp $
+# $Id: Makefile.in,v 1.22 2002/01/03 01:41:48 emma Exp $
 
 VERSION		= @PACKAGE_VERSION@
 
@@ -290,7 +290,8 @@ EXTRASRC = \
 
 EXTRAGENSRC = \
 	config_defs.h \
-	leafnode.spec
+	leafnode.spec \
+	README
 
 # ALLSOURCES combines all relevant source variables for maintainability
 ALLSOURCES = $(HDRFILES) $(SRCFILES) $(EXTRASRC) $(MANSRC) $(EXTRAGENSRC)
@@ -407,17 +408,17 @@ install-strip:
 install: $(PROGRAMS)
 # directories
 	if test -d $(INSTALLROOT)$(BINDIR) ; then : ; else \
-	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(BINDIR) ; fi
+	  $(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(BINDIR) ; fi
 	if test -d $(INSTALLROOT)$(USRDIR) ; then : ; else \
-	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(USRDIR) ; fi
+	  $(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(USRDIR) ; fi
 	if test -d $(INSTALLROOT)$(LIBDIR) ; then : ; else \
-	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(LIBDIR) ; fi
+	  $(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(LIBDIR) ; fi
 # programs, rnews is disabled
-	$(INSTALL) -c -g news -m 750 -o news $(STRIP) \
+	$(INSTALL) -c -g news -m 750 -o root $(STRIP) \
 	  leafnode checkgroups applyfilter $(INSTALLROOT)$(BINDIR)
 	$(INSTALL) -c -g news -m 750 -o root $(STRIP) \
 	  texpire fetchnews $(INSTALLROOT)$(BINDIR)
-	$(INSTALL) -c -g news -m 755 -o news $(STRIP) \
+	$(INSTALL) -c -g news -m 2755 -o root $(STRIP) \
 	  newsq $(INSTALLROOT)$(USRDIR)
 # man pages
 	for i in man1 man5 man7 man8 ; do \
@@ -428,8 +429,8 @@ install: $(PROGRAMS)
 	$(INSTALL) -c -m 644 *.5 $(INSTALLROOT)$(MANDIR)/man5
 	$(INSTALL) -c -m 644 *.8 $(INSTALLROOT)$(MANDIR)/man8
 # directories
-	$(INSTALL) -d -m 755 -o news -g news $(INSTALLROOT)$(SPOOLDIR)
-	$(INSTALL) -d -m 755 -o news -g news $(INSTALLROOT)$(SPOOLDIR)/leaf.node
+	$(INSTALL) -d -m 750 -o news -g news $(INSTALLROOT)$(SPOOLDIR)
+	$(INSTALL) -d -m 750 -o news -g news $(INSTALLROOT)$(SPOOLDIR)/leaf.node
 	p=$(INSTALLROOT)$(SPOOLDIR)/leaf.node/groupinfo ; \
 	test -f $$p || cp /dev/null $$p
 	if test ! -d `dirname $(INSTALLROOT)$(LOCKFILE)` ; then \
@@ -480,16 +481,17 @@ doxygen:
 	-rm -rf $(srcdir)/dox/html/
 	cd $(srcdir) && doxygen
 
+README:	README.html $(LYNX)
+	if test "$(LYNX)" != "no" ; then \
+		rm -f README ; \
+		$(LYNX) -dump $(srcdir)/README.html > README ; \
+	fi
+
 .PHONY:	distdir
 distdir: depend $(ALLSOURCES) # doxygen
 	# clean old dist
 	-chmod -R a+rX leafnode-$(VERSION)
 	rm -rf leafnode-$(VERSION)
-	# regenerate text files
-	if test "$(LYNX)" != "no" ; then \
-		rm -f README ; \
-		$(LYNX) -dump $(srcdir)/README.html > README ; \
-	fi
 	# set up directories
 	mkdir -p leafnode-$(VERSION)
 	$(SHELL) $(srcdir)/vcp.sh $(VPATH) $(ALLSOURCES) leafnode-$(VERSION)
@@ -599,21 +601,19 @@ applyfilter.o: applyfilter.c leafnode.h \
  critmem.h ln_log.h
 artutil.o: artutil.c leafnode.h config.h \
  attributes.h redblack.h critmem.h ln_log.h mastring.h
-b_sortnl.o: b_sortnl.c leafnode.h \
- config.h attributes.h redblack.h
+b_sortnl.o: b_sortnl.c leafnode.h config.h \
+ attributes.h redblack.h
 checkgroups.o: checkgroups.c leafnode.h \
  config.h attributes.h redblack.h \
- critmem.h
-configparam.o: configparam.c \
- config_defs.h configparam.h \
- config.h
+ critmem.h ln_log.h
+configparam.o: configparam.c config_defs.h \
+ configparam.h config.h
 configutil.o: configutil.c leafnode.h \
  config.h attributes.h redblack.h \
  critmem.h ln_log.h config_defs.h \
  configparam.h get.h
-copyfile.o: copyfile.c leafnode.h \
- config.h attributes.h redblack.h \
- critmem.h
+copyfile.o: copyfile.c leafnode.h config.h \
+ attributes.h redblack.h critmem.h
 critmem_calloc.o: critmem_calloc.c critmem.h attributes.h ln_log.h
 critmem_malloc.o: critmem_malloc.c critmem.h ln_log.h attributes.h
 critmem_realloc.o: critmem_realloc.c critmem.h ln_log.h attributes.h
@@ -649,24 +649,18 @@ ln_log_open.o: ln_log_open.c ln_log.h attributes.h
 localutil.o: localutil.c leafnode.h \
  config.h attributes.h redblack.h \
  critmem.h ln_log.h mastring.h
-lockfile.o: lockfile.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h critmem.h
+lockfile.o: lockfile.c leafnode.h config.h \
+ attributes.h redblack.h ln_log.h critmem.h
 log_close.o: log_close.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 log_fclose.o: log_fclose.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 log_fsync.o: log_fsync.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 log_rename.o: log_rename.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 log_unlink.o: log_unlink.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 lsort.o: lsort.c leafnode.h config.h \
  attributes.h redblack.h critmem.h
 mailto.o: mailto.c leafnode.h config.h \
@@ -681,30 +675,28 @@ mastring.o: mastring.c mastring.h attributes.h getline.h \
 mastrncpy.o: mastrncpy.c mastring.h
 mergesort.o: mergesort.c leafnode.h \
  config.h attributes.h redblack.h
-miscutil.o: miscutil.c leafnode.h \
- config.h attributes.h redblack.h \
- critmem.h ugid.h ln_log.h format.h msgid.h mastring.h get.h
+miscutil.o: miscutil.c leafnode.h config.h \
+ attributes.h redblack.h critmem.h ugid.h ln_log.h format.h msgid.h \
+ mastring.h get.h
 mkdir_parent.o: mkdir_parent.c ln_dir.h
 moderated.o: moderated.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h mastring.h critmem.h
+ config.h attributes.h redblack.h ln_log.h \
+ mastring.h critmem.h
 msgid_hash.o: msgid_hash.c msgid.h
 msgid_sanitize.o: msgid_sanitize.c msgid.h
 newsq.o: newsq.c leafnode.h config.h \
  attributes.h redblack.h
-nfswrite.o: nfswrite.c leafnode.h \
- config.h attributes.h redblack.h
+nfswrite.o: nfswrite.c leafnode.h config.h \
+ attributes.h redblack.h
 nntpd.o: nntpd.c leafnode.h config.h \
  attributes.h redblack.h critmem.h ln_log.h get.h mastring.h h_error.h \
  masock.h
-nntputil.o: nntputil.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h h_error.h
+nntputil.o: nntputil.c leafnode.h config.h \
+ attributes.h redblack.h ln_log.h h_error.h
 parserange.o: parserange.c leafnode.h \
  config.h attributes.h redblack.h get.h
-putaline.o: putaline.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h mastring.h
+putaline.o: putaline.c leafnode.h config.h \
+ attributes.h redblack.h ln_log.h mastring.h
 queues.o: queues.c ln_log.h attributes.h leafnode.h \
  config.h redblack.h critmem.h
 redblack.o: redblack.c redblack.h
@@ -717,9 +709,8 @@ store.o: store.c leafnode.h config.h \
  ln_dir.h
 strutil.o: strutil.c leafnode.h config.h \
  attributes.h redblack.h critmem.h mastring.h
-sync_dir.o: sync_dir.c leafnode.h \
- config.h attributes.h redblack.h \
- mastring.h
+sync_dir.o: sync_dir.c leafnode.h config.h \
+ attributes.h redblack.h mastring.h
 sync_link.o: sync_link.c leafnode.h \
  config.h attributes.h redblack.h
 tab2spc.o: tab2spc.c leafnode.h config.h \
@@ -727,8 +718,7 @@ tab2spc.o: tab2spc.c leafnode.h config.h \
 texpire.o: texpire.c leafnode.h config.h \
  attributes.h redblack.h critmem.h ln_log.h format.h
 timeout_getaline.o: timeout_getaline.c leafnode.h \
- config.h attributes.h redblack.h \
- ln_log.h
+ config.h attributes.h redblack.h ln_log.h
 ugid_gensure.o: ugid_gensure.c ugid.h
 ugid_gget.o: ugid_gget.c ugid.h
 ugid_ggetbyuname.o: ugid_ggetbyuname.c ugid.h
@@ -744,4 +734,4 @@ writes.o: writes.c leafnode.h config.h \
  attributes.h redblack.h
 xoverutil.o: xoverutil.c leafnode.h \
  config.h attributes.h redblack.h \
- critmem.h ln_log.h get.h
+ critmem.h ln_log.h get.h mastring.h
