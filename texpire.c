@@ -770,7 +770,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 
     /* read overview information */
     freexover();
-    if (!getxover(0))
+    if (!xgetxover(0, NULL, 1))
 	return;
 
     /* find low-water and high-water marks */
@@ -880,7 +880,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
      * deleted.
      */
     if (chdirgroup(n, FALSE)) {
-	getxover(1);
+	xgetxover(1, NULL, 1);
     }
     freexover();
 }

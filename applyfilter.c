@@ -419,7 +419,7 @@ main(int argc, char *argv[])
 		if (deleted) {
 		    if (verbose)
 			printf("Updating .overview file...");
-		    getxover(1);
+		    xgetxover(1, NULL, 1);
 		}
 		printf("%lu articles %sdeleted, %lu kept.\n", deleted,
 			dryrun ? "would have been " : "",

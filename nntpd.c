@@ -665,7 +665,7 @@ opengroup(struct newsgroup *g)
     if (is_interesting(g->name))
 	markinterest(g->name);
     if (chdirgroup(g->name, FALSE)) {
-	xgetxover(0, g);
+	xgetxover(0, g, 0);
 #if 0
 	if (g->count == 0) {
 	    if (getwatermarks(&g->first, &g->last, &g->count)) {
@@ -1033,7 +1033,7 @@ donewnews(char *arg)
     while ((de = readdir(d))) {
 	if (ngmatch(l->head->string, de->d_name) == 0) {
 	    chdirgroup(de->d_name, FALSE);
-	    getxover(1);
+	    xgetxover(1, NULL, 0);
 	    ng = opendir(".");
 	    while ((nga = readdir(ng))) {
 		unsigned long artno;
@@ -1740,7 +1740,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	/* FIXME: does this work for local groups? */
 	/* is a real group */
 	if (xovergroup != group) {
-	    if (getxover(1))
+	    if (xgetxover(1, NULL, 0))
 		xovergroup = group;
 	}
     } else {
@@ -1945,7 +1945,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
     if (!is_pseudogroup(group->name)) {
 	if (xovergroup != group) {
 	    freexover();
-	    if (getxover(1))
+	    if (xgetxover(1, NULL, 0))
 		xovergroup = group;
 	    else
 		xovergroup = NULL;
@@ -2017,8 +2017,9 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     if ((pseudogroup = is_pseudogroup(g->name))) {
 	/* group has not been visited before */
 	markinterest(group->name);
-    } else if ((xovergroup != group) && chdirgroup(group->name, FALSE) &&
-	        !getxover(1)) {
+    } else if ((xovergroup != group)
+	    && chdirgroup(group->name, FALSE)
+	    && !xgetxover(1, NULL, 0)) {
 	if (is_interesting(g->name)) {
 	    /* group has already been marked as interesting but is empty */
 	    emptygroup = TRUE;
