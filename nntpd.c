@@ -102,12 +102,13 @@ static /*@null@*/ /*@only@*/ char *NOPOSTING;
 static int allowposting(void)
     /*@globals undef NOPOSTING@*/;
 static int isauthorized(void);
-static void doauthinfo(char *arg);
+static void doauthinfo(char *arg)
+    /*@modifies arg@*/;
 static int dorange(/*@null@*/ const char *arg,
 		   /*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
 		   unsigned long artno, unsigned long lo, unsigned long hi);
 
-static const struct newsgroup *xovergroup;	/* FIXME */
+static /*@dependent@*/ const struct newsgroup *xovergroup;	/* FIXME */
 /*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
 int debug = 0;
@@ -224,7 +225,7 @@ main_loop(void)
 	    if (isauthorized()) {
 		nntpprintf("202 Cool - I always wanted a slave");
 	    }
-	} else if (!strcasecmp(cmd, "xhdr")) {
+	} else if (!strcasecmp(cmd, "xhdr") || !strcasecmp(cmd, "hdr")) {
 	    if (isauthorized())
 		doxhdr(group, arg, artno);
 	} else if (!strcasecmp(cmd, "xpat") || !strcasecmp(cmd, "pat")) {
@@ -504,7 +505,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 {
     FILE *f;
     char *p = NULL;
-    /*@dependent@*/ char *q = NULL;
     unsigned long localartno;
     char *localmsgid = NULL;
     char s[PATH_MAX + 1];	/* FIXME */
@@ -529,29 +529,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
     } else {
 	localartno = strtoul(arg, NULL, 10);
 	localmsgid = fgetheader(f, "Message-ID:", 1);
-    }
-
-    if (!localartno) {
-	/* we have to extract the article number from the Xref: header */
-	p = fgetheader(f, "Xref:", 1);
-	if (p) {
-	    /* search article number of 1st group in Xref: */
-	    q = strchr(p, ':');
-	    if (q) {
-		q++;
-		localartno = strtoul(q, NULL, 10);
-	    }
-	    if (group) {
-		/* search article number of group in Xref: */
-		q = strstr(p, group->name);
-		if (q) {
-		    q += strlen(group->name);
-		    if (*q++ == ':')
-			localartno = strtoul(q, NULL, 10);
-		}
-	    }
-	    free(p);
-	}
     }
 
     sprintf(s, "%3d %lu %s article retrieved - ", 223 - what,
@@ -695,7 +672,7 @@ dogroup(const char *arg, unsigned long *artno)
     g = findgroup(arg, active, -1);
     if (g) {
 	freexover();
-	xovergroup = 0;
+	xovergroup = NULL;
 	if (is_interesting(g->name))
 	    markinterest(g);
 	if (chdirgroup(g->name, FALSE)) {
@@ -789,6 +766,7 @@ dohelp(void)
     printf("  body [MessageID|Number]\r\n");
 /*  printf("  date\r\n"); */
     printf("  group newsgroup\r\n");
+    printf("  hdr header [range|MessageID]\r\n");
     printf("  head [MessageID|Number]\r\n");
     printf("  help\r\n");
 /*  printf("  ihave\r\n"); */
@@ -802,6 +780,7 @@ dohelp(void)
     printf
 	("  newnews newsgroups yymmdd hhmmss [\"GMT\"] [<distributions>]\r\n");
     printf("  next\r\n");
+    printf("  over [range]\r\n");
     if (allowposting())
 	printf("  post\r\n");
     printf("  quit\r\n");
@@ -894,11 +873,11 @@ list(struct newsgroup *g, int what, char *pattern)
 static void
 dolist(char *oarg)
 {
-    char *arg = critstrdup(oarg, "dolist");
+    char *const arg = critstrdup(oarg, "dolist");
 
     if (!strcasecmp(arg, "extensions")) {
 	nntpprintf("202 extensions supported follow");
-	fputs(" OVER\r\n" " PAT\r\n" " LISTGROUP\r\n", stdout);
+	fputs(" HDR\r\n" " OVER\r\n" " PAT\r\n" " LISTGROUP\r\n", stdout);
 	if (authentication)
 	    printf(" AUTHINFO USER\r\n");
 	fputs(".\r\n", stdout);
@@ -925,11 +904,12 @@ dolist(char *oarg)
 		if (!*arg || strlen(arg) == 6)
 		    list(active, 0, NULL);
 		else {
-		    while (*arg && (!isspace((unsigned char)*arg)))
-			arg++;
-		    while (*arg && isspace((unsigned char)*arg))
-			arg++;
-		    list(active, 0, arg);
+		    char *p = arg;
+		    while (*p && (!isspace((unsigned char)*p)))
+			p++;
+		    while (*p && isspace((unsigned char)*p))
+			p++;
+		    list(active, 0, p);
 		}
 	    }
 	    fputs(".\r\n", stdout);
@@ -939,11 +919,12 @@ dolist(char *oarg)
 		if (strlen(arg) == 10)
 		    list(active, 1, NULL);
 		else {
-		    while (*arg && (!isspace((unsigned char)*arg)))
-			arg++;
-		    while (*arg && isspace((unsigned char)*arg))
-			arg++;
-		    list(active, 1, arg);
+		    char *p = arg;
+		    while (*p && (!isspace((unsigned char)*p)))
+			p++;
+		    while (*p && isspace((unsigned char)*p))
+			p++;
+		    list(active, 1, p);
 		}
 	    }
 	    fputs(".\r\n", stdout);
@@ -1038,7 +1019,10 @@ donewnews(char *arg)
 	return;
     }
     age = donew_common(l->next);
-    if (age == -1) return;
+    if (age == (time_t)-1) {
+	freelist(l);
+	return;
+    }
 
     nntpprintf("230 List of new articles since %ld in newsgroup %s", age,
 	       l->string);
@@ -1047,6 +1031,7 @@ donewnews(char *arg)
     if (!d) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m", s);
 	fputs(".\r\n", stdout);
+	freelist(l);
 	return;
     }
     while ((de = readdir(d))) {
@@ -1055,9 +1040,9 @@ donewnews(char *arg)
 	    getxover(1);
 	    ng = opendir(".");
 	    while ((nga = readdir(ng))) {
-		long artno;
+		unsigned long artno;
 
-		if (get_long(nga->d_name, &artno)) {
+		if (get_ulong(nga->d_name, &artno)) {
 		    if ((stat(nga->d_name, &st) == 0) &&
 			(*nga->d_name != '.') && S_ISREG(st.st_mode) &&
 			(st.st_ctime > age)) {
@@ -1079,11 +1064,12 @@ donewnews(char *arg)
 		}		/* if not a number, not an article */
 	    }			/* readdir loop */
 	    closedir(ng);
-	    free(xoverinfo);
-	    xoverinfo = 0;
+	    freexover();
 	}
     }
+    xovergroup = NULL;
     closedir(d);
+    freelist(l);
     fputs(".\r\n", stdout);
 }
 
@@ -1095,17 +1081,21 @@ donewgroups(const char *arg)
     struct newsgroup *ng;
 
     age = donew_common(l);
-    if (age == -1) return;
+    if (age == (time_t)-1) {
+	freelist(l);
+	return;
+    }
 
     nntpprintf("231 List of new newsgroups since %lu follows",
 	       (unsigned long)age);
     ng = active;
     while (ng->name) {
 	if (ng->age >= age)
-	    printf("%s %lu %lu y\r\n", ng->name, ng->first, ng->last);
+	    printf("%s %lu %lu %c\r\n", ng->name, ng->first, ng->last, ng->status);
 	ng++;
     }
     fputs(".\r\n", stdout);
+    freelist(l);
 }
 
 /* next bit is copied from INN 1.4 and modified("broken") by agulbra
@@ -1439,14 +1429,20 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, s);
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
+		free(mid);
+		free(groups);
+		if (modgroup) free(modgroup);
+		if (approved) free(approved);
 		log_unlink(inname);
 		return;
 	    }
 	    if (modgroup && !approved) {
-		free(modgroup);
 		nntpprintf("240 Posting scheduled for posting to "
 			   "upstream, be patient");
 		log_unlink(inname);
+		free(modgroup);
+		free(mid);
+		free(groups);
 		return;
 	    }
 	}
@@ -1472,6 +1468,7 @@ dopost(void)
 	    free(moderator);
 	    free(mid);
 	    free(groups);
+	    if (modgroup) free(modgroup);
 	    log_unlink(inname);
 	    return;
 	}
@@ -1514,6 +1511,7 @@ dopost(void)
 	}			/* switch(fork()) */
 	free(mid);
 	free(groups);
+	if (modgroup) free(modgroup);
 	return;
     }
 
@@ -1540,7 +1538,7 @@ dopost(void)
 void
 doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
-    /* NOTE: XPAT is not to change the current article pointer, thus,
+    /* NOTE: XHDR is not to change the current article pointer, thus,
        we're using call by value here */
     struct stringlist *l = cmdlinetolist(arg);
 
@@ -1786,7 +1784,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 			ap = ap->next;
 		    }
 		    if (!ap) {
-			free(t);
+			if (t) free(t);
 			continue;
 		    }
 		}
@@ -1902,7 +1900,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	    if (getxover(1))
 		xovergroup = group;
 	    else
-		xovergroup = 0;
+		xovergroup = NULL;
 	}
 
 	if (!dorange(arg, &a, &b, artno, xfirst, xlast))
@@ -2094,7 +2092,7 @@ doauth_file(char *const cmd, char *const val)
 
 void
 doauthinfo(char *arg)
-    /*@modifies *arg@*/
+    /*@modifies arg@*/
 {				/* we nuke away the password, no const here! */
     char *cmd;
     char *param;
@@ -2186,7 +2184,7 @@ dummy(int unused)
 }
 
 static int
-mysetfbuf(FILE * f, char *buf, size_t size)
+mysetfbuf(FILE * f, /*@null@*/ /*@exposed@*/ /*@out@*/ char *buf, size_t size)
 {
 #ifdef SETVBUF_REVERSED
     return setvbuf(f, _IOFBF, buf, size);
@@ -2293,7 +2291,7 @@ main(int argc, char **argv)
     {
 	int allow = allowposting();
 	printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
-	       201 - allowposting(), version, owndn ? owndn : fqdn,
+	       201 - allow, version, owndn ? owndn : fqdn,
 	       allow ? "" : " (No posting.)",
 	       allow ? "" : NOPOSTING);
     }
