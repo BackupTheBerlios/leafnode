@@ -454,26 +454,37 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
  * Mark an article for download by appending its number to the
  * corresponding file in interesting.groups
  */
-/* FIXME: need error checking for write errors */
 static int
 markdownload(const struct newsgroup *group, const char *msgid)
 {
+    int e = 0;
     char *l;
     FILE *f;
-    char s[PATH_MAX + 1];	/* FIXME */
+    mastr *s = mastr_new(1024);
 
-    sprintf(s, "%s/interesting.groups/%s", spooldir, group->name);
-    if ((f = fopen(s, "r+"))) {
+    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, 0);
+    if ((f = fopen(mastr_str(s), "r+"))) {
 	while ((l = getaline(f)) != NULL) {
-	    if (strncmp(l, msgid, strlen(msgid)) == 0)
+	    if (strncmp(l, msgid, strlen(msgid)) == 0) {
 		(void)fclose(f);
+		mastr_delete(s);
 		return 0;	/* already marked */
+	    }
+	    if (ferror(f)) e = errno;
 	}
-	fprintf(f, "%s\n", msgid);
+	(void)fprintf(f, "%s\n", msgid);
+	if (ferror(f)) e = errno;
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 	       "Marking %s: %s for download", group->name, msgid);
-	fclose(f);
+	if (fclose(f)) e = errno;
     }
+    if (e) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "I/O error handling \"%s\": %s",
+	       mastr_str(s), strerror(e));
+	mastr_delete(s);
+	return -1;
+    }
+    mastr_delete(s);
     return 1;
 }
 
@@ -615,7 +626,6 @@ markinterest(const struct newsgroup *group)
     time_t now;
     FILE *f;
     mastr *s;
-    mastr *s_dormant;
 
     if (is_localgroup(group->name))
 	return 0;		/* local groups don't have to be marked */
