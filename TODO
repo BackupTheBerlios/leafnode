@@ -87,13 +87,6 @@ Matthias:
 11pre1
 1.1 fix posting issues, introduce per-server queues?
 
-11pre1
-1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
-    sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
-    <51nig9.kv.ln@abu.ivos.de>
-    NOTE: only worked around, not fixed.
-    TODO: only delete articles successfully posted
-
 2.2 Add custom headers like Organization: or X-Complaints-To: (Jeff
     Grossman, 2002-03-09)
 
@@ -240,6 +233,11 @@ FIXED ITEMS:
 2004-02-06 Hynek Schlawack, Matthias Andree
 	   try to post an article to *every* server before moving into
 	   failed.postings, suggested by Jeff Grossman
+
+	   this should also fix
+	   out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
+	   sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo
+	   Schwalbe, <51nig9.kv.ln@abu.ivos.de>
 
 2004-01-29 Matthias Andree
 	   forward port "noactive" from leafnode-1
