@@ -33,6 +33,9 @@ other changes:
   It is now possible to query all or some newsgroups only, fetch several
   articles by Message-ID and fine-tune fetching of headers and bodies
   of delaybody groups as well as articles in regular groups.
+- fetchnews and rnews no longer use a two-stage approach -- the
+  .overview files are updated as articles are stored, this should profit
+  from caches.
 
 2.0b8_ma10pre3.3:
 - fix: texpire crashes (Ralf Wildenhues)
