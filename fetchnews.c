@@ -175,7 +175,7 @@ add_fetchgroups(void)
 
     while (sl) {
 	/* do not add wildcards */
-	if (strcspn(sl->string, "\\*?[") == strlen(sl->string)) {
+	if (!strpbrk(sl->string, "\\*?[")) {
 	    s = critstrdup(sl->string, "add_fetchgroups");
 	    t = addtointeresting(s);
 	    if (t != NULL && t != s)	/* NULL: OOM, t!=s: repeated entry */
