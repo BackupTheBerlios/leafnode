@@ -73,3 +73,11 @@ texpire.o
 try.c try-indent.c
 vsnprintf.o
 xoverutil.o
+xsnprintf
+mkinstalldirs
+.rsyncs
+missing
+install-sh
+compile
+depcomp
+aclocal.m4
