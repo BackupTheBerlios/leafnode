@@ -106,7 +106,7 @@ feedincoming(void)
 	return 0;
     }
 
-    ln_log(LNLOG_SINFO, LNLOG_CTOP, "found %ld article%s in in.coming.",
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "found %lu article%s in in.coming.",
 	   articles, articles != 1 ? "s" : "");
 
     for (di = dl; *di; di++) {
@@ -148,6 +148,7 @@ feedincoming(void)
 	    log_unlink(*di);
 	}
 	log_fclose(f);
+	free(ngs);
     }
 
     free_dirlist(dl);
