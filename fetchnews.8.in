@@ -13,9 +13,9 @@ fetchnews \- fetch news via NNTP
 .SH SYNOPSIS
 .B fetchnews -V
 .br
-.B fetchnews [-BDfHnP] [-D debugmode] [-v [...]] [-F configfile]
+.B fetchnews [GLOBAL OPTIONS] [-BfHnPR]
 .B [-M message-id] [...] [-x number] [-S server[:port]]
-.B [-N newsgroup] [...] [-t #]
+.B [-N {newsgroup|group.pattern}] [...] [-t #]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -33,22 +33,13 @@ is the program which submits and retrieves new
 articles to or from the upstream NNTP server.
 
 .SH OPTIONS
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I -B
 Get article bodies from groups that are in "delaybody" mode. Done by
 default unless one of -H -M -R -P is used. See the configuration
 section of leafnode(8) for "delaybody".
-.TP
-.I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems with your upstream server(s). See
-.I config.example
-for details on how to configure the debugmode.
-.TP
-.I -F configfile
-Read configuration from an alternate config file instead of
-@sysconfdir@/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is
@@ -77,8 +68,10 @@ directory. This avoids automatic unsubscription of newsgroups, see
 below.
 .TP
 .I -N newsgroup
-Get only articles posted to "newsgroup". The -N option can be used
+Get only articles posted to \fInewsgroup\fR. The -N option can be used
 multiple times to get articles from more than one group.
+.I -N group.pattern
+Get articles only from interesting groups matching \fIgroup.pattern\fR.
 .TP
 .I -P
 Post articles that have accumulated in the
@@ -101,29 +94,6 @@ immediately behind the server name, without any whitespace inbetween.
 .I -t number
 Wait this many seconds before fetching next article. This is useful if
 you need bandwidth for something else, but it makes fetching slow.
-.TP
-.I -v
-Be verbose.  A maximum of four
-.I -v
-can be used (the more v, the more verbose):
-.TP
-.I -v
-Warn about non-critical errors.
-.TP
-.I -vv
-Be verbose whenever a server command occurs.
-.TP
-.I -vvv
-Be verbose whenever a group command occurs.
-.TP
-.I -vvvv
-Be verbose whenever an article command occurs.
-.TP
-.I -vvvvv
-For debugging purposes. Don't expect the additional output to make sense.
-.TP
-.I -V
-Print version number and exit.
 .TP
 .I "-x number"
 Go
@@ -273,11 +243,16 @@ Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96
 Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
 .PP
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>,
+Modified and Copyright 1997 - 2003 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>,
 Markus Enzenberger <enz@cip.physik.uni-muenchen.de>, Randolf Skerka
-<Randolf.Skerka@gmx.de>, Matthias Andree <matthias.andree@gmx.de> and
+<Randolf.Skerka@gmx.de> and
 Jörg Lüders.
-Copyright of the modifications 1997-2003.
+.br
+Written and Copyright 2002 by Jörg Dietrich <joerg@dietrich.net>.
+.br
+Written and Copyright 2002 - 2004 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.br
+Written and Copyright 2000 - 2005 by Matthias Andree <matthias.andree@gmx.de>.
 
 .SH SEE ALSO
 .BR filterfile (5),

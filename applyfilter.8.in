@@ -9,9 +9,7 @@
 applyfilter \- apply filter settings to news spool
 
 .SH SYNOPSIS
-.B applyfilter -V
-.PP
-.B applyfilter [-v [...]] [-n] [-c] [-D debugmode] [-F configfile] object [...]
+.B applyfilter [GLOBAL OPTIONS] [-n] [-c] object [...]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -29,46 +27,20 @@ the filtering rules, the article is deleted from the newsgroup.
 sets its real and effective uid to "news".
 
 .SH OPTIONS
-.TP
-.I object
-is either a newsgroup name (if -c is NOT given) or a file name (if -c is
-given).
-.TP
-.I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems. Check
-.I config.example
-for details on how to set the debugmode.
-.TP
-.I -F configfile
-Read configuration from an alternate config file instead of
-@sysconfdir@/config.
-.TP
-.I -n
-Dry run.  Do not actually delete anything.  Use in combination with
-.I -v
-to see which articles would be deleted.
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I -c
 Check mode. Print if filter would apply to files given on command line.
 The files are expected to contain one news article each.
 .TP
-.I -v
-Be verbose.
-.IP
-The cancel will only remove the article locally. No control message will
-be generated or sent to other hosts.
-.TP
-.I -V
-Print version number and exit.
+.I -n
+Dry run.  Do not actually delete anything.  Use in combination with
+\fI-v\fR to see which articles would be deleted without \fI-n\fR.
 .TP
 .I object
-is the newsgroup you want to apply the filter to.
-
-.SH BUGS
-.PP
-Cancel mode does not report success or failure properly.
+is either a newsgroup name (if -c is NOT given) or a file name (if -c is
+given).
 
 .SH FILES
 .PP
@@ -79,12 +51,14 @@ The file format is described in the
 manual.
 
 .SH AUTHOR
-Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright 1999. Updated by Matthias Andree <matthias.andree@gmx.de>.
-Copyright 2002.
+Written and Copyright 1999 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+.br
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.br
+Written and Copyright 2000, 2002, 2003, 2004, 2005 by Matthias Andree <matthias.andree@gmx.de>.
 .PP
 Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
-and is copyright 1995-96 
+and is copyright 1995-96
 Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
 

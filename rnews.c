@@ -35,12 +35,12 @@ static void
 usage(void)
 {
     printf("Usage:\n"
-	   "rnews -V\n"
-	   "    print version on stderr and exit\n"
-	   "rnews [-vD] [file|directory]\n"
-	   "    -D: switch on debugmode\n"
-	   "    -v: verbose mode\n"
-	   "See also the leafnode homepage at http://www.leafnode.org/\n");
+	   "rnews [OPTIONS] [file|directory]\n"
+	   "options are:\n"
+	   GLOBALOPTLONGHELP
+	   "    file           - import file into news spool\n"
+	   "    directory      - import all files in directory into news spool\n"
+	  );
 }
 
 /*

@@ -11,9 +11,7 @@
 checkgroups \- update group descriptions
 
 .SH SYNOPSIS
-.B checkgroups -V
-.br
-.B checkgroups [-v [...]] [-D debugmode] [checkgroups script]
+.B checkgroups [GLOBAL OPTIONS] [checkgroups script [...]]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -30,28 +28,20 @@ group descriptions into the active file (which is usually
 sets its real and effective uid to "news".
 
 .SH OPTIONS
-.TP
-.I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems. Check
-.I config.example
-for details on how to set the debugmode.
-.TP
-.I -v
-Be more verbose.
-.TP
-.I -V
-Print version number and exit.
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I checkgroups script
 is a file which contains the newsgroup name and the description on one
-line, separated by a whitespace. Checkgroups scripts are sometimes sent
-out by news administrators (e.g. in the bionet.* hierarchy).
+line, separated by a whitespace. Checkgroups scripts are sent
+out regularly for some hierarchies by their news administrators.
 
 .SH AUTHOR
-Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright 1997-1999.
+Written and Copyright 1997, 1998, 1999 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+.br
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.br
+Written and Copyright 2000, 2002, 2003, 2004, 2005 by Matthias Andree <matthias.andree@gmx.de>.
 .PP
 Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
 and is copyright 1995-96 

@@ -34,12 +34,14 @@ process_input(char *s)
 {
     FILE *f;
     char *l;
+    unsigned long changed = 0, counted = 0;
 
     f = fopen(s, "r");
     if (!f) {
 	fprintf(stderr, "cannot open %s: %s\n", s, strerror(errno));
 	return;
     }
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "processing checkgroups file %s", s);
     while ((l = getaline(f))) {
 	char *p;
 	struct newsgroup *g;
@@ -50,15 +52,19 @@ process_input(char *s)
 	    if (*p)
 		*p++ = '\0';
 	    if ((g = findgroup(l, active, -1)) != NULL) {
-		fprintf(stderr, "%s\n", l);
-		if (strlen(p) > 0) {
+		if (verbose)
+		    puts(l);
+		if (strlen(p) > 0 && strcmp(g->desc,p)) {
 		    if (g->desc)
 			free(g->desc);
 		    g->desc = critstrdup(p, "process_input");
+		    changed++;
 		}
 	    }
 	}
     }
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "updated %lu description%s from %lu in %s",
+	    changed, changed == 1 ? "" : "s", counted, s);
     fclose(f);
 }
 
@@ -67,11 +73,10 @@ usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "checkgroups -V: print version number and exit\n"
-	    "checkgroups [-Dv] checkfile\n"
-	    "    -D: switch on debug mode\n"
-	    "    -v: switch on verbose mode\n"
-	    "See also the leafnode homepage at http://www.leafnode.org/\n");
+	    "checkgroups [options] checkfile [...]\n"
+	    "options are:\n"
+	    GLOBALOPTLONGHELP
+	   );
 }
 
 int

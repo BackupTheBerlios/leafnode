@@ -27,13 +27,13 @@ usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "newsq -V\n"
-	    "    print version on stderr and exit\n"
-	    "newsq\n"
-	    "    print queues\n"
-	    "newsq -c\n"
-	    "    exit %d on error, %d if out.going queue has articles, %d if not.\n"
-	    "See also the leafnode homepage at http://www.leafnode.org/\n",
+	    "newsq [OPTIONS] [-c]\n"
+	    "options are:\n"
+	    GLOBALOPTLONGHELP
+	    "    -c             - exit with code %d on error,\n"
+	    "                     exit with code %d if out.going queue has articles\n"
+	    "                     exit with code %d if out.going queue is empty.\n"
+	    "    -h             - print short usage help like this\n",
 	    EXIT_FAILURE, EXIT_SUCCESS, EX_UNAVAILABLE);
 }
 

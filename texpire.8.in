@@ -11,11 +11,7 @@
 texpire \- delete old news article threads
 
 .SH SYNOPSIS
-.B texpire -V
-
-.B texpire [-fnr] [-D debugmode] [-F configfile] [-v[v[v[v]]]]
-
-.B texpire [-D debugmode] [-F configfile] [-v[v[v[v]]]] -C messageid [...]
+.B texpire [GLOBAL OPTIONS] [-afnr] [-C message.id [...]]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -33,30 +29,22 @@ is the program which deletes old articles from the local news spool,
 rehashes the spool after updates of leafnode.
 
 .SH OPTIONS
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I -C messageid [...]
-Switch on cancel mode. This will attempt to remove the articles with
+Cancel mode: This will attempt to remove the articles with
 given Message-ID numbers from the spool. Note that the Message-ID must
 be given with angle brackets; remember to use single quotes to protect
-the Message-IDs from the shell.
-.TP
-.I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems with your upstream server(s). See
-.I config.example
-for details on how to set the debugmode.
-.TP
-.I -F configfile
-Read configuration from an alternate config file instead of
-/etc/leafnode/config.
-.TP
-.I -f
-Expire will look at the arrival time of the articles rather than at the
-access time. Expiry will still be thread-based.
+the Message-IDs from the shell. Note that this will not queue cancel
+messages to the upstream, but have solely local effect.
 .TP
 .I -a
 Expire individual articles rather than threads.
+.TP
+.I -f
+Expire will look at the arrival time of the articles rather than at the
+access time. Expiry will still be thread-based unless \fI-a\fR is given.
 .TP
 .I -n
 Dry run mode. In this mode, texpire will not delete anything, it will
@@ -67,15 +55,6 @@ Repair and migrate mode. In this mode, texpire tries to save as much of the news
 spool as it can. This mode MUST be used when upgrading to a leafnode
 version which has a different hash function for messageid than the
 version previously installed. If in doubt, use -r after an update.
-.TP
-.I -v
-Be verbose.  A maximum of four
-.I -v
-can be used (the more v, the more verbose).  Don't expect all the output
-to make sense.
-.TP
-.I -V
-Print texpire version information and exit.
 
 .SH FILES
 .I @sysconfdir@/config.example
@@ -100,13 +79,15 @@ Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
 Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
 .PP
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1997-1999.
+Written and Copyright 1997 - 1999 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
 .PP
-Modified by Matthias Andree <matthias.andree@gmx.de>. Copyright of the
-modifications 1999-2004.
+Written and Copyright 2001 by Stefan Wiens <s.wi@gmx.de>.
 .PP
-Parts written by Stefan Wiens <s.wi@gmx.de>. Copyright 2001.
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.PP
+Written and Copyright 2003 by Jörg Dietrich <joerg@dietrich.net>.
+.PP
+Written and Copyright 1999 - 2005 by Matthias Andree <matthias.andree@gmx.de>.
 
 .SH SEE ALSO
 .BR tcpd (8),

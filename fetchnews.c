@@ -145,29 +145,26 @@ static void
 usage(void)
 {
     fprintf(stderr, "Usage:\n"
-	    "fetchnews -V\n"
-	    "    print version on stderr and exit\n"
-	    "fetchnews [-BDfHnPRv] [-F configfile] [-t #] [-x #] [-S server]\n"
-	    "          [-N newsgroup] [-N group.pattern] [-M message-id]\n"
-	    "    -B                get article bodies in delaybody groups\n"
-	    "    -D debugmode      switch on debugmode\n");
+	    "fetchnews [GLOBAL OPTIONS] [-BfHnPR] [-t #] [-x #] [-S server[:port]]\n"
+	    "          [-N {newsgroup|group.pattern}] [-M message-id]\n"
+	    "options are:\n"
+	    GLOBALOPTLONGHELP
+	    "    -B             - get article bodies in delaybody groups\n");
     fprintf(stderr,
-	    "    -f                force reload of groupinfo file\n"
-	    "    -F conffile       use \"configfile\" instead of %s/config\n"
-	    "    -H                get article headers in delaybody groups\n"
-	    "    -n                switch off automatic unsubscription of groups\n", sysconfdir);
+	    "    -f             - force reload of groupinfo file\n"
+	    "    -H             - get article headers in delaybody groups\n"
+	    "    -n             - switch off automatic unsubscription of groups\n");
     fprintf(stderr,
-	    "    -P                post only, don't get new articles\n"
-	    "    -M message-id     get article by Message-ID\n"
-	    "    -N newsgroup      get only articles in \"newsgroup\"\n"
-	    "    -N group.pattern  get articles from all interesting groups\n"
-	    "                      matching the wildcard \"group.pattern\"\n");
+	    "    -P             - post only, don't get new articles\n"
+	    "    -M message-id  - get article by Message-ID\n"
+	    "    -N newsgroup   - get only articles in \"newsgroup\"\n"
+	    "    -N group.pattern get articles from all interesting groups\n"
+	    "                     matching the wildcard \"group.pattern\"\n");
     fprintf(stderr,
-	    "    -R                get articles in non delaybody groups\n"
-	    "    -S server         only get articles from \"server\"\n"
-	    "    -t delay          wait \"delay\" seconds between articles\n"
-	    "    -v                verbose mode (may be repeated)\n"
-	    "    -x extra          go \"extra\" articles back in upstream history\n");
+	    "    -R             - get articles in non delaybody groups\n"
+	    "    -S server      - only get articles from \"server\"\n"
+	    "    -t delay       - wait \"delay\" seconds between articles\n"
+	    "    -x extra       - go \"extra\" articles back in upstream history\n");
     fprintf(stderr,
 	    "Setting none of the options\n"
 	    "    -B -H -P -R\n"
@@ -175,9 +172,7 @@ usage(void)
 	    "Options [-S server], [-M message-id] and [-N newsgroup] may be repeated.\n"
 	    "Articles specified by Message-ID will always be fetched as a whole,\n"
 	    "no matter if they were posted to a delaybody group.\n"
-	    "\n"
-	    "See also the leafnode homepage at\n"
-	    "    http://www.leafnode.org/\n");
+	    "\n");
 }
 
 /**
@@ -195,7 +190,7 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
     /* state information */
     int action_method_seen = 0;	/* BHPR */
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "HBPRS:N:M:fnx:p:t:")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "BfHM:N:nPRS:t:x:")) != -1) {
 	if (parseopt(argv[0], option, optarg, conffile))
 	    continue;
 

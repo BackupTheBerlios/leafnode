@@ -2,9 +2,10 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050321a:
-- Documentation: manual pages have been revised, with help from
+20050324a: Changes since 20050321a:
+- Documentation: manual pages have been revised, with some help from
   Dietrich Schaffer.
+- Documentation: help output in programs has been revised.
 - Bugfix: the deleted-articles journal was always empty. Reported by
   Jörg Lüders.
 

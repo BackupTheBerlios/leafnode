@@ -39,16 +39,12 @@ usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "applyfilter -V: print version number and exit\n"
-	    "applyfilter [-Dvcn] [-F configfile] object [...]\n"
-	    "applyfilter [-Dv] [-F configfile] -C message-id [...]\n"
-	    "    -D: switch on debug mode\n"
-	    "    -v: switch on verbose mode\n"
-	    "    -F: use \"configfile\" instead of %s/config\n"
-	    "    -n: dry run, do not actually delete anything\n"
-	    "    -c: check mode, print if filters match files on command line\n"
-	    "See also the leafnode homepage at http://www.leafnode.org/\n",
-	    sysconfdir);
+	    "applyfilter [options] object [...]\n"
+	    "options are:\n"
+	    GLOBALOPTLONGHELP
+	    "    -c             - check mode, print if filters match files on command line\n"
+	    "    -n             - dry run, do not actually delete anything\n"
+	    );
 }
 
 /* remove LF in LF+whitespace sequences, in place */

@@ -1003,17 +1003,15 @@ usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "texpire -V\n"
-	    "    print version on stderr and exit\n"
-	    "texpire [-fvnr] [-D debugmode] [-F configfile]\n"
-	    "    -D: switch on debugmode\n"
-	    "    -n: dry run mode, do not delete anything\n"
-	    "    -r: relink articles with message.id tree\n"
-	    "    -f: force expire irrespective of access time\n"
-	    "    -v: more verbose (may be repeated)\n"
-	    "    -F: use \"configfile\" instead of %s/config\n"
-	    "See also the leafnode homepage at http://www.leafnode.org/\n",
-	    sysconfdir);
+	    "texpire [OPTIONS] [-C message.id [...]]\n"
+	    "options are:\n"
+	    GLOBALOPTLONGHELP
+	    "    -a             - expire individual articles (earlier) rather than threads\n"
+	    "    -f             - force expire irrespective of access time\n"
+	    "    -n             - dry run mode, do not delete anything\n"
+	    "    -r             - relink articles with message.id tree\n"
+	    "    -C             - switch to cancel mode\n"
+	    );
 }
 
 int

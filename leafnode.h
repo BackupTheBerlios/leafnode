@@ -170,6 +170,14 @@ int findopt(char option, int argc, char *argv[]);
 /* conffile is malloced */
 int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 #define GLOBALOPTS ":VveD:F:d:"
+#define GLOBALOPTHELP "[-d spooldir] [-D debug] [-e] [-F config] [-v [...]] [-V]"
+#define GLOBALOPTLONGHELP \
+    "    -d spooldir    - use spooldir instead of compiled-in default\n" \
+    "    -D debug       - set debug flags (see config.example for documentation)\n" \
+    "    -e             - redirect logging to standard error\n" \
+    "    -F config      - read config file as configuration instead of default\n" \
+    "    -v [...]       - increase verbosity level (can be repeated)\n" \
+    "    -V             - just print version and exit, perform no other operation\n"
 
     /* handling of misc. lines */
     /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);

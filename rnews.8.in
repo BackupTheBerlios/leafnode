@@ -9,9 +9,7 @@
 rnews \- sort batch files into spool
 
 .SH SYNOPSIS
-.B rnews -V
-.br
-.B rnews [-F configuration] [-v[v[v[v[v]]]]] [-D debugmode] [file|directory]
+.B rnews [GLOBAL OPTIONS] [file|directory]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -37,29 +35,15 @@ through directories.
 sets its real and effective uid to "news".
 
 .SH OPTIONS
-.TP
-.I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems. See
-.I @sysconfdir@/config.example
-for details on how to configure the debug mode.
-.TP
-.I -F configfile
-If set, use configfile instead of the default configuration.
-.TP
-.I -V
-Show version information and exit.
-.TP
-.I -v
-Be verbose. A maximum of five -v can be used.
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I file
 Sort this file into the newsspool. The file can also be a rnews batch,
 optionally compressed.
 .TP
 .I directory
-Sort the contents of this directory into the newsspool.
+Sort the contents of all files in this directory into the newsspool.
 
 .SH BUGS
 .B Rnews
@@ -67,8 +51,8 @@ leaks some bytes of memory (the command line arguments to the
 external compressor program.)
 
 .SH AUTHOR
-Originally written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright 1999.
+Written and Copyright 1999 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
 .PP
-Major rewrite by Matthias Andree <matthias.andree@gmx.de>. Copyright
-2001 - 2002.
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.PP
+Written and Copyright 2000 - 2005 by Matthias Andree <matthias.andree@gmx.de>.

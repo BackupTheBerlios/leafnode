@@ -2,7 +2,7 @@
 .SH NAME
 newsq \- view the leafnode news queue
 .SH SYNOPSIS
-.B newsq [options]
+.B newsq [GLOBAL OPTIONS] [-c]
 .SH "DESCRIPTION"
 .BR newsq
 outputs a summary of news that is in leafnode's out.going, in.coming and
@@ -19,6 +19,8 @@ example, texpire or fetchnews were running).
 failed.postings carries all articles that have been rejected by upstream
 servers.
 .SH OPTIONS
+For a description of the \fBGLOBAL OPTIONS\fR, see
+.BR leafnode (8).
 .TP
 .I -c
 Check mode. Checks the out.going queue without printing anything. The
@@ -27,8 +29,10 @@ EX_UNAVAILABLE when no articles are spooled in out.going and
 EXIT_FAILURE when there was an error.
 .TP
 .I -h
-Help. Print a short help and print the exit codes used in -c mode. They
-are system-specific and should not change after updating leafnode.
+Print a short help and print the exit codes used in -c mode. They
+are system-specific and should not change when updating leafnode, but
+can change on updating operating systems, although this should rarely
+happen.
 .SH SECURITY
 newsq is supposed to be installed set-group-id (mode 02711) to your
 .I news
@@ -36,5 +40,13 @@ group. Do
 .B not
 install it set-user-id anything!
 .SH AUTHOR
+Written and Copyright 1999 by Cornelius Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de>.
+.br
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
+.br
+Written and Copyright 2000, 2001, 2002, 2004 by Matthias Andree
+<matthias.andree@gmx.de>.
+.PP
 This manual page was written by Joey Hess,
 for the Debian GNU/Linux system, and updated by Matthias Andree.

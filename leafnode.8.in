@@ -11,9 +11,9 @@
 leafnode \- NNTP server for small (dialup) sites
 
 .SH SYNOPSIS
-.B leafnode -V
+.B leafnode [-d spooldir] [-D debugmode] [-e] [-F configfile] [-v [...]]
 .br
-.B leafnode [-D debugmode] [-F configfile]
+.B leafnode -V
 
 .SH DESCRIPTION
 .B Leafnode
@@ -38,18 +38,31 @@ are responsible for fetching new news from another server, and for
 deleting old news.
 
 .SH OPTIONS
-
+.B All
+options in this sections are valid for all leafnode programs.
+.TP
+.I -d spooldir
+Switch spool directory from the compiled-in default @SPOOLDIR@ to
+\fIspooldir\fR.
 .TP
 .I -D debugmode
-Switch on debug mode. This will log a lot of information via syslog to
-the facility "news" with the priority "debug". Useful for tracking down
-problems with your upstream server(s). If debug mode has already been
-set in the config file, increase verbosity. See
+Set debug mode. \fIdebugmode\fR is a bit-wise OR of debug options,
+expressed as decimal number. It will log a lot of information via syslog
+to the "news" facility with priority "debug".  See
 .I @sysconfdir@/config.example
-for a description of this parameter.
+for a detailed description of how to set this parameter.
+.TP
+.I -e
+Redirect logging from syslog to the standard error channel (stderr).
+This is useful for debugging and when using service supervisors such as
+Gerrit Pape's \fIrunit\fR or Daniel J. Bernstein's \fIdaemontools\fR.
 .TP
 .I -F configfile
 Read configuration from an alternative file instead of @sysconfdir@/config.
+.TP
+.I -v
+Increase verbosity level. This option can be repeated for increased
+effect.
 .TP
 .I -V
 Report leafnode version and exit.
@@ -546,8 +559,11 @@ Randolf Skerka <Randolf.Skerka@gmx.de> and
 Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
 Copyright of the modifications 1997-2000.
 .PP
-Modified by Matthias Andree <matthias.andree@gmx.de>. Copyright of the
-modifications 2000-2002.
+Written and Copyright 2002 by Jörg Dietrich <joerg@dietrich.net>
+.br
+Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.net>
+.br
+Written and Copyright 2000 - 2005 by Matthias Andree <matthias.andree@gmx.de>.
 .PP
 The initial development of
 .B leafnode
