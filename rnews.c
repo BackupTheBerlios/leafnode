@@ -305,9 +305,10 @@ main(int argc, char *argv[])
     puts("this program cannot currently be used.");
     abort();
 
+    ln_log_open(argv[0]);
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-    ln_log_open(argv[0]);
+
 
     while ((option = getopt(argc, argv, "DVv")) != -1) {
 	if (!parseopt("rnews", option, NULL, NULL, 0)) {
