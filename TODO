@@ -66,9 +66,6 @@ Ralfs TODO:
 10pre4
 0.0 use separate repairspool program
 
-10pre4
-1.1 refuse postings with unqualified or local message ID domain part.
-
 10pre5
 1.1 try to post an article to *every* server before moving into
     failed.postings. suggested by Jeff Grossman.
@@ -274,6 +271,9 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-05-05 Matthias Andree
+           refuse postings with unqualified or local message ID domain part.
 
 2002-05-05 Matthias Andree
 	   add COPYING (requested by Ralf Wildenhues)
