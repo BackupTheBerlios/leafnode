@@ -29,9 +29,9 @@ mastrcpy(/*@out@*/ /*@returned@*/ char *dest, const char *src);
 mastrncpy(/*@out@*/ /*@unique@*/ /*@returned@*/ char *dest, const char *src, size_t n);
 
 struct mastr {
-    char *dat;
-    size_t bufsize;
-    size_t len;
+    char *PRIVATE__dat;
+    size_t PRIVATE__bufsize;
+    size_t PRIVATE__len;
 };
 
 typedef struct mastr mastr;
@@ -53,7 +53,8 @@ void mastr_clear(mastr *);
 void mastr_triml(mastr * m);
 void mastr_trimr(mastr * m);
 void mastr_chop(mastr * m);
+size_t mastr_len(mastr *);
 #define mastr_trim(m) do { mastr_triml(m); mastr_trimr(m); } while(0)
-#define mastr_str(m) ((const char *)(m->dat))
-#define mastr_modifyable_str(m) (m->dat)
+#define mastr_str(m) ((const char *)(m->PRIVATE__dat))
+#define mastr_modifyable_str(m) (m->PRIVATE__dat)
 #endif

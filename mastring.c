@@ -25,6 +25,9 @@
 
 #include <assert.h>
 
+#define len PRIVATE__len
+#define dat PRIVATE__dat
+#define bufsize PRIVATE__bufsize
 #include "mastring.h"
 #include "attributes.h"
 
@@ -312,4 +315,11 @@ size_t
 mastr_size(mastr * m)
 {
     return m->bufsize - 1;
+}
+
+/** return length of buffer */
+size_t
+mastr_len(mastr * m)
+{
+    return m->len;
 }
