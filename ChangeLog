@@ -1,3 +1,70 @@
+2002-01-11  Matthias Andree  <matthias.andree@gmx.de>
+
+        === RELEASE 2.0b8_ma9rc2 ===
+	* configure.ac: Bump version.
+	* miscutil.c: Add freeinteresting() implementation.  Change second
+	argument of findinlist to const * char const.
+
+	* leafnode.h: Add freeinteresting() prototype.  Change second
+	argument of findinlist to const * char const.
+
+	* fetchnews.c: Security bugfix (low risk): dynamically allocate
+	space for group name plus space character in do_group rather than
+	overflowing it's caller's dynamically-allocated string.
+
+	This bug was observed and tracked down by Mike Castle
+	<dalgoda@ix.netcom.com>.  Thanks a lot.
+
+	As we're not overflowing an "auto" storage class variable here,
+	the data will not be on the stack, so just pushing shell code into
+	the variable will be rather useless, and the attack would be
+	rather difficult to deploy: the server would have to toss down
+	shell code without NUL and LF, could not use CR everywhere, and it
+	would need to trick a client into marking this group for fetching.
+
+	* ALL: change DEBUG_DMALLOC -> WITH_DMALLOC.
+	* miscutil.c: Misc cleanups in initinteresting(), deal with
+	"already present in tree" condition. Fix function name logging.
+	* rnews.c: Deal with argument to -D.
+	* nntpd.c: Deal with argument to -D.
+	* newsq.c: Deal with argument to -D.
+	* Makefile.am: Do not install rnews.8 (rnews ist not installed
+	either).  Add log_chmod.c and log_fchmod.c to library sources.
+
+	* log_fchmod.c: New.
+	* log_chmod.c: New.
+	* leafnode.h: Add prototypes for log_chmod and log_fchmod.
+	* xoverutil.c: Use log_fchmod rather than doing our own error
+	logging.
+
+	* texpire.c: Deal with argument to -D.
+	* texpire.8.in: Update documentation.
+	* rnews.8.in: @LIBDIR@ -> @sysconfdir@, found by Mike Castle.
+	Update -D documentation.
+	* leafnode.8.in: @LIBDIR@ -> @sysconfdir@, found by Mike Castle.
+	Update -D documentation.
+	* fetchnews.8.in: @LIBDIR@ -> @sysconfdir@, found by Mike Castle.
+	Update -D documentation.
+	* checkgroups.c: Deal with argument to -D.
+	* attributes.h: Change license to LGPL.
+	* artutil.c (mgetheader) Deal with buf == NULL, found by Ralf
+	Wildenhues.
+
+	* applyfilter.c: Deal with argument to -D.
+	* applyfilter.8.in: @LIBDIR@ -> @sysconfdir@, found by Mike
+	Castle.  Update -D documentation.
+
+	* activutil.c: Use log_fchmod rather than doing our own error
+	logging.
+
+	* fetchnews.c: Fix writing of server-specific info files.  Deal
+	with argument to -D.  Fix bogus "not found in groupinfo file"
+	errors.  Change child's exit() to _exit(), found by Ralf
+	Wildenhues.
+
+	* mastring.c: Add missing free() in oom handling.  Change some 0
+	to NULL for readibility.
+
 2002-01-08  Matthias Andree  <matthias.andree@gmx.de>
 
 	=== RELEASE 2.0b8_ma9rc1 ===
