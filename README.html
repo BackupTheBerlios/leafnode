@@ -291,6 +291,11 @@ to read.
 <p>The local.groups and groupinfo files have changed from any former
 version to 2.0b8_ma8.
 
+<P><STRONG>IMPORTANT:</STRONG>To fix the "remote" groups, run <KBD>fetchnews
+-f</KBD> -- it will take some time, because if refetches the whole
+active file, but that's needed anyhow to figure the group status
+(posting allowed/not allowed/moderated group).
+
 <p>To fix <strong>local.groups</strong>, if you have perl installed:
 
 <PRE>
@@ -311,20 +316,18 @@ Before: local.test some test group
 
 <br>Use the real TAB character rather than TAB.
 
-<P>To fix the "remote" groups, run fetchnews -f.
+<br>The changes written in section 3.2 below also apply.
 
-<h3 align=center>3.1 Update from versions &lt; 2.0</h3>
+<h3 align=center>3.2 Update from versions &lt; 2.0</h3>
 
-<p>
-From 1.9.x to 2.0 there were some changes to options in the main
+<p>From 1.9.x to 2.0 there were some changes to options in the main
 configuration file. The options "maxage", "maxlines", "minlines",
 "maxbytes" and "maxcrosspost" have become obsolete in the main
 configuration file and have to be specified in the filter file
 instead. The advantage of this is that you can do much finer
 selection on these criteria now.
 
-<p>
-To replace, for example, a "maxage = 5" specification in the
+<p>To replace, for example, a "maxage = 5" specification in the
 main configuration file, you should add the following to your
 filter file:
 
@@ -334,8 +337,7 @@ maxage = 5
 action = kill
 </pre>
 
-<p>
-The leafnode programs will issue warnings if they encounter
+<p>The leafnode programs will issue warnings if they encounter
 obsolete specifications in the main config file.
 
 <h3 align=center>3.2 Update from versions &lt; 1.9.3</h3>
@@ -589,9 +591,13 @@ directory.)
 <P>From version 2.0 on, Leafnode also handles <strong>moderated</strong>
 newsgroups. These are newsgroups which only certain people may post
 into, and articles which a regular (non-moderator) user posts, are
-mailed to the moderator. To configure the moderators, an INN-compatible
-"moderators" file is used. It is named /etc/leafnode/moderators and has
-the following format:
+mailed to the moderator. 
+
+<P>External moderated newsgroups are handled by the upstream servers.
+
+<P>To configure the moderators for <strong>local</strong> moderated
+groups, an INN-compatible "moderators" file is used. It is named
+/etc/leafnode/moderators and has the following format:
 
 <PRE>
 pattern:moderator
