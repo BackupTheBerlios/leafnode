@@ -31,8 +31,6 @@
 #include <dmalloc.h>
 #endif
 
-/* extern int optind; */
-static int processfile(char *filename);
 static void
 usage(void)
 {

@@ -392,7 +392,6 @@ freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a)
     free(a);
 }
 
-static int check_old_format(char *l);
 static int
 check_old_format(char *l)
 {
@@ -413,7 +412,6 @@ check_old_format(char *l)
     return TRUE;    
 }
 
-static int read_group_parameters(char *l, struct newsgroup *g, unsigned long *age);
 static int
 read_group_parameters(char *l, struct newsgroup *g, unsigned long *age)
 {
@@ -438,7 +436,6 @@ read_group_parameters(char *l, struct newsgroup *g, unsigned long *age)
 /*
  * read active file into memory
  */
-static void readactive(void);
 static void
 readactive(void)
 {
