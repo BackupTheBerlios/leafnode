@@ -91,7 +91,7 @@ insertgroup(const char *name, const char status, long unsigned first,
 }
 
 /*
- * change description of newsgroup
+ * change description of newsgroup, if the group is not found, nothing happens.
  */
 void
 changegroupdesc(const char *groupname, char *description)
@@ -176,21 +176,42 @@ findgroup(const char *name)
 /*
  * write active file
  */
-void
+int
 writeactive(void)
 {
     FILE *a;
     struct newsgroup *g;
     struct stat st;
     mastr *c = mastr_new(PATH_MAX);
-    mastr *s = mastr_new(PATH_MAX);
+    char *tmp;
     size_t count;
     int err, fd;
+    int rc = -1;
 
-    mastr_vcat(s, spooldir, GROUPINFO ".new", 0);
-    fd = open(mastr_str(s), O_WRONLY | O_CREAT | O_EXCL, 0664);
+    if (!active) {
+	mastr_delete(c);
+	ln_log_sys(LNLOG_SWARNING, LNLOG_CTOP,
+		   "warning: writeactive called without "
+		   "active file in memory, skipping");
+	return -1;
+    }
+
+    { /* this block limits the s scope */
+	mastr *s = mastr_new(PATH_MAX);
+	mastr_vcat(s, spooldir, GROUPINFO ".XXXXXXXXXX", 0);
+	tmp = critstrdup(mastr_str(s), "writeactive");
+	mastr_delete(s);
+    }
+
+    fd = safe_mkstemp(tmp);
+    /* fd = open(mastr_str(s), O_WRONLY | O_CREAT | O_EXCL, 0664); */
     if (fd < 0) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", mastr_str(s));
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", tmp);
+	goto bye;
+    }
+
+    if (fchmod(fd, 0664)) {
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot fchmod(%d, 0664): %m", fd);
 	goto bye;
     }
 
@@ -215,7 +236,7 @@ writeactive(void)
     while (g->name) {
 	if (*(g->name)) {
 	    char num[30];
-	    /* do error checking at end of loop */
+	    /* do error checking at end of loop body */
 	    fputs(g->name, a);
 	    fputc('\t', a);
 	    fputc(g->status, a);
@@ -241,7 +262,7 @@ writeactive(void)
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		   "failed writing new groupinfo file: %m");
 	log_fclose(a);
-	log_unlink(mastr_str(s));
+	log_unlink(tmp);
 	goto bye;
     }
 
@@ -252,19 +273,22 @@ writeactive(void)
 
     log_fclose(a);
     mastr_vcat(c, spooldir, GROUPINFO, 0);
-    if (rename(mastr_str(s), mastr_str(c))) {
+    if (rename(tmp, mastr_str(c))) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
-		   "failed to rename new groupinfo file into place: %m");
+		   "failed to rename new groupinfo file %s into place: %m",
+		   tmp);
     } else {
 	/* prevent reloading the just-written groupinfo */
 	activeinode = st.st_ino;
 	activetime = st.st_mtime;
 	ln_log_sys(LNLOG_SINFO, LNLOG_CTOP,
 		   "wrote groupinfo with %lu lines.", (unsigned long)count);
+	rc = 0;
     }
   bye:
     mastr_delete(c);
-    mastr_delete(s);
+    free(tmp);
+    return rc;
 }
 
 /*
@@ -333,12 +357,15 @@ readactive(void)
 	    abort();
 	    /* old format groupinfo, must refresh */
 	}
-	if (!r || (*r++ = '\0',
-		   sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
-			  &g->first, &g->age) != 4)) {
+	if (!r
+	    || (*r++ = '\0',
+		sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
+		       &g->first, &g->age) != 4)
+	    || !strchr("yYmMnN", g->status)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
-		       "Groupinfo file possibly truncated or damaged: %s", p);
-	    break;
+		       "Groupinfo file damaged, ignoring line: %s", p);
+	    /* skip over malformatted line */
+	    continue;
 	}
 	g->name = critstrdup(p, "readactive");
 	if (g->first == 0)
