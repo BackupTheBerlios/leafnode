@@ -2157,8 +2157,8 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
 }
 
 /* this dummy function is used so we can define a no-op for SIGCHLD */
-static void dummy(int unused);
-static void
+static RETSIGTYPE dummy(int unused);
+static RETSIGTYPE
 dummy(int unused)
 {
     (void)unused;
