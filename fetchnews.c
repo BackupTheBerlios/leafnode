@@ -52,7 +52,6 @@ static unsigned long extraarticles = 0;		/* go back in upstream high mark and tr
 static unsigned int throttling = 0;		/* pause between streaming operations */
 						/* the higher the value, the less bandwidth is used */
 static int noexpire = 0;	/* if 1, don't automatically unsubscribe newsgroups */
-static int forceactive = 0;	/* if 1, reread complete active file */
 
 /* fetchnews major operation.  Default: do everything */
 #define FETCH_ARTICLE 1		/* get normal group articles */
@@ -192,7 +191,7 @@ add_fetchgroups(void)
  * - -1 for failure
  */
 static int
-process_options(int argc, char *argv[])
+process_options(int argc, char *argv[], int *forceactive)
 {
     int option;
     char *p;
@@ -237,7 +236,7 @@ process_options(int argc, char *argv[])
 	    break;
 	case 'M':
 	    if (!msgidlist) {
-		forceactive = 0;	/* don't load active */
+		*forceactive = 0;	/* don't load active */
 	    }
 	    if (!action_method_seen) {
 		action_method_seen = TRUE;
@@ -249,7 +248,7 @@ process_options(int argc, char *argv[])
 	    noexpire = 1;
 	    break;
 	case 'f':
-	    forceactive = 1;
+	    *forceactive = 1;
 	    break;
 	case 'B':
 	    if (!action_method_seen) {
@@ -757,7 +756,7 @@ store_pseudo_header(mastr *s)
 	goto out;
     }
     if (store(mastr_str(tmpfn), 0, 0, 1) == 0) {
-	(void)log_unlink(mastr_str(tmpfn));
+	(void)log_unlink(mastr_str(tmpfn), 0);
     } else {
 	rc = -1;
     }
@@ -1207,32 +1206,11 @@ splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
     }
 }
 
-/** removes the last:*:* file for the current server, to force fetchnews
- * to read this server's active file soon.
- */
-static int
-dirtyactive(struct serverlist *srv)
-{
-    mastr *s = mastr_new(LN_PATH_MAX);
-    char p[20];
-    int r;
-
-    assert(srv != NULL);
-    str_ulong(p, srv->port);
-    mastr_vcat(s, spooldir, "/leaf.node/last:", srv->name, ":", p, NULL);
-    r = unlink(mastr_str(s));
-    if (r && errno != ENOENT) {
-	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m", mastr_str(s));
-    }
-    mastr_delete(s);
-    return r;
-}
-
 /**
  * get active file from current_server
  */
 static void
-nntpactive(void)
+nntpactive(int fa)
 {
     struct stat st;
     char *l, *p, *q;
@@ -1245,16 +1223,31 @@ nntpactive(void)
     int reply = 0, error;
     unsigned long count = 0;
     unsigned long first, last;
+    int forceact = fa;
+    time_t last_update = 0;
 
+    /* the simple upstream file is used to check the time of the last
+     * update. The last:*:* file is used to check the time of the last
+     * full-fetch (must not be older than timeout_active)
+     */
+
+    /* figure last update */
+    p = server_info(spooldir, current_server->name, current_server->port, "");
+    if (0 == stat(p, &st))
+	last_update = st.st_mtime;
+    else
+	/* never fetched before */
+	forceact = 1;
+    free(p);
 
     str_ulong(portstr, current_server->port);
     mastr_vcat(s, spooldir, "/leaf.node/last:", current_server->name, ":", portstr, NULL);
 
-    if (!forceactive && (0 == stat(mastr_str(s), &st))) {
+    if (!forceact && (0 == stat(mastr_str(s), &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 		"%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
-	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&st.st_mtime));
+	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&last_update));
 	putaline(nntpout, "NEWGROUPS %s GMT", timestr + 2);
 	if (nntpreply() != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
@@ -1334,7 +1327,7 @@ nntpactive(void)
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
 	    if (is_interesting(l)
-		    && (forceactive || !(active && findgroup(l, active, -1)))
+		    && (forceact || !(active && findgroup(l, active, -1)))
 		    && chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
@@ -1351,6 +1344,7 @@ nntpactive(void)
 	mergegroups();
 	/*		if (!l)
 			timeout 
+			mastr_delete(namelast);
 			return; */
 
 	if (current_server->descriptions) {
@@ -1401,14 +1395,14 @@ nntpactive(void)
 	free(oldactive); /* Do not call freeactive(). The pointers in 
 			    oldactive will be free()d by freeactive(active)
 			    at the end. */
+	/* touch file */
+	{
+	    int e = touch_truncate(mastr_str(s));
+	    if (e < 0)
+		ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", mastr_str(s));
+	}
+	mastr_delete(s);
     }
-    /* touch file */
-    {
-	int e = touch_truncate(mastr_str(s));
-	if (e < 0)
-	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", mastr_str(s));
-    }
-    mastr_delete(s);
 }
 
 /* post article in open file f, return FALSE if problem, return TRUE if ok */
@@ -1582,7 +1576,7 @@ remove_watermark(const char *group, struct rbtree *upstream,
  */
 static int
 processupstream(const char *const server, const unsigned short port,
-		const time_t lastrun)
+		int forceactive)
 {
     FILE *f;
     const char *ng;			/* current group name */
@@ -1707,7 +1701,7 @@ out:
  * - -2 for fatal errors (do not query any more)
  */
 static int
-do_server(time_t lastrun)
+do_server(int forceactive)
 {
     char *e = NULL;
     int rc = -1;	/* assume non fatal errors */
@@ -1752,8 +1746,9 @@ do_server(time_t lastrun)
 
     /* do regular fetching of articles, headers, delayed bodies */
     if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
-	nntpactive();	/* get list of newsgroups or new newsgroups */
-	res = processupstream(current_server->name, current_server->port, lastrun);
+	nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
+	res = processupstream(current_server->name, current_server->port,
+			forceactive);
 	if (res == 1)
 	    rc = 1;
 	else
@@ -1799,6 +1794,58 @@ static int mysigaction(int signum, const  struct  sigaction  *act) {
     return 0;
 }
 
+static mastr *activeread(void)
+{
+    mastr *c = mastr_new(100);
+    mastr_vcat(c, spooldir, "/leaf.node/:active.read", NULL);
+    return c;
+}
+
+/* return 1 if forceactive is required, 0 if not */
+static int checkactive(void)
+{
+    struct stat st;
+    mastr *c = activeread();
+    int passed, rc = 0;
+
+    if (stat(mastr_str(c), &st)) {
+	ln_log(LNLOG_SNOTICE, LNLOG_CTOP, "cannot stat %s: %m", mastr_str(c));
+	mastr_delete(c);
+	return 1;
+    }
+
+    passed = (now - st.st_mtime) / SECONDS_PER_DAY;
+    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "last active refetch %d days ago.", passed);
+
+    if (passed >= timeout_active)
+	rc = 1;
+    mastr_delete(c);
+    return rc;
+}
+
+enum actmark { AM_UPDATE = 42, AM_KILL };
+
+static int markactive(enum actmark am)
+{
+    int e;
+    mastr *c = activeread();
+    switch (am) {
+	case AM_UPDATE:
+	    if ((e = touch_truncate(mastr_str(c))) < 0)
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot touch or create %s: %m",
+			mastr_str(c));
+	    break;
+	case AM_KILL:
+	    e = log_unlink(mastr_str(c), 1);
+	    break;
+	default:
+	    abort();
+	    break;
+    }
+    mastr_delete(c);
+    return e;
+}
+
 /**
  * main program
  */
@@ -1813,6 +1860,7 @@ main(int argc, char **argv)
     volatile time_t starttime;	/* keep state across setjmp */
     static const char myname[] = "fetchnews";
     struct sigaction sa;
+    int forceactive = 0;	/* if 1, reread complete active file */
 
     verbose = 0;
     ln_log_open("fetchnews");
@@ -1833,7 +1881,7 @@ main(int argc, char **argv)
     if (conffile)
 	free(conffile);
 
-    if (process_options(argc, argv) != 0)
+    if (process_options(argc, argv, &forceactive) != 0)
 	exit(EXIT_FAILURE);
 
     if (!servers) {
@@ -1865,6 +1913,10 @@ main(int argc, char **argv)
     else
 	postonly = 0;
 
+    if (!forceactive)
+	forceactive |= checkactive();
+    if (forceactive)
+	markactive(AM_KILL);
     rereadactive();
 
     feedincoming();
@@ -1914,25 +1966,22 @@ main(int argc, char **argv)
     }
 
     while (servers) {
-	time_t lastrun = 0;		/* FIXME: save state for NEWNEWS */
+	/* time_t lastrun = 0;		/ * FIXME: save state for NEWNEWS */
 
 	current_server = servers;
-	if (forceactive) {
-	    (void)dirtyactive(current_server);
-	}
 	if (current_server->active) {
-	    err = do_server(lastrun);
-	    if (err == 0 || err == -2)
+	    err = do_server(forceactive);
+	    if (err == -2) {
+		rc = 1;
+		break; 
+	    }
+	    if (err == -1 && rc == 0)
+		rc = 2;
+	    if (err == 0) {
 		break;	/* no other servers have to be queried */
+	    }
 	}
 	servers = servers->next;
-    }
-    switch (err) {
-    case  1:
-    case -2:
-	rc = 1;
-    case 0:
-	rc = 0;
     }
 
     signal(SIGINT, SIG_IGN);
@@ -1940,6 +1989,8 @@ main(int argc, char **argv)
 
     if (!postonly) {
 	writeactive();
+	if (rc == 0)
+	    markactive(AM_UPDATE);
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles and %lu headers fetched, %lu killed, %lu posted, in %ld seconds",
