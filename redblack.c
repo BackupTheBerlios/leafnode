@@ -1,4 +1,4 @@
-static char rcsid[]="$Id: redblack.c,v 1.8 2002/08/13 18:12:39 ralf Exp $";
+static char rcsid[]="$Id: redblack.c,v 1.9 2002/10/23 15:57:09 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -386,7 +386,7 @@ static struct rbnode *
 rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 {
 	struct rbnode *x,*y;
-	int cmp;
+	int cmp = 0;
 	int found=0;
 
 	y=RBNULL; /* points to the parent of x */
@@ -1007,6 +1007,9 @@ dumptree(struct rbnode *x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.9  2002/10/23 15:57:09  emma
+ * Initialize cmp. Fixes compiler warning.
+ *
  * Revision 1.8  2002/08/13 18:12:39  ralf
  * Remove superfluous nested function decl.
  *
