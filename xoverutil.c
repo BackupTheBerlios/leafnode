@@ -44,11 +44,6 @@ unsigned long xlast = 0;
 unsigned long xcount = 0;
 struct xoverinfo *xoverinfo = NULL;
 
-/* declarations */
-/*@null@*/ /*@only@*/
-char *getxoverline(const int, const char *filename);
-int writexover(void);
-
 /* order must match enum xoverfields here! */
 static struct {
     const char *header;
