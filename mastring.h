@@ -1,3 +1,22 @@
+/* mastring.h -- Implement auto-allocating string functions.
+ *
+ * (C) 2001 - 2002 by Matthias Andree <matthias.andree@gmx.de>
+ *
+ * This library is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2 or 2.1 of
+ * the License. See the file COPYING.LGPL for details.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
+ */
 #ifndef MASTRING_H
 #define MASTRING_H
 
@@ -22,7 +41,7 @@ typedef struct mastr mastr;
 /*@only@*/ mastr *mastr_new(size_t);
 /*@only@*/ mastr *mastr_newstr(const char *);
 int mastr_cpy(mastr *, const char *);
-int mastr_cat(mastr *, /*@observer@*/ const char *);
+int mastr_cat(mastr *, /*@unique@*/ /*@observer@*/ const char *);
 int mastr_vcat(mastr *, ...);
 int mastr_resizekeep(mastr *, size_t);
 int mastr_resizekill(mastr *, size_t);
