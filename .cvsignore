@@ -65,3 +65,8 @@ try.c try-indent.c
 vsnprintf.o
 xoverutil.o
 lsort
+filterfile.5
+.deps
+amiroot
+leafnode-version
+config.table.sorted

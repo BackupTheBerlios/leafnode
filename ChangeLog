@@ -1,3 +1,34 @@
+2002-02-04  Matthias Andree  <matthias.andree@gmx.de>
+
+	=== RELEASE 2.0b8_ma10pre2 ===
+	* Makefile.am: Add getwatermarks.c.
+	* TODO: Update.
+	* leafnode.h: Add getwatermarks. Add time_t to gmtoff() prototype.
+	* fetchnews.c: nntpactive(): Use getwatermarks() instead of doing
+	this on our own.
+
+	* store.c: If EEXIST happens during store into a newsgroup, obtain
+	the water marks for the group and retry. This should prevent
+	storing articles into the "gaps" after a crash. Fixes a
+	long-standing bug.  Also prefix all log messages with "store: "
+	and let the BAIL macro suppress its log if the second argument is
+	an empty string.
+
+	* gmtoff.c: Now calculate the offset for the time passed in as
+	argument rather than the current time. Side effect: this function
+	does not call upon gettimeofday any more.
+
+	* nntpd.c: Clean up and unify donewgroups/donewnews, split off
+	common code into separate functions to save some code. En passant,
+	fix the time zone sign bug and calculate GMT offset for the time
+	given rather than the current time. Negated offset reported by
+	Ralf Wildenhues.
+
+2002-02-03  Matthias Andree  <matthias.andree@gmx.de>
+
+	* ln_log.h: Reduce general verbosity by one. Add one -v to restore
+	old behaviour.
+
 2002-01-31  Matthias Andree  <matthias.andree@gmx.de>
 
 	* queues.c: - feedincoming: cast result of rbreadlist to char *
