@@ -1,6 +1,5 @@
 #include "ln_log.h"
 #include <errno.h>
-
 int verbose = 9;
 
 main()
