@@ -7,6 +7,8 @@ Changes since 20050104a:
 - Bugfix: store() does not create message.id link unless there was at
   least one valid newsgroup, also avoids writing empty Xref: header that
   confused delete_article()
+- Cleanup: the half-working applyfilter -C mode is gone. texpire -C gets
+  it right.
 
 20050104a: Changes since 20050103a:
 - Feature: texpire can now remove articles from the spool, new -C

@@ -47,7 +47,6 @@ usage(void)
 	    "    -F: use \"configfile\" instead of %s/config\n"
 	    "    -n: dry run, do not actually delete anything\n"
 	    "    -c: check mode, print if filters match files on command line\n"
-	    "    -C: cancel mode, cancel message-IDs on command line\n"
 	    "See also the leafnode homepage at http://www.leafnode.org/\n",
 	    sysconfdir);
 }
@@ -199,7 +198,6 @@ main(int argc, char *argv[])
     int needfilter = 1;
     int check = 0; /** if set, check if file given here would be filtered */
     const char *const myname = "applyfilter";
-    int cancel = 0;
 
     savedir=open(".", O_RDONLY);
 
@@ -209,7 +207,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "ncC")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "nc")) != -1) {
 	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
@@ -220,10 +218,6 @@ main(int argc, char *argv[])
 		dryrun = 1; /* imply -n */
 		check = 1;
 		break;
-	    case 'C':
-		cancel = 1;
-		needfilter = 0;
-		break;
 	    default:
 		usage();
 		/* fallthrough */
@@ -233,7 +227,7 @@ main(int argc, char *argv[])
     }
 
     if (optind + 1 > argc
-	    || (cancel && dryrun)) {
+	    || (dryrun)) {
 	usage();
 	exit(EXIT_FAILURE);
     }
@@ -261,13 +255,7 @@ main(int argc, char *argv[])
 
     rereadactive();
 
-    if (cancel) {
-	for (;optind<argc;optind++) {
-	    if (verbose)
-		printf("trying to cancel %s\n", argv[optind]);
-	    delete_article(argv[optind], "manual remove", "manually removed", 0);
-	}
-    } else {
+    {
 	if (check) {
 	    kept = deleted = 0;
 	    for(;optind<argc;optind++) {
