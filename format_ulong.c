@@ -9,7 +9,7 @@ void
 str_ulong( /*@out@*/ char *p, unsigned long u)
 {
     unsigned int len = 0;
-    unsigned int i = u;
+    unsigned long i = u;
 
     unsigned char b[22];
 
@@ -21,5 +21,5 @@ str_ulong( /*@out@*/ char *p, unsigned long u)
     while (len) {
 	*p++ = "0123456789"[b[--len]];
     }
-    *p = 0;
+    *p = '\0';
 }
