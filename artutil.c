@@ -259,7 +259,7 @@ err_out:
  */
 void
 delete_article(
-/** article to kill */
+/** article to kill, with angle brackets around Message-ID */
 		    const char *mid,
 /** "Supersede" or "Cancel" */
 		    const char *action,
