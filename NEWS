@@ -1,9 +1,11 @@
 2.0b8_ma10pre4:
-- rnews is back! (Matthias Andree)
-- the "dontpost" configuration option is replaced by "feedtype=none".
-- there is a new "only_fetch_once" option, that reads a group only from
+- Rnews is back!
+- The "dontpost" configuration option is replaced by "feedtype=none".
+- There is a new "only_fetch_once" option, that reads a group only from
   the first server queried that carries this group. Suggested by Jörg
   Mensmann.
+- Only change permissions/owner of leafnode directories when creating
+  them. Requested by Kevin Bulgrien.
 
 2.0b8_ma10pre3.3:
 - fix: texpire crashes (Ralf Wildenhues)

@@ -108,24 +108,33 @@ initvars(const char *const progname, int logtostdout)
     expire_base = NULL;
     /* These directories should exist anyway */
     while (md->name) {
-	char x[PATH_MAX];
+	mastr *x = mastr_new(PATH_MAX);
 
-	snprintf(x, sizeof(x), "%s/%s", spooldir, md->name);
-	if (mkdir(x, (mode_t) 0110) && errno != EEXIST) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot mkdir(%s): %m\n", x);
-	    return FALSE;
-	}
+	mastr_vcat(x, spooldir, "/", md->name, NULL);
+	if (mkdir(mastr_str(x), (mode_t) 0110)) {
+		if (errno != EEXIST) {
+			ln_log(LNLOG_SERR, LNLOG_CTOP,
+					"cannot mkdir(%s): %m\n", mastr_str(x));
+			mastr_delete(x);
+			return FALSE;
+		}
+	} else {
 #ifndef TESTMODE
-	if (chown(x, ui, gi)) {	/* Flawfinder: ignore */
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chown(%s,%ld,%ld): %m\n",
-		   x, (long)ui, (long)gi);
-	    return FALSE;
-	}
+		if (chown(mastr_str(x), ui, gi)) {	/* Flawfinder: ignore */
+		    ln_log(LNLOG_SERR, LNLOG_CTOP,
+			    "cannot chown(%s,%ld,%ld): %m\n",
+			    mastr_str(x), (long)ui, (long)gi);
+		    mastr_delete(x);
+		    return FALSE;
+		}
 #endif /* not TESTMODE */
-	if (log_chmod(x, md->m)) {
-	    return FALSE;
+		if (log_chmod(mastr_str(x), md->m)) {
+		    mastr_delete(x);
+		    return FALSE;
+		}
 	}
 	md++;
+	mastr_delete(x);
     }
 #ifndef TESTMODE
     if (gid_ensure(gi)) {

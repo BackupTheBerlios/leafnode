@@ -50,10 +50,6 @@ Ralfs TODO:
     (applyfilter done)
 
 10pre5
-0.0 do not tamper with permissions on /var/spool/news/* directories
-    (Kevin Bulgrien), to allow for leafwa tricks.
-
-10pre5
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
 10pre5
@@ -80,6 +76,7 @@ Ralfs TODO:
     FreeBSD. Asked Jeffrey for explanation of OS and maybe scenario.
     2002-07-08.
     status: FEEDBACK PENDING
+    But should have been fixed with sigaction on 2002-07-08.
 
 10pre5
 1.1 groupinfo not updated after timeout + subsequent SIGINT
@@ -240,6 +237,10 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-07-08 Matthias Andree
+	   do not tamper with permissions on /var/spool/news/* directories
+	   (Kevin Bulgrien), to allow for leafwa tricks.
 
 2002-07-07 Ralf Wildenhues
 	   delaybody mode: Overviews are not corrected at all times yet.
