@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.44 2003/01/28 12:37:38 emma Exp $
+# $Id: Makefile.am,v 1.45 2003/02/02 23:45:15 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -184,6 +184,7 @@ EXTRA_DIST = \
 	config.h.in \
 	COPYING.LGPL \
 	CREDITS \
+	DEBUGGING \
 	Doxyfile \
 	ENVIRONMENT \
 	FAQ \

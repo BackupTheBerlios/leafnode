@@ -71,7 +71,7 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %doc %_mandir/man5/*
 %doc %_mandir/man8/*
 %doc ChangeLog AUTHORS CREDITS FAQ INSTALL README TODO
-%doc README.html
+%doc README.html DEBUGGING
 #%doc tools/*.pl
 %attr(2755,%{runas_user},%{runas_group}) %spooldir
 

@@ -1,0 +1,32 @@
+To get useful debugging out of leafnode-2, do this:
+
+1. log in as root
+
+2. in your /etc/leafnode/config, add a line "debugmode=129" to the top of
+   the file, to debug NNTP. Add other values given in that file to your
+   debugmode if you need other debug logs than NNTP command/reply traces.
+   For example, if you want filtering debugged, use "debugmode=33", and if
+   you want filtering, locking, configuration parsing and NNTP chatter
+   debugged, use 1 + 32 + 64 + 16 + 128 = 241.
+
+3. in your /etc/syslog.conf, add this line:
+
+   news.debug   /var/log/news.all
+
+   There is a tab character between the columns here.
+
+4. touch /var/log/news.all
+
+5. kill -HUP `cat /var/run/syslogd.pid'
+
+Two more hints:
+
+a. On some syslogds (Linux), you can add a - before the file name of step
+   #2 to have syslog write asynchronously for speed, like this:
+
+   news.*      -/var/log/news.all
+
+   Again, there is a tab character between the columns here.
+
+b. Some syslogds may complain about the asterisk in news.*. If yours does,
+   write news.debug instead of news.*.
