@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.103 2004/08/18 15:25:25 emma Exp $ */
+/* $Id: leafnode.h,v 1.104 2004/08/19 01:48:46 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -436,6 +436,8 @@ int xgetxover(const int, /*@null@*/ struct newsgroup *g);
 extern long sendbuf;	/* TCP send buffer of currently connected server */
 extern time_t default_expire;
 
+time_t lookup_expire(char *group); /* expire_lookup.c */
+
 enum feedtype { CPFT_NNTP = 0, CPFT_UUCP, CPFT_NONE };
 
 struct serverlist {
@@ -553,9 +555,8 @@ initfilelist(FILE *f, const void *config,
  */
 int attempt_lock(unsigned long timeout);
 int handover_lock(pid_t pid);
-void putaline(FILE *, const char *fmt, ...)
-    __attribute__ ((format(printf, 2, 3)));
-    extern char last_command[1025];
+void putaline(FILE *, const char *fmt, ...) __attribute__ ((format(printf, 2, 3)));
+extern char last_command[1025];
     void readexpire(void);
     void free_expire(void);
     int readconfig(/*@null@*/ const char *configfile);
