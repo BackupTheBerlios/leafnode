@@ -20,9 +20,6 @@
 
 #include <stdio.h>
 
-int verbose = 0;
-int debug = 0;
-
 static int
 comp(const void *a, const void *b)
 {
