@@ -16,6 +16,7 @@
 #endif
 
 #include "critmem.h"
+#include "mastring.h"
 
 /**
  * Check whether there are any articles in the queue dir.
@@ -130,11 +131,16 @@ feedincoming(void)
 
 	/* FIXME: fix xover */
 	if ((rc = store(*di, 0, 0, 0))) {
-	    static const char xx[] = "/failed.postings/";
+	    static mastr *t;
+	    if (t == NULL) {
+		/* will never be freed, is constant and will be reused */
+		t = mastr_new(PATH_MAX);
+		mastr_vcat(t, spooldir, "/failed.postings/", NULL);
+	    }
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
-		   "moving to %s%s",
-		   *di, store_err(rc), spooldir, xx);
-	    (void)log_moveto(*di, xx);
+		   "moving to %s",
+		   *di, store_err(rc), mastr_str(t));
+	    (void)log_moveto(*di, mastr_str(t));
 	} else {
 	    const char *j;
 	    for (j = strtok(ngs, "\t ,"); j && *j; j = strtok(NULL, "\t ,")) {
