@@ -606,8 +606,15 @@ fixxover(void)
 {
     DIR *d;
     struct dirent *de;
-    mastr *s = mastr_new(1024);
+    mastr *s;
 
+    if (!active) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "no groupinfo file is currently "
+	       "available, skipping xover updates");
+	return;
+    }
+
+    s = mastr_new(1024);
     mastr_vcat(s, spooldir, "/interesting.groups", 0);
 
     d = opendir(mastr_str(s));
