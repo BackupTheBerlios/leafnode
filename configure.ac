@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20030710a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.59 $)
+AC_REVISION($Revision: 1.60 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -32,7 +32,7 @@ AC_PATH_PROG(DEFAULTMTA,sendmail,/usr/sbin/sendmail,/usr/sbin:/usr/lib:/usr/etc)
 dnl If we're using gcc, enable some warnings
 AC_CACHE_CHECK(for additional compiler options, ac_cv_prog_gcc_flags, [
 ac_cv_prog_gcc_flags=""
-if test "$GCC" = yes
+if test "x$GCC" = xyes
 then
   echo "void dummy(void);" >configure-dummy.c
   echo "void dummy(void) {}" >>configure-dummy.c
@@ -47,12 +47,11 @@ AC_SUBST(GCC_FLAGS)
 
 dnl check which user to use
 AC_MSG_CHECKING(runas-user)
-AC_ARG_WITH(runas-user,
-[  --with-runas-user       user (news)],
-  ,
-  withval=news
+AC_ARG_ENABLE(runas-user, AC_HELP_STRING([--enable-runas-user],[user (news)]),
+  :,
+  enableval=news
 )
-RUNAS_USER=$withval
+RUNAS_USER=$enableval
 AC_MSG_RESULT($RUNAS_USER)
 AC_MSG_CHECKING(runas-user uid)
 if test x$RUNAS_USER = xroot -o x$RUNAS_USER = xtoor ; then
@@ -98,7 +97,7 @@ AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC
 #include <sys/param.h>]], [[
      return 0;]])],[cf_cv_sysheaders="yes"],[cf_cv_sysheaders="no"])
 )
-if test "$cf_cv_sysheaders" = "no"
+if test "x$cf_cv_sysheaders" = "xno"
 then
   AC_MSG_ERROR(Kernel sources not installed - unable to continue)
 fi
@@ -119,7 +118,7 @@ AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_COMPILE_IFELSE([AC_LANG_PROGRAM
     socklen_t fodder;
     return fodder;]])],[cf_cv_socklen_t="yes"],[cf_cv_socklen_t="no"])
 )
-if test "$cf_cv_socklen_t" = "yes"
+if test "x$cf_cv_socklen_t" = "xyes"
 then
   AC_DEFINE(HAVE_SOCKLEN_T, 1,
 	    [Define if your system defines a socklen_t type.])
@@ -129,7 +128,7 @@ dnl check whether to use dmalloc
 AM_WITH_DMALLOC
 
 dnl check where to put the spooldir
-if test "$localstatedir" = '${prefix}/var' \
+if test "x$localstatedir" = 'x${prefix}/var' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
   SPDIR='/var/spool/news'
 else
@@ -137,22 +136,21 @@ else
 fi
 
 AC_MSG_CHECKING(spooldir)
-AC_ARG_WITH(spooldir,
-[  --with-spooldir         news spool directory (/var/spool/news)],
-  if echo "$withval" | egrep >/dev/null -v '^/' ; then
+AC_ARG_ENABLE(spooldir, AC_HELP_STRING([--enable-spooldir],[news spool directory (/var/spool/news)]),
+  if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
-  withval=`echo "$withval" | sed 'sx/*$xx;'`
-, 
-  withval=$SPDIR
+  enableval=`echo "$enableval" | sed 'sx/*$xx;'`
+,
+  enableval=$SPDIR
 )
-SPOOLDIR=$withval
+SPOOLDIR=$enableval
 AC_MSG_RESULT($SPOOLDIR)
 AC_SUBST(SPOOLDIR)
 
 AC_MSG_CHECKING(confdir)
 dnl check where to put the confdir
-if test "$sysconfdir" = '${prefix}/etc' \
+if test "x$sysconfdir" = 'x${prefix}/etc' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
   CONFDIR='/etc'
 else
@@ -163,7 +161,7 @@ else
     esac
 fi
 AC_MSG_RESULT($CONFDIR)
-if test "$CONFDIR" != "$sysconfdir"; then
+if test "x$CONFDIR" != "x$sysconfdir"; then
   AC_MSG_WARN([overriding sysconfdir to $CONFDIR (old: $sysconfdir)])
   AC_MSG_WARN([use --sysconfdir to fix])
   AC_MSG_WARN([use --sysconfdir='\${prefix}/etc' to get])
@@ -175,27 +173,25 @@ AC_MSG_NOTICE(note that "leafnode" is automatically appended to $sysconfdir)
 
 dnl check where to put the lockfile
 AC_MSG_CHECKING(lockfile)
-AC_ARG_WITH(lockfile,
-[  --with-lockfile         lockfile (/var/lock/news/fetchnews.lck)],
-  if echo "$withval" | egrep >/dev/null -v '^/' ; then
+AC_ARG_ENABLE(lockfile, AC_HELP_STRING([--enable-lockfile],[lockfile (/var/lock/news/fetchnews.lck)]),
+  if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
 , 
-  withval=/var/lock/news/fetchnews.lck  
+  enableval=/var/lock/news/fetchnews.lck
 )
-LOCKFILE=$withval
+LOCKFILE=$enableval
 AC_MSG_RESULT($LOCKFILE)
 AC_SUBST(LOCKFILE)
 
 dnl check for rpm build dir
-dnl Check for rpm build dir
 AC_MSG_CHECKING(rpm build dir)
 d=/usr/src/packages
 test -d ${d}/SPECS || d=/usr/src/redhat dnl RedHat
 test -d ${d}/SPECS || d=none
 RPMSRC=${d}
 AC_MSG_RESULT(${RPMSRC})
-test "${RMPSRC}" = "none" || AC_SUBST(RPMSRC)
+test "x${RMPSRC}" = "xnone" || AC_SUBST(RPMSRC)
 
 dnl Check for libcrypt
 AC_CHECK_LIB(crypt, crypt)
@@ -219,12 +215,12 @@ AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <pcre.h>]], [[return 0;]])],[ac_cv_header_pcre_h=yes],[ac_cv_header_pcre_h=no])
 ])
 
-if test "$ac_cv_header_pcre_h" = yes
+if test "x$ac_cv_header_pcre_h" = xyes
 then
   AC_CHECK_LIB(pcre, pcre_compile)
 fi
 
-if test "$ac_cv_lib_pcre_pcre_compile" = yes
+if test "x$ac_cv_lib_pcre_pcre_compile" = xyes
 then
   AC_DEFINE(HAVE_LIBPCRE)
 else
@@ -262,15 +258,18 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror])
 
 dnl Check if system vsnprintf works
-AC_MSG_CHECKING(if your system's vsnprintf works)
+AC_CACHE_CHECK([if your system's vsnprintf works],
+	       ln_cv_working_vsnprintf,
 AC_RUN_IFELSE([[
 	       `cat $srcdir/xsnprintf.c`
-	       ]], AC_MSG_RESULT(yes)
-	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ `vsnprintf' function.]), 
-AC_MSG_RESULT(no)
-AC_LIBOBJ(vsnprintf),
-AC_MSG_RESULT(unknown -- cross-compiling -- assuming no)
-AC_LIBOBJ(vsnprintf))
+	       ]], ln_cv_working_vsnprintf=yes,
+	       ln_cv_working_vsnprintf=no,ln_cv_working_vsnprintf=no))
+
+if test "x$ln_cv_working_vsnprintf" = "xyes" ; then
+	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ `vsnprintf' function.]) dnl `
+else
+AC_LIBOBJ(vsnprintf)
+fi
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -292,7 +291,12 @@ fi
 AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop)
 
 dnl Check whether the system has IPv6
-AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+AC_ARG_ENABLE(IPv6, AC_HELP_STRING([--disable-IPv6],[disable IPv6 support (autodetect)]),
+    IPV6=$enableval ,
+    IPV6=auto)
+
+AC_MSG_CHECKING(IPv6 support)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -301,24 +305,14 @@ AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_LINK_IFELSE([AC_LANG_PROGRAM([[
    int b = AF_INET6;
    void *c = &(a->sin6_addr);
    char *e = gai_strerror(0);
-   return 0;]])],[cf_cv_ipv6=yes],[cf_cv_ipv6=no])
-)
-if test "$cf_cv_ipv6" = "yes"
+   return 0;]])],
+   [ if test "x$IPV6" != "xno" ; then cf_cv_ipv6=yes ; else cf_cv_ipv6=no ; fi],
+   [cf_cv_ipv6=no])
+AC_MSG_RESULT($cf_cv_ipv6)
+if test "x$cf_cv_ipv6" = "xyes"
 then
-  AC_MSG_NOTICE([------------------------------------------------------])
-  AC_MSG_NOTICE([Enabling IPv6.])
   AC_DEFINE(HAVE_IPV6, 1, [If set, enable IPv6.])
-else
-  AC_MSG_NOTICE([------------------------------------------------------])
-  AC_MSG_NOTICE([Disabling IPv6, sticking with IPv4.])
 fi
-AC_MSG_NOTICE([------------------------------------------------------])
-AC_MSG_NOTICE([If this was misdetected, then run either])
-AC_MSG_NOTICE([  env cf_cv_ipv6=no /bin/sh ./configure YOUR_OPTIONS])
-AC_MSG_NOTICE([or])
-AC_MSG_NOTICE([  env cf_cv_ipv6=yes /bin/sh ./configure YOUR_OPTIONS])
-AC_MSG_NOTICE([(of course, you need to replace YOUR_OPTIONS)])
-AC_MSG_NOTICE([------------------------------------------------------])
 
 dnl The 'pcre' library uses non-standard defines
 test ".$ac_cv_func_strerror" != ".yes" && \
