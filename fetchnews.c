@@ -2123,6 +2123,7 @@ main(int argc, char **argv)
 	    }
     }
 
+#ifdef COMPILE_BROKEN
     /* Check for unsent postings, provided we were able to talk to all
      * servers successfully. Do not touch articles that have been posted
      * before. */
@@ -2149,6 +2150,8 @@ main(int argc, char **argv)
 	    free_dirlist(y);
 	}
     }
+#endif
+
     signal(SIGINT, SIG_IGN);
     signal(SIGTERM, SIG_IGN);	/* FIXME */
 
