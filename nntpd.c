@@ -1569,7 +1569,7 @@ dopost(void)
 	    goto cleanup;
 	}
 
-	if (0 == no_direct_spool || is_anylocal(groups)) {
+	if (0 == no_direct_spool /* means: may spool directly */ || is_anylocal(groups)) {
 	    /* at least one internal group is given, store into in.coming */
 	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
 	    outbasename = strrchr(inname, '/');
@@ -1582,6 +1582,11 @@ dopost(void)
 		nntpprintf("503 Could not schedule article for posting "
 			   "to local spool, see syslog.");
 		log_unlink(inname);
+		/* error with spooling locally -> also drop from out.going (to avoid
+		 * that the user resends the article after the 503 code)
+		 */
+		sprintf(s, "%s/out.going/%s", spooldir, outbasename);
+		(void)unlink(s);
 		goto cleanup;
 	    }
 	}
@@ -1857,7 +1862,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	return;
     }
     if (OVfield >= 0) {
-	nntpprintf("221 %s header %s(from overview) for postings %lu-%lu:",
+	nntpprintf("221 %s header %s (from overview) for postings %lu-%lu:",
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
