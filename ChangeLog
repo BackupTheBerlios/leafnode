@@ -1,3 +1,9 @@
+2002-05-03  Matthias Andree  <matthias.andree@gmx.de>
+
+	* filterutil.c: When checking against maxcrosspost, do not free a
+	variable we incremented, but store the original pointer and free
+	that instead. Fixes SIGSEGV.
+
 2002-05-01  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* filterutil.c: killfilter copes with folded Newsgroups: header. 
