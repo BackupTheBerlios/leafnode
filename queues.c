@@ -134,7 +134,7 @@ feedincoming(void)
 	    static mastr *t;
 	    if (t == NULL) {
 		/* will never be freed, is constant and will be reused */
-		t = mastr_new(PATH_MAX);
+		t = mastr_new(LN_PATH_MAX);
 		mastr_vcat(t, spooldir, "/failed.postings/", NULL);
 	    }
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "

@@ -25,7 +25,7 @@ getlastart(const char *group)
     struct stat st;
     time_t ret = 0;
 
-    g = mastr_new(PATH_MAX);
+    g = mastr_new(LN_PATH_MAX);
     for (q = p; *q; q++)
 	if (*q == '.')
 	    *q = '/';
@@ -51,7 +51,7 @@ killlastposting(const char *group)
     mastr *g;
     char *p = critstrdup(group, "killlastposting"), *q;
 
-    g = mastr_new(PATH_MAX);
+    g = mastr_new(LN_PATH_MAX);
     for (q = p; *q; q++)
 	if (*q == '.')
 	    *q = '/';

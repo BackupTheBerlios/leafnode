@@ -23,7 +23,7 @@ getmoderator(const char *group)
 {
     char *line, *p;
     char address[512];
-    mastr *modpath = mastr_new(PATH_MAX);
+    mastr *modpath = mastr_new(LN_PATH_MAX);
     FILE *f;
 
     mastr_vcat(modpath, sysconfdir, "/moderators", NULL);

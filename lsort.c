@@ -30,16 +30,15 @@ int
 main(void)
 {
     char *l;
-    char path[PATH_MAX];
     char **act;
     size_t acount = 0;
     size_t i;
     FILE *f;
+    mastr *path = mastr_new(LN_PATH_MAX);
 
-    l = mastrcpy(path, spooldir);
-    (void)mastrcpy(l, "/leaf.node/groupinfo.old");
+    (void)mastr_vcat(path, spooldir, "/leaf.node/groupinfo.old", NULL);
 
-    f = fopen(path, "r");
+    f = fopen(mastr_str(path), "r");
     if (f == NULL) {
 	fprintf(stderr, "Error: Can't open groupinfo.old!\n");
 	exit(EXIT_FAILURE);
@@ -65,5 +64,6 @@ main(void)
 	printf("%s\n", act[i]);
 
     free(act);
+    mastr_delete(path);
     return 0;
 }

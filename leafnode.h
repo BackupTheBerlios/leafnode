@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.69 2002/07/08 12:28:02 emma Exp $ */
+/* $Id: leafnode.h,v 1.70 2002/07/11 08:26:23 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -74,6 +74,9 @@ extern "C" {
 #ifndef __cplusplus
     typedef int bool;
 #endif
+
+    /*@constant int LN_PATH_MAX;@*/
+#define LN_PATH_MAX (PATH_MAX + 1)
 
     /*@constant int BLOCKSIZE;@*/
 #define BLOCKSIZE 16384
@@ -160,9 +163,8 @@ extern "C" {
      getoptarg(char option, int argc, char *argv[]);
     int findopt(char option, int argc, char *argv[]);
 
-/* conffile is changed */
-    int parseopt(const char *, int, /*@null@*/ const char *, /*@unique@*/ char *conffile,
-		 size_t);
+/* conffile is malloced */
+    int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 
 /* converts a message-id to a file name, the return value points to static storage  */
     /*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
@@ -536,7 +538,7 @@ extern "C" {
     extern char last_command[1025];
     void readexpire(void);
     void free_expire(void);
-    int readconfig(char *configfile);
+    int readconfig(/*@null@*/ const char *configfile);
     void lowercase(char *string);
     int ngmatch(const char *pattern, const char *string);
     int copyfile(FILE * infile, FILE * outfile, long n);

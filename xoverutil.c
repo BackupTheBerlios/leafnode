@@ -409,7 +409,7 @@ xgetxover(
     if (((fd = open(".overview", O_RDONLY)) >= 0)
 	&& (fstat(fd, &st) == 0)
 	&& (overview = malloc((size_t) st.st_size + 1)) != NULL
-	&& (read(fd, overview, st.st_size) == st.st_size)) {
+	&& (read(fd, overview, st.st_size) == (ssize_t)st.st_size)) {
 	overview[st.st_size] = '\0';
     } else {
 	/* .overview file not present: make a new one */
@@ -441,7 +441,7 @@ xgetxover(
     }
 
     if (!xcount || xlast < xfirst) {
-	char sd[PATH_MAX], s[PATH_MAX + 15];
+	char sd[LN_PATH_MAX], s[LN_PATH_MAX + 15];
 	if (!getcwd(sd, sizeof(sd))) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "cannot get current working directory in getxover: %m");
@@ -534,11 +534,11 @@ xgetxover(
 	    update = 1;
 	    current++;
 	} else {
-	    char s[PATH_MAX + 1];
+	    char s[LN_PATH_MAX];
 	    /* FIXME: use proper article deletion */
 	    /* FIXME: don't delete if it's nothing about the article */
 	    /* error getting xoverline from article - delete it */
-	    (void)getcwd(s, PATH_MAX);
+	    (void)getcwd(s, LN_PATH_MAX);
 	    if (lstat(*t, &st)) {
 		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		       "cannot lstat %s/%s: %m", s, *t);
@@ -652,9 +652,9 @@ writexover(void)
     }
 
     if (!err) {
-	char s[PATH_MAX + 1];
+	char s[LN_PATH_MAX];
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	       "wrote %s/.overview", getcwd(s, PATH_MAX));
+	       "wrote %s/.overview", getcwd(s, LN_PATH_MAX));
 	return 0;
     } else {
 	(void)log_unlink(newfile);
@@ -706,7 +706,7 @@ fixxover(void)
 	return;
     }
 
-    s = mastr_new(1024);
+    s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups", NULL);
 
     d = opendir(mastr_str(s));

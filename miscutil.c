@@ -119,7 +119,7 @@ initvars(const char *const progname, int logtostdout)
     expire_base = NULL;
     /* These directories should exist anyway */
     while (md->name) {
-	mastr *x = mastr_new(PATH_MAX);
+	mastr *x = mastr_new(LN_PATH_MAX);
 
 	mastr_vcat(x, spooldir, "/", md->name, NULL);
 	if (mkdir(mastr_str(x), (mode_t) 0110)) {
@@ -214,10 +214,11 @@ getoptarg(char option, int argc, char *argv[])
 
 /*
  * parse options global to all leafnode programs
+ * conffile will be malloced if non-NULL
  */
 int
 parseopt(const char *progname, int option,
-	 /*@null@*/ const char *opta, /*@unique@*/ char *conffile, size_t conffilesize)
+	 /*@null@*/ const char *opta, /*@null@*/ char **conffile)
 {
     switch (option) {
     case 'V':
@@ -233,8 +234,11 @@ parseopt(const char *progname, int option,
 	    debugmode = ~0;
 	return TRUE;
     case 'F':
-	if (opta != NULL && *opta)
-	    return mastrncpy(conffile, opta, conffilesize) ? 1 : 0;
+	if (opta != NULL && *opta) {
+	    if (conffile)
+		*conffile = critstrdup(opta, "parseopt");
+	    return TRUE;
+	}
     }
     return FALSE;
 }
@@ -262,7 +266,7 @@ initgrouplistdir(const char *dir)
     static const char myname[] = "initgrouplistdir";
     struct rbtree *rb;
 
-    t = mastr_new(PATH_MAX);
+    t = mastr_new(LN_PATH_MAX);
     rb = rbinit(compare, 0);
     if (!rb) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
@@ -519,12 +523,14 @@ chdirgroup(const char *group,
 	   int creatdir /** if true, create missing directories */ )
 {
     char *p;
-    char s[PATH_MAX];		/* FIXME: possible overrun below */
+    mastr *s = mastr_new(LN_PATH_MAX);
+    size_t len;
 
     if (group && *group) {
-	p = mastrcpy(s, spooldir);
-	*p++ = '/';
-	strcpy(p, group);
+	mastr_vcat(s, spooldir, "/", NULL);
+	len = mastr_len(s);
+	mastr_cat(s, group);
+	p = mastr_modifyable_str(s) + len;
 	while (*p) {
 	    if (*p == '.')
 		*p = '/';
@@ -532,15 +538,21 @@ chdirgroup(const char *group,
 		*p = tolower((unsigned char)*p);
 	    p++;
 	}
-	if (!chdir(s))
+	if (!chdir(mastr_str(s))) {
+	    mastr_delete(s);
 	    return 1;		/* chdir successful */
-	if (creatdir)
-	    return makedir(s);
-	s[strlen(spooldir)] = '\0';
-	if (chdir(s)) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chdir(%s): %m", s);
+	}
+	if (creatdir) {
+	    int err = makedir(mastr_modifyable_str(s));
+	    mastr_delete(s);
+	    return err;
+	}
+	mastr_modifyable_str(s)[len] = '\0';
+	if (chdir(mastr_str(s))) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chdir(%s): %m", mastr_str(s));
 	}
     }
+    mastr_delete(s);
     return 0;
 }
 

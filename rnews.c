@@ -8,6 +8,7 @@
 #include "leafnode.h"
 #include "get.h"
 #include "critmem.h"
+#include "mastring.h"
 #include "ln_log.h"
 
 #include <sys/types.h>
@@ -242,14 +243,16 @@ processdir(char *pathname)
 {
     DIR *dir;
     struct dirent *d;
-    char *procdir;
+    char procdir[LN_PATH_MAX];
 
     if (chdir(pathname) < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chdir to %s: %s\n", pathname,
-	       strerror(errno));
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chdir to %s: %m\n", pathname);
 	return -1;
     }
-    procdir = getcwd(NULL, 0);
+    if (!getcwd(procdir, LN_PATH_MAX)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot getcwd %s: %m\n", procdir);
+	return -1;
+    }
     if (!(dir = opendir("."))) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m\n", pathname);
 	return -1;
@@ -268,7 +271,6 @@ processdir(char *pathname)
 	}
     }
     closedir(dir);
-    free(procdir);
     return 0;
 }
 
@@ -278,19 +280,14 @@ main(int argc, char *argv[])
     char *ptr;
     char option;
     struct stat st;
-    char conffile[PATH_MAX+1];
-    int err;
-
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
-	|| (err >= (int)sizeof(conffile)))
-	exit(EXIT_FAILURE);
+    char *conffile = NULL;
 
     ln_log_open(argv[0]);
     if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
     while ((option = getopt(argc, argv, "F:D:Vv")) != -1) {
-	if (parseopt("rnews", option, optarg, conffile, sizeof(conffile)))
+	if (parseopt("rnews", option, optarg, &conffile))
 	    continue;
 	switch(option) {
 	    default:
@@ -303,6 +300,8 @@ main(int argc, char *argv[])
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Reading configuration failed: %m.\n");
 	exit(2);
     }
+    if (conffile)
+	free(conffile);
 
     umask((mode_t) 077);
 

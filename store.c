@@ -93,7 +93,7 @@ store_stream(FILE * in /** input file */ ,
 	)
 {
     int rc = -1;		/* first, assume something went wrong */
-    mastr *tmpfn = mastr_new(4095l);
+    mastr *tmpfn = mastr_new(LN_PATH_MAX);
     const char *line = 0;
     char *mid = 0, *m;
     mastr *ngs = mastr_new(80l);

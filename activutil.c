@@ -210,7 +210,7 @@ writeactive(void)
     FILE *a;
     struct newsgroup *g;
     struct stat st;
-    mastr *c = mastr_new(PATH_MAX);
+    mastr *c = mastr_new(LN_PATH_MAX);
     char *tmp;
     size_t count;
     int err, fd;
@@ -225,7 +225,7 @@ writeactive(void)
     }
 
     { /* this block limits the s scope */
-	mastr *s = mastr_new(PATH_MAX);
+	mastr *s = mastr_new(LN_PATH_MAX);
 	mastr_vcat(s, spooldir, GROUPINFO ".XXXXXXXXXX", NULL);
 	tmp = critstrdup(mastr_str(s), "writeactive");
 	mastr_delete(s);
@@ -353,7 +353,7 @@ readactive(void)
     int n;
     FILE *f;
     struct newsgroup *g;
-    mastr *s = mastr_new(1024);
+    mastr *s = mastr_new(LN_PATH_MAX);
 
     freeactive(active);
     active = 0;

@@ -98,10 +98,10 @@ main(int argc, char **argv)
     int option;
     int ret = 0;
     long c;
-    mastr *s = mastr_new(PATH_MAX);
+    mastr *s = mastr_new(LN_PATH_MAX);
 
     while ((option = getopt(argc, argv, "VD:")) != -1) {
-	if (!parseopt("newsq", option, NULL, NULL, 0)) {
+	if (!parseopt("newsq", option, NULL, NULL)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}

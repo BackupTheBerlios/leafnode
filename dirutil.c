@@ -33,7 +33,7 @@
 /*@dependent@*/ /*@null@*/ DIR *
 open_spooldir(const char *name /** subdirectory of spooldir to open */ )
 {
-    char x[PATH_MAX];
+    char x[LN_PATH_MAX];
 
     if (snprintf(x, sizeof(x), "%s/%s", spooldir, name) >= 0) {
 	return opendir(x);

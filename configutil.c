@@ -5,6 +5,7 @@
  * See README for restrictions on the use of this software.
  */
 #include "leafnode.h"
+#include "mastring.h"
 #include "critmem.h"
 #include "ln_log.h"
 #include "config_defs.h"
@@ -94,14 +95,19 @@ parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
     /* skipping leading blanks or tabs */
     SKIPLWS(p);
     SKIPLWS(q);
-    strncpy(param, p, TOKENSIZE);
-    strncpy(value, q, TOKENSIZE);
+    if ((p = mastrncpy(param, p, TOKENSIZE)) == NULL ||
+	(q = mastrncpy(value, q, TOKENSIZE)) == NULL) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "config: line too long near \"%s=%s\"",
+	       param, value);
+	return 0;
+    }
     /* now param contains the stuff before '=' and value the stuff behind it */
     if (!(*param) || !(*value))
 	return 0;
     /* skipping trailing blanks or tabs */
-    p = param + strlen(param) - 1;
-    q = value + strlen(value) - 1;
+    p--;
+    q--;
     while (isspace((unsigned char)*p) && (p > param)) {
 	*p = '\0';
 	p--;
@@ -123,7 +129,7 @@ parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
  * errno.h) otherwise
  */
 int
-readconfig(char *configfile)
+readconfig(/*@null@*/ const char *configfile)
 {
     struct serverlist *p = NULL, *q = NULL;
     struct expire_entry *ent = NULL, *prev = NULL;
@@ -132,23 +138,25 @@ readconfig(char *configfile)
     char *param, *value;
     int err;
     time_t i;
-    char s[PATH_MAX+1];
+    mastr *s = mastr_new(LN_PATH_MAX);
 
     artlimit = 0;
     param = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     value = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     if (configfile) {
-	snprintf(s, PATH_MAX, "%s", configfile);
+	mastr_cpy(s, configfile);
     } else {
-	snprintf(s, PATH_MAX, "%s/config", sysconfdir);
+	mastr_vcat(s, sysconfdir, "/config", NULL);
     }
-    if ((f = fopen(s, "r")) == NULL) {
+    if ((f = fopen(mastr_str(s), "r")) == NULL) {
 	err = errno;
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", s);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", mastr_str(s));
 	free(param);
 	free(value);
+	mastr_delete(s);
 	return err;
     }
+    mastr_delete(s);
     while ((l = getaline(f))) {
 	const struct configparam *cp;
 

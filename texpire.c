@@ -36,6 +36,7 @@ See README for restrictions on the use of this software.
 #include "critmem.h"
 #include "ln_log.h"
 #include "format.h"
+#include "mastring.h"
 
 #ifdef SOCKS
 #include <socks.h>
@@ -59,20 +60,11 @@ See README for restrictions on the use of this software.
 #include <dmalloc.h>
 #endif
 
-#define SUBJECT 1
-#define FROM 2
-#define DATE 3
-#define MESSAGEID 4
-#define REFERENCES 5
-#define BYTES 6
-#define LINES 7
-#define XREF 8
-
 static int dryrun = 0;		/* do not delete articles */
 static int use_atime = 1;	/* look for atime on articles to expire */
 static int repair_spool = 0;
 
-static char gdir[PATH_MAX];		/* name of current group directory */
+static char gdir[LN_PATH_MAX];		/* name of current group directory */
 static unsigned long deleted, kept;
 
 extern unsigned long xcount;
@@ -250,7 +242,7 @@ xoverthread(char *xoverline, unsigned long artno)
     newthread->next = NULL;
     newthread->subthread = node;
     node->fthread = newthread;
-    for (i = 0; i < MESSAGEID; ++i) {
+    for (i = 0; i < XO_MESSAGEID; ++i) {
 	if (!(p = strchr(p, '\t'))) {	/* find Message-ID field */
 	    return newthread;	/* cope with broken articles */
 	}
@@ -410,7 +402,7 @@ remove_newer(struct thread *threadlist, time_t expire)
 static void
 delete_article(struct rnode *r)
 {
-    char name[PATH_MAX];
+    char name[64];
 
     if (!r || !r->artno) {
 	return;
@@ -454,7 +446,7 @@ static void
 updatedir(const char *groupname)
 {
     struct rnode *r;
-    char name[PATH_MAX];
+    char name[64];
     struct stat st, st2;
     const char *m;
     long i;
@@ -776,9 +768,9 @@ dogroup(struct newsgroup *g, time_t expire)
 	return;
 
     /* barf on getcwd problems */
-    if (!getcwd(gdir, PATH_MAX)) {
+    if (!getcwd(gdir, LN_PATH_MAX)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP,
-		"getcwd(...,%d) returned error: %m", PATH_MAX);
+		"getcwd(...,%d) returned error: %m", LN_PATH_MAX);
 	return;
     }
 
@@ -854,9 +846,9 @@ dogroup(struct newsgroup *g, time_t expire)
             ) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
-		if (!getcwd(gdir, PATH_MAX)) {
+		if (!getcwd(gdir, LN_PATH_MAX)) {
 		    ln_log(LNLOG_SERR, LNLOG_CGROUP,
-			   "getcwd(...,%d) returned error: %m", PATH_MAX);
+			   "getcwd(...,%d) returned error: %m", LN_PATH_MAX);
 		    return;
 		}
 		chdir("..");
@@ -894,31 +886,35 @@ expiremsgid(void)
     int n;
     char **dl, **di;
     struct stat st;
-    char s[PATH_MAX];
+    mastr *s = mastr_new(LN_PATH_MAX);
 
     deleted = kept = 0;
 
     for (n = 0; n < 1000; n++) {
 	size_t slen;
+	char num[4];	/* 3 digits! */
 
-	snprintf(s, sizeof(s), "%s/message.id/%03d", spooldir, n);
-	slen = strlen(s);	/* not all snprintf implementations have
-				 * reliable return values */
-	if (chdir(s)) {
+	sprintf(num, "%03d", n);
+	mastr_clear(s);
+	mastr_vcat(s, spooldir, "/message.id/", num, NULL);
+	slen = mastr_len(s);
+
+	if (chdir(mastr_str(s))) {
 	    if (errno == ENOENT) {
 		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-		       "creating missing directory %s", s);
-		mkdir(s, MKDIR_MODE);
+		       "creating missing directory %s", mastr_str(s));
+		mkdir(mastr_str(s), MKDIR_MODE);
 	    }
-	    if (chdir(s)) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP, "chdir %s: %m", s);
+	    if (chdir(mastr_str(s))) {
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "chdir %s: %m", mastr_str(s));
 		continue;
 	    }
 	}
 
-	dl = dirlist(s, DIRLIST_NONDOT, NULL);
+	dl = dirlist(mastr_str(s), DIRLIST_NONDOT, NULL);
 	if (!dl) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open directory %s: %m", s);
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open directory %s: %m",
+		   mastr_str(s));
 	    continue;
 	}
 
@@ -931,10 +927,10 @@ expiremsgid(void)
 	    /* First, make sure that all wrongly-hashed
 	       articles are deleted. */
 	    m = lookup(*di);
-	    if (strncmp(m, s, slen) && !dryrun) {
+	    if (strncmp(m, mastr_str(s), slen) && !dryrun) {	/* FIXME: why strncmp? */
 		if (0 == log_unlink(*di)) {
 		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-			   "%s/%s was bogus, removed", s, *di);
+			   "%s/%s was bogus, removed", mastr_str(s), *di);
 		    deleted++;
 		}
 	    } else if (stat(*di, &st) == 0) {
@@ -942,7 +938,7 @@ expiremsgid(void)
 		if (st.st_nlink < 2 && !dryrun && !unlink(*di)) {
 		    ln_log(LNLOG_SDEBUG,
 			   LNLOG_CARTICLE,
-			   "%s/%s has less than 2 links, deleting", s, *di);
+			   "%s/%s has less than 2 links, deleting", mastr_str(s), *di);
 		    deleted++;
 		} else {
 		    if (S_ISREG(st.st_mode)) {
@@ -956,6 +952,7 @@ expiremsgid(void)
 
     ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	   "message.id: %lu articles deleted, %lu kept", deleted, kept);
+    mastr_delete(s);
 }
 
 static void
@@ -981,9 +978,7 @@ main(int argc, char **argv)
 {
     time_t now;
     int option, reply;
-    char conffile[4096];
-
-    snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir);
+    char *conffile = NULL;
 
     ln_log_open("texpire");
 
@@ -991,24 +986,22 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
 
     while ((option = getopt(argc, argv, "F:VD:vfrn")) != -1) {
-	if (parseopt("texpire", option, optarg, conffile, sizeof(conffile))) {
-	    /* FIXME: what happens here? */
-	    ;
-	} else
-	    switch (option) {
-	    case 'f':
-		use_atime = 0;
-		break;
-	    case 'r':
-		repair_spool = 1;
-		break;
-	    case 'n':
-		dryrun = 1;
-		break;
-	    default:
-		usage();
-		exit(EXIT_FAILURE);
-	    }
+	if (parseopt("texpire", option, optarg, &conffile))
+	    continue;
+	switch (option) {
+	case 'f':
+	    use_atime = 0;
+	    break;
+	case 'r':
+	    repair_spool = 1;
+	    break;
+	case 'n':
+	    dryrun = 1;
+	    break;
+	default:
+	    usage();
+	    exit(EXIT_FAILURE);
+	}
     }
     expire_base = NULL;
     if ((reply = readconfig(conffile)) != 0) {
@@ -1017,6 +1010,8 @@ main(int argc, char **argv)
 		conffile, strerror(reply));
 	exit(2);
     }
+    if (conffile)
+	free(conffile);
 
     if (lockfile_exists(LOCKWAIT)) {
 	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);

@@ -95,9 +95,9 @@ static char *
 server_info(const char *spool, const char *server,
 	    const unsigned short port, const char *suffix)
 {
-    mastr *s = mastr_new(256);
+    mastr *s = mastr_new(LN_PATH_MAX);
     char *res;
-    char portstr[20] = "";
+    char portstr[20] = "";	/* RATS: ignore */
 
     if (port) {
 	portstr[0] = ':';
@@ -194,7 +194,6 @@ add_fetchgroups(void)
 static int
 process_options(int argc, char *argv[])
 {
-    char conffile[PATH_MAX + 1];
     int option;
     char *p;
     struct serverlist *sl;
@@ -206,7 +205,7 @@ process_options(int argc, char *argv[])
     int servers_limited = 0;
 
     while ((option = getopt(argc, argv, "VD:HBPRF:S:N:M:fnvx:p:t:")) != -1) {
-	if (parseopt("fetchnews", option, optarg, conffile, sizeof conffile))
+	if (parseopt("fetchnews", option, optarg, NULL))
 	    continue;
 	switch (option) {
 	case 't':
@@ -300,7 +299,7 @@ static void
 print_fetchnews_mode(/*@observer@*/ const char *myname)
 {
     unsigned i, j;
-    mastr *s = mastr_new(1024);
+    mastr *s = mastr_new(LN_PATH_MAX);
 
     mastr_vcat(s, myname, " mode: ", NULL);
     for (i = 0, j = 0; i<sizeof action_description / sizeof *action_description; ++i) {
@@ -543,15 +542,16 @@ getmarked(struct newsgroup *group)
     char *l;
     struct stringlist *failed = NULL;
     struct stringlist *ptr = NULL;
-    char filename[1024];
+    mastr *fname = mastr_new(LN_PATH_MAX);
     mastr *str;
 
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	   "Getting bodies of marked messages for group %s ...", group->name);
-    sprintf(filename, "%s/interesting.groups/%s", spooldir, group->name);
-    if (!(f = fopen(filename, "r"))) {
+    (void)mastr_vcat(fname, spooldir, "/interesting.groups/", group->name,  NULL);
+    if (!(f = fopen(mastr_str(fname), "r"))) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP,
-	       "Cannot open %s for reading: %m", filename);
+	       "Cannot open %s for reading: %m", mastr_str(fname));
+	mastr_delete(fname);
 	return;
     }
     str = mastr_new(256);
@@ -582,13 +582,15 @@ getmarked(struct newsgroup *group)
     }
     fclose(f);
     mastr_delete(str);
-    truncate(filename, (off_t) 0);	/* kill file contents */
-    if (!failed)
+    truncate(mastr_str(fname), (off_t) 0);	/* kill file contents */
+    if (!failed) {
+	mastr_delete(fname);
 	return;
+    }
     /* write back ids of all articles which could not be retrieved */
-    if (!(f = fopen(filename, "w")))
+    if (!(f = fopen(mastr_str(fname), "w")))
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "Cannot open %s for writing: %m", filename);
+	       "Cannot open %s for writing: %m", mastr_str(fname));
     else {
 	ptr = failed;
 	while (ptr) {
@@ -599,6 +601,7 @@ getmarked(struct newsgroup *group)
 	fclose(f);
     }
     freelist(failed);
+    mastr_delete(fname);
 }
 
 /**
@@ -732,7 +735,7 @@ store_pseudo_header(mastr *s)
 {
     int rc = 0;
     int tmpfd;
-    mastr *tmpfn = mastr_new(4095l);
+    mastr *tmpfn = mastr_new(LN_PATH_MAX);
 
     (void)mastr_vcat(tmpfn, spooldir, "/temp.files/delaypseudo_XXXXXXXXXX", NULL);
     tmpfd = safe_mkstemp(mastr_modifyable_str(tmpfn));
@@ -789,7 +792,7 @@ doxover(struct stringlist **stufftoget,
 	return -2;
     }
     while ((l = getaline(nntpin)) && strcmp(l, ".")) {
-	char *xover[20];
+	char *xover[20];	/* RATS: ignore */
 	char *artno, *subject, *from, *date, *messageid;
 	char *references, *lines, *bytes;
 	char **newsgroups_list = NULL;
@@ -1210,8 +1213,8 @@ splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
 static int
 dirtyactive(struct serverlist *srv)
 {
-    mastr *s = mastr_new(1024);
-    char p[64];
+    mastr *s = mastr_new(LN_PATH_MAX);
+    char p[20];
     int r;
 
     assert(srv != NULL);
@@ -1236,16 +1239,18 @@ nntpactive(void)
     struct stringlist *groups = NULL;
     struct stringlist *helpptr = NULL;
     struct newsgroup *oldactive;
-    char s[PATH_MAX];		/* FIXME: possible overrun below */
+    mastr *s = mastr_new(LN_PATH_MAX);
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
+    char portstr[20];
     int reply = 0, error;
     unsigned long count = 0;
     unsigned long first, last;
 
-    sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
-	    current_server->port);
 
-    if (!forceactive && (0 == stat(s, &st))) {
+    str_ulong(portstr, current_server->port);
+    mastr_vcat(s, spooldir, "/leaf.node/last:", current_server->name, ":", portstr, NULL);
+
+    if (!forceactive && (0 == stat(mastr_str(s), &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 		"%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
@@ -1253,6 +1258,7 @@ nntpactive(void)
 	putaline(nntpout, "NEWGROUPS %s GMT", timestr + 2);
 	if (nntpreply() != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
+	    mastr_delete(s);
 	    return;
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, ".") != 0)) {
@@ -1267,9 +1273,11 @@ nntpactive(void)
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 		"%s: found %lu new newsgroups", current_server->name, count);
-	if (!l)
+	if (!l) {
 	    /* timeout */
+	    mastr_delete(s);
 	    return;
+	}
 	mergegroups();		/* merge groups into active */
 	helpptr = groups;
 	if (count && current_server->descriptions) {
@@ -1310,6 +1318,7 @@ nntpactive(void)
 	if (nntpreply() != 215) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
 		    "%s: reading all newsgroups failed", current_server->name);
+	    mastr_delete(s);
 	    return;
 	}
 	oldactive = cpactive(active);
@@ -1365,6 +1374,7 @@ nntpactive(void)
 			    "%s: reading newsgroups descriptions failed: %s",
 			    current_server->name, l);
 		    free(oldactive);
+		    mastr_delete(s);
 		    return;
 		}
 	    } else {
@@ -1372,6 +1382,7 @@ nntpactive(void)
 			"%s: reading newsgroups descriptions failed",
 			current_server->name);
 		free(oldactive);
+		mastr_delete(s);
 		return;
 	    }
 	    while (l && (strcmp(l, "."))) {
@@ -1382,6 +1393,7 @@ nntpactive(void)
 	    }
 	    if (!l) {
 		free(oldactive);
+		mastr_delete(s);
 		return;		/* timeout */
 	    }
 	}
@@ -1392,10 +1404,11 @@ nntpactive(void)
     }
     /* touch file */
     {
-	int e = touch_truncate(s);
+	int e = touch_truncate(mastr_str(s));
 	if (e < 0)
-	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", mastr_str(s));
     }
+    mastr_delete(s);
 }
 
 /* post article in open file f, return FALSE if problem, return TRUE if ok */
@@ -1793,8 +1806,7 @@ int
 main(int argc, char **argv)
 {
     int reply;
-    char conffile[PATH_MAX + 1];
-    char *t;
+    char *t, *conffile = NULL;
     volatile int err;
     volatile int rc = 0;
     volatile int postonly;
@@ -1803,10 +1815,6 @@ main(int argc, char **argv)
     struct sigaction sa;
 
     verbose = 0;
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
-	|| (err >= (int)sizeof(conffile)))
-	exit(EXIT_FAILURE);
-
     ln_log_open("fetchnews");
     if (!initvars(myname, 0))
 	exit(EXIT_FAILURE);
@@ -1814,14 +1822,16 @@ main(int argc, char **argv)
     starttime = time(NULL);
     now = time(NULL);
     umask(2);
-    servers = NULL;
-    t = getoptarg('F', argc, argv);
-    if (t)
-	strcpy(conffile, t);
+
+    if ((t = getoptarg('F', argc, argv)) != NULL)
+	conffile = critstrdup(t, myname);
+
     if ((reply = readconfig(conffile)) != 0) {
 	printf("Reading configuration failed (%s).\n", strerror(reply));
 	exit(2);
     }
+    if (conffile)
+	free(conffile);
 
     if (process_options(argc, argv) != 0)
 	exit(EXIT_FAILURE);

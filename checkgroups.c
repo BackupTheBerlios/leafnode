@@ -52,8 +52,11 @@ process_input(char *s)
 		*p++ = '\0';
 	    if ((g = findgroup(l, active, -1)) != NULL) {
 		fprintf(stderr, "%s\n", l);
-		if (strlen(p) > 0)
+		if (strlen(p) > 0) {
+		    if (g->desc)
+			free(g->desc);
 		    g->desc = critstrdup(p, "process_input");
+		}
 	    }
 	}
     }
@@ -77,12 +80,12 @@ main(int argc, char *argv[])
 {
     int option;
     FILE *f;
-    
+
     ln_log_open("checkgroups");
     if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
     while ((option = getopt(argc, argv, "D:Vv")) != -1) {
-	if (!parseopt("checkgroups", option, NULL, NULL, 0)) {
+	if (!parseopt("checkgroups", option, NULL, NULL)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -113,6 +116,7 @@ main(int argc, char *argv[])
     rereadactive();		/* read groupinfo file */
     process_input(argv[1]);
     writeactive();		/* write groupinfo file */
+    freeactive(active);
     (void)log_unlink(lockfile);	/* unlock */
     exit(0);
 }

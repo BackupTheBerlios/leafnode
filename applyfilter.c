@@ -9,6 +9,7 @@
 
 #include "leafnode.h"
 #include "critmem.h"
+#include "mastring.h"
 #include "ln_log.h"
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -117,7 +118,7 @@ main(int argc, char *argv[])
     static const char c[] = "-\\|/";
     int i, score, option, deleted, kept;
     unsigned long n;
-    char *l;
+    char *l, *conffile = NULL;
     size_t lsize;
     const char *msgidpath = "";
     int fd;
@@ -126,16 +127,8 @@ main(int argc, char *argv[])
     struct stat st;
     struct utimbuf u;
     struct newsgroup *g;
-    char conffile[PATH_MAX];
     int err;
     int dryrun = 0;
-
-    err = snprintf(conffile, sizeof conffile, "%s/config", sysconfdir);
-    if (err < 0 || err >= (int)sizeof conffile) {
-	/* overflow */
-	fprintf(stderr, "caught string overflow in configuration file name\n");
-	exit(EXIT_FAILURE);
-    }
 
     ln_log_open("applyfilter");
     if (!initvars(argv[0], 0)) {
@@ -144,7 +137,7 @@ main(int argc, char *argv[])
     }
 
     while ((option = getopt(argc, argv, "F:D:nVv")) != -1) {
-	if (parseopt("applyfilter", option, optarg, conffile, sizeof conffile))
+	if (parseopt("applyfilter", option, optarg, &conffile))
 	    continue;
 	switch (option) {
 	case 'n':
@@ -165,6 +158,8 @@ main(int argc, char *argv[])
 	printf("Reading configuration failed (%s).\n", strerror(err));
 	exit(2);
     }
+    if (conffile)
+	free(conffile);
 
     if (!filterfile || !readfilter(filterfile)) {
 	printf("Nothing to filter -- no filterfile found.\n");
@@ -288,5 +283,7 @@ main(int argc, char *argv[])
     if (verbose)
 	printf("Updating .overview file\n");
     getxover(1);
+    freexover();
+    freeactive(active);
     exit(EXIT_SUCCESS);
 }

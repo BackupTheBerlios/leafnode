@@ -76,7 +76,7 @@ static void main_loop(void);	/* main program loop */
 static void doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 		      unsigned long *);
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
-dogroup(const char *, unsigned long *);
+dogroup(struct newsgroup *, const char *, unsigned long *);
 static void dohelp(void);
 static void domode(const char *arg);
 static void domove(/*@null@*/ const struct newsgroup *group, int, unsigned long *);
@@ -242,7 +242,7 @@ main_loop(void)
 		group = dolistgroup(group, arg, &artno);
 	} else if (!strcasecmp(cmd, "group")) {
 	    if (isauthorized())
-		group = dogroup(arg, &artno);
+		group = dogroup(group, arg, &artno);
 	} else if (!strcasecmp(cmd, "authinfo")) {
 	    doauthinfo(arg);
 	} else {
@@ -542,7 +542,7 @@ markdownload(const char *groupname, const char *msgid, unsigned long artno)
 
     if (!groupname)
 	return -1;
-    s = mastr_new(1024);
+    s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups/", groupname, NULL);
     if ((f = fopen(mastr_str(s), "r+"))) {
 	while ((l = getaline(f)) != NULL) {
@@ -736,7 +736,7 @@ markinterest(const struct newsgroup *group)
 
     not_yet_interesting = 0;
 
-    s = mastr_new(1024);
+    s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups/", group->name, NULL);
 
     if (stat(mastr_str(s), &st) == 0) {
@@ -781,7 +781,7 @@ markinterest(const struct newsgroup *group)
 
 /* change to group - note no checks on group name */
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
-dogroup(const char *arg, unsigned long *artno)
+dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
 
@@ -812,7 +812,7 @@ dogroup(const char *arg, unsigned long *artno)
 	return g;
     } else {
 	nntpprintf("411 No such group");
-	return NULL;
+	return group;
     }
 }
 
@@ -869,7 +869,7 @@ static void
 domove(/*@null@*/ const struct newsgroup *group, int by, unsigned long *artno)
 {
     char *msgid;
-    char s[PATH_MAX + 1];	/* FIXME */
+    char s[64];
     unsigned long a;
 
     by = (by < 0) ? -1 : 1;
@@ -1091,7 +1091,7 @@ donewnews(char *arg)
 
     nntpprintf("230 List of new articles since %ld in newsgroup %s", age,
 	       l->string);
-    s = mastr_new(1024);
+    s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups", NULL);
     d = opendir(mastr_str(s));
     if (!d) {
@@ -1229,7 +1229,7 @@ validate_newsgroups(const char *n)
 #if 0
 	/* tolerant version */
 	/* we have found whitespace, check if it's just trailing */
-	if (strspn(t, WHITESPACE) != strlen(t, WHITESPACE))
+	if (strspn(t, WHITESPACE) != strlen(t))
 	    return 0;
 #else
 	/* pedantic version */
@@ -1297,7 +1297,7 @@ dopost(void)
     int hdrtoolong = FALSE;
     size_t len;
     int out;
-    char inname[PATH_MAX + 1];
+    char inname[LN_PATH_MAX];
     static int postingno;	/* starts at 0 */
 
     do {
@@ -1542,19 +1542,21 @@ dopost(void)
 	if (!moderator && !is_alllocal(groups)) {
 	    /* also posted to external groups or moderated group with
 	       unknown moderator, store into out.going */
-	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
+	    mastr *s = mastr_new(LN_PATH_MAX);
 	    outbasename = strrchr(inname, '/');
 	    outbasename++;
-	    sprintf(s, "%s/out.going/%s", spooldir, outbasename);
-	    if (sync_link(inname, s)) {
+	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
+	    if (sync_link(inname, mastr_str(s))) {
 		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		       "unable to schedule for posting to upstream, "
-		       "link %s -> %s failed: %m", inname, s);
+		       "link %s -> %s failed: %m", inname, mastr_str(s));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
 		log_unlink(inname);
+		mastr_delete(s);
 		goto cleanup;
 	    }
+	    mastr_delete(s);
 	    if (modgroup && !approved) {
 		nntpprintf("240 Posting scheduled for posting to "
 			   "upstream, be patient");
@@ -1587,24 +1589,27 @@ dopost(void)
 
 	if (0 == no_direct_spool /* means: may spool directly */ || is_anylocal(groups)) {
 	    /* at least one internal group is given, store into in.coming */
-	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
+	    mastr *s = mastr_new(LN_PATH_MAX);
 	    outbasename = strrchr(inname, '/');
 	    outbasename++;
-	    sprintf(s, "%s/in.coming/%s", spooldir, outbasename);
-	    if (sync_link(inname, s)) {
+	    mastr_vcat(s, spooldir, "/in.coming/", outbasename, NULL);
+	    if (sync_link(inname, mastr_str(s))) {
 		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		       "unable to schedule for posting to local spool, "
-		       "link %s -> %s failed: %m", inname, s);
+		       "link %s -> %s failed: %m", inname, mastr_str(s));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to local spool, see syslog.");
 		log_unlink(inname);
 		/* error with spooling locally -> also drop from out.going (to avoid
 		 * that the user resends the article after the 503 code)
 		 */
-		sprintf(s, "%s/out.going/%s", spooldir, outbasename);
-		(void)unlink(s);
+		mastr_clear(s);
+		mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
+		(void)unlink(mastr_str(s));
+		mastr_delete(s);
 		goto cleanup;
 	    }
+	    mastr_delete(s);
 	}
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
@@ -2042,7 +2047,6 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 	    nntpprintf("411 No such group: %s", arg);
 	    return group;
 	} else {
-	    group = g;
 	    *artno = g->first;
 	}
     } else if (group) {
@@ -2055,7 +2059,8 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     if ((pseudogroup = is_pseudogroup(g->name))) {
 	/* group has not been visited before */
 	markinterest(group);
-    } else if ((xovergroup != group) && !getxover(1)) {
+    } else if ((xovergroup != group) && chdirgroup(group->name, FALSE) &&
+	        !getxover(1)) {
 	if (is_interesting(g->name)) {
 	    /* group has already been marked as interesting but is empty */
 	    emptygroup = TRUE;
@@ -2099,14 +2104,16 @@ readpasswd(void)
     FILE *f;
     int error;
     struct stringlist *ptr = NULL;
-    char s[PATH_MAX + 1];	/* FIXME */
+    mastr *s = mastr_new(LN_PATH_MAX);
 
-    sprintf(s, "%s/users", sysconfdir);
-    if ((f = fopen(s, "r")) == NULL) {
+    mastr_vcat(s, sysconfdir, "/users", NULL);
+    if ((f = fopen(mastr_str(s), "r")) == NULL) {
 	error = errno;
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", mastr_str(s));
+	mastr_delete(s);
 	return error;
     }
+    mastr_delete(s);
     while ((l = getaline(f)) != NULL) {
 	appendtolist(&users, &ptr, l);
     }
@@ -2282,12 +2289,12 @@ mysetfbuf(FILE * f, /*@null@*/ /*@exposed@*/ /*@out@*/ char *buf, size_t size)
 int
 main(int argc, char **argv)
 {
-    int option, reply, err;
+    int option, reply;
     socklen_t fodder;
-    char conffile[PATH_MAX + 1];
     FILE *se;
     const long bufsize = BLOCKSIZE;
     char *buf = (char *)critmalloc(bufsize, "main");
+    char *conffile = NULL;
 
 #ifdef HAVE_IPV6
     struct sockaddr_in6 sa, peer;
@@ -2299,11 +2306,6 @@ main(int argc, char **argv)
     fflush(stdout);
 
     mysetfbuf(stdout, buf, bufsize);
-
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
-	|| (err >= (int)sizeof(conffile))) {
-	exit(EXIT_FAILURE);
-    }
 
     ln_log_open("leafnode");
     if (!initvars(argv[0], 1))
@@ -2319,7 +2321,7 @@ main(int argc, char **argv)
     }
 
     while ((option = getopt(argc, argv, "F:D:V")) != -1) {
-	if (!parseopt("leafnode", option, optarg, conffile, sizeof(conffile))) {
+	if (!parseopt("leafnode", option, optarg, &conffile)) {
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
 	    exit(EXIT_FAILURE);
 	}
@@ -2332,6 +2334,8 @@ main(int argc, char **argv)
 		  conffile, strerror(reply));
 	exit(EXIT_FAILURE);
     }
+    if (conffile)
+	free(conffile);
 
     verbose = 0;
     umask((mode_t) 02);

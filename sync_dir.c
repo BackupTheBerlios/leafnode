@@ -32,7 +32,7 @@ sync_dir(const char *in)
 int
 sync_parent(const char *in)
 {
-    char s[PATH_MAX];
+    char s[LN_PATH_MAX];
     char *r;
 
     /* copy just the dirname to s */
