@@ -1,4 +1,38 @@
+2003-10-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* getwatermarks.c: Fix for empty groups.
+	* fetchnews.c: Bump group "first" counter rather than last in empty
+	groups.
+	* applyfilter.c: Increment counters, minor fixes to verbose mode,
+	minor fix to dryrun mode.
+
+2003-10-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Respond with 440 (not 500) when POST is not allowed.
+	Drop unused variable.  SLAVE (a no-op) no longer depends on
+	authorization.
+
+2003-10-12  Matthias Andree <matthias.andree@gmx.de>
+
+	* store.c: Avoid crash on malformatted or missing Message-ID.
+	* artutil.c: Bump group lower article number if the article to be
+	removed has the same number.
+	* applyfilter.c: Refactor, use delete_article to remove filtered
+	articles from the spool.
+	* configure.ac: Bump version, drop warning about unreachable code
+	(GCC bugs).
+	* nntpd.c: Rename two functions. Fix type in pseudogroup GROUP 211
+	reply, initialize.
+	* fetchnews.c, leafnode.h, store.c, texpire.c: Rename two
+	functions.
+
 2003-10-09  Matthias Andree <matthias.andree@gmx.de>
+
+	* .cvsignore: Add some auto-generated files to make cvschk happy.
+	* fetchnews.c: Fix signedness and const-ness to avoid compiler
+	warnings.
+	* NEWS: Add missing NEWS entries.
+	* ChangeLog, NEWS, configure.ac: Snapshot 20031009a.
 
 	= snapshot 20031009a =
 	* nntpd.c: XOVER fixes.  XOVER n and XOVER n- didn't work for pseudo

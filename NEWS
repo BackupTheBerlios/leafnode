@@ -1,3 +1,9 @@
+Changes since 20031009a:
+- Revamp applyfilter, now more robust.
+- Reply 440 rather than 500 if user tries to POST in NOPOSTING mode.
+- GROUP article number fixes, to avoid bogus new article "offering" in
+  newsreader, reported by Reiner Steib.
+
 20031009a: Changes since 20031001a:
 - Bugfix: applyfilter no longer chokes on 0-sized articles and will
   unconditionally deleted them. Reported by Reiner Steib.
