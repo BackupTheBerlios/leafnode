@@ -136,18 +136,27 @@ str_isprefix(const char *string, const char *prefix)
 
 #ifdef TEST
 #include <stdio.h>
+#include <stdlib.h>
 int
 main(int argc, char **argv)
 {
-    int n;
+    int n, t;
     char **x, **y;
+    const int maxf = 20;
 
     if (argc != 3) {
 	puts("usage: strutil <string to break> <separator character list>");
-	return 1;
+	exit(EXIT_FAILURE);
     }
 
-    x = y = str_nsplit(argv[1], argv[2], 20);
+    x = malloc(sizeof(char *) * maxf);
+    if (!x) {
+	fputs("out of memory\n", stderr);
+	exit(EXIT_FAILURE);
+    }
+
+    t = str_nsplit(x, argv[1], argv[2], maxf);
+    printf("returned %d\n", t);
     for (n = 0; *x; n++, x++) {
 	printf("%2d: %s\n", n, *x);
 	free(*x);
