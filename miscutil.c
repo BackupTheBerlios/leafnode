@@ -255,8 +255,6 @@ static int log_dir_unlink(const char *dir, const char *file)
     return ret;
 }
 
-static int compare(const void *a, const void *b,
-		   const void *config __attribute__ ((unused)));
 static int
 compare(const void *a, const void *b,
 	/*@unused@*/ const void *config __attribute__ ((unused)))
