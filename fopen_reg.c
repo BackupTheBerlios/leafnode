@@ -12,7 +12,7 @@
  *  License for more details.  You should have received a copy of the
  *  GNU Lesser General Public License along with this program; if not,
  *  write to the Free Software Foundation, Inc., 59 Temple Place, Suite
- *  330, Boston, MA 02111-1307 USA 
+ *  330, Boston, MA 02111-1307 USA
  */
 #include <stdio.h>
 #include <sys/types.h>
@@ -26,9 +26,9 @@
 #endif
 
 /** Open an existing file if it's a regular file.
- * Sets errno in case of
- * trouble.  
- * \return FILE* stream handle or NULL if it's not a regular file. 
+ * Sets errno in case of trouble. Safe on systems with broken stat() macros.
+ * \return FILE* stream handle or NULL if it's not a regular file.
+ * \bugs on systems, that do not support ENOTSUP, returns EINVAL instead.
  */
 FILE *
 fopen_reg(
@@ -38,13 +38,15 @@ fopen_reg(
     fopen */
 	     const char *mode)
 {
-    FILE *f = fopen(path, mode);
+    FILE *f;
     struct stat st;
 
     if (!mode || ((mode[0] != 'r') && (mode[0] != 'a'))) {
 	errno = EINVAL;
 	return 0;
     }
+
+    f = fopen(path, mode);
     /* cannot open file */
     if (!f)
 	return 0;
@@ -56,9 +58,13 @@ fopen_reg(
 	errno = e;
 	return 0;
     }
+#ifdef STAT_MACROS_BROKEN
+    if ((st.st_mode & S_IFMT) != S_IFREG) {
+#else
     if (!S_ISREG(st.st_mode)) {
+#endif
 	fclose(f);
-	errno = ENOTSUP;
+	errno = EINVAL;
 	return 0;
     }
     return f;
