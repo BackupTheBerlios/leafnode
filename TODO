@@ -61,6 +61,10 @@ Ralfs TODO:
 	  Using only_fetch_once e.g. can hit the window with two upstream servers.
 
 10pre5
+0.0 if group is empty, low water mark is not bumped up to high water
+    mark
+
+10pre5
 0.0 forward port bug fixes from 1.9.19rc*
     (applyfilter done)
 
