@@ -29,6 +29,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <utime.h>
+#include <assert.h>
 
 #ifdef DEBUG_DMALLOC
 #include <dmalloc.h>
@@ -938,6 +939,28 @@ splitLISTline(char *line, char **nameend, char **status) {
     }
 }
 
+/** removes the last:*:* file for the current server, to force fetchnews
+ * to read this server's active file soon.
+ */
+static int
+dirtyactive(struct serverlist *srv)
+{
+    mastr *s = mastr_new(1024);
+    char p[64];
+    int r;
+
+    assert(srv);
+    str_ulong(p, srv->port);
+    mastr_vcat(s, spooldir, "/leaf.node/last:", srv->name, ":", p, 0);
+    r = unlink(mastr_str(s));
+    if (r && errno != ENOENT) {
+	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m",
+	       mastr_str(s));
+    }
+    mastr_delete(s);
+    return r;
+}
+
 /*
  * get active file from current_server
  */
@@ -959,13 +982,7 @@ nntpactive(void)
     sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
 	    current_server->port);
 
-    if (forceactive) {
-	int r = unlink(s);
-	if (r && errno != ENOENT) {
-	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m", s);
-	}
-    }
-    if ((0 == stat(s, &st))) {
+    if (!forceactive && (0 == stat(s, &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
@@ -1042,7 +1059,7 @@ nntpactive(void)
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
 	    if (isinteresting(l)
-		&& !(active && findgroup(l))
+		&& (forceactive || !(active && findgroup(l)))
 		&& chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
@@ -1681,6 +1698,9 @@ main(int argc, char **argv)
 
     while (servers) {
 	current_server = servers;
+	if (forceactive) {
+	    (void)dirtyactive(current_server);
+	}
 	if (current_server->active) {
 	    if (do_server(msgid, lastrun, newsgrp))
 		continue;	/* no other servers have to be queried */
