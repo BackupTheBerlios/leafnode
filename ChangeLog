@@ -1,5 +1,25 @@
 2002-07-04  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
+	* README.html, applyfilter.c, config.example, config.table,
+	configutil.c, fetchnews.c, leafnode.8.in, leafnode.h, miscutil.c,
+	nntpd.c, queues.c, rnews.c, store.c: Revive delaybody.	Add new
+	configuration option
+	  groupdelaybody = group.pattern.*
+	which will enable delaybody for all groups matching.  The global
+	option delaybody will override, if set to 1.
+	store() and store_stream() take an extra argument delayflg, 1 for the
+	pseudo head, 2 for the delayed article, 0 for default mode.
+	Pseudo article will be killed (all links) by supersede_cancel after
+	successful download of delayed article.  nntpd will store Message-IDs
+	for all bodies requested in a delaybody group.  Special treatment to
+	crossposts is not provided.  fetchnews will load all requested bodies,
+	headers via XOVER only.
+	* nntpd.c: domove: Fix NEXT and LAST, when groupinfo numbers are
+	incorrect.  Current article number is set only if there is a valid
+	article.
+	* nntpd.c: On LISTGROUP non.existent.group, don't invalidate
+	current valid group.
+	* store.c: Don't add Xref: entry for bogus (i.e. rmgroup'ed) group.
 	* rnews.c: Portability:  no empty switch case.
 	* artutil.c, checkgroups.c, configutil.c, fetchnews.c, filterutil.c,
 	leafnode.h, miscutil.c, store.c, xoverutil.c: Consistently use

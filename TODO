@@ -66,6 +66,13 @@ Ralfs TODO:
 10pre5
 0.0 use separate repairspool program
 
+
+10pre5
+1.1 delaybody mode: fetchnews currently tries normal download of those
+    headers also, resulting in error messages, the output counts are wrong. 
+    Overviews are not corrected at all times yet, some error checking
+    in fetchnews.
+
 10pre5
 1.1 exit code of fetchnews always zero
 
