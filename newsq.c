@@ -35,17 +35,17 @@ show_queue(const char *s)
     FILE *f;
     DIR *d;
     struct stat st;
-    unsigned long filesize;
+    off_t filesize;
     long count = 0;
 
     if (chdir(s) < 0) {
 	fprintf(stderr, "Cannot change to %s -- aborting.\n", s);
-	return (-1);
+	return -1l;
     }
     d = opendir(".");
     if (!d) {
 	fprintf(stderr, "Cannot open directory %s -- aborting.\n", s);
-	return (-1);
+	return -1l;
     }
     while ((de = readdir(d))) {
 	if (stat(de->d_name, &st)) {
@@ -53,16 +53,20 @@ show_queue(const char *s)
 	} else if (S_ISREG(st.st_mode)) {
 	    f = fopen(de->d_name, "r");
 	    if (f) {
-		char *fr, *ng, *su;
+		char *fr = fgetheader(f, "From:", 1);
+		char *ng = fgetheader(f, "Newsgroups:", 1);
+		char *su = fgetheader(f, "Subject:", 1);
 		filesize = st.st_size;
 		count++;
-		printf("%s: %8lu bytes, spooled %s\tFrom: %-.66s\n"
-		       "\tNgrp: %-.66s\n\tSubj: %-.66s\n",
-		       de->d_name, filesize, ctime(&st.st_mtime),
-		       fr = fgetheader(f, "From:", 1),
-		       ng = fgetheader(f, "Newsgroups:", 1),
-		       su = fgetheader(f, "Subject:", 1));
-		fclose(f);
+		if (fr != NULL && ng != NULL && su != NULL) {
+		    printf("%s: %8lu bytes, spooled %s\tFrom: %-.66s\n"
+			   "\tNgrp: %-.66s\n\tSubj: %-.66s\n",
+			   de->d_name, (unsigned long)filesize,
+			   ctime(&st.st_mtime), fr, ng, su);
+		} else {
+		    fprintf(stderr, "Header missing in file %s\n", de->d_name);
+		}
+		(void)fclose(f);
 		if (fr)
 		    free(fr);
 		if (ng)
@@ -73,7 +77,7 @@ show_queue(const char *s)
 		fprintf(stderr, "Cannot open %s\n", de->d_name);
 	}
     }
-    closedir(d);
+    (void)closedir(d);
     return count;
 }
 
@@ -99,7 +103,7 @@ main(int argc, char **argv)
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
-	printf("%ld article%s found.\n", c, c == 1 ? "" : "s");
+	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
 
 
@@ -111,18 +115,17 @@ main(int argc, char **argv)
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
-	printf("%ld article%s found.\n", c, c == 1 ? "" : "s");
+	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
 
     printf("\n");
-    printf("Articles in failed.postings:\n"
-	   "----------------------------\n");
+    printf("Articles in failed.postings:\n" "----------------------------\n");
     sprintf(s, "%.*s/failed.postings", (int)sizeof(s) - 20, spooldir);
     if ((c = show_queue(s)) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
     } else {
-	printf("%ld article%s found.\n", c, c == 1 ? "" : "s");
+	printf("%ld article%s found.\n", c, c == 1l ? "" : "s");
     }
 
     exit(ret ? EXIT_FAILURE : EXIT_SUCCESS);
