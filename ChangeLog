@@ -1,8 +1,34 @@
+2002-04-26  Matthias Andree  <matthias.andree@gmx.de>
+
+	* nntpd.c: Deescalate EOF-from-client syslog message from WARNING
+	to DEBUG. It seems to be totally normal for NNTP clients to just
+	disconnect without saying QUIT.
+	* xoverutil.c: Allow STOP_AT_MESSAGEID to raise a SIGSTOP in
+	store_stream.
+
+	* store.c: Allow STOP_AT_MESSAGEID to raise a SIGSTOP in
+	store_stream.
+
+	* leafnode.h: Add debugutil.c support.
+	* Makefile.am: Add debugutil.c.
+	* getfoldedline.c: Bugfix: do not try to append the next line if
+	the current line is empty. Impact: getfoldedline (for example, in
+	getxoverline) would read past the empty line between news header
+	and body if the body started with a tab or space character. Bug
+	reported by Ralf Wildenhues.
+
+	* debugutil.c: Initial checkin.
+	* TODO: Add lacking markdownload error checking.
+	* nntpd.c: Ralf Wildenhues: fix file descriptor leak when marking
+	a body for download that had previously been marked already.
+	* fetchnews.c: Revert broken timeout_active fix. Need to find
+	something different.
+
 2002-04-23  Matthias Andree  <matthias.andree@gmx.de>
 
 	* config.table: Add timeout_client to complement Jonathan
 	Larmour's timeout_client patch.
-	
+
 	* configutil.c: Merge the timeout_client patch by Jonathan Larmour
 	<jlarmour@redhat.com>.
 
