@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.47 2003/07/06 21:20:34 emma Exp $
+# $Id: Makefile.am,v 1.48 2003/07/12 23:58:10 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -333,3 +333,9 @@ rpm: dist-bzip2 leafnode.spec
 	unset IFS ; env LANG=C LC_MESSAGES=C rpm -ba --target=i486 $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
 	| grep '^Wrote:' | $(SED) -e 's/^Wrote: //' \
 	| while read r ; do mv -f "$$r" . || exit 1 ; done
+# this target expects a .rsyncs file with lines of this format:
+# host:directory/
+# it will call rsync from its source directory to the destination for
+# each of them, running them in parallel
+rsync:	distdir .rsyncs
+	@( cat .rsyncs | sed -e 's}^}rsync -av --delete $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x

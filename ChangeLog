@@ -1,4 +1,12 @@
+2003-07-12  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030712a =
+	* filterutil.c: Bugfix: filtering on patterns used reverse logic
+	when debugmode didn't include 32 (DEBUG_FILTER).  
+
 2003-07-10  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS: Snapshot 20030710a.  
 
 	= snapshot 20030710a =
 	* configure.ac: 
@@ -18,8 +26,8 @@
 
 	* nntpd.c: Properly initialize newsgroup data in LISTGROUP, to fix
 	bogus pseudo status of groups that actually have articles in them.
-	Unify opening code in dogroup and dolistgroup. Reported by Michael
-	Mauch against tin 1.5.19.  
+	Unify opening code in dogroup and dolistgroup. Reported by Jörg
+	Dietrich and Michael Mauch.  
 
 2003-07-06  Matthias Andree <matthias.andree@gmx.de>
 

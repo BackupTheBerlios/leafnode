@@ -1,3 +1,7 @@
+Changes since 20030710:
+- Bugfix: Filtering by regexp was broken (inverse logic) unless
+  DEBUG_FILTER was set (debugmode included the 32 flag).
+
 Changes since 20030706:
 - Bugfix: LISTGROUP bugfixed, LISTGROUP - XOVER now works; no longer
   shows bogus pseudo article.
