@@ -1,11 +1,16 @@
 2001-12-18  Matthias Andree  <matthias.andree@gmx.de>
 
+	* Makefile.in: Update dependencies (automatic).
+	* TODO: Update.
+	* store.c: Brown paper bag bug: Don't apply "missing message.id"
+	fix to newsgroups, but to message.id.
+	* mkdir_parent.c: Bugfix: don't try to create directory without
+	name.
 	* moderated.c: Initial version after split from nntpd.c.
 	* TODO: UPDATE.
 	* timeout_getaline.c: Change timeout from 2 to 5 minutes, Jörg
 	Dietrich had suggested to increase it to 3 minutes, to correspond
 	with current NNTP drafts.
-
 	* README.html: Updates: status chars, NOPOSTING.
 	* nntpd.c: Move checkstatus/getmoderator to moderator.c Remove
 	gmtoff. Replace by new gmtoff.c Add allowposting() function to
@@ -14,25 +19,20 @@
 	SIGCHLD to, Linux collects children itself when set to SIG_IGN,
 	returning ECHILD on wait, which is not what we want. Needed for
 	mailto().
-
 	* miscutil.c: Also create backup.moderated directory.
 	* Makefile.in: Add gmtoff.c, moderated.c.
 	* leafnode.h: Add gmtoff, checkstatus, getmoderator prototypes.
 	Add dontpost to struct server.
-
 	* gmtoff.c: New file, to carry a new calculation routine for the
 	GMT offset. Relies on time.h and libc to parse the time zone
 	staff. No more environment fiddling.
-
 	* fetchnews.c: Add "dontpost" server option.  Postings to
 	moderated groups are posted to just one upstream server, and
 	backed up to backup.moderated below SPOOLDIR.  Do
 	move-to-failed.postings/backup.moderated with a new moveto()
 	function.
-
 	* configure.in: Drop PUTENV_COPIES check.
 	Bump version to 2.0b8_ma8rc1.
-
 	* config.table, configutil.c: Add "dontpost" server option.
 
 2001-12-18  Matthias Andree  <matthias.andree@gmx.de>
