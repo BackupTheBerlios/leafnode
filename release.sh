@@ -29,9 +29,9 @@ fi
   cat $dest/RELEASE
 ) >$dest/RELEASE.new && mv $dest/RELEASE.new $dest/RELEASE
 vim $dest/RELEASE
-vim $dest/HEADER.html
 fi
 perl addpatches.pl
+vim $dest/HEADER.html
 ./export.sh
 
 synchome.sh &
