@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.21 2002/01/07 21:36:19 emma Exp $ */
+/* $Id: leafnode.h,v 1.22 2002/01/08 16:38:14 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -135,14 +135,16 @@ extern "C" {
 #define LASTPOSTING ".last.posting"
 
 /* initialize global variables */
-    int initvars(const char *progname);
+    int initvars(const char *const progname);
 
 /* get configuration file */
-    char *getoptarg(char option, int argc, char *argv[]);
+/*@null@*//*@observer@*/ char *
+     getoptarg(char option, int argc, char *argv[]);
     int findopt(char option, int argc, char *argv[]);
 
 /* conffile is changed */
-    int parseopt(const char *, int, const char *, char *conffile, size_t);
+    int parseopt(const char *, int, /*@null@*/ const char *, char *conffile,
+		 size_t);
 
 /* converts a message-id to a file name, the return value points to static storage  */
     /*@dependent@*/ char *lookup(const char *msgid);
@@ -219,10 +221,11 @@ extern "C" {
 		      char *newentry);
     /* append "newentry" to "list". "lastentry" points to the last
        entry in "list" and must be supplied. */
-    char *findinlist(struct stringlist *haystack, char *needle);
+    /*@dependent@*//*@null@*/ char *findinlist(struct stringlist *haystack,
+						 /*@null@*/ char *needle);
 
     /* find a string in a stringlist by doing a linear search */
-    void freelist(struct stringlist *list);
+    void freelist( /*@only@*/ struct stringlist *list);
 
     /* free memory occupied by a stringlist */
     int stringlistlen(const struct stringlist *list);
@@ -279,15 +282,21 @@ extern "C" {
  * store articles
  */
     int store(const char *filename, int, /*@null@*/ const struct filterlist *);
-    int store_stream(FILE * stream, int, /*@null@*/ const struct filterlist *, long);
+    int store_stream(FILE * stream, int, /*@null@*/ const struct filterlist *,
+		     long);
     /*@observer@*/ const char *store_err(int);
 
 /*
  * find a certain header in an article and return it
  */
-    char *getheader(const char *filename, const char *header);
-    char *fgetheader(FILE * f, const char *header, int rewind_me);
-    char *mgetheader(const char *hdr, char *buf);
+/*@null@*//*@only@*/ char *
+     getheader( /*@notnull@*/ const char *filename, /*@notnull@*/
+	       const char *header);
+/*@null@*//*@only@*/ char *
+     fgetheader( /*@null@*/ FILE * f, /*@notnull@*/ const char *header,
+		int rewind_me);
+/*@null@*//*@only@*/ char *
+     mgetheader( /*@notnull@*/ const char *hdr, /*@null@*/ char *buf);
 
 /*
  * various functions in artutil.c
@@ -322,8 +331,8 @@ extern "C" {
 
     /* find index number for an article, return -1 on error */
     int maybegetxover(struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
-    int xgetxover(struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
-    int getxover(void);		/* set xoverinfo, return 0 on error, nonzero else */
+    int xgetxover(const int, struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
+    int getxover(const int);	/* set xoverinfo, return 0 on error, nonzero else */
     void fixxover(void);	/* repair all .overview files */
     void gfixxover(const char *g);	/* repair .overview in groups g */
     void freexover(void);	/* free xoverinfo structure */
@@ -468,12 +477,13 @@ extern "C" {
  */
     bool authenticate(void);	/* authenticate ourselves at a server */
     int nntpreply(void);	/* decode an NNTP reply number */
-    int newnntpreply( /*@null@*/ /*@out@*/ char **);	/* decode an NNTP reply number */
+    int newnntpreply( /*@null@*//*@out@*/ char **);	/* decode an NNTP reply number */
     int nntpconnect(const struct serverlist *upstream);
 
     /* connect to upstream server */
     void nntpdisconnect(void);	/* disconnect from upstream server */
-    const char *rfctime(void);	/* An rfc type date */
+						/*@dependent@*/ const char *rfctime(void);
+						/* An rfc type date */
 
 /* from strutil.c */
     int check_allnum(const char *);	/* check if string is all made of digits */
@@ -489,25 +499,26 @@ extern "C" {
 
 /* from dirutil.c */
 /* open directory, relative to spooldir, log problems */
-    /*@dependent@*/ /*@null@*/ DIR *open_spooldir(const char *);
+/*@dependent@*//*@null@*/ DIR *open_spooldir(const char *);
 /* read directory into a list of strings */
-    /*@null@*/ /*@only@*/ char **
-      dirlist(const char *name, int (*)(const char *), /*@null@*/ long unsigned *);
+/*@null@*//*@only@*/ char **
+     dirlist(const char *name, int (*)(const char *),	/*@null@*/
+	     long unsigned *);
 /* dito, prefixing the directory name */
-    /*@null@*/ /*@only@*/ char **
-      dirlist_prefix(const char *name, int (*)(const char *),
-			  /*@null@*/ long unsigned *);
+/*@null@*//*@only@*/ char **
+     dirlist_prefix(const char *name, int (*)(const char *),
+		    /*@null@*/ long unsigned *);
 /* dito, relative to the spool directory */
-    /*@null@*/ /*@only@*/ char **
-      spooldirlist_prefix(const char *name, int (*)(const char *),
-			       /*@null@*/ long unsigned *);
+/*@null@*//*@only@*/ char **
+     spooldirlist_prefix(const char *name, int (*)(const char *),
+			 /*@null@*/ long unsigned *);
 /* filters for dirlist */
     int DIRLIST_ALL(const char *x);
     int DIRLIST_NONDOT(const char *x);
     int DIRLIST_ALLNUM(const char *x);
 
 /* free string list */
-    void free_dirlist(/*@null@*/ /*@only@*/ char **);
+    void free_dirlist( /*@null@*//*@only@*/ char **);
 
 /* from fopen_reg.c */
     FILE *fopen_reg(const char *path, const char *m);
