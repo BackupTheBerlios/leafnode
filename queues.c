@@ -132,15 +132,10 @@ feedincoming(void)
 	/* FIXME: fix xover */
 	if ((rc = store(*di, 0, 0, 0))) {
 	    static mastr *t;
-	    if (t == NULL) {
-		/* will never be freed, is constant and will be reused */
-		t = mastr_new(LN_PATH_MAX);
-		mastr_vcat(t, spooldir, "/failed.postings/", NULL);
-	    }
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
-		   "moving to %s",
-		   *di, store_err(rc), mastr_str(t));
-	    (void)log_moveto(*di, mastr_str(t));
+		   "moving to %s/failed.postings/",
+		   *di, store_err(rc), spooldir);
+	    (void)log_moveto(*di, "/failed.postings/");
 	} else {
 	    const char *j;
 	    for (j = strtok(ngs, "\t ,"); j && *j; j = strtok(NULL, "\t ,")) {
