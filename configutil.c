@@ -364,7 +364,7 @@ readconfig(/*@null@*/ const char *configfile)
 				if (ent) {
 				    ent->group =
 					critstrdup(value, "readconfig");
-				    ent->xtime = i;
+				    ent->xtime = days < 0 ? -1 : i;
 				    ent->next = prev;
 				    prev = ent;
 				    if (debugmode & DEBUG_CONFIG)
