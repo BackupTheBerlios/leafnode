@@ -1202,7 +1202,7 @@ postarticles(void)
 {
     char *line = 0;
     FILE *f;
-    int haveid, n;
+    int n;
     unsigned long articles;
     char **x, **y;
 
@@ -1217,7 +1217,6 @@ postarticles(void)
 
     n = 0;
     for (y = x; *y; y++) {
-	haveid = 0;
 	f = 0;
 	if (!(f = fopen_reg(*y, "r"))) {
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
@@ -1284,7 +1283,7 @@ do_group(const char *ng, /** which group to operate on */
     struct newsgroup *g;
     unsigned long newserver = 0;
     char *l;
-    int from;
+    unsigned long from;
     mastr *s;
 
     g = findgroup(ng, active, -1);
@@ -1319,7 +1318,7 @@ do_group(const char *ng, /** which group to operate on */
 	newserver = getgroup(g, from);
 
 	if (f && newserver) {
-	    fprintf(f, "%s %lu\n", g->name, newserver > 0 ? newserver : from);
+	    fprintf(f, "%s %lu\n", g->name, newserver > 0u ? newserver : from);
 	}
 	return newserver;
     } else {			/* g != NULL */
@@ -1339,7 +1338,7 @@ processupstream(const char *const server, const int port,
 {
     FILE *f;
     const char *ng;
-    unsigned long newserver;
+    unsigned long newserver; /* FIXME variable newserver set but not used */
     char *oldfile = 0;
     int havefile;
     struct stringlist *ngs = NULL;
