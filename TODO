@@ -58,18 +58,13 @@ Ralfs TODO:
 	(Ralf Wildenhues, 2002-09-05)
 
 10pre5
-0.0 if group is empty, low water mark is not bumped up to high water
-    mark
+0.0 if group is empty, low water mark is not bumped up to high water mark
 
 10pre5
-0.0 forward port bug fixes from 1.9.19rc*
-    (applyfilter done)
+0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
 10pre5
 0.0 do not use mkstemp on MacOS X, it's unsafe there
-
-10pre5
-1.1 exit code of fetchnews always zero
 
 10pre5
 1.1 try to post an article to *every* server before moving into
@@ -80,14 +75,6 @@ Ralfs TODO:
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
     (Not in leafnode). Reported by Ralf Wildenhues. Bug report
     to Damian Ivereigh. Message-ID: <20020126133758.A428@uni-bonn.de>
-
-10pre5
-1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch of 2002-02-04
-    note: cannot reproduce "SIGCHLD triggers getc() EOF" on Linux or
-    FreeBSD. Asked Jeffrey for explanation of OS and maybe scenario.
-    2002-07-08.
-    status: FEEDBACK PENDING
-    But should have been fixed with sigaction on 2002-07-08.
 
 10pre5
 1.1 leafnode does not add a Lines: header, but has the Lines count in
@@ -157,9 +144,9 @@ Ralfs TODO:
     permissions to root -- Ozz 2001-06-12
 
 3.3 do parallel fetch
-    models: 1- thread 2- fork() 3- select()-based
-    problems: 1- groupinfo 2- .overview 3- avoid EEXIST 4- avoid locks
-    or semaphores
+    models: 1- threads 2- fork() 3- select()-based
+    problems: 1- groupinfo 2- avoid EEXIST 3- avoid locks or semaphores
+    Go for threads or alternatively transactional BerkeleyDB
 
 3.3 heed Expires: header in texpire
 
@@ -175,8 +162,6 @@ Ralfs TODO:
 
 3.3 add support for stderr logging so that multilog can be used
     (clemensF <rabat@web.de>).
-
-3.3 add IHAVE support for feeding upstream
 
 3.3 don't supersede() articles unconditionally
     ACTION: figure criteria for allowing/denying supersede
@@ -256,6 +241,8 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 4.4 split post functionality from fetchnews to a separate daemon (but
     maybe call the new daemon automatically) Ozz 2001-06-12
 
+4.4 add IHAVE support for feeding upstream
+
 5.5 introduce Control: pseudo group functionality
 
 5.5 abort group fetch and proceed to next group
@@ -282,8 +269,16 @@ FIXED ITEMS:
 2002-08-21 Jörg Dietrich
 	   dopost: Newsgroups: is not checked for valid groups
 
-2002-07-22 tolerate ", " instead of just "," in Newsgroup:
-	   current NNTP drafts suggests that to be able to fold Newsgroup: headers.
+2002-07-22 Ralf Wildenhues
+	   tolerate ", " instead of just "," in Newsgroup:
+	   current NNTP drafts suggests that to be able to fold
+	   Newsgroup: headers.
+
+2002-07-08 Matthias Andree
+	   fix SIGCHLD behaviour or use Jeffrey Goldberg's patch of
+	   2002-02-04 note: cannot reproduce "SIGCHLD triggers getc()
+	   EOF" on Linux or FreeBSD.
+	   Fixed: using sigaction now with SA_RESTART.
 
 2002-07-08 groupinfo not updated after timeout + subsequent SIGINT
 	   fix acknowledged by Jörg Dietrich 2002-08-17
@@ -315,7 +310,11 @@ FIXED ITEMS:
 	   check each time occurrence for possible 4 digit years (NNTP draft).
 	   getgroup() should return unsigned long.
 	   delaybody mode: fetchnews currently tries normal download of those
-	   headers also, resulting in error messages, the output counts are wrong.
+	   headers also, resulting in error messages, the output counts
+	   are wrong.
+
+2002-07-03 Ralf Wildenhues
+           exit code of fetchnews always zero
 
 2002-07-03 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
 	   <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
