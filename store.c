@@ -406,6 +406,8 @@ store_stream(FILE * in /** input file */ ,
 	    }
 	}
     }
+    if (mastr_str(xref)[0] == '\0')
+	BAIL(0, "no valid newsgroups");
     if (fputs("Xref: ", tmpstream) == EOF)
 	BAIL(-1, "write error");
     if (fputs(fqdn, tmpstream) == EOF)
