@@ -886,7 +886,8 @@ static int
 expiregroups(void)
 {
     struct newsgroup *g;
-    struct stringlist *t, *l = get_grouplist();
+    struct stringlistnode *t;
+    struct stringlisthead *l = get_grouplist();
     time_t expire;
 
     if (!l) {
@@ -894,7 +895,7 @@ expiregroups(void)
 	return FALSE;
     }
 
-    for(t = l; t; t = t -> next) {
+    for(t = l->head; t->next; t = t -> next) {
 	if (is_dormant(t -> string))
 	    continue;
 	g = findgroup(t -> string, active, -1);

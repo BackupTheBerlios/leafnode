@@ -3,6 +3,6 @@
 
 #include "leafnode.h"
 
-/*@null@*/ struct stringlist * get_grouplist(void);
+/*@null@*/ struct stringlisthead * get_grouplist(void);
 
 #endif

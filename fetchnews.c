@@ -66,8 +66,8 @@ static const char *action_description[] = {
     "get articles", "get headers", "get bodies", "post articles"
 };
 
-static struct stringlist *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
-static struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
+static struct stringlisthead *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
+static struct stringlisthead *nglist = NULL;	/* newsgroups patterns to fetch */
 static char *only_server = NULL;		/* server name when -S option is given */
 
 static void
@@ -125,20 +125,20 @@ sigcatch(int signo)
 static void
 add_fetchgroups(void)
 {
-    struct stringlist *sl = nglist;
+    struct stringlistnode *sl;
     char *s;
     const char *t;
 
-    while (sl) {
-	/* do not add wildcards */
-	if (!strpbrk(sl->string, "\\*?[")) {
-	    s = critstrdup(sl->string, "add_fetchgroups");
-	    t = addtointeresting(s);
-	    if (t != NULL && t != s)	/* NULL: OOM, t!=s: repeated entry */
-		free(s);
+    if (nglist)
+	for (sl=nglist->head; sl->next; sl=sl->next) {
+	    /* do not add wildcards */
+	    if (!strpbrk(sl->string, "\\*?[")) {
+		s = critstrdup(sl->string, "add_fetchgroups");
+		t = addtointeresting(s);
+		if (t != NULL && t != s)	/* NULL: OOM, t!=s: repeated entry */
+		    free(s);
+	    }
 	}
-	sl = sl->next;
-    }
 }
 
 static void
@@ -187,8 +187,6 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
     char *p;
-    struct stringlist *msgidlast = NULL;
-    struct stringlist *nglast = NULL;
 
     /* state information */
     int action_method_seen = 0;	/* BHPR */
@@ -218,7 +216,8 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    only_server = critstrdup(optarg, "processoptions");
 	    break;
 	case 'N':
-	    appendtolist(&nglist, &nglast, optarg);
+	    initlist(&nglist);
+	    appendtolist(nglist, optarg);
 	    break;
 	case 'M':
 	    if (!msgidlist) {
@@ -228,7 +227,8 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 		action_method_seen = TRUE;
 		action_method = 0;	/* don't do anything else */
 	    }
-	    appendtolist(&msgidlist, &msgidlast, optarg);
+	    initlist(&msgidlist);
+	    appendtolist(msgidlist, optarg);
 	    break;
 	case 'n':
 	    noexpire = 1;
@@ -445,14 +445,13 @@ getbymsgid(const char *msgid, int delayflg)
  * - -2 if server error, disconnect
  */
 static int
-getmsgidlist(struct stringlist **first)
+getmsgidlist(struct stringlisthead *first)
 {
-    struct stringlist **slp = first;
+    struct stringlistnode *slp;
+    struct stringlistnode *next;
 
-    if (slp == NULL)	/* consistency check */
+    if (first == NULL)	/* consistency check */
 	return -1;
-    if (*slp == NULL)	/* done! */
-	return 0;
 
     ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 	   "Getting articles specified by Message-ID");
@@ -462,8 +461,9 @@ getmsgidlist(struct stringlist **first)
     /* remove MIDs of articles we already have
      * as well as successfully downloaded articles
      */
-    while (*slp) {
-	char *mid = (*slp)->string;
+    slp = first->head;
+    for (slp = first->head; (next = slp->next); slp = next) {
+	char *mid = slp->string;
 
 	if (ihave(mid)) {
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
@@ -475,14 +475,13 @@ getmsgidlist(struct stringlist **first)
 	    removefromlist(slp);
 	    continue;
 	}
-	*slp = (*slp)->next;
     }
     ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 	    "%lu articles fetched by Message-ID, %lu killed",
 	    groupfetched, groupkilled);
     globalfetched += groupfetched;
     globalkilled += groupkilled;
-    return *first == NULL ? 0 : -1;
+    return is_listempty(first) ? 0 : -1;
 }
 
 
@@ -536,8 +535,8 @@ getmarked(struct newsgroup *group)
 {
     FILE *f;
     char *l;
-    struct stringlist *failed = NULL;
-    struct stringlist *ptr = NULL;
+    struct stringlisthead *failed = NULL;
+    struct stringlistnode *ptr = NULL;
     mastr *fname = mastr_new(LN_PATH_MAX);
     mastr *str;
 
@@ -574,7 +573,8 @@ getmarked(struct newsgroup *group)
 
 	if (!getbymsgid(mastr_str(str), 2)) {
 	    *sep = ' ';			/* ugly, get original line back */
-	    appendtolist(&failed, &ptr, mastr_str(str));
+	    initlist(&failed);
+	    appendtolist(failed, mastr_str(str));
 	}
     }
     fclose(f);
@@ -589,8 +589,8 @@ getmarked(struct newsgroup *group)
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "Cannot open %s for writing: %m", mastr_str(fname));
     else {
-	ptr = failed;
-	while (ptr) {
+	ptr = failed->head;
+	while (ptr->next) {
 	    fputs(ptr->string, f);
 	    fputc('\n', f);
 	    ptr = ptr->next;
@@ -831,14 +831,13 @@ out:
  * - -2 if XOVER was rejected
  */
 static long
-fn_doxover(struct stringlist **stufftoget,
+fn_doxover(struct stringlisthead *stufftoget,
 	unsigned long first, unsigned long last,
 	/*@null@*/ struct filterlist *filtlst, char *groupname)
 {
     char *l, *xref_scratch;
     unsigned long count = 0, dupes = 0, seen = 0;
     long reply;
-    struct stringlist *helpptr = NULL;
     int delaybody_this_group = delaybody_group(groupname);
 
     putaline(nntpout, "XOVER %lu-%lu", first, last);
@@ -925,12 +924,12 @@ fn_doxover(struct stringlist **stufftoget,
 		    count++;
 	    } else {
 		count++;
-		appendtolist(stufftoget, &helpptr, artno);
+		appendtolist(stufftoget, artno);
 	    }
 	    mastr_delete(s);
 	} else {
 	    count++;
-	    appendtolist(stufftoget, &helpptr, artno);
+	    appendtolist(stufftoget, artno);
 	}
 next_over:
 	free_strlist(xover);
@@ -965,13 +964,12 @@ next_over:
  * - -2 if XHDR was rejected
  */
 static long
-fn_doxhdr(struct stringlist **stufftoget, unsigned long first,
+fn_doxhdr(struct stringlisthead *stufftoget, unsigned long first,
 	unsigned long last)
 {
     char *l;
     unsigned long count = 0;
     long reply;
-    struct stringlist *helpptr = NULL;
 
     putaline(nntpout, "XHDR message-id %lu-%lu", first, last);
     l = getaline(nntpin);
@@ -990,7 +988,7 @@ fn_doxhdr(struct stringlist **stufftoget, unsigned long first,
 	    continue;
 	/* mark this article */
 	count++;
-	appendtolist(stufftoget, &helpptr, l);
+	appendtolist(stufftoget, l);
     }
     if (l && strcmp(l, ".") == 0)
 	return count;
@@ -1021,17 +1019,17 @@ chopmid(/*@unique@*/ const char *in)
  * get all articles in a group, with pipelining NNTP commands
  */
 static unsigned long
-getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
+getarticles(/*@null@*/ struct stringlisthead *stufftoget, long n,
     /*@null@*/ struct filterlist *f)
 {
-    struct stringlist *p;
+    struct stringlistnode *p;
     long advance = 0, window;
     unsigned long artno_server = 0ul;
     long remain = sendbuf;
 
-    p = stufftoget;
+    p = stufftoget->head;
     window = (n < windowsize) ? n : windowsize;
-    while (p || advance) {
+    while (p->next || advance) {
 	remain = sendbuf;
 	/* stuff pipeline until TCP send buffer is full or window size
 	 * is reached (preload, don't read anything) */
@@ -1054,7 +1052,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
 	    if (res == -2)
 		return 0;	/* disconnected server or store OS error */
 	    /* FIXME: add timeout here and force window to 1 if it triggers */
-	    if (p) {
+	    if (p->next) {
 		const char *c;
 		fprintf(nntpout, "ARTICLE %s\r\n", c = chopmid(p->string));
 		fflush(nntpout);
@@ -1083,7 +1081,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
 static unsigned long
 getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 {
-    struct stringlist *stufftoget = NULL;
+    struct stringlisthead *stufftoget = NULL;
     struct filterlist *f = NULL;
     int x = 0;
     long outstanding = 0;
@@ -1153,7 +1151,8 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 		(last - first + 1),
 		delaybody_this_group ? "headers" : "articles",
 		first, last);
-	outstanding = fn_doxover(&stufftoget, first, last, f, g->name);
+	initlist(&stufftoget);
+	outstanding = fn_doxover(stufftoget, first, last, f, g->name);
 
 	/* fall back to XHDR only without filtering or delaybody mode */
 	if (outstanding == -2 && !f && !delaybody_this_group)
@@ -1166,7 +1165,8 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: considering %lu articles %lu - %lu, using XHDR", g->name,
 	       (last - first + 1), first, last);
-	outstanding = fn_doxhdr(&stufftoget, first, last);
+	initlist(&stufftoget);
+	outstanding = fn_doxhdr(stufftoget, first, last);
     }
 
     switch (outstanding) {
@@ -1259,8 +1259,8 @@ nntpactive(struct serverlist *cursrv, int fa)
 {
     struct stat st;
     char *l, *p, *q;
-    struct stringlist *groups = NULL;
-    struct stringlist *helpptr = NULL;
+    struct stringlisthead *groups = NULL;
+    struct stringlistnode *helpptr = NULL;
     mastr *s = mastr_new(LN_PATH_MAX);
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
     char portstr[20];
@@ -1288,6 +1288,8 @@ nntpactive(struct serverlist *cursrv, int fa)
     mastr_vcat(s, spooldir, "/leaf.node/last:", cursrv->name, ":", portstr, NULL);
 
     if (!forceact && (0 == stat(mastr_str(s), &st))) {
+	initlist(&groups);
+
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 		"%s: checking for new newsgroups", cursrv->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
@@ -1306,7 +1308,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    *p = '\0';
 	    if (gs_match(cursrv->group_pcre, l)) {
 		insertgroup(l, *r, 0, 0, time(NULL), NULL);
-		appendtolist(&groups, &helpptr, l);
+		appendtolist(groups, l);
 		count++;
 	    }
 	}
@@ -1318,36 +1320,36 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    return 1;
 	}
 	mergegroups();		/* merge groups into active */
-	helpptr = groups;
+	helpptr = groups->head;
 	if (count && cursrv->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		    "%s: getting new newsgroup descriptions",
 		    cursrv->name);
-	}
-	while (count && helpptr != NULL && cursrv->descriptions) {
-	    error = 0;
-	    putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
-	    reply = nntpreply(cursrv);
-	    if (reply == 215) {
-		l = getaline(nntpin);
-		if (l && *l != '.') {
-		    p = l;
-		    CUTSKIPWORD(p);
-		    changegroupdesc(l, *p ? p : NULL);
-		    do {
-			l = getaline(nntpin);
-			error++;
-		    } while (l && *l && strcmp(l, "."));
-		    if (error > 1) {
-			cursrv->descriptions = 0;
-			ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
-				"%s: warning: server does not process "
-				"LIST NEWSGROUPS %s correctly: use nodesc",
-				cursrv->name, helpptr->string);
+	    while (helpptr->next != NULL) {
+		error = 0;
+		putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
+		reply = nntpreply(cursrv);
+		if (reply == 215) {
+		    l = getaline(nntpin);
+		    if (l && *l != '.') {
+			p = l;
+			CUTSKIPWORD(p);
+			changegroupdesc(l, *p ? p : NULL);
+			do {
+			    l = getaline(nntpin);
+			    error++;
+			} while (l && *l && strcmp(l, "."));
+			if (error > 1) {
+			    cursrv->descriptions = 0;
+			    ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
+				    "%s: warning: server does not process "
+				    "LIST NEWSGROUPS %s correctly: use nodesc",
+				    cursrv->name, helpptr->string);
+			}
 		    }
 		}
+		helpptr = helpptr->next;
 	    }
-	    helpptr = helpptr->next;
 	}
 	freelist(groups);
     } else {    /* read new active */
@@ -1599,7 +1601,7 @@ processupstream(struct serverlist *cursrv, const char *const server,
 		    "%s already fetched successfully, skipping", ng);
 	}
 
-	if ((!nglist || matchlist(nglist, ng)) && !donethisgroup) {
+	if ((!nglist || matchlist(nglist->head, ng)) && !donethisgroup) {
 	    /* we still want this group */
 
 	    g = findgroup(ng, active, -1);
@@ -1852,7 +1854,7 @@ do_server(struct serverlist *cursrv, int forceactive)
     }
 
     /* fetch by MID */
-    switch (getmsgidlist(&msgidlist)) {
+    switch (getmsgidlist(msgidlist)) {
     case 0:
 	flag |= f_mayshort;
     default:
@@ -2160,6 +2162,14 @@ main(int argc, char **argv)
 	}
 	if (rc == 0 && forceactive)
 	    markactive(AM_UPDATE);
+
+	if (msgidlist && msgidlist->head->next) {
+	    struct stringlistnode *n = msgidlist->head;
+	    while(n->next) {
+		ln_log(LNLOG_SNOTICE, LNLOG_CTOP, "%s: unfetched article %s", myname, n->string);
+		n = n->next;
+	    }
+	}
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles and %lu headers fetched, %lu killed, %lu posted, in %ld seconds",

@@ -577,47 +577,61 @@ chdirgroup(const char *group,
     return 0;
 }
 
-/*
- * Functions to handle stringlists
- */
-/*
+/**
  * prepend string "newentry" to stringlist "list".
  */
 void
-prependtolist(struct stringlist **list, /*@unique@*/ const char *newentry)
+prependtolist(struct stringlisthead *list, /*@unique@*/ const char *newentry)
 {
+    struct stringlistnode *ptr;
 
-    struct stringlist *ptr;
-
-    ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
-					  strlen(newentry),
+    ptr = (struct stringlistnode *)critmalloc(sizeof(struct stringlistnode) +
+					  strlen(newentry) + 1,
 					  "Allocating space in stringlist");
     strcpy(ptr->string, newentry);	/* RATS: ignore */
-    ptr->next = *list;
-    *list = ptr;
+
+    ptr->next = list->head;
+    ptr->prev = (struct stringlistnode *)list;
+
+    list->head->prev = ptr;
+    list->head = ptr;
 }
 
-/*
- * append string "newentry" to stringlist "list". "lastentry" is a
- * pointer pointing to the last entry in "list" and must be properly
- * intialized.
+/**
+ * append string "newentry" to stringlist "list".
  */
 void
-appendtolist(struct stringlist **list, struct stringlist **lastentry,
-	     /*@unique@*/ const char *newentry)
+appendtolist(struct stringlisthead *list, /*@unique@*/ const char *newentry)
 {
-    struct stringlist *ptr;
-    ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
-					  strlen(newentry),
+    struct stringlistnode *ptr;
+    ptr = (struct stringlistnode *)critmalloc(sizeof(struct stringlistnode) +
+					  strlen(newentry) + 1,
 					  "Allocating space in stringlist");
 
     strcpy(ptr->string, newentry);
-    ptr->next = NULL;
-    if (*list == NULL)
-	*list = ptr;
-    else
-	(*lastentry)->next = ptr;
-    *lastentry = ptr;
+
+    ptr->next = (struct stringlistnode *)&list->tail;
+    ptr->prev = list->tailpred;
+
+    list->tailpred->next = ptr;
+    list->tailpred = ptr;
+}
+
+bool is_listempty(const struct stringlisthead *list) {
+    return list->tailpred == (const struct stringlistnode *)list;
+}
+
+void initlist(struct stringlisthead **list) {
+    struct stringlisthead *head;
+
+    if (*list) return;
+
+    /* create a merged list head that implements first/last marker */
+    head = critmalloc(3 * sizeof(struct stringlist *), "initlist");
+    head->head = (struct stringlistnode *)&(head->tail);
+    head->tail = 0;
+    head->tailpred = (struct stringlistnode *)head;
+    *list = head;
 }
 
 /*
@@ -625,55 +639,20 @@ appendtolist(struct stringlist **list, struct stringlist **lastentry,
  * return pointer to string if found, NULL otherwise
  */
 /*@null@*/ char *
-findinlist(/*@null@*/ struct stringlist *haystack, /*@null@*/ const char *const needle)
+findinlist(/*@null@*/ struct stringlisthead *haystack, /*@null@*/ const char *const needle)
 {
-    struct stringlist *a;
+    struct stringlistnode *a;
     size_t n;
 
     if (needle == NULL)
 	return NULL;
 
     n = strlen(needle);
-    a = haystack;
-    while (a && a->string) {
+    for(a = haystack->head; a->next; a = a->next) {
 	if (strncmp(needle, a->string, n) == 0)
 	    return a->string;
-	a = a->next;
     }
     return NULL;
-}
-
-/*
- * find a string in a stringlist
- * return pointer to string if found, NULL otherwise
- */
-struct stringlist **
-lfindinlist(struct stringlist **haystack, char *needle, int len)
-{
-    struct stringlist **a;
-
-    a = haystack;
-    while (a && *a && (*a)->string) {
-	if (strncmp(needle, (*a)->string, len) == 0)
-	    return a;
-	a = &(*a)->next;
-    }
-    return NULL;
-}
-
-void replaceinlist(struct stringlist **haystack, char *needle, int len)
-{
-    struct stringlist **f = lfindinlist(haystack, needle, len);
-    struct stringlist *n;
-    if (!f) prependtolist(haystack, needle);
-    else {
-	n = (*f)->next;
-	free(*f);
-	*f = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
-			strlen(needle), "Allocating space in stringlist");
-	strcpy((*f)->string, needle);
-	(*f)->next = n;
-    }
 }
 
 /*
@@ -681,11 +660,11 @@ void replaceinlist(struct stringlist **haystack, char *needle, int len)
  * give pointer which is to twist
  */
 void
-removefromlist(struct stringlist **f)
+removefromlist(struct stringlistnode *f)
 {
-    struct stringlist *l = *f;
-    *f = (*f)->next;
-    free(l);
+    f->prev->next = f->next;
+    f->next->prev = f->prev;
+    free(f);
 }
 
 
@@ -693,28 +672,25 @@ removefromlist(struct stringlist **f)
  * free a list
  */
 void
-freelist(/*@null@*/ /*@only@*/ struct stringlist *list)
+freelist(/*@null@*/ /*@only@*/ struct stringlisthead *list)
 {
-    struct stringlist *a = list, *b;
-    if (!list)
-	return;
+    if (!list) return;
 
-    while (a) {
-	b = a->next;
-	free(a);
-	a = b;
-    }
+    while(list->head->next)
+	removefromlist(list->head);
+    free(list);
 }
 
 /*
  * get the length of a list
  */
 int
-stringlistlen(/*@null@*/ const struct stringlist *list)
+stringlistlen(/*@null@*/ const struct stringlisthead *list)
 {
     int i;
+    struct stringlistnode *ii;
 
-    for (i = 0; list; list = list->next)
+    for (i = 0, ii = list->head; ii->next; ii = ii->next)
 	i++;
     return i;
 }
@@ -722,19 +698,18 @@ stringlistlen(/*@null@*/ const struct stringlist *list)
 /*
  * convert a space separated string into a stringlist
  */
-/*@null@*/ /*@only@*/ struct stringlist *
+/*@null@*/ /*@only@*/ struct stringlisthead *
 cmdlinetolist(const char *cmdline)
 {
     char *c;
     char *o;
-    struct stringlist *s = NULL, *l = NULL;
+    struct stringlisthead *s = NULL;
+
+    initlist(&s);
 
     if (!cmdline || !*cmdline)
 	return NULL;
-    o = (char *)critmalloc(strlen(cmdline) + 1,
-			   "Allocating temporary string space");
-    c = o;
-    strcpy(c, cmdline);
+    c = o = (char *)critstrdup(cmdline, "Allocating temporary string space");
     while (*c) {
 	char *p;
 
@@ -745,7 +720,7 @@ cmdlinetolist(const char *cmdline)
 	    *c++ = '\0';
 	if (*p)
 	    /* avoid lists with only one empty entry */
-	    appendtolist(&s, &l, p);
+	    appendtolist(s, p);
     }
     free(o);
     return s;
@@ -755,16 +730,13 @@ cmdlinetolist(const char *cmdline)
  * match str against patterns in a stringlist
  * return matching item or NULL
  */
-/*@null@*/ /*@dependent@*/ struct stringlist*
-matchlist(struct stringlist *patterns, const char *str)
+/*@null@*/ /*@dependent@*/ struct stringlistnode *
+matchlist(struct stringlistnode *a /** patterns */, const char *str)
 {
-    struct stringlist *a = patterns;
-    while (a) {
+    for ( ; a->next; a = a->next)
 	if (0 == ngmatch((const char *)&a->string, str))
-	    break;
-	a = a->next;
-    }
-    return a;
+	    return a;
+    return NULL;
 }
 
 /*@dependent@*/ const char *

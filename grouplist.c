@@ -30,12 +30,11 @@
 
 #ifdef TEST
 #include <stdio.h>
-const char *spooldir;
 #else
 #include "ln_log.h"
 #endif
 
-static int myscandir(struct stringlist **l, const char *prefix, int toplevel)
+static int myscandir(struct stringlisthead **l, const char *prefix, int toplevel)
 {
     DIR *d = opendir(".");
     struct dirent *de;
@@ -43,6 +42,8 @@ static int myscandir(struct stringlist **l, const char *prefix, int toplevel)
 
     assert(l);
     assert(prefix);
+
+    initlist(l);
 
     if (d == NULL) {
 #ifdef TEST
@@ -68,7 +69,7 @@ static int myscandir(struct stringlist **l, const char *prefix, int toplevel)
 	if (lstat(de->d_name, &st)) goto bail;
 	if (added == 0 && S_ISREG(st.st_mode)) {
 	    added = 1;
-	    prependtolist(l, prefix);
+	    prependtolist(*l, prefix);
 	} else if (S_ISDIR(st.st_mode)) {
 	    founddir = 1;
 	    if (prefix != NULL && *prefix != '\0')
@@ -103,15 +104,15 @@ static int myscandir(struct stringlist **l, const char *prefix, int toplevel)
     }
     (void)closedir(d);
     if (!added && !founddir) {
-	prependtolist(l, prefix);
+	prependtolist(*l, prefix);
     }
     return 0;
 }
 
-/*@null@*/ struct stringlist *
+/*@null@*/ struct stringlisthead *
 get_grouplist(void)
 {
-    struct stringlist *g = NULL;
+    struct stringlisthead *g = NULL;
 
     if (chdir(spooldir)) return NULL;
     if (myscandir(&g, "", 1) != 0 && g != NULL) {
@@ -125,16 +126,17 @@ get_grouplist(void)
 int debug=0;
 
 int main(int argc, char **argv) {
-    struct stringlist *t, *q, *l;
+    struct stringlisthead *l;
+    struct stringlistnode *n;
 
     if (argc > 1) { spooldir = argv[1]; }
     l = get_grouplist();
-    if (!l) fputs("failed\n", stderr);
-    else for (t = l; t; ) {
-	puts(t->string);
-	q = t->next;
-	free(t);
-	t = q;
+    if (!l)
+	fputs("failed\n", stderr);
+    else {
+	for (n = l->head; n->next; n=n->next)
+	    puts(n->string);
+	freelist(l);
     }
     return 0;
 }

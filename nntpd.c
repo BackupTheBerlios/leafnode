@@ -71,7 +71,7 @@
 static /*@null@*/ /*@only@*/ char *NOPOSTING;
 				/* ok-to-print version of getenv("NOPOSTING") */
 static /*@dependent@*/ const struct newsgroup *xovergroup;	/* FIXME */
-/*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
+/*@null@*/ static struct stringlisthead *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
 static int authflag = 0;	/* TRUE if authenticated */
 static char *peeraddr = NULL;	/* peer address, for X-NNTP-Posting header */
@@ -912,15 +912,16 @@ dodate(void)
 }
 
 static time_t
-parsedate_newnews(const struct stringlist *l, const int gmt)
+parsedate_newnews(const struct stringlisthead *l, const int gmt)
 {
     struct tm timearray;
+    const struct stringlistnode *n = l->head;
     time_t age;
     long a, b;
 
     if (stringlistlen(l) < 2) return (time_t)-1;
     memset(&timearray, 0, sizeof(timearray));
-    a = strtol(l->string, NULL, 10);
+    a = strtol(n->string, NULL, 10);
     /* NEWNEWS/NEWGROUPS dates may have the form YYMMDD or YYYYMMDD.
      * Distinguish between the two */
     b = a / 10000;
@@ -942,7 +943,7 @@ parsedate_newnews(const struct stringlist *l, const int gmt)
     }
     timearray.tm_mon = (a % 10000 / 100) - 1;
     timearray.tm_mday = a % 100;
-    a = strtol(l->next->string, NULL, 10);
+    a = strtol(n->next->string, NULL, 10);
     timearray.tm_hour = a / 10000;
     timearray.tm_min = a % 10000 / 100;
     timearray.tm_sec = a % 100;
@@ -960,8 +961,9 @@ parsedate_newnews(const struct stringlist *l, const int gmt)
 }
 
 static time_t
-donew_common(const struct stringlist *l)
+donew_common(const struct stringlisthead *l)
 {
+    struct stringlistnode *n = l->head;
     int gmt, len;
     time_t age;
 
@@ -971,7 +973,7 @@ donew_common(const struct stringlist *l)
 	return -1;
     }
 
-    gmt = (len >= 3 && !strcasecmp(l->next->next->string, "gmt"));
+    gmt = (len >= 3 && !strcasecmp(n->next->next->string, "gmt"));
 
     age = parsedate_newnews(l, gmt);
     if (age == (time_t)-1) {
@@ -985,7 +987,7 @@ donew_common(const struct stringlist *l)
 static void
 donewnews(char *arg)
 {
-    struct stringlist *l = cmdlinetolist(arg);
+    struct stringlisthead *l = cmdlinetolist(arg);
     struct stat st;
     time_t age;
     DIR *d, *ng;
@@ -996,14 +998,14 @@ donewnews(char *arg)
 	nntpprintf("502 Syntax error.");
 	return;
     }
-    age = donew_common(l->next);
+    age = donew_common(l);
     if (age == (time_t)-1) {
 	freelist(l);
 	return;
     }
 
     nntpprintf_as("230 List of new articles since %ld in newsgroup %s", age,
-	       l->string);
+	       l->head->string);
     s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups", NULL);
     d = opendir(mastr_str(s));
@@ -1015,10 +1017,10 @@ donewnews(char *arg)
 	mastr_delete(s);
 	return;
     }
-    if (!strpbrk((const char *)&l->string, "\\*?[")) 
-	markinterest((const char *)&l->string);
+    if (!strpbrk(l->head->string, "\\*?[")) 
+	markinterest(l->head->string);
     while ((de = readdir(d))) {
-	if (ngmatch((const char *)&(l->string), de->d_name) == 0) {
+	if (ngmatch(l->head->string, de->d_name) == 0) {
 	    chdirgroup(de->d_name, FALSE);
 	    getxover(1);
 	    ng = opendir(".");
@@ -1060,7 +1062,7 @@ donewnews(char *arg)
 static void
 donewgroups(const char *arg)
 {
-    struct stringlist *l = cmdlinetolist(arg);
+    struct stringlisthead *l = cmdlinetolist(arg);
     time_t age;
     struct newsgroup *ng;
 
@@ -1664,7 +1666,7 @@ static void
 doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup */ ,
 		 const char *hd /** header to extract */ ,
 		 const char *messages /** message range */ ,
-		 struct stringlist *patterns /** pattern */ ,
+		 struct stringlistnode *patterns /** pattern */ ,
 		 unsigned long *artno /** currently selected article */)
 {
     enum xoverfields OVfield;
@@ -1861,15 +1863,15 @@ doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long 
 {
     /* NOTE: XHDR is not to change the current article pointer, thus,
        we're using call by value here */
-    struct stringlist *l = cmdlinetolist(arg);
+    struct stringlisthead *l = cmdlinetolist(arg);
 
     switch (stringlistlen(l)) {
     case 1:
-	doselectedheader(group, l->string, NULL, NULL, &artno);
+	doselectedheader(group, l->head->string, NULL, NULL, &artno);
 	/* discard changes to artno */
 	break;
     case 2:
-	doselectedheader(group, l->string, l->next->string, NULL, &artno);
+	doselectedheader(group, l->head->string, l->head->next->string, NULL, &artno);
 	/* discard changes to artno */
 	break;
     default:
@@ -1884,14 +1886,14 @@ doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long 
 {
     /* NOTE: XPAT is not to change the current article pointer, thus,
        we're using call by value here */
-    struct stringlist *l = cmdlinetolist(arg);
+    struct stringlisthead *l = cmdlinetolist(arg);
 
     if (stringlistlen(l) < 3) {
 	nntpprintf("502 Usage: PAT header first[-[last]] pattern or "
 		   "PAT header message-id pattern");
     } else {
-	doselectedheader(group, l->string, l->next->string, l->next->next,
-			 &artno);
+	doselectedheader(group, l->head->string, l->head->next->string,
+		l->head->next->next, &artno);
 	/* discard changes to artno */
     }
     if (l)
@@ -2044,7 +2046,6 @@ readpasswd(void)
     char *l;
     FILE *f;
     int error;
-    struct stringlist *ptr = NULL;
     mastr *s = mastr_new(LN_PATH_MAX);
 
     mastr_vcat(s, sysconfdir, "/users", NULL);
@@ -2056,7 +2057,8 @@ readpasswd(void)
     }
     mastr_delete(s);
     while ((l = getaline(f)) != NULL) {
-	appendtolist(&users, &ptr, l);
+	initlist(&users);
+	appendtolist(users, l);
     }
     if (ferror(f))
 	return errno;
