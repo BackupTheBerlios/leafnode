@@ -1,3 +1,13 @@
+2004-05-13  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040513a =
+	* fetchnews.c: Fix memory leak in postarticles when no active file
+	is present.  Authenticate if GROUP command responds with 480.
+	* fetchnews_check_date.c: check_date: fix logic bug/bogus "too few
+	fields in DATE reply"
+	* log_fchmod.c: log_fchmod: Revise log message.
+	* activutil.c: mvactive: Fix memory leak.
+
 2004-05-10  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20040510a =
