@@ -1508,10 +1508,14 @@ postarticles(void)
 				char *ngs = fgetheader(f, "Newsgroups:", 1);
 				if (ngs != NULL) {
 				    char *mod = checkstatus(ngs, 'm');
-				    if (mod != NULL) {
+				    char *app = fgetheader(f, "Approved:", 1);
+				    if (mod != NULL && app == NULL) {
 					(void)log_unlink(*y, 1);
-					free(mod);
 				    }
+				    if (mod != NULL)
+					free(mod);
+				    if (app != NULL)
+					free(app);
 				    free(ngs);
 				}
 				/* POST was OK */
