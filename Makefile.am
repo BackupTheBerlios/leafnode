@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.7 2002/01/11 00:06:32 emma Exp $
+# $Id: Makefile.am,v 1.8 2002/01/29 10:35:23 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -93,7 +93,6 @@ liblnutil_a_SOURCES	= \
 	mastring.c \
 	mastring.h \
 	mastrncpy.c \
-	mergesort.c \
 	miscutil.c \
 	mkdir_parent.c \
 	moderated.c \
@@ -174,11 +173,11 @@ BUILT_SOURCES = \
 amiroot_SOURCES		= amiroot.c
 amiroot_LDADD 		=
 
-b_sortnl_SOURCES	= b_sortnl.c mergesort.c
-b_sortnl_LDADD		=
+b_sortnl_SOURCES	= b_sortnl.c
+b_sortnl_LDADD		= @LIBOBJS@
 
 # programs
-LDADD			= liblnutil.a
+LDADD			= @LIBOBJS@ liblnutil.a
 applyfilter_SOURCES	= applyfilter.c
 fetchnews_SOURCES	= fetchnews.c
 leafnode_SOURCES	= nntpd.c
