@@ -285,6 +285,30 @@ static unsigned int delete_mid_from_dir(const char *dir, const char *msgid,
     return count;
 }
 
+/** marks the article with number \a artno as deleted for the current
+ * group, so that the overview reader code can skip it
+ * \returns 0 for success, negative for error */
+static int mark_deleted(unsigned long artno) {
+    int fd = open(".overview.deleted", O_APPEND|O_CREAT, 0664);
+    char buf[64];
+
+    if (fd < 0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open .overview.deleted file: %m");
+	return fd;
+    }
+
+    snprintf(buf, sizeof(buf), "%lu\n", artno);
+    if (writes(fd,buf) < 0) {
+	close(fd);
+	return -1;
+    }
+
+    if (close(fd) < 0)
+	return -1;
+
+    return 0;
+}
+
 void delete_article(const char *mid, const char *action,
 	const char *past_action, const int updatexover)
 {
@@ -348,13 +372,16 @@ void delete_article(const char *mid, const char *action,
 	    struct newsgroup *g = findgroup(ngs[n], active, -1);
 	    unsigned long u;
 
-	    if (g && get_ulong(artnos[n], &u) && u == g->first)
+	    get_ulong(artnos[n], &u);
+	    if (g && g->first == u)
 		g->first++;
 
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 		    "%s %s:%s", past_action, ngs[n], artnos[n]);
 	    if (updatexover)
 		xgetxover(1,NULL,1);
+	    else
+		mark_deleted(u);
 	}
     }
     free(ngs);

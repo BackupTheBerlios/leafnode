@@ -3,6 +3,10 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20050215a:
+- Change: when deleting articles (supersedes, cancel, ...) and we don't
+  rebuild the overview right away, store a line in a new file that marks
+  the corresponding overview line invalid, so that the article is no
+  longer offered in the overview. Reported by Jörg Lüders.
 - Change: forward port configuration parser fix from leafnode-1.11,
   to allow the right hand side of configuration or filter file to be
   quoted, useful when the NUMBER SIGN character needs to be specified.

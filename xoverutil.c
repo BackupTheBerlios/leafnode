@@ -321,12 +321,12 @@ findxoverrange(unsigned long low, unsigned long high,
 }
 
 static unsigned long
-crunchxover(struct xoverinfo *xi, unsigned long count)
+crunchxover(struct xoverinfo *xi, unsigned long count, const int refval)
 {
     unsigned long i, j;
     i = j = 0;
     while (j < count) {
-	while (j < count && xi[j].exists == 0) {
+	while (j < count && xi[j].exists == refval) {
 	    if (xi[j].text)
 		free(xi[j].text);
 	    j++;
@@ -363,6 +363,7 @@ xgetxover(
     int fd, update = 0;
     unsigned long current, art;
     long i;
+    FILE *ii;
 
     freexover();
     xfirst = ULONG_MAX; /* will be lowered accordingly */
@@ -466,6 +467,35 @@ xgetxover(
     }
 
     xcount = current;		/* to prevent findxover from choking */
+
+    /* read .overview.deleted file and erase entries
+     * NOTE: this assumes that the article is REALLY gone so it isn't
+     * re-added to the overview below!*/
+    ii = fopen(".overview.deleted", "r");
+    if (ii == NULL) {
+	ln_log(errno != ENOENT ? LNLOG_SERR : LNLOG_SDEBUG,
+		LNLOG_CGROUP, "Cannot open .overview.deleted for reading: %m");
+    } else {
+	char buf[32], *pp;
+
+	while(fgets(buf, sizeof(buf), ii) == buf
+		&& (pp = strchr(buf, '\n')) /* want only complete lines */)
+	{
+	    unsigned long uu;
+
+	    *pp = '\0';
+	    (void)get_ulong(buf, &uu);
+	    if ((i = findxover(uu)) >= 0)
+		xoverinfo[i].exists = -1;
+	}
+	if (ferror(ii))
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "Cannot read .overview.deleted: %m");
+	(void)fclose(ii);
+	xcount = current = crunchxover(xoverinfo, current, -1);
+	if (g && g->first < xoverinfo[0].artno)
+	    g->first = xoverinfo[0].artno;
+    }
+
     if (!fixxover) {
 	if (g)
 	    g->count = current;
@@ -539,7 +569,7 @@ xgetxover(
     }
 
     /* crunch xover, delete nonexistent articles */
-    current = crunchxover(xoverinfo, current);
+    current = crunchxover(xoverinfo, current, 0);
 
     /* free superfluous memory */
     /* FIXME: do we need this at all? After all, free will get rid of that */
@@ -612,6 +642,8 @@ writexover(void)
     if (!err) {
 	if (log_rename(newfile, ".overview"))
 	    err = 1;
+	else
+	    (void)log_unlink(".overview.deleted", 1);
     }
 
     if (!err) {
