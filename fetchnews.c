@@ -1505,6 +1505,15 @@ postarticles(void)
 			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				   "Posting %s", *y);
 			    if (post_FILE(f, &line)) {
+				char *ngs = fgetheader(f, "Newsgroups:", 1);
+				if (ngs != NULL) {
+				    char *mod = checkstatus(ngs, 'm');
+				    if (mod != NULL) {
+					(void)log_unlink(*y, 1);
+					free(mod);
+				    }
+				    free(ngs);
+				}
 				/* POST was OK */
 				++n;
 			    } else {
