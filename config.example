@@ -15,7 +15,7 @@ expire = 20
 # authenticate = internal
 
 ## To aid in debugging, here is a switch. Sum up the debug info you
-## want, or just use 2047 for "all". Optional.
+## want, or just use 4095 for "all". Optional.
 # MISC (unused): 1
 # I/O (net, disk): 2
 # Sort functions: 4
@@ -27,6 +27,7 @@ expire = 20
 # Expiring: 256
 # Additional XOVER debugging: 512
 # Cancelling and Superseding: 1024
+# Storing: 2048
 # debugmode = 1001
 
 ## Non-standard expire times (glob(7) wildcard constructs possible). Optional.

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.53 2002/06/28 12:03:15 ralf Exp $ */
+/* $Id: leafnode.h,v 1.54 2002/07/03 12:37:23 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -446,7 +446,7 @@ extern "C" {
 #define DEBUG_EXPIRE 256
 #define DEBUG_XOVER 512
 #define DEBUG_CANCEL 1024
-
+#define DEBUG_STORE 2048
 
     extern int create_all_links;
 
