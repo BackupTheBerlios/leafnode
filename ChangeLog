@@ -1,4 +1,22 @@
+2003-12-18  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031218a =
+	* fetchnews.8.in: Revise EXPIRY OF NEWGROUPS section further.
+	* tools/Makefile.am: Install lsmac.pl and man page.
+	* NEWS, fetchnews.8.in: Enhance documentation.
+	* tools/lsmac.pl: Add documentation.  Add option parser.  Change
+	default output format to UTC, with --local option to override.
+
+2003-12-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* texpire.c: Revise logging to be more compact, avoid leaking debug
+	log into regular output.
+	* texpire.c: Report when empty groups are removed or otherwise why
+	not. Reported by Jeff Grossman.
+
 2003-12-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20031203a
 
 	= snapshot 20031203a =
 	* NEWS, nntpd.c: nntpprintf/fflush cleanup.

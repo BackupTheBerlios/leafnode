@@ -1,8 +1,11 @@
 Changes since 20031203:
-- Documentation: fetchnews(8) now documents group expiry.
-- Documentation: lsmac.pl is now documented.
+- Change: texpire now prints why a particular group directory is not
+  expired even though 0 articles are kept.
 - Change: lsmac.pl now defaults to UTC and has a --local option to
   restore old behaviour (that used to be undocumented).
+- Documentation: fetchnews(8) now documents group expiry.
+- Documentation: lsmac.pl is now documented.
+- Rebuild Makefile.ins with automake 1.8.
 
 20031203a (was not announced): Changes since 20031129a:
 - Cleanup: (nntpd) Avoid extraneous fflush() that causes the status line
