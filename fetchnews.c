@@ -115,8 +115,8 @@ server_info(const char *spool, const char *server,
 static RETSIGTYPE
 sigcatch(int signo)
 {
-    if (signo == SIGINT || signo == SIGTERM || signo == SIGALRM)
-	longjmp(jmpbuffer, 1);
+    if (signo == SIGINT || signo == SIGTERM)
+	longjmp(jmpbuffer, signo);
     else if (signo == SIGUSR1)
 	verbose++;
     else if (signo == SIGUSR2)
@@ -1874,22 +1874,6 @@ main(int argc, char **argv)
 	if (!checkforpostings())
 	    exit(EXIT_SUCCESS);
     } else {
-	sa.sa_handler = sigcatch;
-	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
-	/* Since the nntpd can create a lockfile for a short time, we
-	 * attempt to create a lockfile during a five second time period,
-	 * hoping that the nntpd will release the lock file during that
-	 * time (which it should).
-	 */
-	if (sigaction(SIGALRM, &sa, NULL))
-	    fprintf(stderr, "Cannot catch SIGALARM.\n");
-	else if (setjmp(jmpbuffer) != 0) {
-	    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-		   "%s: lockfile %s exists, abort", myname, lockfile);
-	    exit(EXIT_FAILURE);
-	}
-
 	if (lockfile_exists(LOCKWAIT)) {
 	    fprintf(stderr, "%s: lockfile %s exists, abort\n",
 		    myname, lockfile);
@@ -1950,7 +1934,6 @@ main(int argc, char **argv)
 
     signal(SIGINT, SIG_IGN);
     signal(SIGTERM, SIG_IGN);	/* FIXME */
-    signal(SIGALRM, SIG_IGN);	/* FIXME */
 
     if (!postonly) {
 	writeactive();
