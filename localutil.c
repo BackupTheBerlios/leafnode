@@ -91,7 +91,7 @@ insertlocal(const char *name)
  * has therefore at the moment not been attempted.
  *
  * The format of the file containing the local groups is
- * news.group.name[whitespace]Description
+ * news.group.name[tab]status char[tab]Description
  */
 void
 readlocalgroups(void)
