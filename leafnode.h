@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.86 2003/07/06 21:54:22 emma Exp $ */
+/* $Id: leafnode.h,v 1.87 2003/07/28 20:34:02 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -164,7 +164,8 @@ extern "C" {
     int findopt(char option, int argc, char *argv[]);
 
 /* conffile is malloced */
-    int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
+int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
+#define GLOBALOPTS "VveD:F:"
 
 /* handling of misc. lines */
     /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);
