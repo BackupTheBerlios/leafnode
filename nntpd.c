@@ -1511,16 +1511,15 @@ dopost(void)
 	}
 
 	if (havemessageid) {
-	    int tmp;
-	    char *m;
-
 	    if (!validate_messageid(mid)) {
 		nntpprintf("441 Invalid header \"Message-ID: %s\", article not posted", mid);
 		log_unlink(inname, 0);
 		goto cleanup;
 	    }
+	}
 
-	    tmp = msgid_allocate(inname, m = lookup(mid));
+	{
+	    int  tmp = msgid_allocate(inname, mid);
 	    switch(tmp) {
 		case 1:
 		    nntpprintf("441 435 Duplicate, article not posted");
@@ -1532,7 +1531,7 @@ dopost(void)
 		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot link %s to %s: %m",
-			    inname, m);
+			    inname, lookup(mid));
 		    log_unlink(inname, 0);
 		    goto cleanup;
 		    break;
