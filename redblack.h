@@ -1,5 +1,5 @@
 /*
- * RCS $Id: redblack.h,v 1.4 2002/06/19 09:20:28 emma Exp $
+ * RCS $Id: redblack.h,v 1.5 2002/07/08 00:48:01 emma Exp $
  */
 
 /*
@@ -23,25 +23,24 @@
 
 /* Header file for redblack.c, should be included by any code that 
 ** uses redblack.c since it defines the functions 
-*/
-
-#ifndef REDBLACK_H
-#define REDBLACK_H
-#ident  "@(#)redblack.h 1.4     95/06/12"
+*/ 
+ 
+/* Stop multiple includes */
+#ifndef _REDBLACK_H
 
 /* Modes for rblookup */
-#define RB_NONE -1		/* None of those below */
-#define RB_LUEQUAL 0		/* Only exact match */
+#define RB_NONE -1	    /* None of those below */
+#define RB_LUEQUAL 0	/* Only exact match */
 #define RB_LUGTEQ 1		/* Exact match or greater */
 #define RB_LULTEQ 2		/* Exact match or less */
 #define RB_LULESS 3		/* Less than key (not equal to) */
-#define RB_LUGREAT 4		/* Greater than key (not equal to) */
+#define RB_LUGREAT 4	/* Greater than key (not equal to) */
 #define RB_LUNEXT 5		/* Next key after current */
 #define RB_LUPREV 6		/* Prev key before current */
-#define RB_LUFIRST 7		/* First key in index */
+#define RB_LUFIRST 7	/* First key in index */
 #define RB_LULAST 8		/* Last key in index */
 
-/* Defines the VISIT structure */
+/* For rbwalk - pinched from search.h */
 typedef enum
 {
   preorder,
@@ -51,62 +50,56 @@ typedef enum
 }
 VISIT;
 
-struct rblists {
-    const struct rbnode *rootp;
-    const struct rbnode *nextp;
-};
-
-#define RBLIST struct rblists
+struct rblists { 
+const struct rbnode *rootp; 
+const struct rbnode *nextp; 
+}; 
+ 
+#define RBLIST struct rblists 
 
 struct rbtree {
-    /* comparison routine */
-    int (*rb_cmp) (const void *, const void *, const void *);
-    /* config data to be passed to rb_cmp */
-    const void *rb_config;
-    /* root of tree */
-    struct rbnode *rb_root;
+		/* comparison routine */
+int (*rb_cmp)(const void *, const void *, const void *);
+		/* config data to be passed to rb_cmp */
+const void *rb_config;
+		/* root of tree */
+struct rbnode *rb_root;
 };
 
 struct rbtree *rbinit(int (*)(const void *, const void *, const void *),
-		      const void *);
+		 const void *);
 const void *rbdelete(const void *, struct rbtree *);
 const void *rbfind(const void *, struct rbtree *);
 const void *rblookup(int, const void *, struct rbtree *);
 const void *rbsearch(const void *, struct rbtree *);
 void rbdestroy(struct rbtree *);
 void rbwalk(const struct rbtree *,
-	    void (*)(const void *, const VISIT, const int, void *), void *);
-RBLIST *rbopenlist(const struct rbtree *);
-const void *rbreadlist(RBLIST *);
-void rbcloselist(RBLIST *);
+		void (*)(const void *, const VISIT, const int, void *),
+		void *); 
+RBLIST *rbopenlist(const struct rbtree *); 
+const void *rbreadlist(RBLIST *); 
+void rbcloselist(RBLIST *); 
 
 /* Some useful macros */
 #define rbmin(rbinfo) rblookup(RB_LUFIRST, NULL, (rbinfo))
 #define rbmax(rbinfo) rblookup(RB_LULAST, NULL, (rbinfo))
 
+#define _REDBLACK_H
+#endif /* _REDBLACK_H */
+
 /*
  *
  * $Log: redblack.h,v $
- * Revision 1.4  2002/06/19 09:20:28  emma
- * drop <search.h> for dietlibc compatibility
+ * Revision 1.5  2002/07/08 00:48:01  emma
+ * Update libredblack to 1.2.
  *
- * Revision 1.3  2002/01/29 10:35:54  emma
- * Manually define the "VISIT" enum type unless HAVE_SEARCH_H is defined.
- *
- * Revision 1.2  2001/11/29 17:48:30  emma
- * Move 7.7pre on top to HEAD branch
- *
- * Revision 1.1.2.3  2001/11/12 00:09:15  emma
- * fed through indent
- *
- * Revision 1.1.2.2  2001/10/05 04:54:28  emma
- * Add #ifndef/#define REDBLACK_H to fix compile.
- *
- * Patch submitted to libredblack's sourceforge page:
- * https://sourceforge.net/tracker/index.php?func=detail&aid=468171&group_id=5997&atid=305997
- *
- * Revision 1.1.2.1  2001/09/27 01:48:50  emma
- * Pulled Damian Ivereigh's libredblack in. LGPL.
+ * Revision 1.5  2002/01/30 07:54:53  damo
+ * Fixed up the libtool versioning stuff (finally)
+ * Fixed bug 500600 (not detecting a NULL return from malloc)
+ * Fixed bug 509485 (no longer needs search.h)
+ * Cleaned up debugging section
+ * Allow multiple inclusions of redblack.h
+ * Thanks to Matthias Andree for reporting (and fixing) these
  *
  * Revision 1.4  2000/06/06 14:43:43  damo
  * Added all the rbwalk & rbopenlist stuff. Fixed up malloc instead of sbrk.
@@ -125,4 +118,3 @@ void rbcloselist(RBLIST *);
  *
  */
 
-#endif

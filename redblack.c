@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: redblack.c,v 1.6 2002/04/03 21:45:07 emma Exp $";
+static char rcsid[]="$Id: redblack.c,v 1.7 2002/07/08 00:48:01 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -27,11 +27,6 @@ static char rcsid[] = "$Id: redblack.c,v 1.6 2002/04/03 21:45:07 emma Exp $";
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#ifdef WITH_DMALLOC
-#include <dmalloc.h>
-#endif
-
 #include "redblack.h"
 
 #define assert(expr)
@@ -44,19 +39,20 @@ static char rcsid[] = "$Id: redblack.c,v 1.6 2002/04/03 21:45:07 emma Exp $";
 
 enum nodecolour { BLACK, RED };
 
-struct rbnode {
-    struct rbnode *left;	/* Left down */
-    struct rbnode *right;	/* Right down */
-    struct rbnode *up;		/* Up */
-    enum nodecolour colour;	/* Node colour */
-    const void *key;		/* Pointer to user's key (and data) */
+struct rbnode
+{
+	struct rbnode *left;		/* Left down */
+	struct rbnode *right;		/* Right down */
+	struct rbnode *up;		/* Up */
+	enum nodecolour colour;		/* Node colour */
+	const void *key;		/* Pointer to user's key (and data) */
 };
 
 /* Dummy (sentinel) node, so that we can make X->left->up = X
 ** We then use this instead of NULL to mean the top or bottom
 ** end of the rb tree. It is a black node.
 */
-struct rbnode rb_null = { &rb_null, &rb_null, &rb_null, BLACK, NULL };
+struct rbnode rb_null={&rb_null, &rb_null, &rb_null, BLACK, NULL};
 #define RBNULL (&rb_null)
 
 #if defined(USE_SBRK)
@@ -80,9 +76,7 @@ static void rb_delete(struct rbnode **, struct rbnode *);
 static void rb_delete_fix(struct rbnode **, struct rbnode *);
 static struct rbnode *rb_successor(const struct rbnode *);
 static struct rbnode *rb_preccessor(const struct rbnode *);
-static void rb_walk(const struct rbnode *,
-		    void (*)(const void *, const VISIT, const int, void *),
-		    void *, int);
+static void rb_walk(const struct rbnode *, void (*)(const void *, const VISIT, const int, void *), void *, int);
 static RBLIST *rb_openlist(const struct rbnode *);
 static const void *rb_readlist(RBLIST *);
 static void rb_closelist(RBLIST *);
@@ -111,136 +105,137 @@ static void rb_closelist(RBLIST *);
  * Returns a pointer to the top of the tree.
  */
 struct rbtree *
-rbinit(int (*cmp) (const void *, const void *, const void *),
-       const void *config)
+rbinit(int (*cmp)(const void *, const void *, const void *), const void *config)
 {
-    struct rbtree *retval;
-    char c;
+	struct rbtree *retval;
+	char c;
 
-    c = rcsid[0];		/* This does nothing but shutup the -Wall */
+	c=rcsid[0]; /* This does nothing but shutup the -Wall */
 
-    if ((retval = (struct rbtree *)malloc(sizeof(struct rbtree))) == NULL)
-	return (NULL);
+	if ((retval=(struct rbtree *) malloc(sizeof(struct rbtree)))==NULL)
+		return(NULL);
+	
+	retval->rb_cmp=cmp;
+	retval->rb_config=config;
+	retval->rb_root=RBNULL;
 
-    retval->rb_cmp = cmp;
-    retval->rb_config = config;
-    retval->rb_root = RBNULL;
-
-    return (retval);
+	return(retval);
 }
-
+	
 void
 rbdestroy(struct rbtree *rbinfo)
 {
-    if (rbinfo == NULL)
-	return;
+	if (rbinfo==NULL)
+		return;
 
-    if (rbinfo->rb_root != RBNULL)
-	rb_destroy(rbinfo->rb_root);
-
-    free(rbinfo);
+	if (rbinfo->rb_root!=RBNULL)
+		rb_destroy(rbinfo->rb_root);
+	
+	free(rbinfo);
 }
 
 const void *
 rbsearch(const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x;
+	struct rbnode *x;
 
-    if (rbinfo == NULL)
-	return (NULL);
+	if (rbinfo==NULL)
+		return(NULL);
 
-    x = rb_traverse(1, key, rbinfo);
+	x=rb_traverse(1, key, rbinfo);
 
-    return ((x == RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : x->key);
 }
 
 const void *
 rbfind(const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x;
+	struct rbnode *x;
 
-    if (rbinfo == NULL)
-	return (NULL);
+	if (rbinfo==NULL)
+		return(NULL);
 
-    /* If we have a NULL root (empty tree) then just return */
-    if (rbinfo->rb_root == RBNULL)
-	return (NULL);
+	/* If we have a NULL root (empty tree) then just return */
+	if (rbinfo->rb_root==RBNULL)
+		return(NULL);
 
-    x = rb_traverse(0, key, rbinfo);
+	x=rb_traverse(0, key, rbinfo);
 
-    return ((x == RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : x->key);
 }
 
 const void *
 rbdelete(const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x;
-    const void *y;
+	struct rbnode *x;
+	const void *y;
 
-    if (rbinfo == NULL)
-	return (NULL);
+	if (rbinfo==NULL)
+		return(NULL);
 
-    x = rb_traverse(0, key, rbinfo);
+	x=rb_traverse(0, key, rbinfo);
 
-    if (x == RBNULL) {
-	return (NULL);
-    } else {
-	y = x->key;
-	rb_delete(&rbinfo->rb_root, x);
+	if (x==RBNULL)
+	{
+		return(NULL);
+	}
+	else
+	{
+		y=x->key;
+		rb_delete(&rbinfo->rb_root, x);
 
-	return (y);
-    }
+		return(y);
+	}
 }
 
 void
-rbwalk(const struct rbtree *rbinfo,
-       void (*action) (const void *, const VISIT, const int, void *), void *arg)
+rbwalk(const struct rbtree *rbinfo, void (*action)(const void *, const VISIT, const int, void *), void *arg)
 {
-    if (rbinfo == NULL)
-	return;
+	if (rbinfo==NULL)
+		return;
 
-    rb_walk(rbinfo->rb_root, action, arg, 0);
+	rb_walk(rbinfo->rb_root, action, arg, 0);
 }
 
 RBLIST *
-rbopenlist(const struct rbtree * rbinfo)
+rbopenlist(const struct rbtree *rbinfo)
 {
-    if (rbinfo == NULL)
-	return (NULL);
+	if (rbinfo==NULL)
+		return(NULL);
 
-    return (rb_openlist(rbinfo->rb_root));
+	return(rb_openlist(rbinfo->rb_root));
 }
 
 const void *
-rbreadlist(RBLIST * rblistp)
+rbreadlist(RBLIST *rblistp)
 {
-    if (rblistp == NULL)
-	return (NULL);
+	if (rblistp==NULL)
+		return(NULL);
 
-    return (rb_readlist(rblistp));
+	return(rb_readlist(rblistp));
 }
 
 void
-rbcloselist(RBLIST * rblistp)
+rbcloselist(RBLIST *rblistp)
 {
-    if (rblistp == NULL)
-	return;
+	if (rblistp==NULL)
+		return;
 
-    rb_closelist(rblistp);
+	rb_closelist(rblistp);
 }
 
 const void *
 rblookup(int mode, const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x;
+	struct rbnode *x;
 
-    /* If we have a NULL root (empty tree) then just return NULL */
-    if (rbinfo->rb_root == NULL)
-	return (NULL);
+	/* If we have a NULL root (empty tree) then just return NULL */
+	if (rbinfo==NULL || rbinfo->rb_root==NULL)
+		return(NULL);
 
-    x = rb_lookup(mode, key, rbinfo);
+	x=rb_lookup(mode, key, rbinfo);
 
-    return ((x == RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : x->key);
 }
 
 /* --------------------------------------------------------------------- */
@@ -251,121 +246,139 @@ rblookup(int mode, const void *key, struct rbtree *rbinfo)
 static struct rbnode *
 rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x, *y, *z;
-    int cmp;
-    int found = 0;
+	struct rbnode *x,*y,*z;
+	int cmp;
+	int found=0;
+	int cmpmods();
 
-    y = RBNULL;			/* points to the parent of x */
-    x = rbinfo->rb_root;
+	y=RBNULL; /* points to the parent of x */
+	x=rbinfo->rb_root;
 
-    /* walk x down the tree */
-    while (x != RBNULL && found == 0) {
-	y = x;
-	/* printf("key=%s, x->key=%s\n", key, x->key); */
-	cmp = (*rbinfo->rb_cmp) (key, x->key, rbinfo->rb_config);
-	if (cmp < 0)
-	    x = x->left;
-	else if (cmp > 0)
-	    x = x->right;
-	else
-	    found = 1;
-    }
-
-    if (found || !insert)
-	return (x);
-
-    if ((z = rb_alloc()) == NULL) {
-	/* Whoops, no memory */
-	return (RBNULL);
-    }
-
-    z->key = key;
-    z->up = y;
-    if (y == RBNULL) {
-	rbinfo->rb_root = z;
-    } else {
-	cmp = (*rbinfo->rb_cmp) (z->key, y->key, rbinfo->rb_config);
-	if (cmp < 0)
-	    y->left = z;
-	else
-	    y->right = z;
-    }
-
-    z->left = RBNULL;
-    z->right = RBNULL;
-
-    /* colour this new node red */
-    z->colour = RED;
-
-    /* Having added a red node, we must now walk back up the tree balancing
-       ** it, by a series of rotations and changing of colours
-     */
-    x = z;
-
-    /* While we are not at the top and our parent node is red
-       ** N.B. Since the root node is garanteed black, then we
-       ** are also going to stop if we are the child of the root
-     */
-
-    while (x != rbinfo->rb_root && (x->up->colour == RED)) {
-	/* if our parent is on the left side of our grandparent */
-	if (x->up == x->up->up->left) {
-	    /* get the right side of our grandparent (uncle?) */
-	    y = x->up->up->right;
-	    if (y->colour == RED) {
-		/* make our parent black */
-		x->up->colour = BLACK;
-		/* make our uncle black */
-		y->colour = BLACK;
-		/* make our grandparent red */
-		x->up->up->colour = RED;
-
-		/* now consider our grandparent */
-		x = x->up->up;
-	    } else {
-		/* if we are on the right side of our parent */
-		if (x == x->up->right) {
-		    /* Move up to our parent */
-		    x = x->up;
-		    rb_left_rotate(&rbinfo->rb_root, x);
-		}
-
-		/* make our parent black */
-		x->up->colour = BLACK;
-		/* make our grandparent red */
-		x->up->up->colour = RED;
-		/* right rotate our grandparent */
-		rb_right_rotate(&rbinfo->rb_root, x->up->up);
-	    }
-	} else {
-	    /* everything here is the same as above, but
-	       ** exchanging left for right
-	     */
-
-	    y = x->up->up->left;
-	    if (y->colour == RED) {
-		x->up->colour = BLACK;
-		y->colour = BLACK;
-		x->up->up->colour = RED;
-
-		x = x->up->up;
-	    } else {
-		if (x == x->up->left) {
-		    x = x->up;
-		    rb_right_rotate(&rbinfo->rb_root, x);
-		}
-
-		x->up->colour = BLACK;
-		x->up->up->colour = RED;
-		rb_left_rotate(&rbinfo->rb_root, x->up->up);
-	    }
+	/* walk x down the tree */
+	while(x!=RBNULL && found==0)
+	{
+		y=x;
+		/* printf("key=%s, x->key=%s\n", key, x->key); */
+		cmp=(*rbinfo->rb_cmp)(key, x->key, rbinfo->rb_config);
+		if (cmp<0)
+			x=x->left;
+		else if (cmp>0)
+			x=x->right;
+		else
+			found=1;
 	}
-    }
 
-    /* Set the root node black */
-    (rbinfo->rb_root)->colour = BLACK;
+	if (found || !insert)
+		return(x);
 
-    return (z);
+	if ((z=rb_alloc())==NULL)
+	{
+		/* Whoops, no memory */
+		return(RBNULL);
+	}
+
+	z->key=key;
+	z->up=y;
+	if (y==RBNULL)
+	{
+		rbinfo->rb_root=z;
+	}
+	else
+	{
+		cmp=(*rbinfo->rb_cmp)(z->key, y->key, rbinfo->rb_config);
+		if (cmp<0)
+			y->left=z;
+		else
+			y->right=z;
+	}
+
+	z->left=RBNULL;
+	z->right=RBNULL;
+
+	/* colour this new node red */
+	z->colour=RED;
+
+	/* Having added a red node, we must now walk back up the tree balancing
+	** it, by a series of rotations and changing of colours
+	*/
+	x=z;
+
+	/* While we are not at the top and our parent node is red
+	** N.B. Since the root node is garanteed black, then we
+	** are also going to stop if we are the child of the root
+	*/
+
+	while(x != rbinfo->rb_root && (x->up->colour == RED))
+	{
+		/* if our parent is on the left side of our grandparent */
+		if (x->up == x->up->up->left)
+		{
+			/* get the right side of our grandparent (uncle?) */
+			y=x->up->up->right;
+			if (y->colour == RED)
+			{
+				/* make our parent black */
+				x->up->colour = BLACK;
+				/* make our uncle black */
+				y->colour = BLACK;
+				/* make our grandparent red */
+				x->up->up->colour = RED;
+
+				/* now consider our grandparent */
+				x=x->up->up;
+			}
+			else
+			{
+				/* if we are on the right side of our parent */
+				if (x == x->up->right)
+				{
+					/* Move up to our parent */
+					x=x->up;
+					rb_left_rotate(&rbinfo->rb_root, x);
+				}
+
+				/* make our parent black */
+				x->up->colour = BLACK;
+				/* make our grandparent red */
+				x->up->up->colour = RED;
+				/* right rotate our grandparent */
+				rb_right_rotate(&rbinfo->rb_root, x->up->up);
+			}
+		}
+		else
+		{
+			/* everything here is the same as above, but
+			** exchanging left for right
+			*/
+
+			y=x->up->up->left;
+			if (y->colour == RED)
+			{
+				x->up->colour = BLACK;
+				y->colour = BLACK;
+				x->up->up->colour = RED;
+
+				x=x->up->up;
+			}
+			else
+			{
+				if (x == x->up->left)
+				{
+					x=x->up;
+					rb_right_rotate(&rbinfo->rb_root, x);
+				}
+
+				x->up->colour = BLACK;
+				x->up->up->colour = RED;
+				rb_left_rotate(&rbinfo->rb_root, x->up->up);
+			}
+		}
+	}
+
+	/* Set the root node black */
+	(rbinfo->rb_root)->colour = BLACK;
+
+	return(z);
 }
 
 /* Search for a key according to mode (see redblack.h)
@@ -373,73 +386,80 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 static struct rbnode *
 rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 {
-    struct rbnode *x, *y;
-    int cmp;
-    int found = 0;
+	struct rbnode *x,*y;
+	int cmp;
+	int found=0;
 
-    y = RBNULL;			/* points to the parent of x */
-    x = rbinfo->rb_root;
+	y=RBNULL; /* points to the parent of x */
+	x=rbinfo->rb_root;
 
-    if (mode == RB_LUFIRST) {
-	/* Keep going left until we hit a NULL */
-	while (x != RBNULL) {
-	    y = x;
-	    x = x->left;
+	if (mode==RB_LUFIRST)
+	{
+		/* Keep going left until we hit a NULL */
+		while(x!=RBNULL)
+		{
+			y=x;
+			x=x->left;
+		}
+
+		return(y);
+	}
+	else if (mode==RB_LULAST)
+	{
+		/* Keep going right until we hit a NULL */
+		while(x!=RBNULL)
+		{
+			y=x;
+			x=x->right;
+		}
+
+		return(y);
 	}
 
-	return (y);
-    } else if (mode == RB_LULAST) {
-	/* Keep going right until we hit a NULL */
-	while (x != RBNULL) {
-	    y = x;
-	    x = x->right;
+	/* walk x down the tree */
+	while(x!=RBNULL && found==0)
+	{
+		y=x;
+		/* printf("key=%s, x->key=%s\n", key, x->key); */
+		cmp=(*rbinfo->rb_cmp)(key, x->key, rbinfo->rb_config);
+		if (cmp<0)
+			x=x->left;
+		else if (cmp>0)
+			x=x->right;
+		else
+			found=1;
 	}
 
-	return (y);
-    }
+	if (found && (mode==RB_LUEQUAL || mode==RB_LUGTEQ || mode==RB_LULTEQ))
+		return(x);
+	
+	if (!found && (mode==RB_LUEQUAL || mode==RB_LUNEXT || mode==RB_LUPREV))
+		return(RBNULL);
+	
+	if (mode==RB_LUGTEQ || (!found && mode==RB_LUGREAT))
+	{
+		if (cmp>0)
+			return(rb_successor(y));
+		else
+			return(y);
+	}
 
-    /* walk x down the tree */
-    while (x != RBNULL && found == 0) {
-	y = x;
-	/* printf("key=%s, x->key=%s\n", key, x->key); */
-	cmp = (*rbinfo->rb_cmp) (key, x->key, rbinfo->rb_config);
-	if (cmp < 0)
-	    x = x->left;
-	else if (cmp > 0)
-	    x = x->right;
-	else
-	    found = 1;
-    }
+	if (mode==RB_LULTEQ || (!found && mode==RB_LULESS))
+	{
+		if (cmp<0)
+			return(rb_preccessor(y));
+		else
+			return(y);
+	}
 
-    if (found && (mode == RB_LUEQUAL || mode == RB_LUGTEQ || mode == RB_LULTEQ))
-	return (x);
+	if (mode==RB_LUNEXT || (found && mode==RB_LUGREAT))
+		return(rb_successor(x));
 
-    if (!found
-	&& (mode == RB_LUEQUAL || mode == RB_LUNEXT || mode == RB_LUPREV))
-	return (RBNULL);
-
-    if (mode == RB_LUGTEQ || (!found && mode == RB_LUGREAT)) {
-	if (cmp > 0)
-	    return (rb_successor(y));
-	else
-	    return (y);
-    }
-
-    if (mode == RB_LULTEQ || (!found && mode == RB_LULESS)) {
-	if (cmp < 0)
-	    return (rb_preccessor(y));
-	else
-	    return (y);
-    }
-
-    if (mode == RB_LUNEXT || (found && mode == RB_LUGREAT))
-	return (rb_successor(x));
-
-    if (mode == RB_LUPREV || (found && mode == RB_LULESS))
-	return (rb_preccessor(x));
-
-    /* Shouldn't get here */
-    return (RBNULL);
+	if (mode==RB_LUPREV || (found && mode==RB_LULESS))
+		return(rb_preccessor(x));
+	
+	/* Shouldn't get here */
+	return(RBNULL);
 }
 
 /*
@@ -449,13 +469,14 @@ rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 static void
 rb_destroy(struct rbnode *x)
 {
-    if (x != RBNULL) {
-	if (x->left != RBNULL)
-	    rb_destroy(x->left);
-	if (x->right != RBNULL)
-	    rb_destroy(x->right);
-	rb_free(x);
-    }
+	if (x!=RBNULL)
+	{
+		if (x->left!=RBNULL)
+			rb_destroy(x->left);
+		if (x->right!=RBNULL)
+			rb_destroy(x->right);
+		rb_free(x);
+	}
 }
 
 /*
@@ -475,79 +496,91 @@ rb_destroy(struct rbnode *x)
 static void
 rb_left_rotate(struct rbnode **rootp, struct rbnode *x)
 {
-    struct rbnode *y;
+	struct rbnode *y;
 
-    assert(x != RBNULL);
-    assert(x->right != RBNULL);
+	assert(x!=RBNULL);
+	assert(x->right!=RBNULL);
 
-    y = x->right;		/* set Y */
+	y=x->right; /* set Y */
 
-    /* Turn Y's left subtree into X's right subtree (move B) */
-    x->right = y->left;
+	/* Turn Y's left subtree into X's right subtree (move B)*/
+	x->right = y->left;
 
-    /* If B is not null, set it's parent to be X */
-    if (y->left != RBNULL)
-	y->left->up = x;
+	/* If B is not null, set it's parent to be X */
+	if (y->left != RBNULL)
+		y->left->up = x;
 
-    /* Set Y's parent to be what X's parent was */
-    y->up = x->up;
+	/* Set Y's parent to be what X's parent was */
+	y->up = x->up;
 
-    /* if X was the root */
-    if (x->up == RBNULL) {
-	*rootp = y;
-    } else {
-	/* Set X's parent's left or right pointer to be Y */
-	if (x == x->up->left) {
-	    x->up->left = y;
-	} else {
-	    x->up->right = y;
+	/* if X was the root */
+	if (x->up == RBNULL)
+	{
+		*rootp=y;
 	}
-    }
+	else
+	{
+		/* Set X's parent's left or right pointer to be Y */
+		if (x == x->up->left)
+		{
+			x->up->left=y;
+		}
+		else
+		{
+			x->up->right=y;
+		}
+	}
 
-    /* Put X on Y's left */
-    y->left = x;
+	/* Put X on Y's left */
+	y->left=x;
 
-    /* Set X's parent to be Y */
-    x->up = y;
+	/* Set X's parent to be Y */
+	x->up = y;
 }
 
 static void
 rb_right_rotate(struct rbnode **rootp, struct rbnode *y)
 {
-    struct rbnode *x;
+	struct rbnode *x;
 
-    assert(y != RBNULL);
-    assert(y->left != RBNULL);
+	assert(y!=RBNULL);
+	assert(y->left!=RBNULL);
 
-    x = y->left;		/* set X */
+	x=y->left; /* set X */
 
-    /* Turn X's right subtree into Y's left subtree (move B) */
-    y->left = x->right;
+	/* Turn X's right subtree into Y's left subtree (move B) */
+	y->left = x->right;
 
-    /* If B is not null, set it's parent to be Y */
-    if (x->right != RBNULL)
-	x->right->up = y;
+	/* If B is not null, set it's parent to be Y */
+	if (x->right != RBNULL)
+		x->right->up = y;
 
-    /* Set X's parent to be what Y's parent was */
-    x->up = y->up;
+	/* Set X's parent to be what Y's parent was */
+	x->up = y->up;
 
-    /* if Y was the root */
-    if (y->up == RBNULL) {
-	*rootp = x;
-    } else {
-	/* Set Y's parent's left or right pointer to be X */
-	if (y == y->up->left) {
-	    y->up->left = x;
-	} else {
-	    y->up->right = x;
+	/* if Y was the root */
+	if (y->up == RBNULL)
+	{
+		*rootp=x;
 	}
-    }
+	else
+	{
+		/* Set Y's parent's left or right pointer to be X */
+		if (y == y->up->left)
+		{
+			y->up->left=x;
+		}
+		else
+		{
+			y->up->right=x;
+		}
+	}
 
-    /* Put Y on X's right */
-    x->right = y;
+	/* Put Y on X's right */
+	x->right=y;
 
-    /* Set Y's parent to be X */
-    y->up = x;
+	/* Set Y's parent to be X */
+	y->up = x;
 }
 
 /* Return a pointer to the smallest key greater than x
@@ -555,26 +588,30 @@ rb_right_rotate(struct rbnode **rootp, struct rbnode *y)
 static struct rbnode *
 rb_successor(const struct rbnode *x)
 {
-    struct rbnode *y;
+	struct rbnode *y;
 
-    if (x->right != RBNULL) {
-	/* If right is not NULL then go right one and
-	   ** then keep going left until we find a node with
-	   ** no left pointer.
-	 */
-	for (y = x->right; y->left != RBNULL; y = y->left);
-    } else {
-	/* Go up the tree until we get to a node that is on the
-	   ** left of its parent (or the root) and then return the
-	   ** parent.
-	 */
-	y = x->up;
-	while (y != RBNULL && x == y->right) {
-	    x = y;
-	    y = y->up;
+	if (x->right!=RBNULL)
+	{
+		/* If right is not NULL then go right one and
+		** then keep going left until we find a node with
+		** no left pointer.
+		*/
+		for (y=x->right; y->left!=RBNULL; y=y->left);
 	}
-    }
-    return (y);
+	else
+	{
+		/* Go up the tree until we get to a node that is on the
+		** left of its parent (or the root) and then return the
+		** parent.
+		*/
+		y=x->up;
+		while(y!=RBNULL && x==y->right)
+		{
+			x=y;
+			y=y->up;
+		}
+	}
+	return(y);
 }
 
 /* Return a pointer to the largest key smaller than x
@@ -582,26 +619,30 @@ rb_successor(const struct rbnode *x)
 static struct rbnode *
 rb_preccessor(const struct rbnode *x)
 {
-    struct rbnode *y;
+	struct rbnode *y;
 
-    if (x->left != RBNULL) {
-	/* If left is not NULL then go left one and
-	   ** then keep going right until we find a node with
-	   ** no right pointer.
-	 */
-	for (y = x->left; y->right != RBNULL; y = y->right);
-    } else {
-	/* Go up the tree until we get to a node that is on the
-	   ** right of its parent (or the root) and then return the
-	   ** parent.
-	 */
-	y = x->up;
-	while (y != RBNULL && x == y->left) {
-	    x = y;
-	    y = y->up;
+	if (x->left!=RBNULL)
+	{
+		/* If left is not NULL then go left one and
+		** then keep going right until we find a node with
+		** no right pointer.
+		*/
+		for (y=x->left; y->right!=RBNULL; y=y->right);
 	}
-    }
-    return (y);
+	else
+	{
+		/* Go up the tree until we get to a node that is on the
+		** right of its parent (or the root) and then return the
+		** parent.
+		*/
+		y=x->up;
+		while(y!=RBNULL && x==y->left)
+		{
+			x=y;
+			y=y->up;
+		}
+	}
+	return(y);
 }
 
 /* Delete the node z, and free up the space
@@ -609,201 +650,226 @@ rb_preccessor(const struct rbnode *x)
 static void
 rb_delete(struct rbnode **rootp, struct rbnode *z)
 {
-    struct rbnode *x, *y;
+	struct rbnode *x, *y;
 
-    if (z->left == RBNULL || z->right == RBNULL)
-	y = z;
-    else
-	y = rb_successor(z);
-
-    if (y->left != RBNULL)
-	x = y->left;
-    else
-	x = y->right;
-
-    x->up = y->up;
-
-    if (y->up == RBNULL) {
-	*rootp = x;
-    } else {
-	if (y == y->up->left)
-	    y->up->left = x;
+	if (z->left == RBNULL || z->right == RBNULL)
+		y=z;
 	else
-	    y->up->right = x;
-    }
+		y=rb_successor(z);
 
-    if (y != z) {
-	z->key = y->key;
-    }
+	if (y->left != RBNULL)
+		x=y->left;
+	else
+		x=y->right;
 
-    if (y->colour == BLACK)
-	rb_delete_fix(rootp, x);
+	x->up = y->up;
 
-    rb_free(y);
+	if (y->up == RBNULL)
+	{
+		*rootp=x;
+	}
+	else
+	{
+		if (y==y->up->left)
+			y->up->left = x;
+		else
+			y->up->right = x;
+	}
+
+	if (y!=z)
+	{
+		z->key = y->key;
+	}
+
+	if (y->colour == BLACK)
+		rb_delete_fix(rootp, x);
+
+	rb_free(y);
 }
 
 /* Restore the reb-black properties after a delete */
 static void
 rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 {
-    struct rbnode *w;
+	struct rbnode *w;
 
-    while (x != *rootp && x->colour == BLACK) {
-	if (x == x->up->left) {
-	    w = x->up->right;
-	    if (w->colour == RED) {
-		w->colour = BLACK;
-		x->up->colour = RED;
-		rb_left_rotate(rootp, x->up);
-		w = x->up->right;
-	    }
+	while (x!=*rootp && x->colour==BLACK)
+	{
+		if (x==x->up->left)
+		{
+			w=x->up->right;
+			if (w->colour==RED)
+			{
+				w->colour=BLACK;
+				x->up->colour=RED;
+				rb_left_rotate(rootp, x->up);
+				w=x->up->right;
+			}
 
-	    if (w->left->colour == BLACK && w->right->colour == BLACK) {
-		w->colour = RED;
-		x = x->up;
-	    } else {
-		if (w->right->colour == BLACK) {
-		    w->left->colour = BLACK;
-		    w->colour = RED;
-		    rb_right_rotate(rootp, w);
-		    w = x->up->right;
+			if (w->left->colour==BLACK && w->right->colour==BLACK)
+			{
+				w->colour=RED;
+				x=x->up;
+			}
+			else
+			{
+				if (w->right->colour == BLACK)
+				{
+					w->left->colour=BLACK;
+					w->colour=RED;
+					rb_right_rotate(rootp, w);
+					w=x->up->right;
+				}
+
+
+				w->colour=x->up->colour;
+				x->up->colour = BLACK;
+				w->right->colour = BLACK;
+				rb_left_rotate(rootp, x->up);
+				x=*rootp;
+			}
 		}
+		else
+		{
+			w=x->up->left;
+			if (w->colour==RED)
+			{
+				w->colour=BLACK;
+				x->up->colour=RED;
+				rb_right_rotate(rootp, x->up);
+				w=x->up->left;
+			}
 
+			if (w->right->colour==BLACK && w->left->colour==BLACK)
+			{
+				w->colour=RED;
+				x=x->up;
+			}
+			else
+			{
+				if (w->left->colour == BLACK)
+				{
+					w->right->colour=BLACK;
+					w->colour=RED;
+					rb_left_rotate(rootp, w);
+					w=x->up->left;
+				}
 
-		w->colour = x->up->colour;
-		x->up->colour = BLACK;
-		w->right->colour = BLACK;
-		rb_left_rotate(rootp, x->up);
-		x = *rootp;
-	    }
-	} else {
-	    w = x->up->left;
-	    if (w->colour == RED) {
-		w->colour = BLACK;
-		x->up->colour = RED;
-		rb_right_rotate(rootp, x->up);
-		w = x->up->left;
-	    }
-
-	    if (w->right->colour == BLACK && w->left->colour == BLACK) {
-		w->colour = RED;
-		x = x->up;
-	    } else {
-		if (w->left->colour == BLACK) {
-		    w->right->colour = BLACK;
-		    w->colour = RED;
-		    rb_left_rotate(rootp, w);
-		    w = x->up->left;
+				w->colour=x->up->colour;
+				x->up->colour = BLACK;
+				w->left->colour = BLACK;
+				rb_right_rotate(rootp, x->up);
+				x=*rootp;
+			}
 		}
-
-		w->colour = x->up->colour;
-		x->up->colour = BLACK;
-		w->left->colour = BLACK;
-		rb_right_rotate(rootp, x->up);
-		x = *rootp;
-	    }
 	}
-    }
 
-    x->colour = BLACK;
+	x->colour=BLACK;
 }
 
 static void
-rb_walk(const struct rbnode *x,
-	void (*action) (const void *, const VISIT, const int, void *),
-	void *arg, int level)
+rb_walk(const struct rbnode *x, void (*action)(const void *, const VISIT, const int, void *), void *arg, int level)
 {
-    if (x == RBNULL)
-	return;
+	if (x==RBNULL)
+		return;
 
-    if (x->left == RBNULL && x->right == RBNULL) {
-	/* leaf */
-	(*action) (x->key, leaf, level, arg);
-    } else {
-	(*action) (x->key, preorder, level, arg);
+	if (x->left==RBNULL && x->right==RBNULL)
+	{
+		/* leaf */
+		(*action)(x->key, leaf, level, arg);
+	}
+	else
+	{
+		(*action)(x->key, preorder, level, arg);
 
-	rb_walk(x->left, action, arg, level + 1);
+		rb_walk(x->left, action, arg, level+1);
 
-	(*action) (x->key, postorder, level, arg);
+		(*action)(x->key, postorder, level, arg);
 
-	rb_walk(x->right, action, arg, level + 1);
+		rb_walk(x->right, action, arg, level+1);
 
-	(*action) (x->key, endorder, level, arg);
-    }
+		(*action)(x->key, endorder, level, arg);
+	}
 }
 
 static RBLIST *
 rb_openlist(const struct rbnode *rootp)
 {
-    RBLIST *rblistp;
+	RBLIST *rblistp;
 
-    rblistp = (RBLIST *) malloc(sizeof(RBLIST));
-    if (!rblistp) return NULL;
+	rblistp=(RBLIST *) malloc(sizeof(RBLIST));
+	if (!rblistp)
+		return(NULL);
 
-    rblistp->rootp = rootp;
-    rblistp->nextp = rootp;
+	rblistp->rootp=rootp;
+	rblistp->nextp=rootp;
 
-    if (rootp != RBNULL) {
-	while (rblistp->nextp->left != RBNULL) {
-	    rblistp->nextp = rblistp->nextp->left;
+	if (rootp!=RBNULL)
+	{
+		while(rblistp->nextp->left!=RBNULL)
+		{
+			rblistp->nextp=rblistp->nextp->left;
+		}
 	}
-    }
 
-    return (rblistp);
+	return(rblistp);
 }
 
 static const void *
-rb_readlist(RBLIST * rblistp)
+rb_readlist(RBLIST *rblistp)
 {
-    const void *key = NULL;
+	const void *key=NULL;
 
-    if (rblistp->nextp != RBNULL) {
-	key = rblistp->nextp->key;
-	rblistp->nextp = rb_successor(rblistp->nextp);
-    }
+	if (rblistp!=NULL && rblistp->nextp!=RBNULL)
+	{
+		key=rblistp->nextp->key;
+		rblistp->nextp=rb_successor(rblistp->nextp);
+	}
 
-    return (key);
+	return(key);
 }
 
 static void
-rb_closelist(RBLIST * rblistp)
+rb_closelist(RBLIST *rblistp)
 {
-    free(rblistp);
+	if (rblistp)
+		free(rblistp);
 }
 
 #if defined(USE_SBRK)
 /* Allocate space for our nodes, allowing us to get space from
 ** sbrk in larger chucks.
 */
-static struct rbnode *rbfreep = NULL;
+static struct rbnode *rbfreep=NULL;
 
 #define RBNODEALLOC_CHUNK_SIZE 1000
 static struct rbnode *
 rb_alloc()
 {
-    struct rbnode *x;
-    int i;
+	struct rbnode *x;
+	int i;
 
-    if (rbfreep == NULL) {
-	/* must grab some more space */
-	rbfreep =
-	    (struct rbnode *)sbrk(sizeof(struct rbnode) *
-				  RBNODEALLOC_CHUNK_SIZE);
+	if (rbfreep==NULL)
+	{
+		/* must grab some more space */
+		rbfreep=(struct rbnode *) sbrk(sizeof(struct rbnode) * RBNODEALLOC_CHUNK_SIZE);
 
-	if (rbfreep == (struct rbnode *)-1) {
-	    return (NULL);
+		if (rbfreep==(struct rbnode *) -1)
+		{
+			return(NULL);
+		}
+
+		/* tie them together in a linked list (use the up pointer) */
+		for (i=0, x=rbfreep; i<RBNODEALLOC_CHUNK_SIZE-1; i++, x++)
+		{
+			x->up = (x+1);
+		}
+		x->up=NULL;
 	}
 
-	/* tie them together in a linked list (use the up pointer) */
-	for (i = 0, x = rbfreep; i < RBNODEALLOC_CHUNK_SIZE - 1; i++, x++) {
-	    x->up = (x + 1);
-	}
-	x->up = NULL;
-    }
-
-    x = rbfreep;
-    rbfreep = rbfreep->up;
-    return (x);
+	x=rbfreep;
+	rbfreep = rbfreep->up;
+	return(x);
 }
 
 /* free (dealloc) an rbnode structure - add it onto the front of the list
@@ -812,8 +878,8 @@ rb_alloc()
 static void
 rb_free(struct rbnode *x)
 {
-    x->up = rbfreep;
-    rbfreep = x;
+	x->up=rbfreep;
+	rbfreep=x;
 }
 
 #endif
@@ -822,133 +888,136 @@ rb_free(struct rbnode *x)
 int
 rb_check(struct rbnode *rootp)
 {
-    if (rootp == NULL || rootp == RBNULL)
-	return (0);
+	if (rootp==NULL || rootp==RBNULL)
+		return(0);
 
-    if (rootp->up != RBNULL) {
-	SddbReport(0, "Root up pointer not RBNULL");
-	dumptree(rootp, 0);
-	return (1);
-    }
+	if (rootp->up!=RBNULL)
+	{
+		fprintf(stderr, "Root up pointer not RBNULL");
+		dumptree(rootp, 0);
+		return(1);
+	}
 
-    if (rb_check1(rootp)) {
-	dumptree(rootp, 0);
-	return (1);
-    }
+	if (rb_check1(rootp))
+	{
+		dumptree(rootp, 0);
+		return(1);
+	}
 
-    if (count_black(rootp) == -1) {
-	dumptree(rootp, 0);
-	return (-1);
-    }
+	if (count_black(rootp)==-1)
+	{
+		dumptree(rootp, 0);
+		return(-1);
+	}
 
-    return (0);
+	return(0);
 }
 
 int
 rb_check1(struct rbnode *x)
 {
-    if (x->left == NULL || x->right == NULL) {
-	SddbReport(0, "Left or right is NULL");
-	return (1);
-    }
-
-    if (x->colour == RED) {
-	if (x->left->colour != BLACK && x->right->colour != BLACK) {
-	    SddbReport(0, "Children of red node not both black, x=%ld", x);
-	    return (1);
-	}
-    }
-
-    if (x->left != RBNULL) {
-	if (x->left->up != x) {
-	    SddbReport(0, "x->left->up != x, x=%ld", x);
-	    return (1);
+	if (x->left==NULL || x->right==NULL)
+	{
+		fprintf(stderr, "Left or right is NULL");
+		return(1);
 	}
 
-	if (rb_check1(x->left))
-	    return (1);
-    }
-
-    if (x->right != RBNULL) {
-	if (x->right->up != x) {
-	    SddbReport(0, "x->right->up != x, x=%ld", x);
-	    return (1);
+	if (x->colour==RED)
+	{
+		if (x->left->colour!=BLACK && x->right->colour!=BLACK)
+		{
+			fprintf(stderr, "Children of red node not both black, x=%ld", x);
+			return(1);
+		}
 	}
 
-	if (rb_check1(x->right))
-	    return (1);
-    }
-    return (0);
+	if (x->left != RBNULL)
+	{
+		if (x->left->up != x)
+		{
+			fprintf(stderr, "x->left->up != x, x=%ld", x);
+			return(1);
+		}
+
+		if (rb_check1(x->left))
+			return(1);
+	}		
+
+	if (x->right != RBNULL)
+	{
+		if (x->right->up != x)
+		{
+			fprintf(stderr, "x->right->up != x, x=%ld", x);
+			return(1);
+		}
+
+		if (rb_check1(x->right))
+			return(1);
+	}		
+	return(0);
 }
 
-count_black(struct rbnode * x)
+count_black(struct rbnode *x)
 {
-    int nleft, nright;
+	int nleft, nright;
 
-    if (x == RBNULL)
-	return (1);
+	if (x==RBNULL)
+		return(1);
 
-    nleft = count_black(x->left);
-    nright = count_black(x->right);
+	nleft=count_black(x->left);
+	nright=count_black(x->right);
 
-    if (nleft == -1 || nright == -1)
-	return (-1);
+	if (nleft==-1 || nright==-1)
+		return(-1);
 
-    if (nleft != nright) {
-	SddbReport(0, "Black count not equal on left & right, x=%ld", x);
-	return (-1);
-    }
+	if (nleft != nright)
+	{
+		fprintf(stderr, "Black count not equal on left & right, x=%ld", x);
+		return(-1);
+	}
 
-    if (x->colour == BLACK) {
-	nleft++;
-    }
+	if (x->colour == BLACK)
+	{
+		nleft++;
+	}
 
-    return (nleft);
+	return(nleft);
 }
 
-dumptree(struct rbnode * x, int n)
+dumptree(struct rbnode *x, int n)
 {
-    char *prkey();
+	char *prkey();
 
-    if (x != NULL && x != RBNULL) {
-	n++;
-	SddbReport(15, "Tree: %*s %ld: left=%ld, right=%ld, colour=%s, key=%s",
-		   n,
-		   "",
-		   x,
-		   x->left,
-		   x->right,
-		   (x->colour == BLACK) ? "BLACK" : "RED", prkey(x->key));
+	if (x!=NULL && x!=RBNULL)
+	{
+		n++;
+		fprintf(stderr, "Tree: %*s %ld: left=%ld, right=%ld, colour=%s, key=%s",
+			n,
+			"",
+			x,
+			x->left,
+			x->right,
+			(x->colour==BLACK) ? "BLACK" : "RED",
+			prkey(x->key));
 
-	dumptree(x->left, n);
-	dumptree(x->right, n);
-    }
+		dumptree(x->left, n);
+		dumptree(x->right, n);
+	}	
 }
 #endif
 
 /*
  * $Log: redblack.c,v $
- * Revision 1.6  2002/04/03 21:45:07  emma
- * remove unnecessary declaration of cmpmods in rb_traverse.
+ * Revision 1.7  2002/07/08 00:48:01  emma
+ * Update libredblack to 1.2.
  *
- * Revision 1.5  2002/01/19 02:12:02  emma
- * writes.c
- *
- * Revision 1.4  2002/01/07 21:48:08  emma
- * Handle OOM in rb_openlist. Found by Ralf Wildenhues.  Bug filed on
- * https://sourceforge.net/project/libredblack, Bug-ID #500600.
- *
- * Revision 1.3  2001/12/29 01:45:18  emma
- * Merge 2.0b8_ma8rc* series changes.
- *
- * Revision 1.2  2001/11/29 17:48:30  emma
- * Move 7.7pre on top to HEAD branch
- *
- * Revision 1.1.2.2  2001/11/12 00:09:15  emma
- * fed through indent
- *
- * Revision 1.1.2.1  2001/09/27 01:48:50  emma
- * Pulled Damian Ivereigh's libredblack in. LGPL.
+ * Revision 1.5  2002/01/30 07:54:53  damo
+ * Fixed up the libtool versioning stuff (finally)
+ * Fixed bug 500600 (not detecting a NULL return from malloc)
+ * Fixed bug 509485 (no longer needs search.h)
+ * Cleaned up debugging section
+ * Allow multiple inclusions of redblack.h
+ * Thanks to Matthias Andree for reporting (and fixing) these
  *
  * Revision 1.4  2000/06/06 14:43:43  damo
  * Added all the rbwalk & rbopenlist stuff. Fixed up malloc instead of sbrk.
@@ -966,3 +1035,4 @@ dumptree(struct rbnode * x, int n)
  * Initial import of files. Versions are now all over the place. Oh well
  *
  */
+
