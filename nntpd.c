@@ -147,6 +147,7 @@ main_loop(void)
     /* locals */
     char *arg, *cmd;
     int n;
+    size_t size;
 
     while (fflush(stdout), (cmd = mgetaline(stdin))) {
 	/* collect possible returned children */
@@ -155,10 +156,10 @@ main_loop(void)
 	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "< %s", cmd);
 
-	n = (int)strlen(cmd);
-	if (n == 0)
+	size = strlen(cmd);
+	if (size == 0)
 	    continue;		/* necessary for netscape to be quiet */
-	else if (n > MAXLINELENGTH) {
+	else if (size > MAXLINELENGTH) {
 	    /* ignore attempts at buffer overflow */
 	    nntpprintf("500 Dazed and confused");
 	    (void)fflush(stdout);
@@ -429,6 +430,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
     } else if (arg && *arg == '<') {
 	f = fopen(lookup(arg), "r");
     } else if (group && *artno) {
+	(void)chdirgroup(group->name, FALSE);
 	sprintf(s, "%lu", *artno);
 	f = fopen(s, "r");
 	if (!f)
@@ -786,6 +788,7 @@ dohelp(void)
 	("  newnews newsgroups yymmdd hhmmss [\"GMT\"] [<distributions>]\r\n");
     printf("  next\r\n");
     printf("  over [range]\r\n");
+    printf("  pat header range|MessageID pat [morepat...]\r\n");
     if (allowposting())
 	printf("  post\r\n");
     printf("  quit\r\n");
@@ -1595,8 +1598,8 @@ doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long 
     struct stringlist *l = cmdlinetolist(arg);
 
     if (stringlistlen(l) < 3) {
-	nntpprintf("502 Usage: XPAT header first[-[last]] pattern or "
-		   "XPAT header message-id pattern");
+	nntpprintf("502 Usage: PAT header first[-[last]] pattern or "
+		   "PAT header message-id pattern");
     } else {
 	doselectedheader(group, l->string, l->next->string, l->next->next,
 			 &artno);
