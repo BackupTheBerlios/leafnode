@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.44 2002/06/14 15:44:30 emma Exp $ */
+/* $Id: leafnode.h,v 1.45 2002/06/14 15:58:22 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -419,6 +419,7 @@ extern "C" {
     /* max # of articles to read at first time */
     extern int delaybody;	/* delay download of message body */
     extern int debugmode;	/* log lots of stuff via syslog */
+    extern int no_direct_spool; /* if set, do not store remote posts locally */
     extern long windowsize;
 /* Note: Sync the DEBUG_ flags below with config.example */
 #define DEBUG_MISC 1

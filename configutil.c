@@ -37,6 +37,7 @@ unsigned long artlimit = 0;
 unsigned long initiallimit = 0;
 int create_all_links = 0;
 int delaybody = 0;
+int no_direct_spool = 0;
 int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
@@ -407,6 +408,13 @@ readconfig(char *configfile)
 		    else
 			q->next = p;
 		    q = p;
+		    break;
+		case CP_NODIRECTSPOOL:
+		    no_direct_spool = strtol(value, NULL, 10);
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: no_direct_spool is %d (default 0)",
+				   no_direct_spool);
 		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
