@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.105 2004/08/23 09:50:48 emma Exp $ */
+/* $Id: leafnode.h,v 1.106 2004/09/16 11:05:29 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -403,9 +403,8 @@ int findxoverrange(unsigned long low, unsigned long high,
 /* find index number for an article, return -1 on error */
 int maybegetxover(/*@null@*/ struct newsgroup *g);
 /* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
-int xgetxover(const int, /*@null@*/ struct newsgroup *g);
+int xgetxover(const int, /*@null@*/ struct newsgroup *g, const int);
     /* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
-    int getxover(const int);	/* set xoverinfo, return 0 on error, nonzero else */
     void freexover(void);	/* free xoverinfo structure */
     extern int writexover(void);    /* write overview info */
 
