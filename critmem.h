@@ -1,6 +1,7 @@
 #ifndef CRITMEM_H
 #define CRITMEM_H
 
+#include "config.h"
 #include <sys/types.h>
 
 /*@only@*//*@out@*//*@notnull@*/ void *mycritmalloc(const char *f, long, size_t size,
