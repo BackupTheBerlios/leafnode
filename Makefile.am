@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.24 2002/07/03 15:29:22 emma Exp $
+# $Id: Makefile.am,v 1.25 2002/07/03 15:48:58 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -133,6 +133,7 @@ liblnutil_a_SOURCES	= \
 	ugid_uset.c \
 	validatefqdn.c \
 	validatefqdn.h \
+	version.h \
 	vsnprintf.c \
 	wildmat.c \
 	writes.c \
