@@ -518,6 +518,23 @@ whoami(void)
  * Functions to handle stringlists
  */
 /*
+ * prepend string "newentry" to stringlist "list".
+ */
+void
+prependtolist(struct stringlist **list, /*@unique@*/ const char *newentry)
+{
+
+    struct stringlist *ptr;
+
+    ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
+					  strlen(newentry),
+					  "Allocating space in stringlist");
+    strcpy(ptr->string, newentry);	/* RATS: ignore */
+    ptr->next = *list;
+    *list = ptr;
+}
+
+/*
  * append string "newentry" to stringlist "list". "lastentry" is a
  * pointer pointing to the last entry in "list" and must be properly
  * intialized.
@@ -562,6 +579,52 @@ findinlist(/*@null@*/ struct stringlist *haystack, /*@null@*/ const char *const 
     }
     return NULL;
 }
+
+/*
+ * find a string in a stringlist
+ * return pointer to string if found, NULL otherwise
+ */
+struct stringlist **
+lfindinlist(struct stringlist **haystack, char *needle, int len)
+{
+    struct stringlist **a;
+
+    a = haystack;
+    while (a && *a && (*a)->string) {
+	if (strncmp(needle, (*a)->string, len) == 0)
+	    return a;
+	a = &(*a)->next;
+    }
+    return NULL;
+}
+
+void replaceinlist(struct stringlist **haystack, char *needle, int len)
+{
+    struct stringlist **f = lfindinlist(haystack, needle, len);
+    struct stringlist *n;
+    if (!f) prependtolist(haystack, needle);
+    else {
+	n = (*f)->next;
+	free(*f);
+	*f = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
+			strlen(needle), "Allocating space in stringlist");
+	strcpy((*f)->string, needle);
+	(*f)->next = n;
+    }
+}
+
+/*
+ * remove item from list
+ * give pointer which is to twist
+ */
+void
+removefromlist(struct stringlist **f)
+{
+    struct stringlist *l = *f;
+    *f = (*f)->next;
+    free(l);
+}
+
 
 /*
  * free a list

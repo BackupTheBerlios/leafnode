@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.58 2002/07/04 22:30:06 ralf Exp $ */
+/* $Id: leafnode.h,v 1.59 2002/07/06 08:55:11 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -241,14 +241,21 @@ extern "C" {
 	struct stringlist *next;
 	char string[1];
     };
+    void
+    prependtolist(struct stringlist **list, /*@unique@*/ const char *newentry);
+
     void appendtolist(struct stringlist **list, struct stringlist **lastentry,
 		      /*@unique@*/ const char *newentry);
     /* append "newentry" to "list". "lastentry" points to the last
        entry in "list" and must be supplied. */
     /*@dependent@*//*@null@*/ char *findinlist(/*@null@*/ struct stringlist *haystack,
 					       /*@null@*/ const char * const needle);
-
     /* find a string in a stringlist by doing a linear search */
+
+    /*@null@*//*@dependent@*/
+    struct stringlist **lfindinlist(struct stringlist **haystack, char *needle, int len);
+    void replaceinlist(struct stringlist **haystack, char *needle, int len);
+    void removefromlist(struct stringlist **f);
     void freelist(/*@null@*/ /*@only@*/ struct stringlist *list);
 
     /* free memory occupied by a stringlist */
