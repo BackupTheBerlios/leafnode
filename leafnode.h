@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.99 2004/05/10 09:24:58 emma Exp $ */
+/* $Id: leafnode.h,v 1.100 2004/05/10 09:25:49 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -7,6 +7,8 @@
 #else
 #error "HAVE_CONFIG_H is undefined. This condition is unsupported."
 #endif
+
+#define _GNU_SOURCE 1
 
 #include "attributes.h"
 #include "redblack.h"

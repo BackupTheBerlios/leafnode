@@ -1,5 +1,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
+
+#define _GNU_SOURCE 1
 #include "config.h"
 
 #if TIME_WITH_SYS_TIME
