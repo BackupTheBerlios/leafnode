@@ -1,3 +1,20 @@
+2002-07-05  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: getmarkgroup:  also look at Xref for other interesting
+	groups in delaybody mode if current group is not suitable. 
+	doarticle: improved error message if marking failed.
+	* nntpd.c: New function getmarkgroup to find out where to mark
+	article.  Parses Xref line to make 'ARTICLE MID' work.	Currently
+	only successful if article is found in current group and current
+	group is in delaybody mode.  markdownload: store MID and article
+	number.  doarticle: fix possible NULL deref, make use of
+	getmarkgroup.
+	* fetchnews.c: getmarked: expect Message-ID and article number in
+	groups.file, silently drop all badly formatted lines, lines with
+	article number 0 or with nonexistent pseudo articles.  Prevents
+	repeated download of crossposts.  getgroup: change to group dir
+	before getting marked articles.
+
 2002-07-04  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* README.html, applyfilter.c, config.example, config.table,
