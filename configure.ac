@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre4])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.26 $)
+AC_REVISION($Revision: 1.27 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -151,13 +151,19 @@ SPOOLDIR=$withval
 AC_MSG_RESULT($SPOOLDIR)
 AC_SUBST(SPOOLDIR)
 
+AC_MSG_CHECKING(confdir)
 dnl check where to put the confdir
 if test "$sysconfdir" = '${prefix}/etc' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
   CONFDIR='/etc'
 else
-  CONFDIR="$sysconfdir"
+    case "$sysconfdir" in
+	*/leafnode)  CONFDIR=${sysconfdir%%/leafnode} ;;
+	*/leafnode/) CONFDIR=${sysconfdir%%/leafnode/} ;;
+	*)           CONFDIR="$sysconfdir" ;;
+    esac
 fi
+AC_MSG_RESULT($CONFDIR)
 if test "$CONFDIR" != "$sysconfdir"; then
   AC_MSG_WARN([overriding sysconfdir to $CONFDIR (old: $sysconfdir)])
   AC_MSG_WARN([use --sysconfdir to fix])
@@ -166,6 +172,7 @@ if test "$CONFDIR" != "$sysconfdir"; then
 fi
 sysconfdir=$CONFDIR
 AC_SUBST(sysconfdir)
+AC_MSG_NOTICE(note that "leafnode" is automatically appended to $sysconfdir)
 
 dnl check where to put the lockfile
 AC_MSG_CHECKING(lockfile)
@@ -353,6 +360,7 @@ if test x$silent != xyes ; then
     echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
     printf "prefix:      " ; eval echo "$prefix"
     printf "sysconfdir:  " ; eval echo "$sysconfdir"
+    printf "             " ; echo 'note that "leafnode" is automatically appended to sysconfdir'
     printf "spooldir:    " ; eval echo "$SPOOLDIR"
     printf "lockfile:    " ; eval echo "$LOCKFILE"
     printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
