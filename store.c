@@ -49,25 +49,6 @@
    - message-id/newsgroups need not be known in advance
 */
 
-/** Create a file and make sure it has a current mtime. Note this file
-    is not fsynced. */
-__inline__ static
-    int
-touch(const char *name)
-{
-    int fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-    int r, e;
-    if (fd >= 0) {
-	r = ftruncate(fd, 0);	/* actually update mtime */
-	e = errno;
-	(void)close(fd);
-	errno = e;
-	return r;
-    } else {
-	return fd;
-    }
-}
-
 /*@observer@*/ const char *
 store_err(int i)
 {
