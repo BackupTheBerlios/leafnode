@@ -2044,6 +2044,13 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
+    if (filterfile && !readfilter(filterfile)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+		"%s: Cannot read filterfile %s, aborting.",
+		myname, filterfile);
+	exit(EXIT_FAILURE);
+    }
+
     ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 	   "%s: version %s; verbosity level is %d; debugging level is %d",
 	   myname, version, verbose, debugmode);
@@ -2084,13 +2091,6 @@ main(int argc, char **argv)
 	if (attempt_lock(LOCKWAIT)) {
 	    fprintf(stderr, "%s: lockfile %s exists, abort\n",
 		    myname, lockfile);
-	    exit(EXIT_FAILURE);
-	}
-
-	if (filterfile && !readfilter(filterfile)) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "%s: Cannot read filterfile %s, aborting.",
-		   myname, filterfile);
 	    exit(EXIT_FAILURE);
 	}
 
