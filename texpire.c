@@ -19,6 +19,8 @@ Modified by Joerg Dietrich <joerg@dietrich.net>.
 Copyright of the modifications 1999.
 Modified by Stefan Wiens <s.wi@gmx.net>.
 Copyright of the modifications 2001.
+Modified by Matthias Andree <matthias.andree@gmx.de>.
+Copyright of the modifications 2000 - 2002.
 
 See README for restrictions on the use of this software.
 */
