@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.51 2002/06/23 10:30:24 emma Exp $ */
+/* $Id: leafnode.h,v 1.52 2002/06/24 19:34:32 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -230,11 +230,6 @@ extern "C" {
     int is_alllocal(const char *grouplist);
     int is_anylocal(const char *grouplist);
     void freelocal(void);
-
-/* translation from message-id to article number, used in fetch and expire */
-    void clearidtree(void);
-    void insertmsgid(const char *msgid, unsigned long art);
-    unsigned long findmsgid(const char *msgid);
 
 /* -----------here starts the new stuff-----------------*/
 /*
