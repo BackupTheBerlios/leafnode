@@ -427,6 +427,8 @@ readactive(void)
 					    "allocating active");
     g = active;
     while ((p = getaline(f))) {
+	unsigned long temp;
+
 	r = strchr(p, '\t');
 	if (!r && sscanf(p, "%*[^ ] %*u %*u %*u %*s")) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
@@ -438,13 +440,14 @@ readactive(void)
 	if (!r
 	    || (*r++ = '\0',
 		sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
-		       &g->first, &g->age) != 4)
+		       &g->first, &temp) != 4)
 	    || !strchr("ymn", g->status)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "Groupinfo file damaged, ignoring line: %s", p);
 	    /* skip over malformatted line */
 	    continue;
 	}
+	g->age = temp;
 	g->name = critstrdup(p, "readactive");
 	if (g->first == 0)
 	    g->first = 1;	/* pseudoarticle */
