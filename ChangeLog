@@ -1,3 +1,22 @@
+2002-06-18  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* Makefile.am, TODO, configure.ac, leafnode.h, miscutil.c: 
+	Configure options --with-runas-user and --with-runas-group to allow
+	leafnode to run under as different user.  Default to 'news'.  
+	* fetchnews.c: General clean up of processupstream.  Fix: After
+	'fetchnews -N some.group' the server info file contained only
+	information about this group.  Now write back old information for
+	all other groups.  Use log_fclose for the newly written file, so
+	write errors are logged.   Fix name checking for 'fetchnews -N'.
+	* fetchnews.c: Fix not requesting server again on successful
+	'fetchnews -M <MID>'.  
+	* fetchnews.c: Few more string literal formatting reverted.  
+	* ENVIRONMENT: Document STOP_AT_MESSAGEID.  
+	* nntpd.c: Simplify doselectedheader using matchlist and cuttab.  
+	Another unnecessary formatting fix reverted.  
+	* leafnode.h, miscutil.c: New function matchlist matches one string
+	against a stringlist of patterns.  
+
 2002-06-16  Matthias Andree <matthias.andree@gmx.de>
 
 	* nntpd.c: Merge missing bits before Ralf's 1.58.  
