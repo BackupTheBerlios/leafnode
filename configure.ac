@@ -3,9 +3,9 @@ dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma9])
+AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre1])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.10 $)
+AC_REVISION($Revision: 1.11 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -49,7 +49,7 @@ AC_HEADER_STAT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h])
+AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h search.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h])
 
 dnl Check whether all necessary include files are there
 AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_TRY_COMPILE([
@@ -260,14 +260,14 @@ AC_FUNC_CHOWN
 AC_FUNC_FORK
 AC_FUNC_LSTAT
 AC_FUNC_MALLOC
-AC_FUNC_MKTIME
+dnl AC_FUNC_MKTIME
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir mktime rmdir socket strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf getaddrinfo])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf getaddrinfo])
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -286,7 +286,7 @@ if test $ac_cv_func_setsockopt = no; then
   AC_CHECK_LIB(socket, setsockopt)
 fi
 
-AC_REPLACE_FUNCS(mergesort getline inet_ntop)
+AC_REPLACE_FUNCS(mergesort inet_ntop)
 
 dnl Check whether the system has IPv6
 AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_COMPILE([
