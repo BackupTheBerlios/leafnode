@@ -397,7 +397,27 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
 static int
 is_pseudogroup(const char *group)
 {
-    return (!chdirgroup(group, FALSE) && !is_localgroup(group));
+    struct newsgroup *g;
+
+    /* warning: the order of this checks is relevant */
+
+    /* local is never pseudo */
+    if (is_localgroup(group)) return FALSE;
+
+    /* interesting is never pseudo */
+    if (is_interesting(group)) return FALSE;
+
+    /* make sure that is_localgroup is FALSE here: */
+    if (!chdirgroup(group, FALSE)) return TRUE;
+
+    /* group not in active -> not pseudo either */
+    if ((g = findgroup(group, active, -1)) == NULL) return FALSE;
+
+    /* empty group -> pseudo */
+    if (g->count == 0ul) return TRUE;
+
+    /* non-empty group -> not pseudo */
+    return FALSE;
 }
 
 /* open an article by number or message-id */
@@ -694,11 +714,6 @@ static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dogroup(const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
-    unsigned long i;
-    DIR *d;
-    struct dirent *de;
-    struct stat st;
-    int hardlinks;
 
     rereadactive();
     g = findgroup(arg, active, -1);
@@ -712,56 +727,31 @@ dogroup(const char *arg, unsigned long *artno)
 	if (chdirgroup(g->name, FALSE)) {
 	    maybegetxover(g);
 	    if (g->count == 0) {
-		g->count = (g->last >= g->first ? g->last - g->first + 1 : 0);
-		/* FIXME: count articles in group */
-		i = 0;
-		if (stat(".", &st)) {
-		    ln_log(LNLOG_SERR, LNLOG_CTOP,
-			   "cannot stat directory of group %s: %m", g->name);
-		    hardlinks = 2;
-		} else {
-		    hardlinks = st.st_nlink;
-		}
-		if ((d = opendir("."))) {
-		    while ((de = readdir(d))) {
-			if (de->d_name[0] != '.') {
-                            /* UNIX: skip hidden files */
-			    if (check_allnum(de->d_name)) {
-				if (stat(de->d_name, &st)) {
-				    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
-					   "warning: cannot stat bogus file "
-					   "%s in %s: %m", de->d_name, g->name);
-				} else {
-				    if (S_ISREG(st.st_mode)) {
-					i++;
-				    }
-				}
-			    }
-			}
-		    }
-		    closedir(d);
-		    /* UNIX tricks: every subdirectory will have a .., thus,
-		       the link count of . is 2 (for . and its name) plus
-		       1 for each subdirectory's .. */
-		    g->count = i - (hardlinks - 2);
+		if (getwatermarks(&g->first, &g->last, &g->count)) {
+		    nntpprintf("503 Cannot get group article count.");
+		    return NULL;
 		}
 	    }
-	    if (g->count == 0) {
-		g->first = g->last = 0;	/* FIXME: is this necessary? */
-		/* FIXME: is this consistent with other parts (rather
-		   set g->first to 1? */
-	    }
-	} else {		/* group directory is not present */
-	    g->first = g->last = g->count = is_pseudogroup(g->name) ? 1ul : 0ul;
 	}
+
+	if (g->count == 0) {
+	    g->first = g->last = 0ul;
+	}
+
+	if (is_pseudogroup(g->name)) {
+	    g->first = g->last = g->count = 1ul;
+
+	}
+
 	nntpprintf("211 %lu %lu %lu %s group selected",
 		   g->count, g->first, g->last, g->name);
 	*artno = g->first;
+
 	fflush(stdout);
 	return g;
     } else {
 	nntpprintf("411 No such group");
-	return 0;
+	return NULL;
     }
 }
 
