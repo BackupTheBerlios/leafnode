@@ -1,5 +1,6 @@
 #! /bin/sh
 
+set -e
 repo="$HOME"/public_html/leafnode/beta/darcs/
 rsync -a ./ "$repo" \
     --exclude 'build*' \
