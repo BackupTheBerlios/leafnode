@@ -1253,7 +1253,7 @@ validate_messageid(const char *n)
     if (!r) return 0;
     r++;
     l = strcspn(r, ">");
-    s = critmalloc(l, "validate_messageid");
+    s = critmalloc(l+1, "validate_messageid");
     *s = '\0';
     strncat(s, m, l);
     l = is_validfqdn(s);
