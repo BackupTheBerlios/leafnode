@@ -42,7 +42,7 @@ check_allnum(const char *x)
     return 1;
 }
 
-char *
+/*@null@*/ /*@only@*/ char *
 cuttab(const char *in, int field)
 {
     const char *j;
@@ -54,14 +54,14 @@ cuttab(const char *in, int field)
 	in++;			/* skip tab */
     }
     if (!*in)
-	return 0;
+	return NULL;
 
     j = in;
     while (*in && *in != '\t')
 	in++;
     k = (char *)critmalloc(in - j + 1, "cuttab");
     strncpy(k, j, in - j);
-    k[in - j] = 0;
+    k[in - j] = '\0';
     return k;
 }
 
@@ -108,7 +108,7 @@ str_nsplit(/*@out@*/ char **a /** pre-allocated destination array to hold substr
 /** Free NULL-terminated list of strings pointed to by hdl, but do not
     free the handle itself. */
 void
-free_strlist(char **hdl /** string array to free */ )
+free_strlist(/*@null@*/ char **hdl /** string array to free */ )
 {
     char **ptr = hdl;
 
@@ -117,6 +117,7 @@ free_strlist(char **hdl /** string array to free */ )
 
     while (*ptr) {
 	free(*ptr);
+	*ptr = NULL;
 	ptr++;
     }
 }
