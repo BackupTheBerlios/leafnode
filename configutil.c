@@ -628,6 +628,10 @@ freeconfig(void)
         free(mta);
 	mta = NULL;
     }
+    if (spooldir) {
+	free(spooldir);
+	spooldir = NULL;
+    }
     freeexpire();
     freedelaybody();
 }
