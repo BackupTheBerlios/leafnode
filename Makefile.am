@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2002/01/06 01:02:55 emma Exp $
+# $Id: Makefile.am,v 1.3 2002/01/06 01:04:02 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -20,7 +20,7 @@ sysconf_DATA	= config.example
 man_MANS = \
 	applyfilter.8 \
 	checkgroups.8 \
-	fetchnews.5 \
+	filterfile.5 \
 	fetchnews.8 \
 	leafnode.8 \
 	newsq.1 \

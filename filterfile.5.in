@@ -1,6 +1,6 @@
-.TH fetchnews 5 @VERSION@ leafnode Leafnode \" -*- nroff -*-
+.TH filterfile 5 @VERSION@ leafnode Leafnode \" -*- nroff -*-
 .SH NAME
-fetchnews \- fetch news via NNTP
+filterfile \- filter configuration file for fetchnews(8)
 
 .SH DESCRIPTION
 .B Leafnode
@@ -26,7 +26,7 @@ stores a number of entries in the following format.
 .RS
 newsgroups = [wildmat]
 .br
-[pattern to recognize]
+pattern = [pattern to recognize]
 .br
 action = kill|select|[score]
 .RE
@@ -40,7 +40,7 @@ The
 .BR newsgroups
 parameter determines which newsgroup(s) the following patterns should be
 applied to. You can use
-.I wildmat
+.BR wildmat (3)
 expressions as explained below. A newsgroups parameter can be set for
 more than one pattern/action pair. It is valid until the next newsgroups
 parameter turns up.
@@ -55,7 +55,8 @@ can be one of the following:
 pattern = [pcre]
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
-a separate manual page (pcre(7)).
+a separate manual page (
+.BR pcre (7)).
 .TP
 maxage = [days]
 Filter on age of articles in days. Articles that are older are
@@ -132,10 +133,8 @@ name and the "fast" may be arbitrary ("." means "any char" and the "*"
 designates that an arbitrary number, including zero, of these characters
 may be there) while between "fast" and "money" there must be at least one
 other character (designated by the "?"). For further explanations of
-Perl-compatible regular expressions, see 
-.I
-pcre(7)
-.
+Perl-compatible regular expressions, see
+.BR pcre (7).
 
 .PP
 The second example shows how to avoid articles in a specific newsgroup

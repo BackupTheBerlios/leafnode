@@ -5,7 +5,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma9pre2])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.2 $)
+AC_REVISION($Revision: 1.3 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -329,4 +329,4 @@ printf "lockfile:   " ; eval echo "$LOCKFILE"
 echo
 
 AC_OUTPUT(Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8
-fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)
+filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)
