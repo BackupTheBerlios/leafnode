@@ -53,17 +53,16 @@ int getwatermarks(unsigned long *f, unsigned long *l,
 	}
     }
     if (first > last) {
-	first = last;
+	first = last + 1;
     }
     if (closedir(ng) != 0) {
 	return -1;
     }
     if (last > *l || *l == (unsigned long)-1)
 	*l = last;
-    if (first > 0 || *f > *l + 1)
+    if (first > 0)
 	*f = first;
-    if (c) {
+    if (c)
 	*c = count;
-    }
     return 0;
 }
