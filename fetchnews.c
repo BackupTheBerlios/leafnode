@@ -613,6 +613,45 @@ getmarked(struct newsgroup *group)
     mastr_delete(fname);
 }
 
+static int parseulong(const char **in, /*@out@*/ unsigned long *var)
+{
+    int valid = 0, oflow = 0;
+    unsigned long value = 0;
+
+    for(;;) {
+	int d;
+	if (!isdigit((unsigned char)**in)) {
+	    if (valid)
+		*var = value;
+	    if (oflow)
+		*var = ULONG_MAX, errno = ERANGE;
+	    return valid - oflow;
+	}
+	valid = 1;
+	d = **in - '0';
+	(*in)++;
+	if (value > ULONG_MAX / 10 || (value == ULONG_MAX / 10 && d > ULONG_MAX % 10)) {
+	    oflow = 1;
+	}
+	value = value * 10 + d;
+    }
+}
+
+static int
+parsegroupreply(const char **s, unsigned long *code, unsigned long *number,
+	unsigned long *first, unsigned long *last)
+{
+    if (!parseulong(s, code)) return 0;
+    SKIPLWS(*s);
+    if (!parseulong(s, number)) return 0;
+    SKIPLWS(*s);
+    if (!parseulong(s, first)) return 0;
+    SKIPLWS(*s);
+    if (!parseulong(s, last)) return 0;
+    SKIPLWS(*s);
+    return 1;
+}
+
 /**
  * calculate first and last article number to get
  * \return
@@ -626,7 +665,7 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
 {
     unsigned long h, window;
     long n;
-    char *l;
+    char *l, *t;
 
     if (!gs_match(current_server -> group_pcre, g->name))
 	return 0;
@@ -645,8 +684,18 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
 	return -1;
     }
 
-    if (sscanf(l, "%3ld %lu %lu %lu ", &n, &h, &window, last) < 4 || n != 211)
+    t = l;
+    if (!parsegroupreply(&t, &n, &h, &window, last)) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse GROUP reply: \"%s\"",
+		g->name, l);
 	return 0;
+    }
+
+    if (n != 211) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: protocol error in response to GROUP command: \"%s\", must be 211 or 411",
+		g->name, l);
+	return 0;
+    }
 
     if (*last == 0) {		/* group available but no articles on server */
 	*first = 0;
