@@ -36,8 +36,12 @@ parserange(const char *in /** input string */ , unsigned long *from,
     if (!in)
 	return RANGE_ERR;
     i = str_nsplit(a, in, "-", sizeof(a) / sizeof(a[0]));
-    if (i < 0 || i > 2)
+    if (i < 0)
 	return RANGE_ERR;
+    if (i > 2) {
+	free_strlist(a);
+	return RANGE_ERR;
+    }
 
     if (a[0]) {
 	res |= RANGE_HAVEFROM;
