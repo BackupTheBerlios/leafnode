@@ -31,7 +31,6 @@ extern char *optarg;
 extern int optind, opterr, optopt;
 
 int debug = 0;
-int first, last;
 
 static void
 usage(void)
@@ -117,8 +116,8 @@ main(int argc, char *argv[])
 	unlink(lockfile);
 	exit(EXIT_FAILURE);
     }
-    g->first = INT_MAX;
-    g->last = 0;
+    g->first = ULONG_MAX;
+    g->last = 0ul;
     if (!chdirgroup(g->name, FALSE)) {
 	printf("No such newsgroup: %s\n", g->name);
 	unlink(lockfile);
