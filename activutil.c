@@ -138,6 +138,7 @@ mergegroups(void)
 	active[count].age = (l->entry)->age;
 	active[count].desc = (l->entry)->desc;
 	active[count].status = (l->entry)->status;
+	free(l->entry);
 	l = l->next;
 	count++;
 	free(la);		/* clean up */
