@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.67 2002/07/07 14:01:38 ralf Exp $ */
+/* $Id: leafnode.h,v 1.68 2002/07/08 10:36:54 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -695,6 +695,10 @@ extern "C" {
 
     extern void /*@exits@*/ internalerror(void);
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
+
+    /* cmp_firstcolumn.c */
+    int cmp_firstcolumn(const void *a, const void *b,
+		    /*@unused@*/ const void *config __attribute__ ((unused)));
 
 /* debugutil.c */
 /* set this to 1 for debugging */
