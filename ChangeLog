@@ -1,3 +1,16 @@
+2004-11-13  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20041113a =
+	* NEWS, activutil.c:
+	- Speedup: the active file now has a header line that contains the
+	number of lines. leafnode can read both the old format (requires two
+	passes) and the new format (requires one pass).
+	- Speedup: the active file is now mmapped, rather than read, into
+	memory.  Patch by Robert Clark.
+	* getaline.c, leafnode.h: Add getabufferedline, based on a patch by
+	Robert Clark.
+	* CREDITS: List Robert Clark.  Convert to UTF-8.
+
 2004-10-07  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20041007a =
