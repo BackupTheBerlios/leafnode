@@ -1,0 +1,117 @@
+#! /bin/bash
+
+# primitive UUCP batcher, adds #! rnews line, optionally
+# compresses and prepends the proper unbatcher line, and
+# finally hands the articles over to uux.
+
+# (C) 2002 by Matthias Andree
+# Redistributable under the terms of the GNU General Public License v2.
+
+# Modified by Tim Koenig <tk2652@compuserve.de>, 2002
+
+# 28.09.2002, 16:11
+
+# usage: sendbatch [options] [source]
+#
+# options are:
+# -z -> build "gunbatch" (gzip)
+# -Z -> build "cunbatch" (compress)
+# -b -> build "bunbatch" (bzip2) (default!)
+
+# source configuration file
+. @sysconfdir@/leafnode/uucp
+
+while [ "x$1" != "x" ]; do
+    case $1 in
+	-Z) uucp_batch_prefix='#! cunbatch'
+	    uucp_batch_compress="compress -b15"
+	    ;;
+	-z) uucp_batch_prefix='#! gunbatch'
+	    uucp_batch_compress="gzip -c -9"
+	    ;;
+	-b) uucp_batch_prefix='#! bunbatch'
+	    uucp_batch_compress="bzip2 -c -9"
+	    ;;
+	-u) uucp_batch_prefix=''
+	    uucp_batch_compress="cat -"
+	    ;;
+	--) shift
+	    break
+	    ;;
+	-*) echo "unknown option $1"
+	    ;;
+	*)
+	    break;
+	    ;;
+    esac
+    shift
+done
+
+if [ "x$1" = "x" ]; then
+    outgoing=$outgoing_default
+else
+    outgoing=$1
+fi
+
+if [ ! -d $outgoing ]; then
+    echo "$outgoing is no directory"
+    exit 127
+fi
+
+echo "$0: $outgoing"
+
+if [ ! -d $outgoing_tempfiles ]; then
+    mkdir -p $outgoing_tempfiles
+fi
+
+if [ "x$uucp_batch_compress" != "x" ]; then
+    (
+	if [ "x$uucp_batch_prefix" != "x" ]; then
+	    echo $uucp_batch_prefix
+	fi
+
+	( 
+	    for file in $outgoing/*; do
+		if [ ! -r $file -o -d $file ]; then
+		    continue
+		fi
+	        temp=`mktemp $outgoing_tempfiles/sendbatch.XXXXXX`
+		dos2unix < $file > $temp
+	        find "$temp" -printf "#! rnews %s\n" -prune
+		cat $temp
+	    done
+	) | $uucp_batch_compress
+    ) | $uucp_queue_cmd $uucp_remote_site!rnews
+else
+    for file in $outgoing/*; do
+	if [ ! -r $file -o -d $file ]; then
+	    continue
+	fi
+	(
+	    temp=`mktemp $outgoing_tempfiles/sendbatch.XXXXXX`
+	    dos2unix < $file > $temp
+	    find "$temp" -printf "#! rnews %s\n" -prune
+	    cat $temp
+	) | $uucp_queue_cmd $uucp_remote_site!rnews
+    done
+fi
+
+if [ $? != 0 ]; then
+    echo "$0: error while processing queue, please investigate"
+    exit 127
+fi
+
+if [ ! -d $outgoing_archive ]; then
+    mkdir -p $outgoing_archive
+fi
+
+for file in $outgoing/*; do
+    if [ ! -r $file -o -d $file ]; then
+	continue
+    fi
+    mv $file $outgoing_archive
+done
+
+rm -f $outgoing_tempfiles/sendbatch.*
+
+echo "$0: success."

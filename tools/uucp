@@ -1,0 +1,8 @@
+uucp_remote_site='uucp.gnuu.de'
+uucp_queue_cmd='/usr/bin/uux - -r -z -gd'
+uucp_batch_compress='bzip2 -c'
+uucp_batch_prefix='#! bunbatch'
+local_newsspool='/usr/local/spool/leafnode-2.0.0.alpha20020921a'
+outgoing_default="${local_newsspool}/out.going"
+outgoing_archive="${outgoing_default}/archive"
+outgoing_tempfiles="${local_newsspool}/temp.files"
