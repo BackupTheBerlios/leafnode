@@ -1,3 +1,18 @@
+2003-02-09  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: Bump version 
+	* midutil.c: msgid_allocate: create message.id/xxx/ directory
+	before trying to link.  
+	* nntpd.c: Add missing 441 error message when the Message-ID link
+	cannot be created locally 
+	* activutil.c: Fix crash-on-exit when no active file is present and
+	no local groups are defined.  
+
+2003-02-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, TODO, configure.ac, leafnode.h: Release
+	2.0.0.alpha20030203a 
+
 2003-02-02  Matthias Andree <matthias.andree@gmx.de>
 
 	* fetchnews_check_date.c: Do not send an empty command after DATE
