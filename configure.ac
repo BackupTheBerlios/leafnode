@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20021229a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20030127a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.43 $)
+AC_REVISION($Revision: 1.44 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -15,6 +15,7 @@ dnl Checks for programs.
 AC_C_INLINE
 AC_C_VOLATILE
 AC_CHECK_TOOL([STRIP],[strip])
+AC_PATH_TOOL([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -57,7 +58,7 @@ AC_MSG_CHECKING(runas-user uid)
 if test x$RUNAS_USER = xroot -o x$RUNAS_USER = xtoor ; then
     AC_MSG_ERROR([user $RUNAS_USER cannot be used to run leafnode for security reasons.])
 fi
-a=`id -u $RUNAS_USER`
+a=`$ID -u $RUNAS_USER`
 if test -z "$a" ; then
     AC_MSG_ERROR([user $RUNAS_USER does not exist. Please add this user before building leafnode.
                   Most systems have man adduser or man useradd to tell you how to do this.])
@@ -71,7 +72,7 @@ AC_SUBST(RUNAS_USER)
 
 dnl check which group that user belongs to
 AC_MSG_CHECKING(the primary group of $RUNAS_USER)
-RUNAS_GROUP=`id -g $RUNAS_USER`
+RUNAS_GROUP=`$ID -g $RUNAS_USER`
 AC_MSG_RESULT($RUNAS_GROUP)
 if test -z "$a" ; then
     AC_MSG_WARN([cannot determine primary group of ${RUNAS_USER}.])
