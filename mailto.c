@@ -1,5 +1,5 @@
 /** mailto.c - send mail from a file descriptor
- * (C) 2001 by Matthias Andree
+ * (C) 2001 - 2002 by Matthias Andree
  */
 
 #include "leafnode.h"
