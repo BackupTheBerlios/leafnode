@@ -109,7 +109,7 @@ feedincoming(void)
 	    continue;
 	}
 
-	if ((rc = store(*di, 0, 0, 0))) {
+	if ((rc = store(*di, 0, 0, 3))) {
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
 		   "moving to %s/failed.postings/",
 		   *di, store_err(rc), spooldir);
