@@ -28,8 +28,17 @@ vim $dest/RELEASE
 vim $dest/HEADER.html
 fi
 perl addpatches.pl
+repo="$HOME"/public_html/leafnode/beta/darcs/
+rsync -av ./ "$repo" \
+    --exclude 'build*' \
+    --exclude '.*.swp' \
+    --exclude '*~' \
+    --exclude 'autom4te.cache' \
+    --delete --delete-excluded
+darcs whatsnew --boring -ls \
+| awk '/^a / { printf "%s\0", $2; }' \
+| ( cd $repo && xargs -0 rm -v -f )
 synchome.sh &
-#ssh krusty cvsup -L2 supfile &
 wait
 
 [ -f leafnode-ann.$vers ] && exit 0
