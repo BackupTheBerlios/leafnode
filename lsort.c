@@ -56,7 +56,7 @@ main(void)
 	    fprintf(stderr, "realloc returned NULL\n");
 	    exit(EXIT_FAILURE);
 	}
-	act[acount] = strdup(l);
+	act[acount] = critstrdup(l, "lsort");
 	acount++;
     }
     (void)fclose(f);

@@ -62,7 +62,7 @@ getmoderator(const char *group)
 	    }
 	    fclose(f);
 	    mastr_delete(modpath);
-	    return strdup(address);
+	    return critstrdup(address, "getmoderator");
 	}
     }
     fclose(f);
@@ -99,7 +99,7 @@ checkstatus(const char *groups, const char status)
 	if (g) {
 	    if (g->status == status) {
 		free(p);
-		return strdup(g->name);
+		return critstrdup(g->name, "checkstatus");
 	    }
 	}
 	grp = q;

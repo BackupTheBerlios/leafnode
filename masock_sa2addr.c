@@ -1,4 +1,5 @@
 #include "masock.h"
+#include "critmem.h"
 #include "config.h"
 
 #include <sys/types.h>
@@ -48,5 +49,5 @@ masock_sa2addr(const struct sockaddr *sa)
 	break;
     }
 
-    return ret ? strdup(ret) : 0;
+    return ret ? critstrdup(ret, "masock_sa2addr") : 0;
 }

@@ -5,6 +5,7 @@
  */
 
 #include "masock.h"
+#include "critmem.h"
 #include "config.h"
 
 #include <sys/types.h>
@@ -80,7 +81,7 @@ masock_sa2name(const struct sockaddr *sa
 	break;
     }
 
-    ret = he && he->h_name ? strdup(he->h_name) : 0;
+    ret = he && he->h_name ? critstrdup(he->h_name, "masock_sa2name") : 0;
     endhostent();
     return ret;
 }

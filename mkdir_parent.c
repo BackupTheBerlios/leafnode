@@ -3,6 +3,7 @@
  * \year 2001
  */
 
+#include "critmem.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
@@ -20,7 +21,7 @@
  * so passing in a file name is safe.
  */
 int mkdir_parent(const char *s, mode_t mode) {
-    char *t = strdup(s);
+    char *t = critstrdup(s, "mkdir_parent");
     char *u = t;
     if (!t)
 	return -1;

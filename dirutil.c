@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <string.h>
 #include "mastring.h"
+#include "critmem.h"
 #include "leafnode.h"
 
 #ifdef WITH_DMALLOC
@@ -108,7 +109,7 @@ dirlist_core(
 		p = mastrcpy(p, de->d_name);
 	    }
 	} else {
-	    *ptr = strdup(de->d_name);
+	    *ptr = critstrdup(de->d_name, "dirlist_core");
 	}
 
 	if (!*ptr) {
