@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040326a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040510a])
 AC_PREREQ(2.59)
-AC_REVISION($Revision: 1.98 $)
+AC_REVISION($Revision: 1.99 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -253,7 +253,7 @@ AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
 dnl THESE ARE DISABLED AND UNNEEDED, no malloc(0) calls possible
 dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
 dnl AC_FUNC_REALLOC dnl checks whether realloc(0) works
