@@ -13,8 +13,6 @@ Source: http://mandree.home.pages.de/leafnode/beta/leafnode-%version.tar.bz2
 %define prefix      /usr
 %define spooldir    /var/spool/news
 %define confdir     /etc/leafnode
-%define lockdir     /var/lock/news
-%define lockfile    %{lockdir}/fetchnews.lck
 %define runas_user  news
 %define runas_group news
 
@@ -35,10 +33,10 @@ regelm‰ﬂig lesen, vom Newsserver des Providers.
 
 %prep
 %setup -q
-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix --mandir=%_mandir \
- --with-spooldir=%spooldir --silent \
- --sysconfdir=%confdir --with-lockfile=%lockfile \
- --with-runas-user=%{runas_user} --with-runas-group=%{runas_group}
+CFLAGS="$RPM_OPT_FLAGS"
+%configure \
+ --enable-spooldir=%spooldir \
+ --enable-runas-user=%{runas_user} --with-runas-group=%{runas_group}
 
 %build
 make -s
@@ -58,21 +56,22 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %config(noreplace) %attr(640,root,news) %confdir/filters
 %attr(640,root,news) %confdir/config.example
 %attr(640,root,news) %confdir/filters.example
-%attr(755,root,root) %{prefix}/bin/newsq
 %attr(755,root,root) %{prefix}/bin/leafnode-version
+%attr(755,root,root) %{prefix}/bin/lsmac.pl
+%attr(755,root,root) %{prefix}/bin/newsq
 %attr(755,root,root) %{prefix}/sbin/applyfilter
 %attr(755,root,root) %{prefix}/sbin/checkgroups
+%attr(755,root,root) %{prefix}/sbin/fetchnews
 %attr(755,root,root) %{prefix}/sbin/leafnode
 %attr(755,root,root) %{prefix}/sbin/rnews
-%attr(755,root,root) %{prefix}/sbin/fetchnews
 %attr(755,root,root) %{prefix}/sbin/texpire
-%attr(775,%{runas_user},%{runas_group}) %dir %{lockdir}
 %doc %_mandir/man1/*
 %doc %_mandir/man5/*
 %doc %_mandir/man8/*
-%doc ChangeLog AUTHORS CREDITS FAQ INSTALL README TODO
+%doc ChangeLog AUTHORS COPYING COPYING.LGPL NEWS 
+%doc CREDITS DEBUGGING ENVIRONMENT FAQ INSTALL
+%doc README TODO README_FIRST
 %doc README.html DEBUGGING
-#%doc tools/*.pl
 %attr(2755,%{runas_user},%{runas_group}) %spooldir
 
 %clean
