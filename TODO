@@ -239,9 +239,6 @@ Ralfs TODO:
 4.4 split post functionality from fetchnews to a separate daemon (but
     maybe call the new daemon automatically) Ozz 2001-06-12
 
-5.5 getgroup: "%s: considering %ld articles %lu - %lu" does not include
-    proper article count as sent by server, but just uses last-first+1
-
 5.5 introduce Control: pseudo group functionality
 
 5.5 abort group fetch and proceed to next group
@@ -389,6 +386,10 @@ FIXED ITEMS:
 
 ========================================================================
 DROPPED ITEMS:
+
+2002-07-07 getgroup: "%s: considering %ld articles %lu - %lu" does not include
+	   proper article count as sent by server, but just uses last-first+1
+	   The correct numbers are reported later on.
 
 2002-04-13 Matthias Andree
 	Ralf asked:
