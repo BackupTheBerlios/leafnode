@@ -1,4 +1,4 @@
-Changes since 20031129a:
+20031203a: Changes since 20031129a:
 - Cleanup: (nntpd) Avoid extraneous fflush() that causes the status line
   and the following input to be sent in separate packets, adding packet
   overhead. Add nntpprintf_as for this purpose.

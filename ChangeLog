@@ -1,4 +1,15 @@
+2003-12-03  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031203a =
+	* NEWS, nntpd.c: nntpprintf/fflush cleanup.
+	* NEWS, nntpd.c: Change: In response to LIST NEWSGROUPS, don't
+	flush 215 line, but concatenate answer into same packet. Reduces
+	packet count in response, for instance, when clients send this
+	command often to get newsgroup descriptions.
+
 2003-11-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20031129a
 
 	= snapshot 20031129a =
 	* leafnode.8.in: Add a note that EACH server line must have a
