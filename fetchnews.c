@@ -552,6 +552,7 @@ getmarked(struct newsgroup *group)
 	mastr_delete(fname);
 	return;
     }
+    initlist(&failed);
     while ((l = getaline(f))) {
 	char *fi[4];
 	struct stat dummy1;
@@ -594,29 +595,34 @@ getmarked(struct newsgroup *group)
 
 	if (!getbymsgid(fi[0], 2)) {
 	    /* mark article for retry */
-	    initlist(&failed);
-	    appendtolist(failed, l);
+	    mastr *tmp = mastr_new(200);
+	    mastr_vcat(tmp, fi[0], " ", fi[1], " ", fi[2], "\n", NULL);
+	    appendtolist(failed, mastr_str(tmp));
+	    mastr_delete(tmp);
 	}
     }
     fclose(f);
-    truncate(mastr_str(fname), (off_t) 0);	/* kill file contents */
-    if (!failed) {
-	mastr_delete(fname);
-	return;
-    }
-    /* XXX FIXME: don't overwrite directly but use TMP file */
+    /* XXX FIXME: overwriting is a bit dangerous and can lose marks
+     * however creating a new file changes the ctime which we must avoid */
     /* write back ids of all articles which could not be retrieved */
     if (!(f = fopen(mastr_str(fname), "w")))
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "Cannot open %s for writing: %m", mastr_str(fname));
     else {
+	int eflag = 0;
+	setbuf(f, NULL); /* make unbuffered */
 	ptr = failed->head;
 	while (ptr->next) {
-	    fputs(ptr->string, f);
-	    fputc('\n', f);
+	    if (EOF == fputs(ptr->string, f)) {
+		eflag = 1;
+		break;
+	    }
 	    ptr = ptr->next;
 	}
-	fclose(f);
+	if (fclose(f)) eflag = 1;
+	if (eflag)
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
+		    "Write error on %s: %m", mastr_str(fname));
     }
     freelist(failed);
     mastr_delete(fname);
