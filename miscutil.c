@@ -289,8 +289,9 @@ initgrouplistdir(const char *dir)
     return rb;
 }
 
-/** Read lines of a file into rbtree, ignore duplicates and empty lines.
- *  replace all spaces in file with '\0'.
+/** Read lines of a file into rbtree,
+ *  ignore empty lines, lines with duplicate first word and list without a space.
+ *  replace all spaces and tabs in file with '\0'.
  *  \return rbtree, NULL in case of trouble.
  */
 /*@null@*/ /*@only@*/ struct rbtree *
@@ -298,6 +299,7 @@ initfilelist(FILE *f, const void *config,
 	int (*comparison_function)(const void *, const void *, const void *))
 {
     static const char myname[] = "initfilelist";
+    static const char WHITE[] = " \t";
     struct rbtree *rb;
     char *l;
 
@@ -313,14 +315,22 @@ initfilelist(FILE *f, const void *config,
 	const char *k2;
 
 	k1 = critstrdup(l, myname);
-	for (p = k1; (p = strchr(p, ' ')) != NULL; ) {
-	    *p++ = '\0';
+	p = strpbrk(k1, WHITE);
+	if (p == NULL) {
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		   "%s: found invalid line \"%s\", skipping",
+		   myname, k1);
+	    free(k1);
+	    continue;
 	}
+	do {
+	    *p++ = '\0';
+	} while ((p = strpbrk(p, WHITE)) != NULL);
 
 	k2 = rbsearch(k1, rb);
 
 	if (k2 == NULL) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "out of memory in "
 		   "%s, cannot build rbtree", myname);
 	    free(k1);
 	    freegrouplist(rb);
