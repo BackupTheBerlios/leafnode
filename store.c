@@ -297,11 +297,18 @@ store_stream(FILE * in /** input file */ ,
     }
 
     /* check if it is to be filtered, if so, filter */
-    if (f && killfilter(f, mastr_str(head))) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-	       "store: article %s rejected by filter", mid);
-	rc = 1;
-	goto bail;
+    if (f) {
+	mastr_unfold(head);
+	if (debugmode & DEBUG_FILTER) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "store: try filters on header \"%s\"", mastr_str(head));
+	}
+	if (killfilter(f, mastr_str(head))) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "store: article %s rejected by filter", mid);
+	    rc = 1;
+	    goto bail;
+	}
     }
 
     /* We now have the header, we link this into the appropriate
