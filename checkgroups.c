@@ -83,7 +83,7 @@ main(int argc, char *argv[])
     FILE *f;
     
     ln_log_open("checkgroups");
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
     while ((option = getopt(argc, argv, "D:Vv")) != -1) {
 	if (!parseopt("checkgroups", option, NULL, NULL, 0)) {

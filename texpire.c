@@ -985,7 +985,7 @@ main(int argc, char **argv)
 
     ln_log_open("texpire");
 
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
     while ((option = getopt(argc, argv, "F:VD:vfrn")) != -1) {

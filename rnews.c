@@ -306,7 +306,7 @@ main(int argc, char *argv[])
     abort();
 
     ln_log_open(argv[0]);
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
 

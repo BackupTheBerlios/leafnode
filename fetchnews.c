@@ -1499,7 +1499,7 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
 
     ln_log_open("fetchnews");
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
     starttime = time(NULL);

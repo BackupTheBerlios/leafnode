@@ -5,6 +5,7 @@
 */
 
 #include "leafnode.h"
+#include "validatefqdn.h"
 
 #include <unistd.h>
 #include <assert.h>
@@ -2315,7 +2316,7 @@ main(int argc, char **argv)
     }
 
     ln_log_open("leafnode");
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 1))
 	exit(EXIT_FAILURE);
 
 

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.42 2002/05/05 19:49:28 emma Exp $ */
+/* $Id: leafnode.h,v 1.43 2002/05/06 09:06:08 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -151,7 +151,7 @@ extern "C" {
 #define LASTPOSTING ".last.posting"
 
 /* initialize global variables */
-    int initvars(const char *const progname);
+    int initvars(const char *const progname, int logtostdout);
 
 /* get configuration file */
 /*@null@*//*@observer@*/ char *

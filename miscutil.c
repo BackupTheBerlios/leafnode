@@ -13,6 +13,7 @@
 #include "mastring.h"
 #include "get.h"
 #include "redblack.h"
+#include "validatefqdn.h"
 
 #include <fcntl.h>
 #include <sys/uio.h>
@@ -75,7 +76,7 @@ static const struct mydir dirs[] = {
  */
 /*@-globstate@*/
 int
-initvars(const char *const progname)
+initvars(const char *const progname, int logtostdout)
 {
 #ifndef TESTMODE
     uid_t ui;
@@ -99,7 +100,7 @@ initvars(const char *const progname)
 #endif /* not TESTMODE */
 
     whoami();
-    validatefqdn(fqdn);
+    validatefqdn(logtostdout);
 
     /* config.c stuff does not have to be initialized */
     expire_base = NULL;

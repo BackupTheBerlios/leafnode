@@ -140,7 +140,7 @@ main(int argc, char *argv[])
     }
 
     ln_log_open("applyfilter");
-    if (!initvars(argv[0])) {
+    if (!initvars(argv[0], 0)) {
 	fprintf(stderr, "%s: cannot initialize\n", argv[0]);
 	exit(EXIT_FAILURE);
     }
