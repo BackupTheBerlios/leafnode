@@ -2016,7 +2016,7 @@ doauth_file(char *const cmd, char *const val) /*@modifies *val@*/
 	if (user) free(user);
 	user = malloc(strlen(val) + 2);
 	t = mastrcpy(user, val);
-	*t++ = ' ';
+	*t++ = ':';
 	*t = '\0';
 	memset(val, 0x55, strlen(val));
 	return P_CONTINUE;
@@ -2070,7 +2070,8 @@ doauthinfo(char *arg) /* we nuke away the password, no const here! */
     cmd = arg;
     SKIPLWS(cmd);
     param = cmd;
-    if (!*param || !isspace(*param)) {
+    SKIPWORDNS(param);
+    if (!*param || !isspace((unsigned char)*param)) {
 	result = P_SYNTAX_ERROR;
 	goto done;
     }

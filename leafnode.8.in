@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.5 2002/01/06 01:06:10 emma Exp $
+.\" $Id: leafnode.8.in,v 1.6 2002/01/06 04:11:05 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -218,7 +218,7 @@ authenticate = internal
 Require that NNTP clients authenticate themselves. If set, leafnode
 expects a file @sysconfdir@/users which lists users and their
 passwords. The file has one line per user, with the user name (which
-cannot contain spaces), then a space, then the crypt(3) encrypted
+cannot contain spaces), then a colon (:), then the crypt(3) encrypted
 password.
 
 To generate these lines, you can use the Perl program

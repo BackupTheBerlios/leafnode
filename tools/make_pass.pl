@@ -10,5 +10,5 @@ my $alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./
 
 srand();
 my $salt = substr($alphabet,int(rand 64),1) . substr($alphabet,int(rand 64),1);
-printf("%s %s\n", $ARGV[0], crypt($ARGV[1], $salt));
+printf("%s:%s\n", $ARGV[0], crypt($ARGV[1], $salt));
 exit 0;

@@ -526,7 +526,7 @@ The only method currently
 supported is <tt>internal</tt>. In this mode, leafnode expects a file
 <i>users</i> in its sysconfdir, /etc/leafnode/users by default, which has a
 simple format, one line per user, with the user name (which cannot contain
-spaces), then a space, then the crypt(3) encrypted password. To
+spaces), then a colon, then the crypt(3) encrypted password. To
 generate these lines, you can use the Perl program <i>tools/make_pass.pl</i>,
 for example, if you want to add a user "enigma" with a password of "break!me",
 type:

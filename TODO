@@ -68,6 +68,8 @@ urgence:
 
 2.2 heed Expires: header in texpire
 
+2.2 log RFC931 or AUTH data who posted an article (maybe show in newsq)
+
 2.2 Check RPM build
 
 2.2 pipeline GROUP commands for speed (make configurable for
