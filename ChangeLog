@@ -1,5 +1,17 @@
+2004-01-17  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode.spec.in:
+	 List uucp and sendbatch.bash in %files. Reported by Daniel Zwick.
+	* configure.ac: Clean up sysconfdir handling. Add GCC flags to
+	CFLAGS.
+	* Makefile.am: Clean up.
+
 2004-01-16  Matthias Andree <matthias.andree@gmx.de>
 
+	* leafnode.spec.in: Update.
+	* ChangeLog, NEWS, configure.ac: Release 20040116a.
+
+	= snapshot 20040116a =
 	* Makefile.am, genconfigdefs.awk, genconfigparam_data.awk: Makefile
 	cleanup. Do not ship AWK-generated files.
 	* b_sortnl.c: Quench compiler warnings in SPARC64.

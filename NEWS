@@ -1,3 +1,8 @@
+Changes since 20040116a:
+- Update: the spec file was outdated. Reported by Daniel Zwick.
+- Cleanup: Internal Makefile.am and configure.ac cleanup. Watch for
+  changes in the response to --prefix and/or --sysconfdir options.
+
 20040116a: Changes since 20040108a:
 - Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group
   argument was given that was not a pattern. Patch by Hans-Jürgen
