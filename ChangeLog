@@ -1,4 +1,18 @@
+2003-07-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: update 
+	* midutil.c: Fix comment.  
+	* applyfilter.c: Truncate a filtered article to  0 bytes, to let it
+	disappear from the spool.  texpire will later collect the empty
+	file.  
+	* nntpd.c: Adjust comment to new applyfilter truncate().  
+	* mastring.c: Adjust copyright years.  
+	* applyfilter.c: Unfold headers before filtering, just like store()
+	does.  Reported by Reiner Steib.  
+
 2003-07-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20030728a
 
 	= snapshot 20030728a =
 	* applyfilter.c, checkgroups.c, fetchnews.c, nntpd.c, rnews.c,
