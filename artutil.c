@@ -181,6 +181,76 @@ getheader(
     return hdr;
 }
 
+/** destructively parse Xref: header with syntax-checking
+ * given memory is overwritten (partial strings will be 0-terminated)
+ * *groups will be malloced to hold pointers to group names within xref
+ * *artno_strings will be malloced to hold pointers to article numbers
+ *  if artno_strings != NULL
+ *
+ *  \return
+ *  - number of groups in case of success
+ *  - -1 in case of failure, *groups and *artno_strings are undefined
+ */
+int
+parsekill_xref_line(/*@exposed@*/ char *xref,
+	/*@out@*/ char ***groups, /*@null@*/ /*@out@*/ char ***artno_strings,
+	int noskip)
+{
+    char *p, *q;
+    int n;
+    int max = 20;	/* assume most-catch */
+    char **ngs, **nums;
+
+    p = xref;
+    if (!noskip) {
+	if (!str_isprefix(p, "Xref:"))
+	    return -1;
+	p += 5;
+	SKIPLWS(p);
+    }
+    SKIPWORD(p);	/* skip hostname */
+
+    ngs = critmalloc(max * sizeof *ngs, "parsekill_xref_line");
+    if (artno_strings)
+	nums = critmalloc(max * sizeof *nums, "parsekill_xref_line");
+    else
+	nums = NULL;
+
+    n = 0;
+    while (p && *p) {
+	ngs[n] = p;
+	q = strchr(p, ':');
+	if (!q)
+	    goto err_out;
+	*q++ = '\0';
+	if (nums)
+	    nums[n] = q;
+	q = strchr(q, ' ');
+	if (q) {	/* end of line if NULL */
+	    *q++ = '\0';
+	    SKIPLWS(q);
+	}
+	p = q;
+	if (++n >= max) {
+	    max += max;
+	    ngs = critrealloc(ngs, max * sizeof *ngs, "parsekill_xref_line");
+	    if (nums)
+		nums = critrealloc(nums, max * sizeof *nums, "parsekill_xref_line");
+	}
+    }
+    if (n == 0)
+	goto err_out;
+    *groups = ngs;
+    if (artno_strings)
+	*artno_strings = nums;
+    return n;
+err_out:
+    free(ngs);
+    if (nums)
+	free(nums);
+    return -1;
+}
+
 /**
  * Delete a message in the local news base and in out.going.
  */
@@ -194,7 +264,9 @@ supersede_cancel(
 		    const char *past_action)
 {
     const char *filename;
-    char *p, *q, *r, *hdr;
+    char *r, *hdr;
+    char **ngs, **artnos;
+    int n, num_groups;
     struct stat st;
     char **dl, **t;
     int fd = open(".", O_RDONLY);
@@ -210,59 +282,48 @@ supersede_cancel(
 
     SKIPLWS(msgid);
     if (*msgid != '<')
-	return;
+	goto out;
     if (!(r = strchr(msgid, '>')))
-	return;
+	goto out;
     r[1] = '\0';
 
     if (debugmode & DEBUG_CANCEL)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
 
     filename = lookup(msgid);
-    if (!filename) {
-	(void)close(fd);
-	free(msgidalloc);
-	return;
+    if (!filename)
+	goto out;
+
+    hdr = getheader(filename, "Xref:");
+    if (!hdr)
+	goto out;
+
+    if ((num_groups = parsekill_xref_line(hdr, &ngs, &artnos, 1)) == -1) {
+	/* FIXME: diagnostic! */
+	free(hdr);
+	goto out;
     }
 
-    p = hdr = getheader(filename, "Xref:");
-    if (!hdr) {
-	(void)close(fd);
-	free(msgidalloc);
-	return;
-    }
-
-    /* jump hostname entry */
-    SKIPWORD(p);
-    /* now p points to the first newsgroup */
-
-    /* unlink all the hardlinks in the various newsgroups directories */
-    while (p && ((q = strchr(p, ':')))) {
+    for (n = 0; n < num_groups; n++) {
 	if (debugmode & DEBUG_CANCEL)
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		   "debug %s: xref: \"%s\"", action, p);
-	*q++ = '\0';
-	/* p now points to the newsgroup, q to the article number */
-	if (chdirgroup(p, FALSE)) {
-	    r = p;
-	    p = q;
-	    /* chop off substring */
-	    q = strchr(q, ' ');
-	    if (q)
-		*q++ = '\0';
-	    if (unlink(p)) {
-		ln_log(errno == ENOENT ? LNLOG_SDEBUG : LNLOG_SERR,
-		       LNLOG_CARTICLE,
-		       "%s: failed to unlink %s:%s: %m", action, r, p);
-	    } else {
-		ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-		       "%s %s:%s", past_action, r, p);
-	    }
+		   "debug %s: xref: \"%s\"", action, ngs[n]);
+
+	if (!chdirgroup(ngs[n], FALSE))
+	    continue;		/* no group dir present */
+
+	if (unlink(artnos[n])) {
+	    ln_log(errno == ENOENT ? LNLOG_SDEBUG : LNLOG_SERR,
+		    LNLOG_CARTICLE,
+		    "%s: failed to unlink %s:%s: %m", action, ngs[n], artnos[n]);
+	} else {
+	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+		    "%s %s:%s", past_action, ngs[n], artnos[n]);
 	}
-	p = q;
-	if (p)
-	    SKIPLWS(p);
     }
+    free(ngs);
+    free(artnos);
+    free(hdr);
 
     /* unlink the message-id hardlink */
     if (stat(filename, &st) && errno != ENOENT) {
@@ -308,7 +369,7 @@ supersede_cancel(
     if (fchdir(fd))
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "cannot restore working directory " "in supersede_cancel: %m");
+out:
     (void)log_close(fd);
     free(msgidalloc);
-    free(hdr);
 }

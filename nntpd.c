@@ -479,50 +479,51 @@ static /*@null@*/ /*@only@*/ char *
 getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
 	     /*@out@*/ unsigned long *markartno)
 {
-    char *p, *q, *r, *s, *xref;
-    char *markgroup;
+    char *xref, *p;
+    char *markgroup = NULL;
     unsigned long a;
-    struct stringlist *l, *ptr;
+    char **ngs, **artnos;
+    int n, num_groups;
 
     *markartno = 0;
     xref = fgetheader(f, "Xref:", 1);
     if (!xref)
 	return NULL;
-    p = xref;
-    SKIPWORD(p);
-    l = cmdlinetolist(p);
-    free(xref);
-    if (!l) {
+
+    if ((num_groups = parsekill_xref_line(xref, &ngs, &artnos, 1)) == -1) {
+	free(xref);
 	return NULL;
     }
-    if (groupname && delaybody_group(groupname)) {
-	if ((q = findinlist(l, groupname)) != NULL &&
-	    (r = strchr(q, ':')) != NULL &&
-	    (a = strtoul(r+1, &s, 10)) != 0 &&
-	    (*s == '\0')) {
-	    *r = '\0';
-	    goto found;
+
+    p = NULL;
+    if (groupname != NULL && delaybody_group(groupname)) {
+	for (n = 0; n < num_groups; n++) {
+	    if (!strcmp(groupname, ngs[n])) {
+		a = strtoul(artnos[n], NULL, 10);
+		p = ngs[n];
+		break;
+	    }
 	}
     }
-    /* look for another group to mark this article in */
-    for (ptr = l; ptr; ptr = ptr->next) {
-	q = ptr->string;
-	if ((r = strchr(q, ':')) == NULL)
-	    continue;
-	*r++ = '\0';
-	if (!*r || !is_interesting(q) || !delaybody_group(q))
-	    continue;
-	if ((a = strtoul(r, &s, 10)) == 0 || *s != '\0')
-	    continue;
-	goto found;
+
+    if (p == NULL) {
+	for (n = 0; n < num_groups; n++) {
+	    if (is_interesting(ngs[n]) && delaybody_group(ngs[n])) {
+		a = strtoul(artnos[n], NULL, 10);
+		p = ngs[n];
+		break;
+	    }
+	}
+    }
+    if (p != NULL) {
+	*markartno = a;
+	markgroup = critstrdup(p, "getmarkgroup");
     }
 
-    freelist(l);
-    return NULL;
-found:
-    *markartno = a;
-    markgroup = critstrdup(q, "getmarkgroup");
-    freelist(l);
+    free(xref);
+    free(ngs);
+    free(artnos);
+
     return markgroup;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.61 2002/07/06 09:01:17 ralf Exp $ */
+/* $Id: leafnode.h,v 1.62 2002/07/06 11:35:54 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -342,6 +342,9 @@ extern "C" {
 /*
  * various functions in artutil.c
  */
+    int parsekill_xref_line(/*@exposed@*/ char *xref,
+      /*@out@*/ char ***groups, /*@null@*/ /*@out@*/ char ***artno_strings, int noskip);
+
     void supersede_cancel(const char *msgid, const char *, const char *);
 
 /*
