@@ -51,7 +51,7 @@
 
 /** Create a file and make sure it has a current mtime. Note this file
     is not fsynced. */
-__inline static
+__inline__ static
     int
 touch(const char *name)
 {
@@ -105,7 +105,7 @@ store_stream(FILE * in /** input file */ ,
 	     long maxbytes /** maximum byte count, -1 == unlimited */ )
 {
     int rc = -1;		/* first, assume something went wrong */
-    const char *ta[] = { spooldir, "/temp.files/store_XXXXXXXXXX", 0 };
+    const char *ta[3];
     char *tmpfn = memstrcat(ta);
     const char *line = 0;
     char *mid = 0, *m;
@@ -126,6 +126,10 @@ store_stream(FILE * in /** input file */ ,
     mastr *head = mastr_new(4095);	/* full header for killing */
     ssize_t s;
     mastr *ln = mastr_new(4095);	/* line buffer */
+
+    ta[0] = spooldir;
+    ta[1] = "/temp.files/store_XXXXXXXXXX";
+    ta[2] = 0;
 
     /* check for OOM */
     if (!tmpfn)
@@ -213,7 +217,7 @@ store_stream(FILE * in /** input file */ ,
 	if (strisprefix(line, "Control:")) {
 	    const char *p = line + 8;
 	    SKIPLWS(p);
-	    if (strisprefix(p, "cancel") && isspace(p[6]))
+	    if (strisprefix(p, "cancel") && isspace((unsigned char)p[6]))
 		supersede_cancel(p + 7, "Cancel", "Cancelled");
 	}
 
