@@ -1,3 +1,13 @@
+2004-09-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* xoverutil.c: Drop dead code, make rebuilding overview information
+	optional for efficiency.
+	* applyfilter.c, nntpd.c, texpire.c: Chase getxover() removal.
+	* Makefile.am: Add new sgetcwd function.  Use cmp -s to avoid
+	irritating cmp output during build.
+	* leafnode.h: Add new sgetcwd function.  Drop getxover function.
+	* sgetcwd.c, sgetcwd.h: Add new sgetcwd function.
+
 2004-09-15  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20040915b =
