@@ -527,3 +527,10 @@ void fixxover(void) {
 
     closedir(d);
 }
+
+void freexover(void) {
+    if(xoverinfo) {
+	free(xoverinfo);
+	xoverinfo = 0;
+    }
+}

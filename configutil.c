@@ -22,6 +22,7 @@ See README for restrictions on the use of this software.
 #include "ln_log.h"
 #include "config_defs.h"
 #include "configparam.h"
+#include "get.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -186,11 +187,18 @@ int readconfig(char * configfile) {
 			}
 			break;
 		    case CP_EXPIRE:
-			expire = time(0)-(time_t)(SECONDS_PER_DAY *atol(value));
+		    { 
+			long days;
+			if(!get_long(value, &days)) {
+			    ln_log_sys(LNLOG_ERR, "config: cannot parse %s=%s"
+				       ": expected integer", param, value);
+			}
+			expire = time(0)-(time_t)(SECONDS_PER_DAY*days);
 			if (debugmode)
 			    ln_log_sys(LNLOG_DEBUG, 
 				       "config: expire is %s days", value);
-			break;
+		    }
+		    break;
 		    case CP_FILTFIL:
 			filterfile = strdup(value);
 			if (debugmode)
@@ -250,25 +258,37 @@ int readconfig(char * configfile) {
 			break;
 		    case CP_GROUPEXP: 
 		    {
-			char * m = param;
+			char * m = value;
 		    
-			while (!(isspace((unsigned char)*m))) {
+			while (*m && !(isspace((unsigned char)*m))) {
 			    *m = tolower((unsigned char)*m);
 			    m++;
 			}
+			*m++=0;
 			while (isspace((unsigned char)*m)) m++;
 			if (m && *m) {
-			    i = time(NULL)-(time_t)(SECONDS_PER_DAY *atol(value));
-			    ent = (struct expire_entry *)
-			    malloc(sizeof(struct expire_entry));
-			    ent->group = strdup(m);
-			    ent->xtime = i;
-			    ent->next = prev;
-			    prev = ent;
-			    if (debugmode)
-			    ln_log_sys(LNLOG_DEBUG,
-				       "config: groupexpire for %s is %s days",
-				       m, value);
+			    long days;
+			    if(!get_long(m, &days)) {
+				ln_log_sys(LNLOG_ERR, "config: cannot parse "
+					   "%s=%s line: expected integer",
+					   param, value);
+			    } else {				
+				i = time(NULL)
+				    -(time_t)(SECONDS_PER_DAY*days);
+				ent = (struct expire_entry *)
+				    critmalloc(sizeof(struct expire_entry),
+					       "parsing groupexpire");
+				if(ent) {
+				    ent->group = strdup(value);
+				    ent->xtime = i;
+				    ent->next = prev;
+				    prev = ent;
+				    if (debugmode)
+					ln_log_sys(LNLOG_DEBUG,
+						   "config: groupexpire for %s is %ld days",
+						   value, days);
+				}
+			    }
 			}
 		    }
 		    break;

@@ -2,7 +2,7 @@
  * *** DO NOT EDIT ***
  */
 const char *bindir="/usr/local/sbin";
-const char *spooldir="/var/spool/leafnode";
+const char *spooldir="/usr/spool/leafnode";
 const char *libdir="/etc/leafnode";
 const char *lockfile="/var/lock/news/fetchnews.lck";
-const char *version="2.0b5_ma7";
+const char *version="2.0b5_ma8";

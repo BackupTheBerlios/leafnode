@@ -4,6 +4,36 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma8 -- changes since 2.0b5_ma7:
+
+- install newsq setgid news to be able to protect leafnode's spooldir.
+
+- remove some debug=0 and debug=debugmode-occurrences. suppressing
+  information is no good for debugging.
+
+- junk delposted entirely. No traces left. 
+
+- when posting, try STAT before HEAD (less overhead in case the article
+  is already there)
+  
+- forward port of "files left open" bug fix from 1.9.18 (reported by
+  Carl D. Cravens, fixed by Cornelius Krasel)
+
+- NEWNEWS command uses .overview for speed (good for high-traffic
+  groups)
+
+- new internal function cuttab, which breaks a field out of a
+  tab-separated string and returns a copy (VERY useful for .overview
+  handling). The string returned must be free(3)d.
+
+- fix broken -P option (checkforpostings expected all-numeric file
+  names, while leafnode's spool files also have two "-" characters in them)
+  (Reported by Raymond Scholz) 
+
+- groupexpire fixed, NOTE: NEW SYNTAX groupexpire=de.rec.fotografie 10
+  (Reported by Raymond Scholz) Also note that the old 2.0b5 parser could
+  crash on bogus data in config file here.
+
 ** History of 2.0b5_ma7 -- changes since 2.0b5_ma6:
 
 - portability workaround for broken Solaris /bin/sh: 

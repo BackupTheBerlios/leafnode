@@ -11,18 +11,35 @@ SHOWSTOPPERS:
 BUGS:
 ====
 
+- can't find /usr/local-installed PCRE on FreeBSD 4.0
+- Two reports of Llyod Zusman Dec-17 on leafnode mailing list.
+- "Das ist eine Macke von Leafnode. Wird von einem Server die komplette
+  Gruppenliste geholt, so werden neu hinzugekommene Gruppen bei
+  NEWGROUPS nicht aufgeführt. Der Reader findet sie daher nicht ohne
+  weiteres." (Stefan Wiens, de.comm.software.newsserver 2000-12-07,
+  Message-ID: <wkr93lxerw.fsf@helium.eswe.dyndns.org>)
+- see if the 1.9.17->1.9.18 bugfix can be simplified.
+  update: postarticles is a horrible mess. It deletes the articles
+  IMMEDIATELY if it's available on a server.
 - can fetchnews cope with servers that reject XOVER? (Matthias)
 - maxage doesn't work
 - fetchnews -N does not work
+  Jürgen Salk, Message-ID:
+  <3A3E8E47.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
 - signal needs to be worked around on Solaris 7 (Matthias Andree)
+- server dependent out.going, possibly a repost command?
+- move old articles from out.going to failed.postings if they are, say,
+  7 days, old? (Report by Stefan Wiens, Message-ID:
+  <3A1EDBFF.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
 
 general:
 =======
 
+- flag servers as "don't post here" (Robin S. Socha, 2000-12-17,
+  Message-ID: <3A3D1CB3.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
 - get rid of all those if(verbose > anything)
 - get rid of _all_ sscanf (Matthias Andree)
-- apply all the patches :-)
-- determine interesting groups from .newsrc
+- determine interesting groups from .newsrc?
 - how to make newsgroup names 8-bit compliant? E.g., how to produce
   a newsgroups line of the form
 	Newsgroups: norge.østfold
@@ -37,6 +54,7 @@ general:
 fetchnews:
 =========
 
+- implement NEWNEWS for broken Demon.co.uk servers (Carl Inglis)
 - groupinfo wird nach timeout und anschliessendem sigint nicht upgedated!
 - wenn connection nicht erfolgreich ist, haengt der rechner
 - problems with timeout. If timeout occurs, fetchnews should send itself

@@ -25,6 +25,7 @@ See README for restrictions on the use of this software.
 #include "leafnode.h"
 #include "critmem.h"
 #include "ln_log.h"
+#include "get.h"
 
 #ifdef SOCKS
 #include <socks.h>
@@ -558,7 +559,9 @@ void doarticle(const char *arg, int what) {
 	    if ((p = strchr(p, '\n')))
 		*p = '\0';
 
-	    printf("%s%s\r\n", *s=='.' ? "." : "", s); /* . on headers :(*/
+	    if(*s=='.') putc('.', stdout); /* escape . */
+	    fputs(s, stdout);
+	    fputs("\r\n", stdout);
 	}
     }
 
@@ -593,7 +596,7 @@ void doarticle(const char *arg, int what) {
     fclose(f);
     free(localmsgid);
 
-    return; /* OF COURSE there were no errors */
+    return; /* FIXME: OF COURSE there were no errors */
 }
 
 
@@ -912,19 +915,38 @@ void donewnews(char *arg) {
     while ((de = readdir(d)) != NULL) {
 	if (ngmatch((const char*)&(l->string), de->d_name) == 0) {
 	    chdirgroup(de->d_name, FALSE);
+	    getxover();
 	    ng = opendir(".");
 	    while ((nga = readdir(ng)) != NULL) {
-		if ((stat(nga->d_name, &st) == 0) &&
-		       (*nga->d_name != '.') && S_ISREG(st.st_mode) &&
-		       (st.st_ctime > age)) {
-		    printf("%s\r\n", getheader(nga->d_name, "Message-ID: "));
-		}
-	    }
+		long artno;
+		if(get_long(nga->d_name, &artno)) {
+		    if ((stat(nga->d_name, &st) == 0) &&
+			(*nga->d_name != '.') && S_ISREG(st.st_mode) &&
+			(st.st_ctime > age)) {
+			
+			long xo=findxover(artno);
+			if(xo >= 0) {
+			    char *x = cuttab(xoverinfo[xo].text, XO_MESSAGEID);
+			    if(x) {
+				fputs(x, stdout);
+				fputs("\r\n", stdout);
+				free(x);
+			    } else {
+				/* FIXME: cannot find message ID in XOVER */
+			    }
+			} else {
+			    /* FIXME: cannot find XOVER for article */
+			}
+		    } /* too old */
+		} /* if not a number, not an article */
+	    } /* readdir loop */
 	    closedir(ng);
+	    free(xoverinfo);
+	    xoverinfo = 0;
 	}
     }
     closedir(d);
-    printf(".\r\n");
+    fputs(".\r\n", stdout);
 }
 
 void donewgroups(const char *arg) {
@@ -1059,8 +1081,7 @@ void dopost(void) {
     out = open(outname, O_WRONLY|O_EXCL|O_CREAT, 0444);
     if (out < 0) {
 	char *error = strerror(errno);
-	printf("441 Unable to open spool file %s: %s\r\n", outname, error);
-	ln_log(LNLOG_ERR, ">441 Unable to open spool file %s: %s",
+	ln_log_so(LNLOG_ERR, "441 Unable to open spool file %s: %s",
 		outname, error);
 	return;
     }

@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.9 2000/11/24 15:21:17 emma Exp $
+# $Id: Makefile.in,v 1.10 2001/01/02 18:34:35 emma Exp $
 
 VERSION = @VERSION@
 
@@ -179,7 +179,7 @@ install: $(PROGRAMS)
 	  leafnode rnews checkgroups applyfilter $(INSTALLROOT)$(BINDIR)
 	$(INSTALL) -c -g news -m 4750 -o root $(STRIP) \
 	  texpire fetchnews $(INSTALLROOT)$(BINDIR)
-	$(INSTALL) -c -g news -m 755 -o news $(STRIP) \
+	$(INSTALL) -c -g news -m 2755 -o news $(STRIP) \
 	  newsq $(INSTALLROOT)$(USRDIR)
 # man pages
 	for i in man1 man5 man7 man 8 ; do \

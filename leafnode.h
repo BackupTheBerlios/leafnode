@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.6 2000/11/23 04:10:41 emma Exp $ */
+/* $Id: leafnode.h,v 1.7 2001/01/02 18:34:35 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -231,15 +231,28 @@ struct xoverinfo {
     int exists;
 };
 
+enum xoverfields {
+    XO_ARTNO=1,
+    XO_SUBJECT,
+    XO_FROM,
+    XO_DATE,
+    XO_MESSAGEID,
+    XO_REFERENCES,
+    XO_BYTES,
+    XO_LINES,
+    XO_XHDR 
+}; 
+
 extern struct xoverinfo * xoverinfo;
 extern unsigned long xfirst;
 extern unsigned long xlast;
 
 long findxover(unsigned long article);
 		  /* find index number for an article, return -1 on error */
-int getxover(void);	/* set xoverinfo, return 0 on error, nonzero else */
-void fixxover(void);	/* repair all .overview files */
+int getxover(void);	  /* set xoverinfo, return 0 on error, nonzero else */
+void fixxover(void); 	  /* repair all .overview files */
 void gfixxover(char * g); /* repair .overview in groups g */
+void freexover(void);     /* free xoverinfo structure */
 
 /*
  * the strings in config.c
@@ -347,7 +360,10 @@ void nntpdisconnect(void);	/* disconnect from upstream server */
 const char* rfctime(void);	/* An rfc type date */
 
 /* from strutil.c */
-int check_allnum(const char *); /* check if string is all made of digits */
+int check_allnum_minus(const char *); /* check if string is all made 
+					 of digits and "-" */
+char *cuttab(const char *in, int field); /* break tab-separated field */
+
 
 /* from dirutil.c */
 /* open directory, log problems */

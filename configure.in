@@ -6,7 +6,7 @@ AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
 dnl version information
-VERSION="2.0b5_ma7"
+VERSION="2.0b5_ma8"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.
@@ -120,7 +120,10 @@ AC_CHECK_LIB(crypt, crypt, [CRYPTLIB="-lcrypt"])
 AC_SUBST(CRYPTLIB)
 
 dnl Check for PCRE library.
-AC_CHECK_HEADER(pcre.h)
+AC_MSG_CHECKING(if you have pcre.h)
+AC_CACHE_VAL(ac_cv_header_pcre_h,AC_TRY_COMPILE([#include <pcre.h>],
+[return 0;],[ac_cv_header_pcre_h=yes],[ac_cv_header_pcre_h=no]))
+AC_MSG_RESULT($ac_cv_header_pcre_h)
 if test "$ac_cv_header_pcre_h" = yes
 then
   # do not add this to LIBS
