@@ -19,6 +19,7 @@
 - Change: checkgroups can process multiple files in one go.
 - Bugfix: fetchnews' "-F conffile" option did not work.
 - Change: several internal cleanups and some refactorizations.
+- Build: rebuilt with automake 1.8.2 and autoconf 2.59 
 
 20040108a: Changes since 20031221a:
 - Change: Log username and upstream server for authentication failures.
