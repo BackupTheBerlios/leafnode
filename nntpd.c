@@ -1997,12 +1997,12 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	    return;
 	}
 	nntpprintf("224 Overview information (pseudo) for postings 1-1:");
-	nntpprintf("%lu\t"
+	nntpprintf("1\t"
 		   "Leafnode placeholder for group %s\t"
 		   "nobody@%s (Leafnode)\t%s\t"
 		   "<leafnode.%s@%s>\t\t1000\t40\t"
 		   "Xref: %s %s:1",
-		   b, group->name,
+		   group->name,
 		   owndn ? owndn : fqdn, rfctime(), group->name,
 		   owndn ? owndn : fqdn, fqdn, group->name);
 	fputs(".\r\n", stdout);
