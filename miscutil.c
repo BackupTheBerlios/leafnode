@@ -55,6 +55,7 @@ struct mydir {
 
 static struct mydir dirs[] = {
     {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
+    {"backup.moderated", 0755},	/* carries articles to moderated upstream groups */
     {"interesting.groups", 0755},
     {"leaf.node", 0755},
     {"message.id", 02755},
