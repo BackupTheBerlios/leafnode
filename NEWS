@@ -1,4 +1,6 @@
 2.0b8_ma10pre4:
+- no longer installs the "lsort" program. You can remove it from
+  /usr/local/sbin/lsort
 - IMPORTANT: leafnode now automatically appends "leafnode" to your
   sysconfdir. For backwards compatibility, ./configure will strip a
   trailing "/leafnode" or "/leafnode/" so you don't end up with your
