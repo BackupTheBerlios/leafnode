@@ -86,7 +86,7 @@ vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
     if (console && (!ln_log_stderronly || console != stderr)) {
 	/* always log LNLOG_SERR and more severe,
 	   regardless of verbosity */
-	if ((context <= verbose || severity <= LNLOG_SERR)
+	if ((context <= verbose || severity <= LNLOG_SERR || (severity <= LNLOG_SWARNING && verbose))
 		&& (severity < LNLOG_SDEBUG || debugmode & DEBUG_LOGGING)) {
 	    (void)fputs(buf, console);
 	    (void)fputc('\n', console);
