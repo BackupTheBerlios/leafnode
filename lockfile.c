@@ -197,7 +197,7 @@ safe_mkstemp(
  * - -1: for other errors
  */
 int
-lockfile_exists(
+attempt_lock(
 /** Timeout, if nonzero, wait at most this many seconds. */
 		   unsigned long timeout)
 {
