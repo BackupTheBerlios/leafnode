@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.37 2002/09/10 00:23:26 emma Exp $
+# $Id: Makefile.am,v 1.38 2002/10/23 15:55:10 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -99,6 +99,7 @@ liblnutil_a_SOURCES	= \
 	log_unlink.c \
 	log_moveto.c \
 	mailto.c \
+	mailto.h \
 	masock.h \
 	masock_sa2addr.c \
 	masock_sa2name.c \
@@ -266,8 +267,6 @@ install-data-hook:
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)/leaf.node
-	p=$(DESTDIR)$(SPOOLDIR)/leaf.node/groupinfo ; \
-	test -f $$p || cp /dev/null $$p
 	p=`dirname $(DESTDIR)$(LOCKFILE)` ; \
 	if test ! -d $$p ; then \
 	  $(INSTALL) -d -m 750 $$p ; \
@@ -275,8 +274,6 @@ install-data-hook:
 	  ./amiroot && chgrp $(RUNAS_GROUP) $$p ; true ; \
         fi
 # don't use test -e, it's broken on Solaris (only in /usr/bin/test)
-	p=$(DESTDIR)$(SYSCONFDIR)/local.groups ; \
-	test -f $$p || cp /dev/null $$p
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2755 $$p  ; true
