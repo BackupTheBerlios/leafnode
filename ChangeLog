@@ -1,3 +1,26 @@
+2003-10-01  Matthias Andree <matthias.andree@gmx.de>
+
+	* README.html: Fix typo, found by Jürgen Salk.
+
+	= snapshot 20031001a =
+	* TODO, configure.ac: Update for snapshot 2003-10-01
+
+2003-09-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Add a strtoul replacement that doesn't accept
+	negative values. Stricter GROUP reply parsing to avoid accepting
+	negative values, seen on INN with corrupt OVER
+
+2003-08-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Double tolerance for decreasing high article number
+	on upstreams to 10.  Make sure initialfetch also applies in case the
+	upstream server decreases its high article number by more than this
+	limit, rather than checking tens of thousands of articles.  Reported
+	by Reiner Steib.
+	* filterutil.c: Add test code for age() function.
+	* store.c: Drop unnecessary include.
+
 2003-08-14  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20030814a =

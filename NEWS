@@ -1,4 +1,14 @@
-Changes since 20030731a:
+20031001a: Changes since 20030814a:
+- Bugfix: stricter GROUP reply parsing to avoid accepting negative
+  values (seen on some INN with apparently corrupt overview).
+- Bugfix: Initialfetch now also applies when the server resets its
+  article counters (which it should never do), avoiding the check of
+  thousands of articles. Reported by Reiner Steib.
+- Change: double tolerance for decrease of article counters from 5 to
+  10. When the number goes down by more than 10, re-fetch the group as
+  though it were newly subscribed.
+
+20030814a: Changes since 20030731a:
 - Bugfix: Expire groups that are no longer in "active".
 - Bugfix: Make Xref: based filters work in the XOVER phase already, to
   avoid downloading the article.
