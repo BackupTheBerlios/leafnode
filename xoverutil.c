@@ -490,11 +490,14 @@ xgetxover(
     if (overview)
 	free(overview);
 
-    /* count removed articles */
-    for (art = xfirst; art <= xlast; art++) {
-	if (xoverinfo[art - xfirst].text
-	    && !xoverinfo[art - xfirst].exists) {
-	    update = 1;
+    /* look for removed articles */
+    if (!update) {
+	for (art = 0; art < current; art++) {
+	    if (xoverinfo[art].text
+		    && !xoverinfo[art].exists) {
+		update = 1;
+		break;	/* no need to go through the rest */
+	    }
 	}
     }
 
