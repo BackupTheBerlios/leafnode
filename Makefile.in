@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.in,v 1.13 2001/12/14 03:43:33 emma Exp $
+# $Id: Makefile.in,v 1.14 2001/12/18 01:17:37 emma Exp $
 
 VERSION = @PACKAGE_VERSION@
 
@@ -105,6 +105,7 @@ SRCFILES = \
 	getaline.c \
 	getfoldedline.c \
 	getline.c \
+	gmtoff.c \
 	h_error.c \
 	inet_ntop.c \
 	leafnode-version.c \
@@ -126,6 +127,7 @@ SRCFILES = \
 	mergesort.c \
 	miscutil.c \
 	mkdir_parent.c \
+	moderated.c \
 	msgid_hash.c \
 	msgid_sanitize.c \
 	newsq.c \
@@ -180,6 +182,7 @@ LIBFILES = \
 	getaline.o \
 	getfoldedline.o \
 	getline.o \
+	gmtoff.o \
 	h_error.o \
 	ln_log.o \
 	ln_log_open.o \
@@ -198,6 +201,7 @@ LIBFILES = \
 	mastrncpy.o \
 	miscutil.o \
 	mkdir_parent.o \
+	moderated.o \
 	msgid_hash.o \
 	msgid_sanitize.o \
 	nfswrite.o \
@@ -665,6 +669,8 @@ log_fsync.o: log_fsync.c leafnode.h attributes.h redblack.h \
 log_rename.o: log_rename.c leafnode.h attributes.h redblack.h \
  config.h ln_log.h
 log_unlink.o: log_unlink.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+mailto.o: mailto.c leafnode.h attributes.h redblack.h \
  config.h ln_log.h
 masock_sa2addr.o: masock_sa2addr.c masock.h \
  config.h
