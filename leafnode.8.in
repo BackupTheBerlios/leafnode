@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.7 2002/01/11 00:03:03 emma Exp $
+.\" $Id: leafnode.8.in,v 1.8 2002/02/20 03:59:49 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -225,10 +225,11 @@ password.
 
 To generate these lines, you can use the Perl program
 .IR tools/make_pass.pl ,
-for example, if you want to add a user .I
-enigma
+for example, if you want to add a user
+.I enigma
 with  a password of
-.IR break!me , type:
+.IR break!me ,
+type:
 
 perl -wT tools/make_pass.pl 'enigma' 'break!me'
 
