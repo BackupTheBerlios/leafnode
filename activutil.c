@@ -239,7 +239,7 @@ writeactive(void)
     while (g->name) {
 	g++;
     }
-    count = g - active;
+    count = (size_t)(g - active);
     sort(active, count, sizeof(struct newsgroup), &_compactive);
 
     /* write groupinfo */
@@ -409,7 +409,7 @@ readactive(void)
     while (g->name) {
 	g++;
     }
-    activesize = g - active;	/* C magic */
+    activesize = (size_t)(g - active);	/* C magic */
     /* needed so that subsequent insertgroup can work properly */
     sort(active, activesize, sizeof(struct newsgroup), &_compactive);
 }
@@ -429,9 +429,9 @@ rereadactive(void)
     s2 = (char *)critmalloc(strlen(libdir) + strlen(append) + 1,
 			    "rereadactive");
     t = mastrcpy(s1, spooldir);
-    mastrcpy(t, GROUPINFO);
+    (void)mastrcpy(t, GROUPINFO);
     t = mastrcpy(s2, libdir);
-    mastrcpy(t, append);
+    (void)mastrcpy(t, append);
 
     if (!active)
 	reread = 1;
