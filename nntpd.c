@@ -666,13 +666,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	    unsigned long markartno;
 	    char *markgroup;
 
-	    if (localartno) {
-		markgroup = critstrdup(group->name, "doarticle");
-		markartno = localartno;
-	    } else {
-		/* parse Xref to get (markgroup, markartno) here */
-		markgroup = getmarkgroup(group ? group->name : NULL, f, &markartno);
-	    }
+	    /* parse Xref to get (markgroup, markartno) here */
+	    markgroup = getmarkgroup(group ? group->name : NULL, f, &markartno);
 	    switch (markdownload(markgroup, localmsgid, markartno)) {
 	    case 0:
 		fputs("\r\n\r\n"
@@ -690,8 +685,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	    default:
 		printf("\r\n\r\n"
 			"\t[ Leafnode: ]\r\n"
-			"\t[ Message %s ]\r\n"
-			"\t[ cannot be marked for download. ]\r\n"
+			"\t[ Body of message %s ]\r\n"
+			"\t[ is empty but cannot be marked for download. ]\r\n"
 			"\t[ Apparently none of the interesting groups ]\r\n"
 			"\t[ this message was posted to is in delaybody mode ]\r\n",
 			localmsgid);
