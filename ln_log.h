@@ -46,4 +46,5 @@ extern void ln_log_sys(int severity, int context, const char *format, ...)
     __attribute__ ((format(printf, 3, 4)));
 
 extern int ln_log_stderronly;
+extern int verbose;
 #endif

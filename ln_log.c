@@ -23,7 +23,6 @@
 #include <dmalloc.h>
 #endif
 
-extern int verbose;
 int ln_log_stderronly;
 
 /* log to syslog if slg != 0
