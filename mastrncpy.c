@@ -10,8 +10,8 @@
  * terminates the destination string, but there is no padding as in
  * strncpy. If there is space left in the destination string, returns a
  * pointer to the NUL byte. It returns 0 if there is no space left. */
-char *
-mastrncpy(char *dest, const char *src, size_t n)
+/*@null@*/ char *
+mastrncpy(/*@out@*/ /*@unique@*/ /*@returned@*/ char *dest, const char *src, size_t n)
 {
     if (!n)
 	return 0;

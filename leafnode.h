@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.17 2002/01/03 01:26:15 emma Exp $ */
+/* $Id: leafnode.h,v 1.18 2002/01/05 11:44:06 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -138,8 +138,8 @@ extern "C" {
 /* conffile is changed */
     int parseopt(const char *, int, const char *, char *conffile, size_t);
 
-/* converts a message-id to a file name, the return value is malloc()ed */
-    char *lookup(const char *msgid);
+/* converts a message-id to a file name, the return value points to static storage  */
+    /*@dependent@*/ char *lookup(const char *msgid);
 
 /* handling of misc. lines */
     char *getaline(FILE * f);	/* reads one line, regardless of length,
@@ -272,9 +272,9 @@ extern "C" {
 /*
  * store articles
  */
-    int store(const char *filename, int, const struct filterlist *);
-    int store_stream(FILE * stream, int, const struct filterlist *, long);
-    const char *store_err(int);
+    int store(const char *filename, int, /*@null@*/ const struct filterlist *);
+    int store_stream(FILE * stream, int, /*@null@*/ const struct filterlist *, long);
+    /*@observer@*/ const char *store_err(int);
 
 /*
  * find a certain header in an article and return it
