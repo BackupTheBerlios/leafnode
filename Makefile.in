@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.8 2000/11/23 04:10:41 emma Exp $
+# $Id: Makefile.in,v 1.9 2000/11/24 15:21:17 emma Exp $
 
 VERSION = @VERSION@
 
@@ -12,9 +12,7 @@ INSTALL = @INSTALL@
 RANLIB  = @RANLIB@
 AWK	= @AWK@
 AR	= @AR@
-GPERF	= @GPERF@
 SED	= @SED@
-# ARFLAGS = -rcv # take defaults.
 
 # Libraries
 PCRELIB = @PCRELIB@
@@ -22,11 +20,12 @@ LINKPCRELIB = @LINKPCRELIB@
 CRYPTLIB = @CRYPTLIB@
 
 # Flags
-DEBUG  = -g
-STRIP  =
-CFLAGS = @CFLAGS@ -I. @DEFS@ @GCC_FLAGS@ $(DEBUG)
-LIBS   = @LIBS@
-ADDLIBS  = liblnutil.a libugid.a
+DEBUG    = -g
+STRIP    =
+CFLAGS   = @CFLAGS@ -I. @DEFS@ @GCC_FLAGS@ $(DEBUG)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS  = @LDFLAGS@
+LIBS     = @LIBS@
 
 # Directories and Paths
 # News is stored in SPOOLDIR, configuration is kept in LIBDIR
@@ -65,12 +64,14 @@ LIBFILES = nntputil.o configutil.o xoverutil.o activutil.o miscutil.o \
 	   vsnprintf.o strdup.o get_any.o getaline.o config.o \
 	   ln_log_open.o ln_log.o configparam_data.o h_error.o \
 	   format_ulong.o \
-	   @LIBOBJS@
+	   @LIBOBJS@ \
+	   ugid_gensure.o ugid_gget.o ugid_ggetbyuname.o ugid_gset.o \
+	   ugid_uensure.o ugid_uget.o ugid_ugetbyuname.o ugid_uset.o 
 
 HDRFILES = leafnode.h get.h critmem.h acconfig.h ln_log.h configparam.h \
 	   config_defs.h attributes.h ugid.h getline.h h_error.h format.h
 
-PROGRAMS = nntpd rnews fetchnews texpire checkgroups applyfilter newsq
+PROGRAMS = leafnode rnews fetchnews texpire checkgroups applyfilter newsq
 
 all: $(PROGRAMS) $(MANFILES)
 
@@ -85,34 +86,33 @@ pcre/libpcre.a:
 	@echo "Building Philip Hazel's Perl regular expressions library..."
 	cd pcre && $(MAKE) libpcre.a
 
-nntpd: nntpd.o $(ADDLIBS) @CRYPTLIB@
-	$(CC) $(CFLAGS) -o $@ nntpd.o $(CRYPTLIB) $(LIBS) $(ADDLIBS)
+.c.o:	leafnode.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
-rnews: rnews.o $(ADDLIBS)
-	$(CC) $(CFLAGS) -o $@ rnews.o $(LIBS) $(ADDLIBS)
+.o:	liblnutil.a
+	$(CC) $(LDFLAGS) -o $@ $< liblnutil.a $(LIBS)
 
-fetchnews: fetchnews.o $(ADDLIBS) @PCRELIB@
-	$(CC) $(CFLAGS) -o $@ fetchnews.o $(LIBS) $(ADDLIBS) $(LINKPCRELIB) 
+leafnode: nntpd.o liblnutil.a
+	$(CC) $(LDFLAGS) -o $@ nntpd.o liblnutil.a $(LIBS) $(CRYPTLIB)
 
-texpire: texpire.o $(ADDLIBS)
-	$(CC) $(CFLAGS) -o $@ texpire.o $(LIBS) $(ADDLIBS)
+rnews: rnews.o liblnutil.a
 
-checkgroups: checkgroups.o $(ADDLIBS)
-	$(CC) $(CFLAGS) -o $@ checkgroups.o $(LIBS) $(ADDLIBS)
+fetchnews: fetchnews.o $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ fetchnews.o liblnutil.a $(LIBS) $(LINKPCRELIB) 
 
-applyfilter: applyfilter.o $(ADDLIBS) @PCRELIB@
-	$(CC) $(CFLAGS) -o $@ applyfilter.o  $(LIBS) $(ADDLIBS) $(LINKPCRELIB)
+texpire: texpire.o liblnutil.a
 
-.c.o: leafnode.h
-	$(CC) $(CFLAGS) -o $@ -c $<
+checkgroups: checkgroups.o liblnutil.a
 
-newsq: newsq.o $(ADDLIBS)
-	$(CC) $(CFLAGS) -o $@ newsq.o $(LIBS) $(ADDLIBS)
+applyfilter: applyfilter.o $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ applyfilter.o liblnutil.a $(LIBS) $(LINKPCRELIB)
+
+newsq: newsq.o 
 
 .PHONY:	clean distclean realclean
 clean:
 	rm -f *.o *.a
-	test -f pcre/Makefile && cd pcre && $(MAKE) clean
+	if test -f pcre/Makefile ; then cd pcre && $(MAKE) clean ; fi
 
 realclean: distclean
 
@@ -122,7 +122,7 @@ distclean: clean
 	rm -f config.status config.cache config.log
 
 update:
-	@$(srcdir)/update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
+	@update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
 
 config.o: config.c
 
@@ -136,7 +136,7 @@ config.c: Makefile
 	@echo >>.$@ "const char *libdir=\"$(LIBDIR)\";"
 	@echo >>.$@ "const char *lockfile=\"@LOCKFILE@\";"
 	@echo >>.$@ "const char *version=\"@VERSION@\";"
-	if cmp .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
+	if cmp >/dev/null .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
 
 config_defs.h: config.table configparam.h
 	@echo creating $@
@@ -153,7 +153,7 @@ config_defs.h: config.table configparam.h
 		}' <config.table >$@ || rm -f $@
 
 configparam_data.c: config.table b_sortnl Makefile
-	b_sortnl <config.table | awk '\
+	./b_sortnl <config.table | awk '\
 	BEGIN	{ print "/* file generated from $<, do not edit! */\n";\
   		  print "#include \"configparam.h\"";\
 		  print "#include \"config_defs.h\"\n";\
@@ -169,40 +169,43 @@ configparam_data.c: config.table b_sortnl Makefile
 install-strip:
 	$(MAKE) install STRIP=-s
 
-install: nntpd fetchnews texpire checkgroups applyfilter newsq rnews
-	$(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/man1
-	$(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/man5
-	$(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/man7
-	$(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/man8
-	$(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(BINDIR)
-	$(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(USRDIR)
-	$(INSTALL) -c -g news -m 750 -o news $(STRIP) nntpd $(INSTALLROOT)$(BINDIR)/leafnode
-	$(INSTALL) -c -g news -m 750 -o news $(STRIP) rnews $(INSTALLROOT)$(BINDIR)/rnews
-	$(INSTALL) -c -g news -m 4755 -o root $(STRIP) fetchnews $(INSTALLROOT)$(BINDIR)/fetchnews
-	$(INSTALL) -c -g news -m 4755 -o root $(STRIP) texpire $(INSTALLROOT)$(BINDIR)/texpire
-	$(INSTALL) -c -g news -m 750 -o news $(STRIP) checkgroups $(INSTALLROOT)$(BINDIR)/checkgroups
-	$(INSTALL) -c -g news -m 750 -o news $(STRIP) applyfilter $(INSTALLROOT)$(BINDIR)/applyfilter
-	$(INSTALL) -c -g news -m 755 -o news $(STRIP) newsq $(INSTALLROOT)$(USRDIR)/newsq
-	$(INSTALL) -c -m 644 $(srcdir)/*.8 $(INSTALLROOT)$(MANDIR)/man8
-	$(INSTALL) -c -m 644 $(srcdir)/*.5 $(INSTALLROOT)$(MANDIR)/man5
-	if test $(PCRELIB) ; then $(INSTALL) -c -m 644 $(srcdir)/pcre/pcre.7 $(INSTALLROOT)$(MANDIR)/man7 ; fi
-	$(INSTALL) -c -m 644 $(srcdir)/*.1 $(INSTALLROOT)$(MANDIR)/man1
-	mkdir -p `dirname $(INSTALLROOT)$(LOCKFILE)`
-	mkdir -p $(INSTALLROOT)$(SPOOLDIR)
-	chmod 2755 $(INSTALLROOT)$(SPOOLDIR)
-	mkdir -p $(INSTALLROOT)$(SPOOLDIR)/leaf.node
-	chmod 2755 $(INSTALLROOT)$(SPOOLDIR)/leaf.node
-	test -e $(INSTALLROOT)$(SPOOLDIR)/leaf.node/local.groups || \
+install: $(PROGRAMS)
+# programs
+	if test -d $(INSTALLROOT)$(BINDIR) ; then : ; else \
+	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(BINDIR) ; fi
+	if test -d $(INSTALLROOT)$(USRDIR) ; then : ; else \
+	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(USRDIR) ; fi
+	$(INSTALL) -c -g news -m 750 -o news $(STRIP) \
+	  leafnode rnews checkgroups applyfilter $(INSTALLROOT)$(BINDIR)
+	$(INSTALL) -c -g news -m 4750 -o root $(STRIP) \
+	  texpire fetchnews $(INSTALLROOT)$(BINDIR)
+	$(INSTALL) -c -g news -m 755 -o news $(STRIP) \
+	  newsq $(INSTALLROOT)$(USRDIR)
+# man pages
+	for i in man1 man5 man7 man 8 ; do \
+          test -d $(INSTALLROOT)$(MANDIR)/$$i || \
+	    $(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/$$i ; \
+	done
+	$(INSTALL) -c -m 644 *.1 $(INSTALLROOT)$(MANDIR)/man1
+	$(INSTALL) -c -m 644 *.5 $(INSTALLROOT)$(MANDIR)/man5
+	if test "$(PCRELIB)" ; then $(INSTALL) -c -m 644 pcre/pcre.7 $(INSTALLROOT)$(MANDIR)/man7 ; fi
+	$(INSTALL) -c -m 644 *.8 $(INSTALLROOT)$(MANDIR)/man8
+# directories
+	$(INSTALL) -d -m 2750 -o news -g news $(INSTALLROOT)$(SPOOLDIR)
+	$(INSTALL) -d -m 2750 -o news -g news $(INSTALLROOT)$(SPOOLDIR)/leaf.node
+	if test -d `dirname $(INSTALLROOT)$(LOCKFILE)` ; then : ; \
+	else $(INSTALL) -d -m 750 -o news -g news \
+	  `dirname $(INSTALLROOT)$(LOCKFILE)` ; \
+        fi 
+# don't use test -e, it's broken on Solaris (only implemented in /usr/bin/test)
+	test -f $(INSTALLROOT)$(SPOOLDIR)/leaf.node/local.groups || \
 		echo -n >$(INSTALLROOT)$(SPOOLDIR)/leaf.node/local.groups
 	mkdir -p $(INSTALLROOT)$(LIBDIR)
-	-chown news:news `dirname $(INSTALLROOT)$(LOCKFILE)`
-	-chown news:news $(INSTALLROOT)$(SPOOLDIR) 
-	-chown news:news $(INSTALLROOT)$(LIBDIR)
-	$(INSTALL) -m 600 -o news $(srcdir)/config.example $(INSTALLROOT)$(LIBDIR)
-	-chown -f news:news $(INSTALLROOT)$(LIBDIR)/config
-	-chmod -f 600 $(INSTALLROOT)$(LIBDIR)/config
-	@echo Edit /etc/inetd.conf to start $(INSTALLROOT)$(BINDIR)/leafnode and restart inetd.
-	@echo Also read the instructions on updating in the README file.
+# configuration
+	$(INSTALL) -m 440 -o root -g news config.example $(INSTALLROOT)$(LIBDIR)
+	@echo
+	@echo Edit /etc/inetd.conf to start $(INSTALLROOT)$(BINDIR)/leafnode 
+	@echo and restart inetd. Also read the instructions on updating in the README file.
 
 uninstall-bins:
 	-rm $(BINDIR)/fetchnews
@@ -220,7 +223,7 @@ uninstall-bins:
 	-rm $(MANDIR)/man8/applyfilter.8
 	-rm $(MANDIR)/man5/fetchnews.5
 	-rm $(MANDIR)/man1/newsq.1
-	if test $(PCRELIB) ; then rm ($INSTALLROOT)$(MANDIR)/man7/pcre.7 ; fi
+	if test $(PCRELIB) ; then rm $(INSTALLROOT)$(MANDIR)/man7/pcre.7 ; fi
 
 uninstall: uninstall-bins
 	-rm -r $(LIBDIR)
@@ -259,31 +262,31 @@ dist:	leafnode.spec
 	gzip -f9 leafnode-pcre-$(VERSION).tar
 	rm -rf leafnode-$(VERSION)
 
-$(srcdir)/configure: $(srcdir)/configure.in $(srcdir)/aclocal.m4
-	cd $(srcdir) && autoconf
+configure: configure.in aclocal.m4
+	autoconf
 
-$(srcdir)/config.h.in: $(srcdir)/stamp-h.in
-$(srcdir)/stamp-h.in: $(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/acconfig.h
-	cd $(srcdir) && autoheader
-	echo timestamp >$(srcdir)/stamp-h.in
+config.h.in: stamp-h.in
+stamp-h.in: configure.in aclocal.m4 acconfig.h
+	autoheader
+	echo timestamp >stamp-h.in
 
 config.h: stamp-h
-stamp-h: $(srcdir)/config.h.in config.status
+stamp-h: config.h.in config.status
 	./config.status
 
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile: Makefile.in config.status
 	./config.status
 
-config.status: $(srcdir)/configure
+config.status: configure
 	./config.status --recheck
 
-leafnode.spec: $(srcdir)/leafnode.spec.in config.status
+leafnode.spec: leafnode.spec.in config.status
 	./config.status
 
-%.8: $(srcdir)/%.8.in config.status
+%.8: %.8.in config.status
 	./config.status
 
-%.1: $(srcdir)/%.1.in config.status
+%.1: %.1.in config.status
 	./config.status
 
 rpm: dist leafnode.spec
@@ -293,14 +296,12 @@ rpm: dist leafnode.spec
 
 .PHONY:	depend
 depend:
-	makedepend -f$(srcdir)/Makefile.in -s"# DEPENDENCIES, type make depend to remake" -Y -I$(srcdir) *.c 2>/dev/null
+	makedepend -fMakefile.in -s"# DEPENDENCIES, type make depend to remake" -Y -I$(srcdir) *.c 2>/dev/null
 	./config.status
-
 
 # ugid_Makefile
 # (C) 2000 by Matthias Andree
-libugid.a: ugid_gensure.o ugid_gget.o ugid_ggetbyuname.o ugid_gset.o \
-	ugid_uensure.o ugid_uget.o ugid_ugetbyuname.o ugid_uset.o 
+libugid.a:
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 # ugid_Makefile ends here.

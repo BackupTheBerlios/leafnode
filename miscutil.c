@@ -90,17 +90,6 @@ int initvars(char * progname) {
 	return FALSE;
     }
 
-    if (gid_ensure(gi)) {
-	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi, 
-		strerror(errno));
-	return FALSE;
-    }
-    if (uid_ensure(ui)) {
-	fprintf(stderr, "cannot ensure uid %ld: %s\n", (long)ui,
-		strerror(errno));
-	return FALSE;
-    }
-
     /* config.c stuff does not have to be initialized */
     expire_base = NULL;
 
@@ -114,21 +103,35 @@ int initvars(char * progname) {
 		    x, strerror(errno));
 	    return FALSE;
 	}
+
 	if(chown(x, ui, gi)) {
 	    if(progname) fprintf(stderr, "%s: ", progname);
 	    fprintf(stderr,"cannot chown(%s,%ld,%ld): %s\n", 
 		    x, (long)ui, (long)gi, strerror(errno));
 	    return FALSE;
 	}
+
 	if(chmod(x, md->m)) {
 	    if(progname) fprintf(stderr, "%s: ", progname);
 	    fprintf(stderr,"cannot chmod(%s,%o): %s\n", 
-		    x, md->m, strerror(errno));
+		    x, (unsigned int)md->m, strerror(errno));
 	    return FALSE;
 	}
 	md++;
     }
-    
+
+    if (gid_ensure(gi)) {
+	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi, 
+		strerror(errno));
+	return FALSE;
+    }
+
+    if (uid_ensure(ui)) {
+	fprintf(stderr, "cannot ensure uid %ld: %s\n", (long)ui,
+		strerror(errno));
+	return FALSE;
+    }
+   
     return TRUE;
 }
 
@@ -713,7 +716,7 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.8 $
+/*  $Revision: 1.9 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

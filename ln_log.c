@@ -15,7 +15,10 @@
 #define LOG_CONS 0 
 #endif
 
-static void vln_log_core(int slg, int console, int severity, 
+/* log to syslog if slg != 0
+ * log to stream console if console != 0
+ * other arguments like syslog, except it does not support %m */
+static void vln_log_core(int slg, FILE *console, int severity, 
 		       const char *format, va_list ap)
 {
     char buf[2048];
@@ -28,20 +31,25 @@ static void vln_log_core(int slg, int console, int severity,
     }
     if(console) { 
 	if(severity - LNLOG_MIN <= verbose) {
-	    fputs(buf, stderr);
-	    fputc('\n', stderr);
+	    fputs(buf, console);
+	    fputc('\n', console);
 	}
     }
 }
 
 void ln_log(int sev, const char *format, ...) {
     va_list ap;
-    va_start(ap, format); vln_log_core(1, 1, sev, format, ap); va_end(ap);
+    va_start(ap, format); vln_log_core(1, stderr, sev, format, ap); va_end(ap);
+}
+
+void ln_log_so(int sev, const char *format, ...) {
+    va_list ap;
+    va_start(ap, format); vln_log_core(1, stdout, sev, format, ap); va_end(ap);
 }
 
 void ln_log_prt(int sev, const char *format, ...) {
     va_list ap;
-    va_start(ap, format); vln_log_core(0, 1, sev, format, ap); va_end(ap);
+    va_start(ap, format); vln_log_core(0, stderr, sev, format, ap); va_end(ap);
 }
 
 void ln_log_sys(int sev, const char *format, ...) {

@@ -28,6 +28,9 @@ extern void ln_log_open (const char *ident);
 extern void ln_log(int severity, const char *format, ...)
     __attribute__ ((format (printf, 2, 3)));
 
+extern void ln_log_so(int severity, const char *format, ...)
+    __attribute__ ((format (printf, 2, 3)));
+
 extern void ln_log_prt(int severity, const char *format, ...)
     __attribute__ ((format (printf, 2, 3)));
 

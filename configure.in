@@ -1,4 +1,4 @@
-dnl autoconf script for leafnode
+dnl autoconf script for leafnode -*- m4 -*-
 dnl written by Cornelius Krasel, 1999
 dnl enhanced by Matthias Andree, 2000
 dnl Process this file with autoconf to produce a configure script.
@@ -6,7 +6,7 @@ AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
 dnl version information
-VERSION="2.0b5_ma6"
+VERSION="2.0b5_ma7"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.

@@ -4,6 +4,37 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma7 -- changes since 2.0b5_ma6:
+
+- portability workaround for broken Solaris /bin/sh: 
+  replace test -e by test -f; note that SUSv2 requires test -e
+  (reported by Johannes Teveßen)
+
+- link own libraries before system libraries
+
+- fix Makefile to heed CFLAGS, CPPFLAGS and LDFLAGS properly (as per
+  autoconf and make documentation)
+
+- merge libugid.a into liblnutil.a
+
+- Makefile cleanups
+
+- fix installation procedure, no longer takes over existing directories
+  except its spool directory (reported by Johannes Teveßen)
+
+- fix broken make clean if pcre missing (reported by Johannes Teveßen)
+
+- fix link count type in artutil.c:281, explicit cast to long.
+ 
+- ln_log now has ln_log_so which logs to syslog and stdout
+
+- nntpd now redirects stderr to /dev/null to prevent initialization
+  errors from being sent to the client
+
+- nntpd now logs unknown options at WARNING level (was NOTICE)
+
+- fix broken @VERSION@ in texpire.8.in
+
 ** History of 2.0b5_ma6 -- changes since 2.0b5_ma5:
 
 NOTE that the new locking scheme is not in place yet.
@@ -32,6 +63,8 @@ NOTE that the new locking scheme is not in place yet.
 - merge "xover error: Message ID does not end with >" in one if branch
 
 - fix some printf to ln_log
+
+- log unknown configuration parameters
 
 ** History of 2.0b5_ma5 -- changes since 2.0b5_ma4:
 

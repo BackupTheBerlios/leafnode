@@ -1,4 +1,4 @@
-.TH texpire 8 "@VERSION" leafnode Leafnode \" -*- nroff -*-
+.TH texpire 8 "@VERSION@" leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
+.\" $Id: texpire.8.in,v 1.2 2000/11/24 15:21:17 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME

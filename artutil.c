@@ -278,7 +278,8 @@ void supersede(const char *msgid) {
         ln_log_sys(LNLOG_ERR, "cannot stat %s: %s", filename, 
 		   strerror(errno));
     else if (st.st_nlink > 1)
-        ln_log_sys(LNLOG_ERR, "%s: link count is %d", filename, st.st_nlink);
+        ln_log_sys(LNLOG_ERR, "%s: link count is %ld", filename, 
+		   (long)st.st_nlink);
     else if (unlink( filename) )
         ln_log_sys(LNLOG_ERR, "Failed to unlink %s: %s", filename,
 		    strerror(errno));

@@ -13,6 +13,7 @@ BUGS:
 
 - can fetchnews cope with servers that reject XOVER? (Matthias)
 - maxage doesn't work
+- fetchnews -N does not work
 - signal needs to be worked around on Solaris 7 (Matthias Andree)
 
 general:
