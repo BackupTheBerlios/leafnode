@@ -1,3 +1,25 @@
+2002-09-07  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Add FIXME comment.  
+	* TODO: Update TODO.  
+	* TODO, fetchnews.c: Fix race in fetchnews, obtain the lock prior
+	to reading the active file, so that we only read a current active
+	file. Found by Ralf Wildenhues.  Other programs seem to do the right
+	thing.  
+	* NEWS, TODO, config.table, configutil.c: Drop fqdn option.
+	Hostname is sufficient.  
+	* TODO: Note fix of extraneous :active.read update.  
+	* NEWS, TODO, fetchnews.c, miscutil.c: Drop backup.moderated.  
+	* configure.ac: Bump version.  
+	* nntpd.c: Fix CVSTrac #2: XOVER offers pseudo article that ARTICLE
+	cannot retrieve.  Note: the article number of the pseudo article may
+	still need to be bumped to 1 above the "last" mark.  
+	* fetchnews.c: Fix CVSTrac #5 ":active.read is always updated." 
+
+2002-09-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Add a dormant.groups crosspost quirk found by Ralf.  
+
 2002-09-04  Matthias Andree <matthias.andree@gmx.de>
 
 	--- release snapshot-20020904a ---
