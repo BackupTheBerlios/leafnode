@@ -43,6 +43,8 @@ urgence:
     bug confirmed by Jörg Dietrich 2002-01-04
     ACTION: fix
 
+2.2 insertgroups/mergegroups global/static variables suck big time
+
 2.2 for posts to moderated groups, add server preferences for posting?
 
 2.2 track which user posted an article (Stefan Fleiter)
@@ -180,6 +182,9 @@ urgence:
 4.3 move old articles from out.going to failed.postings if they are,
     say, 7 days, old? (Report by Stefan Wiens, Message-ID:
     <3A1EDBFF.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
+
+4.4 NOCEM, store Message-ID in advance (advance cancel, nocem, ...)
+    (Mike Castle, dalgoda@ix.netcom.com)
 
 4.4 implement detection if local group shadows server group
 
