@@ -45,3 +45,4 @@ cscope\.out$
 ^build
 ^tags$
 ^TAGS$
+^dox$
