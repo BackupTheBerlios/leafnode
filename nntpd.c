@@ -480,7 +480,6 @@ doarticle(const struct newsgroup *group, const char *arg, int what,
     char *localmsgid = NULL;
     char s[PATH_MAX + 1];	/* FIXME */
 
-    if (!*artno && !arg) *artno=1; arg="1";
     f = fopenart(group, arg, artno);
     if (!f) {
 	if (arg && *arg != '<' && !group)
