@@ -43,7 +43,7 @@ void
 insertlocal(const char *name)
 {
     struct localgroup **a;
-    char c;
+    int c;
 
     a = &local;
     while (a) {
