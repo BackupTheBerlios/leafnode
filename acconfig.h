@@ -21,3 +21,6 @@
 
 /* Define if you have getline (GNU libc) */
 #undef HAVE_GETLINE
+
+/* Define this if you have inet_ntop */
+#undef HAVE_INET_NTOP

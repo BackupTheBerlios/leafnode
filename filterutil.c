@@ -31,12 +31,11 @@ static char * findinheaders(char * needle, char * haystack) {
 
     p = haystack;
     while (p && *p) {
-	if (strncasecmp( needle, p, strlen( needle) ) == 0 ) {
+	if (strncasecmp(needle, p, strlen(needle)) == 0) {
 	    p += strlen(needle);
 	    if (isspace((unsigned char)*p))
 		return p;
-	}
-	else {
+	} else {
 	    q = p;
 	    p = strchr(q, '\n');
 	    if (p && *p)
@@ -61,7 +60,7 @@ static int age(const char * date) {
     if (!date)
 	return 1000; /* large number: OLD */
     d = date;
-    if (strncmp( date, "Date:", 5) == 0)
+    if (strncmp(date, "Date:", 5) == 0)
 	d += 5;
     while(isspace((unsigned char)*d))
 	d++;
@@ -93,36 +92,36 @@ static int age(const char * date) {
 	d++;
     year = strtol(d, NULL, 10);
 
-    if (( year < 1970) && ( year > 99 ) ) {
+    if ((year < 1970) && (year > 99)) {
 	ln_log(LNLOG_INFO, "Unable to parse year in %s", date);
 	return 1005;
     } else if (!(day > 0 && day < 32)) {
 	ln_log(LNLOG_INFO, "Unable to parse day in %s", date);
 	return 1006;
     } else {
-	if (!strcasecmp( monthname, "jan") )
+	if (!strcasecmp(monthname, "jan"))
 	    month = 0;
-	else if (!strcasecmp( monthname, "feb") )
+	else if (!strcasecmp(monthname, "feb"))
 	    month = 1;
-	else if (!strcasecmp( monthname, "mar") )
+	else if (!strcasecmp(monthname, "mar"))
 	    month = 2;
-	else if (!strcasecmp( monthname, "apr") )
+	else if (!strcasecmp(monthname, "apr"))
 	    month = 3;
-	else if (!strcasecmp( monthname, "may") )
+	else if (!strcasecmp(monthname, "may"))
 	    month = 4;
-	else if (!strcasecmp( monthname, "jun") )
+	else if (!strcasecmp(monthname, "jun"))
 	    month = 5;
-	else if (!strcasecmp( monthname, "jul") )
+	else if (!strcasecmp(monthname, "jul"))
 	    month = 6;
-	else if (!strcasecmp( monthname, "aug") )
+	else if (!strcasecmp(monthname, "aug"))
 	    month = 7;
-	else if (!strcasecmp( monthname, "sep") )
+	else if (!strcasecmp(monthname, "sep"))
 	    month = 8;
-	else if (!strcasecmp( monthname, "oct") )
+	else if (!strcasecmp(monthname, "oct"))
 	    month = 9;
-	else if (!strcasecmp( monthname, "nov") )
+	else if (!strcasecmp(monthname, "nov"))
 	    month = 10;
-	else if (!strcasecmp( monthname, "dec") )
+	else if (!strcasecmp(monthname, "dec"))
 	    month = 11;
 	else {
 	    ln_log(LNLOG_INFO, "Unable to parse %s", date);
@@ -147,7 +146,7 @@ static int age(const char * date) {
 	if (tmp == -1)
 	    return 1002;
 	
-	return(( time(NULL) - tmp) / SECONDS_PER_DAY );
+	return((time(NULL) - tmp) / SECONDS_PER_DAY);
     }
 }
 
@@ -204,10 +203,10 @@ int readfilter(char *filterfile) {
 	return FALSE;
     }
     debug = 0;
-    while (( l = getaline( ff) ) != NULL ) {
-	if (parse_line( l, param, value) ) {
-	    if (strcasecmp( "newsgroup", param) == 0 ||
-		 strcasecmp("newsgroups", param) == 0 ) {
+    while ((l = getaline(ff)) != NULL) {
+	if (parse_line(l, param, value)) {
+	    if (strcasecmp("newsgroup", param) == 0 ||
+		 strcasecmp("newsgroups", param) == 0) {
 		ng = strdup(value);
 		f = newfilter();
 		(f->entry)->newsgroup = ng;
@@ -216,8 +215,7 @@ int readfilter(char *filterfile) {
 		else
 		    oldf->next = f;
 		oldf = f;
-	    }
-	    else if (strcasecmp( "pattern", param) == 0 ) {
+	    } else if (strcasecmp("pattern", param) == 0) {
 		if (!ng) {
 		    ln_log(LNLOG_NOTICE,
 			    "No newsgroup for expression %s found", value);
@@ -235,11 +233,11 @@ int readfilter(char *filterfile) {
 		    oldf = f;
 		}
 #ifdef NEW_PCRE_COMPILE
-		if (( (f->entry)->expr = pcre_compile( value, PCRE_MULTILINE ,
-		       &regex_errmsg, &regex_errpos, NULL) ) == NULL ) {
+		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE ,
+		       &regex_errmsg, &regex_errpos, NULL)) == NULL) {
 #else
-		if (( (f->entry)->expr = pcre_compile( value, PCRE_MULTILINE ,
-		       &regex_errmsg, &regex_errpos) ) == NULL ) {
+		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE ,
+		       &regex_errmsg, &regex_errpos)) == NULL) {
 #endif
 		    ln_log(LNLOG_NOTICE, "Invalid filter pattern %s: %s",
 			    value, regex_errmsg);
@@ -248,17 +246,15 @@ int readfilter(char *filterfile) {
 				value, regex_errmsg);
 		    free(f->entry);
 		    f->entry = NULL;
-		}
-		else {
+		} else {
 		    (f->entry)->cleartext = strdup(value);
 		    (f->entry)->limit	  = -1 ;
 		}
-	    }
-	    else if (( strcasecmp( "maxage", param) == 0 ) ||
-		      (strcasecmp( "minlines", param) == 0 ) ||
-		      (strcasecmp( "maxlines", param) == 0 ) ||
-		      (strcasecmp( "maxbytes", param) == 0 ) ||
-		      (strcasecmp( "maxcrosspost", param) == 0 ) ) {
+	    } else if ((strcasecmp("maxage", param) == 0) ||
+		      (strcasecmp("minlines", param) == 0) ||
+		      (strcasecmp("maxlines", param) == 0) ||
+		      (strcasecmp("maxbytes", param) == 0) ||
+		      (strcasecmp("maxcrosspost", param) == 0)) {
 	        if (!ng) {
 		    ln_log(LNLOG_NOTICE,
 			    "No newsgroup for expression %s found", value);
@@ -277,8 +273,7 @@ int readfilter(char *filterfile) {
 		}
 		(f->entry)->cleartext = strdup(param);
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
-	    }
-	    else if (strcasecmp( "action", param) == 0 ) {
+	    } else if (strcasecmp("action", param) == 0) {
 		if (!f || !f->entry || !(f->entry)->cleartext) {
 		    ln_log(LNLOG_NOTICE, "No pattern found for action %s",
 			    value);
@@ -289,17 +284,8 @@ int readfilter(char *filterfile) {
 		    if (f)
 			free(f);
 		    continue ;
-		}
-		else {
+		} else {
 		    (f->entry)->action = strdup(value);
-/*
-		    if (debugmode) {
-			ln_log(LNLOG_DEBUG, "filtering in %s: %s -> %s",
-				(f->entry)->newsgroup,
-				(f->entry)->cleartext,
-				(f->entry)->action);
-		    }
-*/
 		}
 	    }
 	}
@@ -309,9 +295,9 @@ int readfilter(char *filterfile) {
     if (filter == NULL) {
 	ln_log(LNLOG_WARNING, "filterfile did not contain any valid patterns");
 	return FALSE;
-    }
-    else
+    } else {
 	return TRUE;
+    }
 }
 
 /*
@@ -325,7 +311,7 @@ struct filterlist * selectfilter (char * groupname) {
     fold  = NULL;
     master = filter;
     while (master) {
-	if (ngmatch( (master->entry)->newsgroup, groupname) == 0 ) {
+	if (ngmatch((master->entry)->newsgroup, groupname) == 0) {
 	    f = (struct filterlist *)critmalloc(sizeof(struct filterlist),
 					 "Allocating groupfilter space");
 	    f->entry = master->entry;
@@ -361,14 +347,13 @@ int killfilter(struct filterlist *f, char *hdr) {
     match = -1 ;
     while (f) {
 	g = f->entry;
-	if (( g->limit == -1) && ( g->expr ) ) {
+	if ((g->limit == -1) && (g->expr)) {
 #ifdef NEW_PCRE_EXEC
 	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr), 0, 0, NULL, 0);
 #else
 	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr), 0, NULL, 0);
 #endif
-	}
-	else if (strcasecmp( g->cleartext, "maxage") == 0 ) {
+	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    p = findinheaders("Date:", hdr);
 	    while (p && *p && isspace((unsigned char)*p))
 		p++;
@@ -376,35 +361,31 @@ int killfilter(struct filterlist *f, char *hdr) {
 		match = 0;	/* limit has been hit */
 	    else
 		match = PCRE_ERROR_NOMATCH;  /* don't match by default */
-	}
-	else if (strcasecmp( g->cleartext, "maxlines") == 0 ) {
+	} else if (strcasecmp(g->cleartext, "maxlines") == 0) {
 	    p = findinheaders("Lines:", hdr);
 	    if (p) {
-		if (strtol( p, NULL, 10) > g->limit )
+		if (strtol(p, NULL, 10) > g->limit)
 		    match = 0;
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	}
-	else if (strcasecmp( g->cleartext, "minlines") == 0 ) {
+	} else if (strcasecmp(g->cleartext, "minlines") == 0) {
 	    p = findinheaders("Lines:", hdr);
 	    if (p) {
-		if (strtol( p, NULL, 10) < g->limit )
+		if (strtol(p, NULL, 10) < g->limit)
 		    match = 0;
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	}
-	else if (strcasecmp( g->cleartext, "maxbytes") == 0 ) {
+	} else if (strcasecmp(g->cleartext, "maxbytes") == 0) {
 	    p = findinheaders("Bytes:", hdr);
 	    if (p) {
-		if (strtol( p, NULL, 10) > g->limit )
+		if (strtol(p, NULL, 10) > g->limit)
 		    match = 0;
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	}
-	else if (strcasecmp( g->cleartext, "maxcrosspost") == 0 ) {
+	} else if (strcasecmp(g->cleartext, "maxcrosspost") == 0) {
 	    p = findinheaders("Newsgroups:", hdr);
 	    match = 1;
 	    while (*p && *p != '\n') {
@@ -418,10 +399,10 @@ int killfilter(struct filterlist *f, char *hdr) {
 	}
 	if (match == 0) {
 	    /* article matched pattern/limit: what now? */
-	    if (strcasecmp( g->action, "select") == 0 ) {
+	    if (strcasecmp(g->action, "select") == 0) {
 		return FALSE;
 	    }
-	    else if (strcasecmp( g->action, "kill") == 0 ) {
+	    else if (strcasecmp(g->action, "kill") == 0) {
 		return TRUE;
 	    }
 	    else {

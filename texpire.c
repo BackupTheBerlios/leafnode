@@ -24,6 +24,7 @@ See README for restrictions on the use of this software.
 #include "leafnode.h"
 #include "critmem.h"
 #include "ln_log.h"
+#include "format.h"
 
 #ifdef SOCKS
 #include <socks.h>
@@ -43,6 +44,7 @@ See README for restrictions on the use of this software.
 #include <unistd.h>
 #include <errno.h>
 
+/* FIXME: xoverstuff belongs to xover.h or something */
 #define SUBJECT 1
 #define FROM 2
 #define DATE 3
@@ -78,7 +80,7 @@ void free_expire(void) {
     struct expire_entry *a, *b;
 
     b = expire_base;
-    while ((a = b) != NULL) {
+    while ((a = b)) {
         b = a->next;
         free(a);
     }
@@ -93,8 +95,8 @@ static time_t lookup_expire(char* group) {
     struct expire_entry *a;
    
     a = expire_base;
-    while (a != NULL) {
-	if (ngmatch(a->group, group) == 0)
+    while (a) {
+	if (!ngmatch(a->group, group))
 	    return a->xtime;
         a = a->next;
     }
@@ -117,7 +119,7 @@ static int legalxoverline (char * xover, unsigned long artno) {
     while (*p) {
 	int c = (unsigned char)*p++;
 
-	if (( c != '\t' && c < ' ') || ( c > 126 && c < 160 ) ) {
+	if ((c != '\t' && c < ' ') || (c > 126 && c < 160)) {
 	    if (debugmode)
 		ln_log(LNLOG_DEBUG,
 			"%lu xover error: non-printable chars.", artno);
@@ -139,7 +141,7 @@ static int legalxoverline (char * xover, unsigned long artno) {
 	if (!isdigit((unsigned char)*p)) {
 	    if (debugmode)
         	ln_log(LNLOG_DEBUG, "%lu xover error: article "
-			"number must consists of digits.", artno);
+		       "number must consists of digits.", artno);
 	    return 0;
 	}
 	p++;
@@ -195,8 +197,9 @@ static int legalxoverline (char * xover, unsigned long artno) {
 		    artno);
 	return 0;
     }
-    while (p != q && *p != '@' && *p != '>' && *p != ' ')
+    while (p != q && *p != '@' && *p != '>' && *p != ' ') {
 	p++;
+    }
     if (*p != '@') {
 	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
@@ -205,13 +208,8 @@ static int legalxoverline (char * xover, unsigned long artno) {
     }
     while (p != q && *p != '>' && *p != ' ')
 	p++;
-    if (*p != '>') {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
-		    "%lu xover error: Message-ID does not end with >.", artno);
-	return 0;
-    }
-    if (++p != q) {
+    if ((*p != '>') 
+	|| (++p != q)) {
 	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not end with >.", artno);
@@ -266,7 +264,6 @@ static int legalxoverline (char * xover, unsigned long artno) {
     }
 
     /* byte count */
-
     while(p != q) {
 	if (!isdigit((unsigned char)*p)) {
 	    if (debugmode)
@@ -282,8 +279,7 @@ static int legalxoverline (char * xover, unsigned long artno) {
     if (q)
         *q = '\0'; /* kill any extra fields */
 
- /* line count */
-
+    /* line count */
     while(p && *p && p != q) {
 	if (!isdigit((unsigned char)*p)) {
 	    if (debugmode)
@@ -328,7 +324,7 @@ static void dogroup(struct newsgroup* g) {
     clearidtree();
 
     /* eliminate empty groups */
-    if (!chdirgroup( g->name, FALSE) )
+    if (!chdirgroup(g->name, FALSE))
 	return;
     getcwd(gdir, PATH_MAX);
 
@@ -342,9 +338,9 @@ static void dogroup(struct newsgroup* g) {
 
     first = ULONG_MAX;
     last = 0;
-    while (( de = readdir(d)) != 0 ) {
+    while ((de = readdir(d)) != 0) {
 	if (!isdigit((unsigned char)de->d_name[0]) ||
-	     stat(de->d_name, &st) || !S_ISREG( st.st_mode ) )
+	     stat(de->d_name, &st) || !S_ISREG(st.st_mode))
 	    continue;
 	art = strtoul(de->d_name, &p, 10);
 	if (p && !*p) {
@@ -360,9 +356,6 @@ static void dogroup(struct newsgroup* g) {
     if (last < first)
 	return;
 
-    if (verbose > 1)
-        printf("%s: low water mark %lu, high water mark %lu\n",
-	        g->name, first, last);
     if (debugmode)
 	ln_log(LNLOG_DEBUG,
 		"%s: expire %lu, low water mark %lu, high water mark %lu",
@@ -438,7 +431,7 @@ static void dogroup(struct newsgroup* g) {
 
     for(current = acount; current > 0; current--) {
 	articles[current-1].kill = 1;	/* by default, kill all articles */
-	sprintf(artfile, "%lu", articles[current-1].artno);
+	str_ulong(artfile, articles[current-1].artno);
 	if (stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
 	    ((st.st_mtime > expire) ||
 	     (use_atime && (st.st_atime > expire)))) {
@@ -497,7 +490,7 @@ static void dogroup(struct newsgroup* g) {
 
     for (art = 0; art < acount ; art++) {
 	if (articles[art].kill) {
-	    sprintf(artfile, "%lu", articles[art].artno);
+	    str_ulong(artfile, articles[art].artno);
 	    if (!unlink(artfile)) {
 		if (debugmode)
 		    ln_log(LNLOG_DEBUG, "deleted article %s/%lu", 
@@ -523,18 +516,17 @@ static void dogroup(struct newsgroup* g) {
 	g->last = last;
 
     if (deleted || kept) {
-	printf("%s: %d articles deleted, %d kept\n", g->name, deleted, kept);
 	ln_log(LNLOG_INFO,
-		"%s: %d articles deleted, %d kept", g->name, deleted, kept);
+	       "%s: %d articles deleted, %d kept", g->name, deleted, kept);
     }
 
     if (!kept) {
-	if (unlink( ".overview") < 0 )
+	if (unlink(".overview") < 0)
 	    ln_log(LNLOG_ERR, "unlink %s/.overview: %s", gdir, 
 		   strerror(errno));
-	if (!chdir("..") && ( isinteresting(g->name) == 0) ) {
+	if (!chdir("..") && (isinteresting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
-	    while (rmdir( gdir) == 0 ) {
+	    while (rmdir(gdir) == 0) {
 		getcwd(gdir, PATH_MAX);
 		chdir("..");
 	    }
@@ -582,12 +574,12 @@ void savethread(struct exp *articles, char *refs, unsigned long acount) {
     unsigned int n = 0;
   
     p = refs;
-    while((q = strchr( p, ' ') ) && n < THREADSAFETY ) {
+    while((q = strchr(p, ' ')) && n < THREADSAFETY) {
 	if (p && q)
 	    *q = '\0';
 	for(i = 0; i < acount; i++) {
 	    if (articles[i].xover && articles[i].kill) {
-		if (strstr( articles[i].xover, p) ) {
+		if (strstr(articles[i].xover, p)) {
 		    if (debugmode)
 			ln_log(LNLOG_DEBUG, "rescued thread %lu", 
 			       articles[i].artno);
@@ -627,10 +619,10 @@ static void expiremsgid(void)
 
     for (n=0; n<1000; n++) {
 	sprintf(s, "%s/message.id/%03d", spooldir, n);
-	if (chdir( s) ) {
+	if (chdir(s)) {
 	    if (errno == ENOENT)
-		mkdir(s, 0755); /* file system damage again */
-	    if (chdir( s) ) {
+		mkdir(s, 0755); /* FIXME: this does not belong here */
+	    if (chdir(s)) {
 		ln_log(LNLOG_ERR, "chdir %s: %s", s, strerror(errno));
 		continue;
 	    }
@@ -651,7 +643,6 @@ static void expiremsgid(void)
     }
 
     if (kept || deleted) {
-	printf("total: %d articles deleted, %d kept\n", deleted, kept);
 	ln_log(LNLOG_INFO, "%d articles deleted, %d kept", deleted, kept);
     }
 }
@@ -667,8 +658,7 @@ static void usage(void) {
 	"    -v: more verbose (may be repeated)\n"
 	"    -F: use \"configfile\" instead of %s/config\n"
 	"See also the leafnode homepage at http://www.leafnode.org/\n",
-	libdir
-   );
+	libdir);
 }
 
 int main(int argc, char** argv) {
@@ -679,13 +669,13 @@ int main(int argc, char** argv) {
 			   "Allocating space for configuration file name");
     sprintf(conffile, "%s/config", libdir);
 
-    if (!initvars( argv[0]) )
+    if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
 
     ln_log_open("texpire");
 
-    while ((option=getopt( argc, argv, "F:VDvf")) != -1 ) {
-	if (parseopt( "texpire", option, optarg, conffile) ) {
+    while ((option=getopt(argc, argv, "F:VDvf")) != -1) {
+	if (parseopt("texpire", option, optarg, conffile)) {
 	    ;
 	} else if (option == 'f') {
 	    use_atime = 0;
@@ -697,19 +687,20 @@ int main(int argc, char** argv) {
     debug = debugmode;
     expire = 0;
     expire_base = NULL;
-    if (( reply = readconfig( conffile) ) != 0 ) {
-	printf("Reading configuration from %s failed (%s).\n",
-		conffile, strerror(reply));
+    if ((reply = readconfig(conffile)) != 0) {
+	ln_log(LNLOG_ERR, "Reading configuration from %s failed (%s).\n",
+	       conffile, strerror(reply));
 	unlink(lockfile);
 	exit(2);
     }
 
     checkinteresting();
 
-    if (lockfile_exists( FALSE, FALSE) )
+    if (lockfile_exists(FALSE, FALSE))
 	exit(EXIT_FAILURE);
     readactive();
     if (!active) {
+	/* FIXME remove this fprintf? */
 	fprintf(stderr, "Reading active file failed, exiting "
 			 "(see syslog for more information).\n"
 			 "Has fetchnews been run?\n");
@@ -717,18 +708,11 @@ int main(int argc, char** argv) {
 	exit(2);
     }
 
-    if (verbose) {
-	printf("texpire %s: ", version);
-	if (use_atime)
-	    printf("check mtime and atime\n");
-	else
-	    printf("check mtime only\n");
-    }
-    if (debugmode)
-	ln_log(LNLOG_DEBUG, "texpire %s: use_atime is %d", version, use_atime);
+    ln_log(LNLOG_INFO, "%s", 
+	   use_atime ? "checking atime and mtime" : "checking mtime");
 
     if (expire == 0) {
-	fprintf(stderr, "%s: no expire time\n", argv[0]);
+	ln_log(LNLOG_ERR, "no expire time");
 	exit(2);
     }
 

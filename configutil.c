@@ -375,7 +375,8 @@ int readconfig(char * configfile) {
 	    ln_log_sys(LNLOG_DEBUG, "Getting core file size failed: %s",
 		       strerror(errno));
 	else
-	    ln_log_sys(LNLOG_DEBUG, "Core file size: %lu", (unsigned long)corelimit.rlim_cur);
+	    ln_log_sys(LNLOG_DEBUG, "Core file size: %lu", 
+		       (unsigned long)corelimit.rlim_cur);
     }
 
     free(param);

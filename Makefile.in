@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.7 2000/11/22 13:55:19 emma Exp $
+# $Id: Makefile.in,v 1.8 2000/11/23 04:10:41 emma Exp $
 
 VERSION = @VERSION@
 
@@ -57,16 +57,19 @@ SRCFILES = nntputil.c configutil.c xoverutil.c activutil.c miscutil.c \
 	   strutil.c configparam.c config.table h_error.c \
 	   ugid_gensure.c ugid_ggetbyuname.c ugid_gget.c ugid_gset.c \
 	   ugid_uensure.c ugid_ugetbyuname.c ugid_uget.c ugid_uset.c \
-	   b_sortnl.c
+	   b_sortnl.c format_ulong.c inet_ntop.c
 
 LIBFILES = nntputil.o configutil.o xoverutil.o activutil.o miscutil.o \
 	   artutil.o filterutil.o localutil.o critmem_malloc.o \
 	   critmem_realloc.o dirutil.o strutil.o configparam.o \
 	   vsnprintf.o strdup.o get_any.o getaline.o config.o \
 	   ln_log_open.o ln_log.o configparam_data.o h_error.o \
+	   format_ulong.o \
 	   @LIBOBJS@
+
 HDRFILES = leafnode.h get.h critmem.h acconfig.h ln_log.h configparam.h \
-	   config_defs.h attributes.h ugid.h getline.h h_error.h
+	   config_defs.h attributes.h ugid.h getline.h h_error.h format.h
+
 PROGRAMS = nntpd rnews fetchnews texpire checkgroups applyfilter newsq
 
 all: $(PROGRAMS) $(MANFILES)
@@ -109,7 +112,7 @@ newsq: newsq.o $(ADDLIBS)
 .PHONY:	clean distclean realclean
 clean:
 	rm -f *.o *.a
-	cd pcre && $(MAKE) clean
+	test -f pcre/Makefile && cd pcre && $(MAKE) clean
 
 realclean: distclean
 
@@ -157,8 +160,7 @@ configparam_data.c: config.table b_sortnl Makefile
 		  print "const struct configparam configparam[] = {";\
 		  FS=","; }\
 	        { printf "  {\"%s\",%s},\n",$$1,$$2; }\
-	END 	{ print "{ 0, 0 }";\
-		  print "};";\
+	END 	{ print "};";\
 		  print "";\
 		  print "const int count_configparam = sizeof(configparam)/sizeof(configparam[0]);" }' >.$@ && mv .$@ $@
 

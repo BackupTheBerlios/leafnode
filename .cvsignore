@@ -51,3 +51,4 @@ b_sortnl
 configparam_data.c
 pcre
 confdefs.h
+t_configparam

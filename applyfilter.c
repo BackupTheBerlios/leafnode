@@ -36,8 +36,7 @@ static void usage(void) {
 	"    -v: switch on verbose mode\n"
 	"    -F: use \"configfile\" instead of %s/config\n"
 	"See also the leafnode homepage at http://www.leafnode.org/\n",
-	libdir
-   );
+	libdir);
 }
 
 int main(int argc, char * argv[]) {
@@ -60,40 +59,40 @@ int main(int argc, char * argv[]) {
 			   "Allocating space for config file name");
     sprintf(conffile, "%s/config", libdir);
 
-    if (!initvars( argv[0]) )
+    if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
 
     ln_log_open("applyfilter");
 
-    while (( option = getopt( argc, argv, "F:DVv") ) != -1 ) {
-	if (!parseopt( "applyfilter", option, optarg, conffile) ) {
+    while ((option = getopt(argc, argv, "F:DVv")) != -1) {
+	if (!parseopt("applyfilter", option, optarg, conffile)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
     }
 
-    if (optind+1 < argc) {
+    if (optind+1 > argc) {
         usage();
 	exit(EXIT_FAILURE);
     }
 
-    if (( err = readconfig( conffile) ) != 0 ) {
+    if ((err = readconfig(conffile)) != 0) {
 	printf("Reading configuration failed (%s).\n", strerror(err));
 	exit(2);
     }
 
-    if (filterfile && readfilter( filterfile) )
+    if (filterfile && readfilter(filterfile))
 	;
     else {
 	printf("Nothing to filter -- no filterfile found.\n");
 	exit(EXIT_FAILURE);
     }
-    if (( myfilter = selectfilter( argv[optind]) ) == NULL ) {
+    if ((myfilter = selectfilter(argv[optind])) == NULL) {
 	printf("Nothing to filter -- no regexp for %s found.\n", argv[1]);
 	exit(EXIT_FAILURE);
     }
 
-    if (lockfile_exists( FALSE, FALSE) )
+    if (lockfile_exists(FALSE, FALSE))
 	exit(EXIT_FAILURE);
     readactive();
 
@@ -106,12 +105,12 @@ int main(int argc, char * argv[]) {
 
     g->first = INT_MAX;
     g->last = 0;
-    if (!chdirgroup( g->name, FALSE)) {
+    if (!chdirgroup(g->name, FALSE)) {
 	printf("No such newsgroup: %s\n", g->name);
 	unlink(lockfile);
 	exit(EXIT_FAILURE);
     }
-    if (!(d = opendir( ".") )) {
+    if (!(d = opendir("."))) {
 	printf("Unable to open directory for newsgroup %s\n", g->name);
 	unlink(lockfile);
 	exit(EXIT_FAILURE);
@@ -121,8 +120,8 @@ int main(int argc, char * argv[]) {
     deleted = 0;
     kept = 0;
     l = critmalloc(MAXHEADERSIZE+1, "Space for article");
-    while (( de = readdir( d) ) != NULL ) {
-	if (!isdigit((unsigned char) de->d_name[0]) ) {
+    while ((de = readdir(d)) != NULL) {
+	if (!isdigit((unsigned char) de->d_name[0])) {
 	    /* no need to stat file */
 	    continue;
 	}
@@ -138,7 +137,7 @@ int main(int argc, char * argv[]) {
 	    }
 	}
 	stat(de->d_name, &st);
-	if (S_ISREG(st.st_mode) && ( f = fopen( de->d_name, "r") ) != NULL ) {
+	if (S_ISREG(st.st_mode) && (f = fopen(de->d_name, "r")) != NULL) {
 	    fread(l, sizeof(char), MAXHEADERSIZE, f);
 	    if (ferror(f)) {
 		printf("error reading %s\n", de->d_name);
@@ -146,7 +145,7 @@ int main(int argc, char * argv[]) {
 	    }
 	    fclose(f);
 	    msgid = mgetheader("Message-ID:", l);
-	    if (( k = strstr( l, "\n\n") ) != NULL ) {
+	    if ((k = strstr(l, "\n\n")) != NULL) {
 		*k = '\0';	/* cut off body */
 		score = killfilter(myfilter, l);
 	    } else {
@@ -158,9 +157,9 @@ int main(int argc, char * argv[]) {
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
 		    msgidpath = lookup(msgid);
-		    if (( stat( msgidpath, &st) == 0 ) &&
-			 (st.st_nlink < 2) ) {
-			if (unlink( msgidpath) == 0 )
+		    if ((stat(msgidpath, &st) == 0) &&
+			 (st.st_nlink < 2)) {
+			if (unlink(msgidpath) == 0)
 			    deleted++;
 		    }
 		}

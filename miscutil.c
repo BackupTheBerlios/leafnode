@@ -47,7 +47,7 @@ See file COPYING for restrictions on the use of this software.
 #include <stdarg.h>
 #endif
 
-char fqdn[256];
+char fqdn[FQDN_SIZE];
 char s[PATH_MAX+1024]; /* long string, here to cut memory usage */
 extern struct state _res;
 
@@ -429,14 +429,14 @@ int chdirgroup(const char *group, int creatdir) {
 void whoami(void) {
     struct hostent * he;
 
-    if (!gethostname(fqdn, 255) && (he = gethostbyname(fqdn))!=NULL) {
-	strncpy(fqdn, he->h_name, 255);
+    if (!gethostname(fqdn, FQDN_SIZE-1) && (he = gethostbyname(fqdn))!=NULL) {
+	strncpy(fqdn, he->h_name, FQDN_SIZE-1);
 	if (strchr(fqdn, '.') == NULL) {
 	    char ** alias;
 	    alias = he->h_aliases;
 	    while(alias && *alias)
 		if (strchr(*alias, '.') && (strlen(*alias)>strlen(fqdn)))
-		    strncpy(fqdn, *alias, 255);
+		    strncpy(fqdn, *alias, FQDN_SIZE-1);
 		else
 		    alias++;
 	    }
@@ -713,7 +713,7 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.7 $
+/*  $Revision: 1.8 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

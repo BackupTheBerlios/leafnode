@@ -4,6 +4,35 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma6 -- changes since 2.0b5_ma5:
+
+NOTE that the new locking scheme is not in place yet.
+
+- provide replacement for sprintf(buf,"%lu",something): str_ulong
+
+- provide replacement for inet_ntop (uses inet_ntoa)
+  note that compiling --with-ipv6 will fail in that case.
+
+- Makefile fix: don't append {0,0} in configparam_data.c, should fix
+  configparam related crashes (reported by Stefan Fleiter)
+
+- remove spurious free(c) in activutil.c:215 which caused crashes after
+  activutil was done. (reported by Michael Mauch)
+
+- change if(optind+1<argc) to >argc in applyfilter.c:75 which caused
+  immediate segfault when called without newsgroup (reported by
+  Michael Mauch)
+
+  NOTE that applyfilter currently only deals with one newsgroup per invocation!
+
+- fix all numeric constants around fqdn to FQDN_SIZE
+
+- fix some explicit ==/!= 0/NULL checks
+
+- merge "xover error: Message ID does not end with >" in one if branch
+
+- fix some printf to ln_log
+
 ** History of 2.0b5_ma5 -- changes since 2.0b5_ma4:
 
 NOTE that the new locking scheme is not in place yet.

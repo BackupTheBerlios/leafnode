@@ -1844,7 +1844,7 @@ int main(int argc, char ** argv) {
     }
 
     if (owndn)
-	strncpy(fqdn, owndn, 255);
+	strncpy(fqdn, owndn, FQDN_SIZE-1);
     else {
 	fodder = sizeof(sa);
 	if (getsockname(0, (struct sockaddr *)&sa, &fodder)) {
@@ -1870,10 +1870,10 @@ int main(int argc, char ** argv) {
 	    inet_ntop(AF_INET, &sa.sin_addr, peername, sizeof(peername));
 #endif
 
-	    strncpy(fqdn, he && he->h_name ? he->h_name : peername, 63);
-	}
+	    strncpy(fqdn, he && he->h_name ? he->h_name : peername, 
+		    FQDN_SIZE-1); }
     }
-    if (strncasecmp( fqdn, "localhost", 9) == 0 )
+    if (!strcasecmp( fqdn, "localhost"))
 	whoami();
 
     artno = 0;

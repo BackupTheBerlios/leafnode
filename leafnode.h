@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.5 2000/11/22 13:55:19 emma Exp $ */
+/* $Id: leafnode.h,v 1.6 2000/11/23 04:10:41 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -311,6 +311,7 @@ extern struct serverlist * servers;
 extern FILE *nntpin;
 extern FILE *nntpout;
 
+#define FQDN_SIZE 256
 extern char s[];
 extern char fqdn[];		/* my name, and my naming myself */
 
@@ -353,5 +354,9 @@ int check_allnum(const char *); /* check if string is all made of digits */
 DIR *log_open_dir(const char *); 
 /* open directory, relative to spooldir, log problems */
 DIR *log_open_spool_dir(const char *); 
+
+#ifndef HAVE_INET_NTOP
+const char *inet_ntop(int af, const void *s, char *dst, int x);
+#endif
 
 #endif	/* #ifndef LEAFNODE_H */

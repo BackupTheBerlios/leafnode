@@ -212,7 +212,6 @@ void writeactive(void) {
     strcpy(c, spooldir);
     strcat(c, "/leaf.node/groupinfo");
     rename(s, c);
-    free(c);
 }
 
 /*

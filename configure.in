@@ -6,7 +6,7 @@ AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
 dnl version information
-VERSION="2.0b5_ma5"
+VERSION="2.0b5_ma6"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.
@@ -212,7 +212,7 @@ AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([getcwd gethostname gettext mkdir mktime regcomp rmdir socket strdup strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf])
 
-AC_REPLACE_FUNCS(getline)
+AC_REPLACE_FUNCS(getline inet_ntop)
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
