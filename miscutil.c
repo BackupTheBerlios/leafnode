@@ -44,7 +44,6 @@
 static void whoami(void);
 
 char fqdn[FQDN_SIZE];
-extern struct state _res;
 
 /*
  * global variables modified here

@@ -1613,7 +1613,6 @@ dopost(void)
 		nntpprintf("441 435 Duplicate, article not posted.");
 		log_unlink(inname, 0);
 		goto cleanup;
-		break;
 	    case 0:
 		/* OK */
 		break;
@@ -1623,7 +1622,6 @@ dopost(void)
 			inname, lookup(mid));
 		log_unlink(inname, 0);
 		goto cleanup;
-		break;
 	}
 
 	if ((forbidden = checkstatus(groups, 'n'))) {
@@ -2398,7 +2396,7 @@ mysetfbuf(FILE * f, /*@null@*/ /*@exposed@*/ /*@out@*/ char *buf, size_t size)
 int
 main(int argc, char **argv)
 {
-    int option, reply;
+    int option;
     socklen_t fodder;
     FILE *se;
     const long bufsize = BLOCKSIZE;
@@ -2437,7 +2435,7 @@ main(int argc, char **argv)
 	verbose = 0;		/* overwrite verbose logging */
     }
 
-    if ((reply = readconfig(conffile)) != 0) {
+    if (readconfig(conffile)) {
 	ln_log_so(LNLOG_SERR, LNLOG_CTOP,
 		  "503 Server misconfiguration: cannot read configuration file.");
 	exit(EXIT_FAILURE);
@@ -2482,7 +2480,7 @@ main(int argc, char **argv)
     }
 
 /* #endif */
-    if (authentication && (reply = readpasswd()) > 0) {
+    if (authentication && readpasswd() > 0) {
 	ln_log_so(LNLOG_SNOTICE, LNLOG_CTOP,
 		  "503 Exiting, unable to read user list: %m");
 	exit(EXIT_FAILURE);

@@ -44,7 +44,6 @@ long sendbuf;
 char last_command[1025];
 /*@dependent@*/ FILE *nntpin  = NULL;
 /*@dependent@*/ FILE *nntpout = NULL;
-int authenticated;
 
 /**
  * Authenticate ourselves at a remote server.

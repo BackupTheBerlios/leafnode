@@ -96,8 +96,6 @@ readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *de
 	*bufp = critrealloc(*bufp, (*size)*=2, "readtodelim");
     }
     /*@=loopexec@*/
-    /*@notreached@*/
-    return NULL;
 }
 
 /* read article headers, cut off body
