@@ -1,3 +1,19 @@
+2004-03-19  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040319a =
+	* NEWS, nntpd.c: Fix SIGSEGV when XPAT, XHDR or NEWNEWS are issued
+	without arguments.  slrn does such non-sense. Reported by Robert
+	Grimm.
+
+2004-03-14  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS: Correct the #include log.
+
+2004-03-10  Matthias Andree <matthias.andree@gmx.de>
+
+	* tools/lsmac.pl: Mention more explicitly that the file name's
+	"mac" letters and the column ordering  do not match.
+
 2004-03-05  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20040305a =
