@@ -2,5 +2,9 @@ LN_LOG_ABORT_ON_ERROR
 	If this environment variable is defined (even empty), the first
 	error logged causes leafnode to abort().
 
+NOPOSTING
+	if set, the client cannot post, and its contents are output,
+	with control characters replaced by underscores
+
 TZ
 	time zone variable
