@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.18 2003/07/25 18:38:44 emma Exp $
+.\" $Id: leafnode.8.in,v 1.19 2003/11/29 18:02:01 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -224,10 +224,18 @@ only_groups_pcre = PCRE
 This parameter lists the Perl-compatible regular expression of groups
 that are fetched or posted to this server. The PCRE is automatically
 anchored at the left hand side, so you can omit the leading ^. Remember
-to escape dots, as in: de\\.comp\\.|de\\.comm\\.
+to escape dots, as in: de\\.comp\\.|de\\.comm\\. Another example might
+be only_groups_pcre=de\.(?!alt) that fetches all de.* groups that are
+not de.alt.* groups. Consult the PCRE documentation for details.
 
 If this parameter is omitted, all groups are fetched from and posted to
 this server.
+
+Note this parameter can be abused to achieve some kind of "newsgroup
+routing". To do this, you must use only_groups_pcre for \fBeach\fR of the
+servers in your configuration file, and only one of them may list the
+hierarchy that needs to be routed to a specific server. This is not very
+comfortable and hence not fully documented, although it works.
 
 .PP
 .B GENERAL OPTIONAL PARAMETERS
