@@ -2123,7 +2123,7 @@ main(int argc, char **argv)
     /* Check for unsent postings, provided we were able to talk to all
      * servers successfully. Do not touch articles that have been posted
      * before. */
-    if (rc == 0 && action_method & FETCH_POST) {
+    if (rc == 0 && action_method & FETCH_POST && !only_server) {
 	char **y;
         x = spooldirlist_prefix("out.going", DIRLIST_NONDOT, &articles);
         if (!x) {
