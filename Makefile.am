@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.61 2004/02/16 20:02:12 emma Exp $
+# $Id: Makefile.am,v 1.62 2004/03/24 22:00:39 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -264,8 +264,8 @@ update:
 
 install-data-hook:
 # directories
-	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)
-	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)/leaf.node
+	$(INSTALL) -d -m 770 $(DESTDIR)$(SPOOLDIR)
+	$(INSTALL) -d -m 770 $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)

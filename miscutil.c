@@ -58,14 +58,14 @@ struct mydir {
 
 /*@+matchanyintegral@*/
 static const struct mydir dirs[] = {
-    {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
-    {"interesting.groups", 0755},
-    {"dormant.groups", 0755},
-    {"leaf.node", 0755},
-    {"message.id", 02755},
-    {"out.going", 02755},	/* FIXME: outgoing queue */
-    {"in.coming", 02755},	/* carries articles that must be stored */
-    {"temp.files", 0700},	/* for temporary files */
+    {"failed.postings", 0775},	/* carries articles that could not be posted to upstream */
+    {"interesting.groups", 0775},
+    {"dormant.groups", 0775},
+    {"leaf.node", 0775},
+    {"message.id", 02775},
+    {"out.going", 02775},	/* FIXME: outgoing queue */
+    {"in.coming", 02775},	/* carries articles that must be stored */
+    {"temp.files", 0750},	/* for temporary files */
     {0, 0}
 };
 /*@=matchanyintegral@*/
