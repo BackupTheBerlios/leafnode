@@ -33,6 +33,7 @@ See README for restrictions on the use of this software.
  */
 
 #include "leafnode.h"
+#include "grouplist.h"
 #include "critmem.h"
 #include "ln_log.h"
 #include "format.h"
@@ -130,7 +131,8 @@ static unsigned long low_wm(unsigned long high);
 static void texpire_log_unlink(const char *file, const char *logprefix)
 {
     if (unlink(file) < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/%s: %m", logprefix, file);
+	if (errno != ENOENT)
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/%s: %m", logprefix, file);
     } else {
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
     }
@@ -754,7 +756,7 @@ legalxoverline(char *xover, unsigned long artno)
  * doexpiregroup: expire group
  */
 static void
-doexpiregroup(struct newsgroup *g, time_t expire)
+doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 {
 
     /* FIXME: why is getxover run twice? why is chdirgroup run
@@ -765,7 +767,7 @@ doexpiregroup(struct newsgroup *g, time_t expire)
     deleted = kept = 0;
 
     /* skip empty groups */
-    if (!chdirgroup(g->name, FALSE))
+    if (!chdirgroup(n, FALSE))
 	return;
 
     /* barf on getcwd problems */
@@ -783,7 +785,7 @@ doexpiregroup(struct newsgroup *g, time_t expire)
     /* find low-water and high-water marks */
     first = ULONG_MAX;
     last = 0;
-    for (i = 0; xoverinfo[i].artno && i < xcount; ++i) {
+    for (i = 0; i < xcount && xoverinfo[i].artno ; ++i) {
 	if (xoverinfo[i].exists) {
 	    if (first > xoverinfo[i].artno) {
 		first = xoverinfo[i].artno;
@@ -796,7 +798,7 @@ doexpiregroup(struct newsgroup *g, time_t expire)
     if (debugmode & DEBUG_EXPIRE)
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 	       "%s: expire %lu, low water mark %lu, high water mark %lu",
-	       g->name, expire, first, last);
+	       n, expire, first, last);
     if (expire <= 0) {
 	return;
     }
@@ -811,11 +813,11 @@ doexpiregroup(struct newsgroup *g, time_t expire)
     }
     threadlist = build_threadlist(xcount);
     totalthreads = count_threads(threadlist);
-    updatedir(g->name);
+    updatedir(n);
     remove_newer(threadlist, expire);
     if (debugmode & DEBUG_EXPIRE) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	       "%s: threads total: %lu, to delete: %lu", g->name,
+	       "%s: threads total: %lu, to delete: %lu", n,
 	       totalthreads, count_threads(threadlist));
     }
     delete_threads(threadlist);
@@ -826,33 +828,46 @@ doexpiregroup(struct newsgroup *g, time_t expire)
     free_threadlist(threadlist);
     threadlist = 0;
 
-    g->first = first;
-    if (last > g->last) {	/* try to correct insane newsgroup info */
-	g->last = last;
+    if (g) {
+	g->first = first;
+	if (last > g->last) {	/* try to correct insane newsgroup info */
+	    g->last = last;
+	}
     }
     if (dryrun)
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: running without dry-run "
-	       "will delete %lu and keep %lu articles", g->name,
+	       "will delete %lu and keep %lu articles", n,
 	       deleted, kept - deleted);
     else
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: %lu articles deleted, " "%lu kept", g->name, deleted, kept);
+	       "%s: %lu articles deleted, " "%lu kept", n, deleted, kept);
     if (!kept) {
 	texpire_log_unlink(".overview", gdir);
 
-	if (!chdir("..") && (
-            (is_interesting(g->name) == 0) ||
-            (is_dormant(g->name) == 0))
-            ) {
+	if ((is_interesting(n) == 0)
+            && (is_dormant(n) == 0))
+	{
+	    texpire_log_unlink(LASTPOSTING, gdir);
 	    /* delete directory and empty parent directories */
-	    while (rmdir(gdir) == 0) {
+	    for (;;) {
+		struct stat st;
+
+		chdir("..");
+		if (rmdir(gdir)) {
+		    if (errno != ENOTEMPTY) {
+			ln_log(LNLOG_SERR, LNLOG_CGROUP,
+				"rmdir(\"%s\") failed: %m", gdir);
+			break;
+		    }
+		}
+		if (0 == stat("leaf.node", &st))
+		    break;
 		if (!getcwd(gdir, LN_PATH_MAX)) {
 		    ln_log(LNLOG_SERR, LNLOG_CGROUP,
-			   "getcwd(...,%d) returned error: %m", LN_PATH_MAX);
+			    "getcwd(...,%d) returned error: %m", LN_PATH_MAX);
 		    return;
 		}
-		chdir("..");
 	    }
 	}
     }
@@ -860,24 +875,33 @@ doexpiregroup(struct newsgroup *g, time_t expire)
      * .overview file. Otherwise unsubscribed groups will never be
      * deleted.
      */
-    if (chdirgroup(g->name, FALSE)) {
+    if (chdirgroup(n, FALSE)) {
 	getxover(1);
     }
     freexover();
 }
 
-static void
-expiregroup(struct newsgroup *g)
+static int
+expiregroups(void)
 {
-    struct newsgroup *ng;
+    struct newsgroup *g;
+    struct stringlist *t, *l = get_grouplist();
     time_t expire;
 
-    ng = g;
-    while (ng && ng->name) {
-	expire = lookup_expire(ng->name);
-	doexpiregroup(ng, expire);
-	ng++;
+    if (!l) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot obtain group list");
+	return FALSE;
     }
+
+    for(t = l; t; t = t -> next) {
+	if (is_dormant(t -> string))
+	    continue;
+	g = findgroup(t -> string, active, -1);
+	expire = lookup_expire(t->string);
+	doexpiregroup(g, t->string, expire);
+    }
+    freelist(l);
+    return TRUE;
 }
 
 
@@ -1053,11 +1077,13 @@ main(int argc, char **argv)
 
     now = time(NULL);
 
-    expiregroup(active);
+    expiregroups();
     writeactive();
     freeactive(active);		/* throw away active data */
     active = NULL;
     freexover();		/* throw away overview data */
+    freeinteresting();
+    free_dormant();
     expiremsgid();
     /* do not release the lock earlier to prevent confusion of other daemons */
     (void)log_unlink(lockfile, 0);

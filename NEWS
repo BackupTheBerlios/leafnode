@@ -1,3 +1,6 @@
+Changes since 20030731a:
+- Bugfix: Expire groups that are no longer in "active".
+
 20030731a: Changes since 20030728a:
 - Bugfix: applyfilter removes filtered articles from the spool at large.
 - Bugfix: applyfilter unfolds headers before applying filters. Reported

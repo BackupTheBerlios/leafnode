@@ -453,7 +453,7 @@ xgetxover(
 	free_dirlist(dl);
 	if (overview)
 	    free(overview);
-	return 0;
+	return 1;
     }
 
     /* count number of entries in .overview file, store into current */
