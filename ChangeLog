@@ -1,3 +1,77 @@
+2002-01-06  Matthias Andree  <matthias.andree@gmx.de>
+
+	* TODO: Update.
+	* configure.ac: Only default spooldir to /var/spool/news when no
+	prefix is set or the prefix is /usr, default to
+	$localstatedir/spool/news otherwise.  Fixes make distcheck
+	breakage.
+
+	* Makefile.am: Prevent install-data-hook abort in non-root mode.
+	* fetchnews.c: Fix long-standing forceactive (-f) bug that left
+	groupinfo with all watermarks zeroed out.
+	* tools/make_pass.pl: Clean up a little.
+	* miscutil.c: Add lclint annotations and some const attributes.
+	* get.h: Add lclint annotations.
+	* masock_sa2port.c: Initial checkin.
+	* leafnode.h: Reorder, drop AM_NAME, add some lclint comments.
+	* masock.h: Add masock_sa2port.
+	* leafnode.8.in: Update, document authenticate.
+	* nntpd.c: Drop AM_NAME support.  Properly implement AM_FILE
+	support for authentication, clean up and enhance robustness.
+
+	* configutil.c: Drop AM_NAME support.
+	* README.html: Update, document authenticate.
+	* artutil.c: Heed DEBUG_CANCEL when cancelling or superseding.
+	* fetchnews.5.in: renamed to filterfile.5.in
+	* configure.ac: Add getaddrinfo.
+	* Makefile.am: Add masock_sa2port.c.
+	* nntpd.c (log_sockaddr): Also log port numbers.
+	* nntputil.c: Add commentary for Doxygen.
+
+2002-01-05  Matthias Andree  <matthias.andree@gmx.de>
+
+	* nntputil.c: Support IPv6 (NNTP client) if the OS provides
+	getaddrinfo(3).  Add some lclint annotations. Fix some bugs, add
+	some assert().
+
+	* nntpd.c: Add SETVBUF_REVERSED support.
+	* TODO: Update, drop fetchnews -N bug and automake (done).
+	* .cvsignore: Add Makefile.in.
+	* vcp.sh: Dropped in favor of automake.
+	* makedepend.sh: Dropped in favor of automake.
+	* Makefile.in: Dropped in favor of Makefile.am.
+	* configure.in: Renamed to configure.ac.
+	* configure.ac: Renamed from configure.in.  Added a lot of things
+	that autoscan found missing.  Ran through autoreconf.
+
+	* store.c: Include fixes and lclint annotations sent by Ralf
+	Wildenhues.
+
+	* mastrncpy.c: Include lclint annotations sent by Ralf Wildenhues.
+	* mastring.c: Include fixes and lclint annotations sent by Ralf
+	Wildenhues.
+
+	* mastring.h: Include fixes and lclint annotations sent by Ralf
+	Wildenhues.
+
+	* leafnode.h: Include lclint annotations sent by Ralf Wildenhues.
+	* b_sortnl.c: Include fixes and lclint annotations sent by Ralf
+	Wildenhues.  Drop "y" variable and rely on compiler to optimize
+	things.
+
+2002-01-04  Matthias Andree  <matthias.andree@gmx.de>
+
+	* Makefile.am: Switch to automake.
+	* fetchnews.c: Really implement -N option to only fetch a
+	particular newsgroup, reported by Jürgen Salk.
+	* aclocal.m4: Update. Just part of CVS for convenience.
+	* amiroot.c: Import from leafnode 1.9.19.ma*.
+	* README.html: Minor updates.
+	* newsq.1.in: Add set-gid note.
+	* newsq.1.in: document in.coming and failed.postings.
+	* fetchnews.c: Implement -N option to only fetch a particular
+	newsgroup.
+
 2002-01-03  Matthias Andree  <matthias.andree@gmx.de>
 
         === RELEASE 2.0b8_ma9.1pre ===
