@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040510a])
 AC_PREREQ(2.59)
-AC_REVISION($Revision: 1.99 $)
+AC_REVISION($Revision: 1.100 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -328,7 +328,7 @@ AC_SUBST(PCRE_DEFINES)
 # Check for PAM
 PAM_MSG="no"
 AC_ARG_WITH(pam,
-	    AS_HELP_STRING([--with-pam],[build with PAM support [no]]),
+	    AS_HELP_STRING([--with-pam],[build with PAM support [[no]]]),
         [
                 if test "x$withval" != "xno" ; then
                         if test "x$ac_cv_header_security_pam_appl_h" != "xyes" ; then
