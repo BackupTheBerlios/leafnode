@@ -429,7 +429,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	sprintf(s, "%lu", *artno);
 	f = fopen(s, "r");
 	if (!f)
-	    f = fopenpseudoart(group, s, a);
+	    f = fopenpseudoart(group, s, *artno);
 	/* warning: f may be NULL */
 	markinterest(group);	/* FIXME: check error */
     }
@@ -520,7 +520,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	return;
     }
 
-    if (!arg) {
+    if (!*arg) {
 	localartno = *artno;
 	localmsgid = fgetheader(f, "Message-ID:", 1);
     } else if (*arg == '<') {
