@@ -1,4 +1,18 @@
+2003-11-29  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031129a =
+	* leafnode.8.in: Add a note that EACH server line must have a
+	only_groups_pcre parameter if used for routing purposes.
+
+2003-11-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, fetchnews.c, leafnode.h, nntputil.c: Drop global variable
+	current_server.  Fixes the "posting doesn't care for
+	only_group_pcre" bug that bit Jens Nixdorf.
+
 2003-11-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 2.0.0.alpha20031122a
 
 	= snapshot 20031122a =
 	* fetchnews.c: Clean up postarticles, fetch active file
