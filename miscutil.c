@@ -49,11 +49,11 @@ int debugmode = 0;
 int verbose = 0;
 
 struct mydir {
-    const char *name;
+    /*@null@*/ const char *name;
     mode_t m;
 };
 
-static struct mydir dirs[] = {
+static const struct mydir dirs[] = {
     {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
     {"backup.moderated", 0755},	/* carries articles to moderated upstream groups */
     {"interesting.groups", 0755},
@@ -69,11 +69,11 @@ static struct mydir dirs[] = {
  * initialize all global variables
  */
 int
-initvars(const char *progname)
+initvars(const char *const progname)
 {
     uid_t ui;
     gid_t gi;
-    struct mydir *md = &dirs[0];
+    struct mydir const *md = &dirs[0];
 
     (void)progname; /* shut up compiler warnings */
 
@@ -205,7 +205,7 @@ parseopt(const char *progname, int option,
  */
 static time_t getlastart(const char *group);
 static time_t
-getlastart(const char *group)
+getlastart(const char *group) /*@globals errno;*/
 {
     mastr *g;
     char *p = critstrdup(group, "getlastart"), *q;
