@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.66 2002/07/07 11:35:28 ralf Exp $ */
+/* $Id: leafnode.h,v 1.67 2002/07/07 14:01:38 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -458,6 +458,8 @@ extern "C" {
     extern unsigned long initiallimit;
 
     /* max # of articles to read at first time */
+
+    extern int only_fetch_once;	/* do not query other servers for same groups */
     extern int delaybody;	/* delay download of message body */
     extern int debugmode;	/* log lots of stuff via syslog */
     extern int no_direct_spool; /* if set, do not store remote posts locally */

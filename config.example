@@ -123,6 +123,11 @@ expire = 20
 ## locally that a remote server has received.
 # no_direct_spool = 1
 
+## If you have multiple servers, but do not want the overviews for the
+## same group fetched several times, enable this.  fetchnews will then
+## skip all groups it has successfully downloaded once.
+# only_fetch_once = 1
+
 ############################################
 ##                                        ##
 ## SERVER declarations go below this line ##
