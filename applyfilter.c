@@ -256,17 +256,18 @@ main(int argc, char *argv[])
     int err, savedir;
     int dryrun = 0;
     int check = 0; /** if set, check if file given here would be filtered */
+    const char *const myname = "applyfilter";
 
     savedir=open(".", O_RDONLY);
 
-    ln_log_open("applyfilter");
+    ln_log_open(myname);
     if (!initvars(argv[0], 0)) {
 	fprintf(stderr, "%s: cannot initialize\n", argv[0]);
 	exit(EXIT_FAILURE);
     }
 
     while ((option = getopt(argc, argv, GLOBALOPTS "nc")) != -1) {
-	if (parseopt("applyfilter", option, optarg, &conffile))
+	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
 	    case 'n':
@@ -293,6 +294,7 @@ main(int argc, char *argv[])
 	printf("Reading configuration failed (%s).\n", strerror(err));
 	exit(2);
     }
+
     if (conffile)
 	free(conffile);
 
@@ -301,7 +303,10 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    if (lockfile_exists(LOCKWAIT)) {
+    if (!init_post())
+	init_failed(myname);
+
+    if (attempt_lock(LOCKWAIT)) {
 	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
