@@ -267,10 +267,11 @@ main(int argc, char *argv[])
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
 		    msgidpath = lookup(msgid);
-		    if ((stat(msgidpath, &st) == 0)
-			&& (st.st_nlink < 2)) {
-			if (unlink(msgidpath) == 0)
+		    if (stat(msgidpath, &st) == 0) {
+			if (truncate(msgidpath, (off_t)0) == 0 && unlink(msgidpath) == 0)
 			    deleted++;
+			else
+			    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot truncate or unlink \"%s\": %m", msgidpath);
 		    }
 		    free(msgid);
 		}
