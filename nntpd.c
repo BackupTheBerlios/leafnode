@@ -777,6 +777,29 @@ markinterest(const char *group)
     return 0;
 }
 
+static struct newsgroup *
+opengroup(struct newsgroup *g)
+{
+    freexover();
+    xovergroup = NULL;
+    /* If this group is interesting and requested, update the time stamp
+       so it remains interesting even without articles */
+    if (is_interesting(g->name))
+	markinterest(g->name);
+    if (chdirgroup(g->name, FALSE)) {
+	maybegetxover(g);
+	if (g->count == 0) {
+	    if (getwatermarks(&g->first, &g->last, &g->count)) {
+		nntpprintf("503 Cannot get group article count.");
+		return NULL;
+	    }
+	}
+    }
+    return g;
+}
+
+
+
 /* change to group - note no checks on group name */
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
@@ -787,21 +810,7 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
     rereadactive();
     g = findgroup(arg, active, -1);
     if (g) {
-	freexover();
-	xovergroup = NULL;
-	/* If this group is interesting and requested, update the time stamp
-	   so it remains interesting even without articles */
-	if (is_interesting(g->name))
-	    markinterest(g->name);
-	if (chdirgroup(g->name, FALSE)) {
-	    maybegetxover(g);
-	    if (g->count == 0) {
-		if (getwatermarks(&g->first, &g->last, &g->count)) {
-		    nntpprintf("503 Cannot get group article count.");
-		    return NULL;
-		}
-	    }
-	}
+	opengroup(g);
 
 	if (is_pseudogroup(g->name))
 	    count = 1;
@@ -2077,6 +2086,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 	    nntpprintf("411 No such group: %s", arg);
 	    return group;
 	} else {
+	    opengroup(g);
 	    *artno = g->first;
 	}
     } else if (group) {
