@@ -4,15 +4,16 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20021108a])
-AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.42 $)
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20021229a])
+AC_PREREQ(2.57)
+AC_REVISION($Revision: 1.43 $)
 AC_CONFIG_SRCDIR(leafnode.h)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_C_INLINE
+AC_C_VOLATILE
 AC_CHECK_TOOL([STRIP],[strip])
 AC_PROG_AWK
 AC_PROG_CC
@@ -54,16 +55,16 @@ RUNAS_USER=$withval
 AC_MSG_RESULT($RUNAS_USER)
 AC_MSG_CHECKING(runas-user uid)
 if test x$RUNAS_USER = xroot -o x$RUNAS_USER = xtoor ; then
-    AC_ERROR(user $RUNAS_USER cannot be used to run leafnode for security reasons.)
+    AC_MSG_ERROR([user $RUNAS_USER cannot be used to run leafnode for security reasons.])
 fi
 a=`id -u $RUNAS_USER`
 if test -z "$a" ; then
-    AC_ERROR([user $RUNAS_USER does not exist. Please add this user before building leafnode.
+    AC_MSG_ERROR([user $RUNAS_USER does not exist. Please add this user before building leafnode.
                   Most systems have man adduser or man useradd to tell you how to do this.])
 else
     AC_MSG_RESULT($a)
     if test "$a" -eq 0 ; then
-	AC_ERROR(user $RUNAS_USER cannot be used to run leafnode for security reasons.)
+	AC_MSG_ERROR([user $RUNAS_USER cannot be used to run leafnode for security reasons.])
     fi
 fi
 AC_SUBST(RUNAS_USER)
@@ -73,10 +74,10 @@ AC_MSG_CHECKING(the primary group of $RUNAS_USER)
 RUNAS_GROUP=`id -g $RUNAS_USER`
 AC_MSG_RESULT($RUNAS_GROUP)
 if test -z "$a" ; then
-    AC_WARN([cannot determine primary group of ${RUNAS_USER}.])
+    AC_MSG_WARN([cannot determine primary group of ${RUNAS_USER}.])
 else
     if test "$a" -eq 0 ; then
-	AC_ERROR([user $RUNAS_USER is in the root or wheel group and cannot be used to run leafnode for security reasons.])
+	AC_MSG_ERROR([user $RUNAS_USER is in the root or wheel group and cannot be used to run leafnode for security reasons.])
     fi
 fi
 AC_SUBST(RUNAS_GROUP)
@@ -84,18 +85,17 @@ AC_SUBST(RUNAS_GROUP)
 dnl Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STAT
+AC_HEADER_STDBOOL
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h])
 
 dnl Check whether all necessary include files are there
-AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_TRY_COMPILE([
+AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#include <sys/param.h>],[
-     return 0;],
-   [cf_cv_sysheaders="yes"],
-   [cf_cv_sysheaders="no"])
+#include <sys/param.h>]], [[
+     return 0;]])],[cf_cv_sysheaders="yes"],[cf_cv_sysheaders="no"])
 )
 if test "$cf_cv_sysheaders" = "no"
 then
@@ -112,13 +112,11 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 dnl Check whether socklen_t is defined in /usr/include/sys/socket.h
-AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_TRY_COMPILE([
+AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#include <sys/socket.h>],[
+#include <sys/socket.h>]], [[
     socklen_t fodder;
-    return fodder;],
-   [cf_cv_socklen_t="yes"],
-   [cf_cv_socklen_t="no"])
+    return fodder;]])],[cf_cv_socklen_t="yes"],[cf_cv_socklen_t="no"])
 )
 if test "$cf_cv_socklen_t" = "yes"
 then
@@ -217,10 +215,7 @@ if test "$PCRECONFIG" != "no" ; then
 fi
 
 AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
-  AC_TRY_COMPILE([#include <pcre.h>],
-	[return 0;],
-	[ac_cv_header_pcre_h=yes],
-	[ac_cv_header_pcre_h=no])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <pcre.h>]], [[return 0;]])],[ac_cv_header_pcre_h=yes],[ac_cv_header_pcre_h=no])
 ])
 
 if test "$ac_cv_header_pcre_h" = yes
@@ -231,24 +226,22 @@ fi
 if test "$ac_cv_lib_pcre_pcre_compile" = yes
 then
   AC_DEFINE(HAVE_LIBPCRE)
-  AC_CACHE_CHECK(for new pcre_compile API,cf_cv_new_pcre_compile,[AC_TRY_COMPILE([
-#include <pcre.h>],[
+  AC_CACHE_CHECK(for new pcre_compile API,cf_cv_new_pcre_compile,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <pcre.h>]], [[
 	char * pattern;
 	int options;
 	const char **errptr;
 	int *erroffset;
 	const unsigned char *tableptr;
-	pcre_compile(pattern, options, errptr, erroffset, tableptr);],
-  [cf_cv_new_pcre_compile="yes"],
-  [cf_cv_new_pcre_compile="no"])
+	pcre_compile(pattern, options, errptr, erroffset, tableptr);]])],[cf_cv_new_pcre_compile="yes"],[cf_cv_new_pcre_compile="no"])
   ])
   if test $cf_cv_new_pcre_compile = "yes"
   then
     AC_DEFINE(NEW_PCRE_COMPILE, 1,
 	      [define if your PCRE is >= v2.01])
   fi
-  AC_CACHE_CHECK(for new pcre_exec API,cf_cv_new_pcre_exec,[AC_TRY_COMPILE([
-#include <pcre.h>],[
+  AC_CACHE_CHECK(for new pcre_exec API,cf_cv_new_pcre_exec,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <pcre.h>]], [[
 	const pcre *pattern;
 	const pcre_extra *extra;
 	const char *subject;
@@ -256,8 +249,7 @@ then
 	int options;
 	int *ovec;
 	int ovecsize;
-	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize);],
-   [cf_cv_new_pcre_exec="no"], [ cf_cv_new_pcre_exec="yes" ])
+	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize);]])],[cf_cv_new_pcre_exec="no"],[ cf_cv_new_pcre_exec="yes" ])
  ])
   if test $cf_cv_new_pcre_exec = "yes"
   then
@@ -290,7 +282,8 @@ AC_SUBST(LINKPCRELIB)
 dnl Checks for library functions.
 AC_FUNC_CHOWN
 AC_FUNC_FORK dnl checks whether fork() is just a stub
-dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
+AC_FUNC_MALLOC dnl checks whether malloc(0) works
+AC_FUNC_REALLOC dnl checks whether realloc(0) works
 dnl AC_FUNC_MKTIME
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_STRFTIME
@@ -319,16 +312,16 @@ fi
 AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop)
 
 dnl Check whether the system has IPv6
-AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_LINK([
+AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-],[struct sockaddr_in6 *a;
+]], [[struct sockaddr_in6 *a;
    int b = AF_INET6;
    void *c = &(a->sin6_addr);
    char *e = gai_strerror(0);
-   return 0;],[cf_cv_ipv6=yes],[cf_cv_ipv6=no])
+   return 0;]])],[cf_cv_ipv6=yes],[cf_cv_ipv6=no])
 )
 if test "$cf_cv_ipv6" = "yes"
 then
