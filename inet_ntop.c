@@ -1,5 +1,5 @@
 /**
- * \file inet_ntop
+ * \file inet_ntop.c
  * inet_ntop emulation based on inet_ntoa.
  * \author Matthias Andree
  * 
