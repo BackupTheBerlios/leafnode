@@ -1,22 +1,23 @@
 #! /bin/sh
 
 set -e
-if test "x`cvs update | grep -v ^?`" != "x" ; then
+if test "x`cvs update | grep -v ^? | grep -v release\\.sh`" != "x" ; then
     echo "commit your changes to CVS first!"
     exit 1
 fi
+builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
 vers=`perl -n -l -e 'if (/AM_INIT_AUTOMAKE\(.*,\[?([^]]*)\]?\)/) { print "$1\n"; last; }' configure.ac`
 if [ x$QUICK != xquick ] ;then
 UPLOAD=yes
 if echo "$vers" | grep -E "devel|rc" ; then UPLOAD=no ; fi
 echo "test if make works"
-make -s
+(cd $builddir && make -s)
 echo "release for leafnode $vers"
-make -s dist
-cp -p leafnode-$vers.tar.bz2 $dest/
+(cd $builddir && make -s dist)
+cp -p $builddir/leafnode-$vers.tar.bz2 $dest/
 #cp -p leafnode-$vers.lsm $dest/
-cp -p README $dest/leafnode-readme.txt
+cp -p $builddir/README $dest/leafnode-readme.txt
 #cp -p FAQ.{xml,html,txt,pdf} $dest/
 cp -p ChangeLog $dest/ChangeLog.txt
 cp -p NEWS TODO UPDATING $dest/
