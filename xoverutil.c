@@ -44,12 +44,18 @@ unsigned long xcount = 0;
 struct xoverinfo *xoverinfo = NULL;
 
 /* declarations */
-static /*@null@*/ /*@only@*/ char *getxoverline(const int, const char *filename);
+static
+				    /*@null@*/
+ /*@only@*/
+char *getxoverline(const int, const char *filename);
 int writexover(void);
 
 /** Extract information from given file to construct an .overview line.
  *  \return a malloc()ed string .overview */
-static /*@null@*/ /*@only@*/ char *
+static
+				    /*@null@*/
+ /*@only@*/
+char *
 getxoverline(
 /** if set, delete articles with missing or improper hardlink to message.id */
 		const int require_messageidlink,
@@ -152,7 +158,8 @@ getxoverline(
 	    linecount++;
 	}
 
-	if (from != NULL && date != NULL && subject != NULL && msgid != NULL && bytes) {
+	if (from != NULL && date != NULL && subject != NULL && msgid != NULL
+	    && bytes) {
 	    if (!require_messageidlink || ihave(msgid)) {
 		/* only generate message ID if article has a link in
 		   message.id */
@@ -258,7 +265,7 @@ findxover(unsigned long article)
  */
 int
 findxoverrange(unsigned long low, unsigned long high,
-	/*@out@*/ long *idxlow, /*@out@*/ long *idxhigh)
+	       /*@out@*/ long *idxlow, /*@out@*/ long *idxhigh)
 {
     struct xoverinfo xl, xh, *fl, *fh;
 
@@ -269,7 +276,7 @@ findxoverrange(unsigned long low, unsigned long high,
     xh.artno = high;
 
     bsearch_range(&xl, &xh, &fl, &fh, xoverinfo, xcount,
-	    sizeof(struct xoverinfo), _compxover);
+		  sizeof(struct xoverinfo), _compxover);
     if (!fl || !fh)
 	return -1;
     *idxlow = fl - xoverinfo;
@@ -277,7 +284,7 @@ findxoverrange(unsigned long low, unsigned long high,
     return 0;
 }
 
-    static unsigned long
+static unsigned long
 crunchxover(struct xoverinfo *xi, unsigned long count)
 {
     unsigned long i, j;
@@ -399,7 +406,8 @@ xgetxover(
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "cannot get current working directory in getxover: %m");
 	    free_dirlist(dl);
-	    if (overview) free(overview);
+	    if (overview)
+		free(overview);
 	    return 0;
 	}
 	snprintf(s, sizeof(s), "%s/.overview", sd);
@@ -407,7 +415,8 @@ xgetxover(
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot unlink %s: %m", s);
 	}
 	free_dirlist(dl);
-	if (overview) free(overview);
+	if (overview)
+	    free(overview);
 	return 0;
     }
 
@@ -520,10 +529,9 @@ xgetxover(
     /* look for removed articles */
     if (!update) {
 	for (art = 0; art < current; art++) {
-	    if (xoverinfo[art].text
-		    && !xoverinfo[art].exists) {
+	    if (xoverinfo[art].text && !xoverinfo[art].exists) {
 		update = 1;
-		break;	/* no need to go through the rest */
+		break;		/* no need to go through the rest */
 	    }
 	}
     }
@@ -536,7 +544,7 @@ xgetxover(
     if (current) {
 	xoverinfo = (struct xoverinfo *)critrealloc((char *)xoverinfo,
 						    sizeof(struct xoverinfo) *
-						    (current+1),
+						    (current + 1),
 						    "reallocating overview array");
 	sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
     }
