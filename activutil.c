@@ -1,5 +1,5 @@
 /*
-  libutil -- deal with active file
+  activutil.c -- deal with active file
   See AUTHORS for copyright holders and contributors.
   See README for restrictions on the use of this software.
 */
@@ -69,8 +69,14 @@ insertgroup(const char *name, char status, long unsigned first,
 
     if (active) {
 	g = findgroup(name, active, -1);
-	if (g)
+	if (g) {
+	    g->status = status;
+	    if (desc && strcmp(g->desc, desc)) {
+		free(g->desc);
+		g->desc = critstrdup(desc, "insertgroup");
+	    }
 	    return;
+	}
     }
     g = (struct newsgroup *)critmalloc(sizeof(struct newsgroup),
 				       "Allocating space for new group");
