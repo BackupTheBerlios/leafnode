@@ -1,5 +1,6 @@
 2003-10-09  Matthias Andree <matthias.andree@gmx.de>
 
+	= snapshot 20031009a =
 	* nntpd.c: XOVER fixes.  XOVER n and XOVER n- didn't work for pseudo
 	articles (XOVER n-m should've been fine).
 	* applyfilter.c: Don't choke on zero-size articles. Reported by

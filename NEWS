@@ -1,4 +1,4 @@
-Changes since 20031001a:
+20031009a: Changes since 20031001a:
 - Bugfix: applyfilter no longer chokes on 0-sized articles and will
   unconditionally deleted them. Reported by Reiner Steib.
 - Bugfix: leafnode was unable to retrieve pseudo articles with XOVER n
