@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040823b])
 AC_PREREQ(2.59)
-AC_REVISION($Revision: 1.105 $)
+AC_REVISION($Revision: 1.106 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -18,6 +18,7 @@ AC_CHECK_TOOL([STRIP],[strip])
 AC_PATH_PROG([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
 AC_PROG_AWK
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB

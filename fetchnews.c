@@ -602,7 +602,7 @@ getmarked(struct newsgroup *group)
 	if (stat(fi[1], &dummy1)) {
 	    /* file not existent -> skip */
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
-		    "interesting.groups/%s: article %s not present, stat failed: %m",
+		    "interesting.groups/%s: article %s %s not present, stat failed: %m",
 		    group->name, fi[1], fi[0]);
 	    continue;
 	}
