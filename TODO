@@ -1,3 +1,4 @@
+-*- mode: text; coding: iso-8859-1; -*-
  ----------------------------------------------------------------------
 		   Leafnode 2.0b8_ma branch TODO list
  ----------------------------------------------------------------------
@@ -6,6 +7,7 @@
 NOTE: issues fixes in the current, possibly unreleased _ma versions, but
 persistent in the offical 2.0b tree, are not listed here.
 
+STATE: NEW -> OPEN -> ANALYZED -> NEEDFEEDBACK|RESOLVED|REJECTED
 
 This is a PRIORITIZED LIST. It has two columns, first the importance,
 second the urgence. (Matthias)
@@ -43,15 +45,15 @@ urgence:
     is not current. groupinfo may be out of date after a crash, fix
     watermarks.
 
+1.1 tin claims "no articles" for all local groups.
+    IN: 2002-01-06
+    FROM: Lutz Frommberger, 2002-01-06. Private mail, ID:
+	  <E16MzOy-0000An-00@dali.aufgebot.gov>
+    STATE: NEW
+
 1.1 groupinfo not updated after timeout + subsequent SIGINT
     bug confirmed by Jörg Dietrich 2002-01-04
     ACTION: fix
-
-1.1 split post functionality from fetchnews to a separate daemon (but
-    maybe call the new daemon automatically) Ozz 2001-06-12
-
-1.3 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
-    ACTION: replace by proper state machine
 
 2.2 for posts to moderated groups, add server preferences for posting?
 
@@ -85,9 +87,6 @@ urgence:
 
 2.2 nntpd control articles are also displayed
 
-2.2 report Raymond Scholz, rnews doesn't read from pipes.
-    ACTION: reimplement rnews from scratch.
-
 2.2 tolerate ", " instead of just "," in Newsgroup:
     current NNTP drafts suggests that to be able to fold Newsgroup: headers.
     ACTION: work in progress, fixed in some places.
@@ -97,10 +96,7 @@ urgence:
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
 
-2.2 groupinfo is all 0 0 0 if groupinfo is entirely re-read, until
-    texpire is run.
-
-2.2 "rnews does not work in pipes", Jörg Dietrich,
+2.2 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
     <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
     See 0.0 above as well.
 
@@ -119,8 +115,9 @@ urgence:
 2.3 if XHDR and XOVER fail, fall back to HEAD!
     ACTION: implement HEAD
 
-3.3 Ben Holmes: read newsgroups immediately after completion of their
-    download, rather than only after fetchnews completed.
+3.3 Ben Holmes: enable clients to read newsgroups immediately after
+    completion of their download, rather than only after fetchnews
+    completed.
 
 3.3 add support for stderr logging so that multilog can be used
     (clemensF <rabat@web.de>).
@@ -130,20 +127,16 @@ urgence:
 3.3 Suggestion by Jörg Mensmann: only pick groups from supplement that
     have not been fetched before (or filter groups by server)
 
-3.3 document NOPOSTING env variable that prevents posting
-
 3.3 does not send UUCP to upstream, introduce option to batch and spool
     UUCP
 
-3.3 Fix nntputil.c and nntpd.c for proper IPv6 (getipnodebyname/byaddr
-    etc.)
-
 3.3 don't supersede() articles unconditionally
     ACTION: figure criteria for allowing/denying supersede
+    Cancel-Lock? Plausibility checks?
 
-3.3 gethostbyname is not subject to timeout control
-
-3.3 make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt
+3.3 authentication interface:
+    make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt?
+    Use Bruce Günter's credential validation module?
 
 3.3 ACLs (possibly including identd) or regexp to prevent groups from
     being shown (mind ARTICLE <message@id> and check against Xref or
@@ -194,11 +187,7 @@ urgence:
 
 4.4 implement detection if local group shadows server group
 
-4.4 NOPOSTING: replace the banner with the contents of this variable.
-
 4.4 can fetchnews cope with servers that reject XOVER? (Matthias Andree)
-
-4.4 signal needs to be worked around on Solaris 7 (Matthias Andree)
 
 4.4 server dependent out.going, possibly a repost command?
 
@@ -215,14 +204,48 @@ urgence:
     (consider this for local posts and check whether to ignore this for
     downstream pulled articles)
 
+4.4 split post functionality from fetchnews to a separate daemon (but
+    maybe call the new daemon automatically) Ozz 2001-06-12
+
 5.5 getgroup: "%s: considering %ld articles %lu - %lu" does not include
     proper article count as sent by server, but just uses last-first+1
-
-5.5 determine interesting groups from .newsrc?
-    REJECT: other newsreaders have different formats
 
 5.5 delaybody only for certain groups?
 
 5.5 introduce Control: pseudo group functionality
 
 5.5 abort group fetch and proceed to next group
+
+========================================================================
+FIXED ITEMS:
+
+2002-01-06 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
+	   ACTION: replace by proper state machine
+
+2002-01-06 document NOPOSTING env variable that prevents posting
+
+2002-01-06 NOPOSTING: replace the banner with the contents of this
+	   variable.
+
+2002-01-06 Fix nntputil.c and nntpd.c for proper IPv6
+	   (getipnodebyname/byaddr etc.)
+
+2002-01-06 groupinfo is all 0 0 0 if groupinfo is entirely re-read, until
+	   texpire is run.
+
+========================================================================
+DROPPED ITEMS:
+
+2002-01-06 report Raymond Scholz, rnews doesn't read from pipes.
+           ACTION: reimplement rnews from scratch.
+	   (duplicate report, merged with Jörg Dietrich's)
+
+2002-01-06 gethostbyname is not subject to timeout control
+	   (rely on the OS to do that)
+
+2002-01-06 signal needs to be worked around on Solaris 7 (Matthias Andree)
+	   (I no longer care for goofed Solaris includes as long as the
+	   stuff still works properly.)
+
+2002-01-06 determine interesting groups from .newsrc
+	   (.newsrc format is not consistent; layer violation)
