@@ -4,6 +4,9 @@
 
 /** compare the first word of two strings ignoring case
  *  'KEY' == 'key value'
+ *
+ *  word is the longest string from the beginning to the first TAB or
+ *  SPACE. The delimiter is not compared.
  */
 int
 cmp_firstcolumn(const void *a, const void *b,
