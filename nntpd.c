@@ -1555,6 +1555,8 @@ dopost(void)
 	approved = getheader(inname, "Approved:");
 	outbasename = strrchr(inname, '/');
 	outbasename++;
+	outgoingname = mastr_new(LN_PATH_MAX);
+	incomingname = mastr_new(LN_PATH_MAX);
 	mastr_vcat(outgoingname, spooldir, "/out.going/", outbasename, NULL);
 	mastr_vcat(incomingname, spooldir, "/in.coming/", outbasename, NULL);
 
@@ -1626,6 +1628,10 @@ dopost(void)
 			log_unlink(mastr_str(outgoingname), 0);
 		goto unlink_cleanup;
 	    }
+	} else {
+	    /* remove message.id link so fetchnews can download the
+	     * posting */
+	    log_unlink(lookup(mid), 0);
 	}
 
 	switch (fork()) {
