@@ -476,7 +476,7 @@ rereadactive(void)
     static struct stat st1, st2;
     char *s1, *s2;
     char *t;
-    int reread = 0;
+    int reread = 0, stat2 = 0;
     const char *const append = "/local.groups";
 
     s1 = (char *)critmalloc(strlen(spooldir) + strlen(GROUPINFO) + 1,
@@ -496,23 +496,37 @@ rereadactive(void)
 	reread = 1;
     }
     if (stat(s2, &st2)) {
+#if 0
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "cannot stat %s: %m, may cause bad performance", s2);
 	reread = 1;
+#else
+	/* do nothing */
+    } else {
+	stat2 = 1;
+#endif
     }
 
-    if (reread || ((st1.st_mtime > activetime)
-		   || (st1.st_ino != activeinode))
-	|| ((st2.st_mtime > localmtime)
-	    || (st2.st_ino != localinode))) {
+
+    if (!reread && (st1.st_mtime > activetime
+		|| st1.st_ino != activeinode))
+	reread = 1;
+
+    if (!reread && stat2 && (st2.st_mtime > localmtime
+		|| st2.st_ino != localinode))
+	reread = 1;
+
+    if (reread) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "%sreading %s and %s",
 	       active ? "re" : "", s1, s2);
 	readactive();
 	readlocalgroups();
 	activetime = st1.st_mtime;
 	activeinode = st1.st_ino;
-	localmtime = st2.st_mtime;
-	localinode = st2.st_ino;
+	if (stat2) {
+	    localmtime = st2.st_mtime;
+	    localinode = st2.st_ino;
+	}
     }
     free(s2);
     free(s1);
@@ -529,7 +543,7 @@ void mergeactives(struct newsgroup *old, struct newsgroup *newa)
 
     g = newa;
     while (g->name) {
-	if ( (ogrp = findgroup(g->name, old, oldactivesize)) != NULL ) {
+	if (old && (ogrp = findgroup(g->name, old, oldactivesize))) {
 	    g->first = (g->first > ogrp->first) ? ogrp->first : g->first;
 	    g->last = (g->last > ogrp->last) ? g->last : ogrp->last;
 	    g->age = (g->age > ogrp-> age) ? g->age : ogrp->age;
