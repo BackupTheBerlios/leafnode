@@ -3,7 +3,7 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20041113a:
-- Bugfix: get rid of cosmetic "Groupinfo file damaged, ignoring line: 18"
+- Bugfix: get rid of cosmetic bug "Groupinfo file damaged, ignoring line: 18"
 - Change: when complaining about damaged groupinfo file, print the line
   number and encapsulate the line in double quotes.
 
