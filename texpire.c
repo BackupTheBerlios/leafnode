@@ -823,7 +823,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     delete_threads(threadlist);
     /* compute new low-water mark, count remaining articles */
     kept = 0;
-    if (!last) last = g->last;
+    if (!last && g) last = g->last;
     first = low_wm(last);
     /* free unused memory */
     free_threadlist(threadlist);
