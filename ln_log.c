@@ -66,7 +66,6 @@ vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
     }
     *y = '\0';
     vsnprintf(buf, sizeof(buf), fmt, ap);
-#ifndef TESTMODE
     if (slg != 0 && (severity < LNLOG_SDEBUG || debugmode & DEBUG_LOGGING)) {
 	if (ln_log_stderronly) {
 	    fprintf(stderr, "%s\n", buf);
@@ -74,7 +73,6 @@ vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
 	    syslog(severity, "%s", buf);
 	}
     }
-#endif /* not TESTMODE */
 
     if (severity <= LNLOG_SERR) {
 	/* check if environment demands kill on first error */
