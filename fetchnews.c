@@ -14,7 +14,6 @@
 #include "format.h"
 
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -2017,26 +2016,9 @@ main(int argc, char **argv)
 	if (only_fetch_once)
 	    freegrouplist(done_groups);
 
-	switch (fork()) {
-	case -1:		/* problem */
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "%s: fork: %m, running on parent schedule", myname);
-	    fixxover();
-	    unlink(lockfile);
-	    break;
-	case 0:			/* child */
-	    setsid();
-	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "%s: Fixing XOVER", myname);
-	    fixxover();
-	    unlink(lockfile);
-	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-		   "%s: Background process finished", myname);
-	    _exit(0);
-	default:		/* parent */
-	    ;
-	}
+	unlink(lockfile);
     }
-    wait(0);
+
     freeoptions();
     freexover();
     freeactive(active);
