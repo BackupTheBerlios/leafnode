@@ -1,3 +1,34 @@
+2002-08-20  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: even more detailed XOVER stats logging.  
+	* fetchnews.8.in, leafnode.8.in, rnews.8.in, texpire.8.in: tack
+	leafnode onto @sysconfdir@ 
+	* applyfilter.8.in: update, tack leafnode onto @sysconfdir@ 
+	* filters.example: document that maxcrosspost is not too efficient 
+
+2002-08-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Don't include XOVER-filtered count in post-download
+	killed count.  
+	* filterfile.5.in: Add efficiency section 
+	* leafnode.8.in: fix reference to filterfile 
+	* configure.ac: bump version 
+	* fetchnews.c: Log (severity: INFO) how many articles doxover() has
+	filtered on pseudo headers.  
+	* config.example, leafnode.h, ln_log.c, miscutil.c: Only log and
+	print debug messages if debugmode requires this.  
+	* nntpd.c: Merge patch by Jörg Dietrich. If leafnode has moderator
+	addresses for non-local groups configured, the article is sent to
+	the moderator by leafnode, but also left linked in out.going, so the
+	first upstream will send it to the moderator again -- who is then
+	getting duplicates. This patch unlinks the article from out.going
+	and fixes this issue.  
+	* TODO: groupinfo update vs. multiple signals bug fix confirmed.  
+
+2002-08-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Add report by Peter.Holm@gmx.at 
+
 2002-08-13  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* store.c, xoverutil.c: Make toupper argument unsigned char.

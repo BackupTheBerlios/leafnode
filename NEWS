@@ -9,10 +9,17 @@ incompatible changes:
   trailing "/leafnode" or "/leafnode/" so you don't end up with your
   configuration in /etc/leafnode/leafnode/config.
 - The "dontpost" configuration option is replaced by "feedtype=none".
+- Debug logging to syslog and console is now only enabled if the
+  debugmode figure is odd (1, 3, 5, ...), to cut down the size of
+  logging in verbose mode somewhat.
 
 other changes:
 - no longer installs the "lsort" program. You can remove it from
   /usr/local/sbin/lsort
+- fetchnews now logs how many articles could be filtered from pseudo
+  headers generated from XOVER data already. Look for "group.name: XOVER
+  N to get, M filtered" lines.
+- the filterfile and applyfilter manual pages have been updated
 - Add: Rnews is back!
 - There is a new "only_fetch_once" option, that reads a group only from
   the first server queried that carries this group. Suggested by Jörg
