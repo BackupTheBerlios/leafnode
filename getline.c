@@ -24,7 +24,7 @@
 #endif
 
 ssize_t
-_getline( /*@out@*/ char *to, size_t size, FILE * stream)
+_getline(char *to, size_t size, FILE * stream)
 {
     ssize_t i = 0;
     int c;
