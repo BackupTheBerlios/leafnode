@@ -796,24 +796,25 @@ domove(/*@null@*/ const struct newsgroup *group, int by, unsigned long *artno)
 {
     char *msgid;
     char s[PATH_MAX + 1];	/* FIXME */
+    unsigned long a;
 
     by = (by < 0) ? -1 : 1;
     if (group) {
 	if (*artno) {
-	    *artno += by;
+	    a = *artno;
+	    a += by;
 	    do {
-		sprintf(s, "%lu", *artno);
+		sprintf(s, "%lu", a);
 		msgid = getheader(s, "Message-ID:");
 		if (!msgid)
-		    *artno += by;
-	    } while (!msgid && *artno >= group->first && *artno <= group->last);
-	    if (*artno > group->last) {
-		*artno = group->last;
+		    a += by;
+	    } while (!msgid && a >= group->first && a <= group->last);
+	    if (a > group->last) {
 		nntpprintf("421 There is no next article");
-	    } else if (*artno < group->first) {
-		*artno = group->first;
+	    } else if (a < group->first) {
 		nntpprintf("422 There is no previous article");
 	    } else {
+		*artno = a;
 		nntpprintf("223 %lu %s article retrieved", *artno, msgid);
 	    }
 	    if (msgid)
