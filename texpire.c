@@ -137,6 +137,14 @@ static void delete_article(struct rnode *r);
 static void delete_threads(struct thread *);
 static unsigned long low_wm(unsigned long high);
 
+static void texpire_log_unlink(const char *file, const char *logprefix)
+{
+    if (unlink(file) < 0) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/%s: %m", logprefix, file);
+    } else {
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
+    }
+}
 
 /* very simple hash function ;-) */
 static unsigned long
@@ -841,11 +849,8 @@ dogroup(struct newsgroup *g, time_t expire)
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: %lu articles deleted, " "%lu kept", g->name, deleted, kept);
     if (!kept) {
-	if (unlink(".overview") < 0) {
-	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/.overview: %m", gdir);
-	} else {
-	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/.overview", gdir);
-	}
+	texpire_log_unlink(".overview", gdir);
+
 	if (!chdir("..") && (
             (is_interesting(g->name) == 0) ||
             (is_dormant(g->name) == 0))
