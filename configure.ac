@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020715a])
+AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020715b])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.28 $)
+AC_REVISION($Revision: 1.29 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -319,13 +319,15 @@ fi
 AC_REPLACE_FUNCS(mergesort mkstemp inet_ntop)
 
 dnl Check whether the system has IPv6
-AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_COMPILE([
+AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 ],[struct sockaddr_in6 *a;
    int b = AF_INET6;
    void *c = &(a->sin6_addr);
+   char *e = gai_strerror(0);
    return 0;],[cf_cv_ipv6=yes],[cf_cv_ipv6=no])
 )
 if test "$cf_cv_ipv6" = "yes"
