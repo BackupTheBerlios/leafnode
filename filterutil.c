@@ -410,7 +410,7 @@ selectfilter(const char *groupname)
 		fold->next = f;
 	    fold = f;
 	    if (debugmode & DEBUG_FILTER) {
-		ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+		ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 		       "filtering in %s: %s -> %s",
 		       groupname, (f->entry)->cleartext, (f->entry)->action);
 	    }
