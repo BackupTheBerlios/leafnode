@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.31 2002/02/11 02:26:45 emma Exp $ */
+/* $Id: leafnode.h,v 1.32 2002/02/20 03:19:04 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -154,13 +154,13 @@ extern "C" {
     /*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
 
 /* handling of misc. lines */
-    char *getaline(FILE * f);	/* reads one line, regardless of length,
+    /*@dependent@*/ char *getaline(FILE * f);	/* reads one line, regardless of length,
 				   returns pointer to static buffer */
     char *mygetfoldedline(const char *, unsigned long, FILE * f);
     /* reads one line, regardless of length, returns malloc()ed string! */
 #define getfoldedline(a) mygetfoldedline(__FILE__,__LINE__,a)
-    char *mgetaline(FILE * f);
-    char *timeout_getaline(FILE * f, int seconds);
+    /*@dependent@*/ char *mgetaline(FILE * f);
+    /*@dependent@*/ char *timeout_getaline(FILE * f, int seconds);
 
     int parse_line(char *l, char *param, char *value);
 
@@ -192,7 +192,7 @@ extern "C" {
 		     long unsigned last, time_t date, const char *desc);
     void changegroupdesc(const char *groupname, char *desc);
     void mergegroups(void);
-    struct newsgroup *findgroup(const char *name, struct newsgroup *a,
+    /*@null@*/ /*@dependent@*/ struct newsgroup *findgroup(const char *name, struct newsgroup *a,
 				size_t asize);	/* active must be read */
     time_t query_active_mtime(void);
     void rereadactive(void);	/* only reread if none read or if it has changed */
@@ -234,7 +234,7 @@ extern "C" {
     void freelist( /*@only@*/ struct stringlist *list);
 
     /* free memory occupied by a stringlist */
-    int stringlistlen(const struct stringlist *list);
+    int stringlistlen(/*@null@*/ const struct stringlist *list);
     struct stringlist *cmdlinetolist(const char *cmdline);
 
     /* convert a space separated string into a stringlist */
@@ -489,8 +489,7 @@ extern "C" {
 
     /* connect to upstream server */
     void nntpdisconnect(void);	/* disconnect from upstream server */
-						/*@dependent@*/ const char *rfctime(void);
-						/* An rfc type date */
+    /*@dependent@*/ const char *rfctime(void); /* An rfc type date */
 
 /* from strutil.c */
     int check_allnum(const char *);	/* check if string is all made of digits */
@@ -596,8 +595,8 @@ extern "C" {
     time_t gmtoff(const time_t);
 
 /* moderated.c */
-    char *getmoderator(const char *group);
-    char *checkstatus(const char *groups, const char status);
+    /*@null@*/ /*@only@*/ char *getmoderator(const char *group);
+    /*@null@*/ /*@only@*/ char *checkstatus(const char *groups, const char status);
 
 /* getwatermarks.c */
     int getwatermarks(unsigned long *, unsigned long *, unsigned long *);
