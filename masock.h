@@ -4,7 +4,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifndef __LCLINT__
 #include <arpa/inet.h>
+#endif /* not __LCLINT__ */
 #include <netdb.h>
 
 char *masock_sa2addr(const struct sockaddr *sa);

@@ -18,7 +18,9 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#ifndef __LCLINT__
 #include <arpa/inet.h>
+#endif /* not __LCLINT__ */
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>

@@ -27,7 +27,10 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
+/* FIXME: is arpa/inet.h still needed after masock_* split? */
+#ifndef __LCLINT__
 #include <arpa/inet.h>
+#endif /* not __LCLINT__ */
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -2023,7 +2026,8 @@ isauthorized(void)
 
 static int
 doauth_file(char *const cmd, char *const val)
-{				/*@modifies *val@*/
+				/*@modifies *val@*/
+{
     static char *user = NULL;
 
     if (0 == strcasecmp(cmd, "user")) {

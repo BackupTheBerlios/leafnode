@@ -10,7 +10,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifndef __LCLINT__
 #include <arpa/inet.h>
+#endif /* not __LCLINT__ */
 #include <netdb.h>
 
 #include <string.h>
