@@ -1,5 +1,32 @@
+2003-06-21  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Do not report difference between freshly marked/already
+	marked to the user (delaybody mode).  Do not store unapproved
+	articles for moderated groups locally ever. Reported by Timo Geusch.  
+	* fetchnews.c: postarticles: report "duplicate" upstream when
+	upstream responds 441 435.  
+
+2003-05-23  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: Revert previous commit, gcc 3.3 gets it right now.  
+	* fetchnews.8.in: Fix verbosity levels.  
+	* filterutil.c: Adjust filter logging level for "filtering in
+	group.name" message.  
+	* tools/lsmac.pl: Format link count with %3d.  
+	* ln_log.c: Kill unnecessary prototype.  
+
+2003-05-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: Kill -Wunreachable-code, seems broken in my gcc 3.2
+	version.  
+	* filters.example: Add Reiner Steib's spam killer for GMANE Xref:
+	lines.  
+	* fetchnews.c: Include Xref: in the pseudo header used for
+	filtering after XOVER. Suggested by Reiner Steib.  
+
 2003-05-05  Matthias Andree <matthias.andree@gmx.de>
 
+	* ChangeLog, configure.ac: Snapshot 2.0.0.alpha20030505a 
 	* configure.ac, vsnprintf.c, xsnprintf.c: Change vsnprintf check
 	along the lines of leafnode-1. Note that if your vsprintf function
 	is borked, the check will later fail.  
