@@ -1510,7 +1510,7 @@ dopost(void)
 	    struct stat st;
 
 	    if (!validate_messageid(mid)) {
-		nntpprintf("441 Invalid Message-ID: header, article not posted");
+		nntpprintf("441 Invalid header \"Message-ID: %s\", article not posted", mid);
 		log_unlink(inname, 0);
 		goto cleanup;
 	    }
