@@ -472,7 +472,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
     }
 
     /* do not return articles with zero size (these have been truncated by
-     * store.c after a write error) */
+     * store.c after a write error or by applyfilter to get deleted) */
     if (f && (fstat(fileno(f), &st) || st.st_size == 0)) {
 	(void)fclose(f);
 	f = NULL;
