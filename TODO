@@ -22,13 +22,6 @@ urgence:
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
 Ralfs TODO:
-	* check each time occurrence for possible 4 digit years (NNTP draft).
-	* Look at each occurence of article numbers. They can go from 1
-	  to 2^32-1 according to NNTP draft - watch out for signed long
-	  (done for all except fetchnews):
-	  getgroup() should return unsigned long.
-	* nntpd.c: doarticle: On 'ARTICLE <MID>', for delaybody an artno
-	  still has to be computed but not returned (see above).
 	* 'LIST NEWSGROUPS pattern' could add moderator address for
 	  moderated local groups.
 	* dirutil.c: should dirlist_core set count in error case?  This
@@ -66,12 +59,8 @@ Ralfs TODO:
 10pre5
 0.0 use separate repairspool program
 
-
 10pre5
-1.1 delaybody mode: fetchnews currently tries normal download of those
-    headers also, resulting in error messages, the output counts are wrong. 
-    Overviews are not corrected at all times yet, some error checking
-    in fetchnews.
+1.1 delaybody mode: Overviews are not corrected at all times yet.
 
 10pre5
 1.1 exit code of fetchnews always zero
@@ -190,9 +179,6 @@ Ralfs TODO:
 3.3 ACLs (possibly including identd) or regexp to filter which groups
     may be subscribed to (could include user specific)
 
-3.3 clean up fetchnews main function, it's a horrible mess with all
-    those !postonly, unmaintainable.
-
 3.3 Hook (ext. program) for editing group info,
     <slrn9e1dv6.3il.wum@wum.truhaso.lu> and
     <m3snj2d3k1.fsf@emma1.emma.line.org>
@@ -258,14 +244,28 @@ Ralfs TODO:
 5.5 getgroup: "%s: considering %ld articles %lu - %lu" does not include
     proper article count as sent by server, but just uses last-first+1
 
-5.5 delaybody only for certain groups?
-
 5.5 introduce Control: pseudo group functionality
 
 5.5 abort group fetch and proceed to next group
 
 ========================================================================
 FIXED ITEMS:
+
+2002-07-06 Ralf Wildenhues
+	   delaybody only for certain groups?
+
+	   clean up fetchnews main function, it's a horrible mess with all
+	   those !postonly, unmaintainable.
+
+	   Look at each occurence of article numbers. They can go from 1
+	   to 2^32-1 according to NNTP draft - watch out for signed long
+	   (done for all except fetchnews):
+	   nntpd.c: doarticle: On 'ARTICLE <MID>', for delaybody an artno
+	   still has to be computed but not returned (see above).
+	   check each time occurrence for possible 4 digit years (NNTP draft).
+	   getgroup() should return unsigned long.
+	   delaybody mode: fetchnews currently tries normal download of those
+	   headers also, resulting in error messages, the output counts are wrong.
 
 2002-07-03 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
 	   <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
