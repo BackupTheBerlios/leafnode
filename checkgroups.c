@@ -42,7 +42,7 @@ process_input(char *s)
 
     f = fopen(s, "r");
     if (!f) {
-	fprintf(stderr, "%s deleted(shouldn't happen)\n", s);
+	fprintf(stderr, "%s deleted (shouldn't happen)\n", s);
 	return;
     }
     while ((l = getaline(f))) {
