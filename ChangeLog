@@ -1,4 +1,43 @@
+2004-05-10  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040510a =
+	* configure.ac: Do not check for gethostbyaddr/-name, we don't use
+	#ifdefs for these.  Bump version.
+	* applyfilter.c: Don't segfault when article has no discernible
+	Message-ID: header. Reported by Robert Marshall.
+	* artutil.c: Include system.h
+	* leafnode.h, system.h: Mark _GNU_SOURCE
+	* leafnode.h: Fix splint comment.
+	* Makefile.am: Add t.mgetheader.c.  Let rsync target work for VPATH
+	builds.
+	* configure.ac: Fed through autoupdate.
+	* t.mgetheader.c: Add mgetheader check.
+	* strcasestr.c: Add replacement strcasestr() function.
+	* artutil.c: Bigfix: mgetheader: Use strcasestr, reported by Robert
+	Marshall.
+	* activutil.c, fetchnews_check_date.c: Cast is*() argument to
+	unsigned char.
+	* miscutil.c: Make ln_log argument and format string consistent.
+	* nntpd.c: Revise PAM code, set PAM_RUSER and PAM_RHOST.
+	* system.h: Add prototype for strcasestr.
+
+2004-05-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* filters.example: Fix filterfile section, was 8, is now 5.
+	Reported by Reiner Steib.
+
+2004-03-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* midutil.c: Add a comment about Cygwin.
+
+2004-03-27  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, NEWS: Speed up installation: do not run chmod -R on
+	spool automatically.
+
 2004-03-26  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, Makefile.am, NEWS, configure.ac: 2.0.0.alpha20040326a
 
 	= snapshot 20040326a =
 	* fetchnews.c: Drop too relaxed umask.

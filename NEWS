@@ -1,4 +1,7 @@
-Changes since 20040326a:
+20040510a: Changes since 20040326a:
+- applyfilter crashed when an article had the "Message-ID" header in
+  different case, for example, "Message-Id". Reported by Robert
+  Marshall.
 - Do not run chmod -R on the spool unconditionally, it's too expensive.
   Just print a message what to type.
 
