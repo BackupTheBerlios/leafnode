@@ -42,7 +42,7 @@ sets its real and effective uid to "news".
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems. See
-.I @sysconfdir@/config.example
+.I @sysconfdir@/leafnode/config.example
 for details on how to configure the debug mode. If the mode is omitted,
 assume maximum debug level.
 .TP

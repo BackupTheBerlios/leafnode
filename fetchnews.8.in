@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.6 2002/04/03 21:52:04 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.7 2002/08/20 00:17:09 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -49,7 +49,7 @@ for details on how to configure the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@sysconfdir@/config.
+@sysconfdir@/leafnode/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is
