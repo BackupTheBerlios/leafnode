@@ -1,5 +1,21 @@
+2004-01-29  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040129a =
+	* NEWS, TODO, config.example, config.table, configutil.c,
+	fetchnews.c, leafnode.8.in, leafnode.h: Forward port "noactive"
+	option from leafnode 1.9.  Drop support for "supplement" option. Use
+	"server" instead.
+
+2004-01-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* applyfilter.8.in: Change formatting.
+	* applyfilter.8.in: Note that -C mode is local only and does not
+	create control messages.
+
 2004-01-27  Matthias Andree <matthias.andree@gmx.de>
 
+	* README-leaf.node: Mention SERVER/SERVER:PORT's mtime used for
+	NEWGROUPS.
 	* Makefile.am, README-leaf.node, leafnode.spec.in: README-leaf.node
 	describes the contents of the leaf.node directory.
 	* fetchnews.c: Robustness: Make leaf.node/server[:port]~ files line

@@ -1,4 +1,4 @@
-Changes since 20040122a:
+20040129a: Changes since 20040122a:
 - Feature: newsq -c now checks the queue if there are articles to post.
   Exits 0 if there are, EX_UNAVAILABLE if there are not, EXIT_FAILURE on
   error.
