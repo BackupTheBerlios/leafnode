@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
