@@ -479,9 +479,11 @@ updatedir(const char *groupname)
 			/* atomically regenerate link to make sure the
 			 * article is not lost -- unlink+link is not
 			 * safe */
-			(void)unlink(".to.relink");
-			if (link(name, ".to.relink")
-			    || rename(".to.relink", m)) {
+			if (link(name, m)
+				&& (errno != EEXIST
+				    || rename(m, name)
+				    || link(name, m)))
+			{
 			    ln_log(LNLOG_SERR,
 				   LNLOG_CARTICLE,
 				   "%s: cannot restore hard link "
