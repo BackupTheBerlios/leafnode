@@ -72,8 +72,8 @@ insertgroup(const char *name, char status, long unsigned first,
 	g = findgroup(name, active, -1);
 	if (g) {
 	    g->status = status;
-	    if (desc && strcmp(g->desc, desc)) {
-		free(g->desc);
+	    if (desc && (g->desc == NULL || strcmp(g->desc, desc) != 0)) {
+		if (g->desc) free(g->desc);
 		g->desc = critstrdup(desc, "insertgroup");
 	    }
 	    return;
