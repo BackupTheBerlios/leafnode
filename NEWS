@@ -1,3 +1,9 @@
+Changes since 20031028a:
+- Feature: applyfilter -c checks in -n mode if filters would match the
+  files (rather than newsgroups) given on the command line.
+  Suggested by Reiner Steib.
+- Feature: applyfilter can now handle more than one newsgroup argument.
+
 20031028a: Changes since 20031026a:
 - Bugfix: Change "ulong" to "unsigned long" to make the package compile
   on FreeBSD. Reported against 20031019a by Jack Raats.

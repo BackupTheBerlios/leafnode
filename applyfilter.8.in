@@ -11,7 +11,7 @@ applyfilter \- apply filter settings to news spool
 .SH SYNOPSIS
 .B applyfilter -V
 .br
-.B applyfilter [-vn] [-D debugmode] [-F configfile] newsgroup
+.B applyfilter [-vnc] [-D debugmode] [-F configfile] object [...]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -30,6 +30,10 @@ sets its real and effective uid to "news".
 
 .SH OPTIONS
 .TP
+.I object
+is either a newsgroup name (if -c is NOT given) or a file name (if -c is
+given).
+.TP
 .I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
@@ -45,6 +49,10 @@ Read configuration from an alternate config file instead of
 Dry run.  Do not actually delete anything.  Use in combination with
 .I -v
 to see which articles would be deleted.
+.TP
+.I -c
+Check mode. Print if filter would apply to files given on command line.
+The files are expected to contain one news article each.
 .TP
 .I -v
 Be verbose.
