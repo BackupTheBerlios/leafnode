@@ -47,7 +47,8 @@ Ralfs TODO:
 	* delaybody mode: Cancels for marked bodies lead to marks not being
 	  removed (supersedes are handled ok) until expiry of the pseudo header.
 	* Leftover link in temp.files for each (successfully?) posted article,
-	  as well as backup.moderated.
+	  as well as backup.moderated.  Reported by Robert Marshall in
+	  <3D39D38D.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>.
 	* :active.read must not be updated on NEWGROUPS, or the active will
 	  never be refetched as a whole.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
@@ -56,6 +57,8 @@ Ralfs TODO:
 	* race condition in fetchnews: a second fetchnews can read the active file
 	  before the first one wrote it.  After obtaining the lock, the second
 	  fetchnews writes back the old active file.  Other programs affected?
+	* race condition in fetchnews between ismsgidonserver and post_FILE.
+	  Using only_fetch_once e.g. can hit the window with two upstream servers.
 
 10pre5
 0.0 forward port bug fixes from 1.9.19rc*

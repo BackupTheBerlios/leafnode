@@ -1,5 +1,16 @@
+2002-08-13  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* store.c, xoverutil.c: Make toupper argument unsigned char.
+	* getline.c, mastring.c, xoverutil.c: forward port fixes to
+	mastr_cpy, mastr_cat and improvements to _getline, mastr_getln
+	reported by Fabrizio Tironi from leafnode-1.9.
+	* redblack.c: Remove superfluous nested function decl.
+	* TODO: Identify race in fetchnews.  Update.
+
 2002-07-22  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
+	* nntpd.c: Now really fix showing pseudo article count with 'GROUP
+	new.group'.  Reported by Jeff Grossman.
 	* getwatermarks.c, nntpd.c: Work around for not shown pseudo
 	article.  This should be fixed once and for all, but isn't yet.
 	* TODO: Update.
