@@ -15,4 +15,4 @@ EXTRA_DIST=	archivefaq.pl \
 		$(GENERATED_DOCS)
 
 lsmac.1: lsmac.pl
-	pod2man lsmac.pl >$@ || rm -f $@
+	pod2man $(srcdir)/lsmac.pl >$@ || rm -f $@
