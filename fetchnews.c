@@ -1354,8 +1354,9 @@ nntpactive(int fa)
 		    && chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
-		if (getwatermarks(&first, &last, 0)) {
-		    /* trouble */
+		unsigned long count;
+		if (getwatermarks(&first, &last, &count) || 0 == count) {
+		    /* trouble or empty group */
 		    first = last = 0;
 		}
 	    }

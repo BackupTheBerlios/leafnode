@@ -375,8 +375,11 @@ readactive(void)
 
     if ((f = fopen(mastr_str(s), "r")) == NULL) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
-		   mastr_str(s));
+		mastr_str(s));
 	mastr_delete(s);
+	active = (struct newsgroup *)critmalloc(sizeof(struct newsgroup),
+		"readactive");
+	activesize = 0;
 	return;
     }
 
@@ -413,6 +416,13 @@ readactive(void)
 	    g->first = 1;	/* pseudoarticle */
 	if (g->last == 0 && !is_localgroup(g->name))
 	    g->last = 1;
+	if (g->last == (unsigned long)-1) {
+	    /* corrupt by older leafnode-2 version */
+	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
+		       "bogus last value, trying to fix: %s", p);
+	    if (chdirgroup(g->name, FALSE))
+		(void)getwatermarks(&g->first, &g->last, NULL);
+	}
 	g->count = 0;
 	p = r;
 	for (n = 0; n < 4; n++) {	/* Skip the numbers */
@@ -500,12 +510,12 @@ rereadactive(void)
  * Merge newly read active with old active. Do not reset watermarks and
  * timestamps. (c) 2002 Joerg Dietrich
  */
-void mergeactives(struct newsgroup *old, struct newsgroup *new)
+void mergeactives(struct newsgroup *old, struct newsgroup *newa)
 {
     struct newsgroup *g;
     struct newsgroup *ogrp;
 
-    g = new;
+    g = newa;
     while (g->name) {
 	if ( (ogrp = findgroup(g->name, old, oldactivesize)) != NULL ) {
 	    g->first = (g->first > ogrp->first) ? ogrp->first : g->first;
@@ -516,7 +526,7 @@ void mergeactives(struct newsgroup *old, struct newsgroup *new)
 	}
 	g++;
     }
-    g = active = new;
+    g = active = newa;
     activesize = 0;
     while (g->name) {
 	activesize++;
@@ -536,7 +546,7 @@ struct newsgroup *mvactive(struct newsgroup *a)
     b = (struct newsgroup *)critmalloc((1+activesize) *
 				       sizeof(struct newsgroup),
 				       "allocating active copy");
-    b = memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
+    (void)memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
     oldactivesize = activesize;
     active = NULL;
     activesize = 0;

@@ -16,6 +16,8 @@ incompatible changes:
   logging in verbose mode somewhat.
 
 other changes:
+- tries to fix the infamous "unsigned -1" corruption in groupinfo.
+- build toolchain updated to automake 1.7.1/autoconf 2.54
 - forward-port of only_groups_pcre option from leafnode-1.
 - articles that are mailed to the moderator that don't already have a To:
   header line now get the To: header appended.

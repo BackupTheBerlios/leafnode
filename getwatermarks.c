@@ -2,6 +2,8 @@
 #include <limits.h>
 #include <dirent.h>
 #include <ctype.h>
+#include <assert.h>
+
 #include "leafnode.h"
 
 /** Get the current first and last article number, and possibly the
@@ -15,6 +17,9 @@ int getwatermarks(unsigned long *f, unsigned long *l,
     unsigned long last = 0, count = 0;
     DIR *ng;
     struct dirent *nga;
+
+    assert(f);
+    assert(l);
 
     ng = opendir(".");
     if (ng == NULL) {
@@ -37,7 +42,7 @@ int getwatermarks(unsigned long *f, unsigned long *l,
 
 	    count ++;
 	    i = strtoul(nga->d_name, &q, 10);
-	    if (q != NULL && *q == '\0') {
+	    if (q != NULL && *q == '\0' && i != 0) {
 		if (i < first) {
 		    first = i;
 		}
@@ -53,10 +58,10 @@ int getwatermarks(unsigned long *f, unsigned long *l,
     if (closedir(ng) != 0) {
 	return -1;
     }
-    if (first > 0)
-	*f = first;
-    if (last > *l)
+    if (last > *l || *l == (unsigned long)-1)
 	*l = last;
+    if (first > 0 || *f > *l + 1)
+	*f = first;
     if (c) {
 	*c = count;
     }
