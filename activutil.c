@@ -101,14 +101,8 @@ insertgroup(const char *name, char status, long unsigned first,
     unsigned long count = 0ul;
 
     /* interpret INN status characters x->n, j->y, =->y */
-    if (status == 'x') status = 'n';
+    if (strchr("x",  status)) status = 'n';
     if (strchr("j=", status)) status = 'y';
-
-    if (*name == '.' || strstr(name, "..") || name[strlen(name)-1] == '.') {
-	ln_log(LNLOG_SWARNING, LNLOG_CGROUP, "Warning: skipping group \"%s\", "
-		"invalid name (NULL component).", name);
-	return;
-    }
 
     if (!validate_groupname(name)) return;
 
