@@ -500,7 +500,7 @@ markdownload(const char *groupname, const char *msgid, unsigned long artno)
 	    }
 	    if (ferror(f)) e = errno;
 	}
-	(void)fprintf(f, "%s %lu\n", msgid, artno);
+	(void)fprintf(f, "%s %lu 0\n", msgid, artno);
 	if (ferror(f)) e = errno;
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 	       "Marking %s: %s for download", groupname, msgid);
