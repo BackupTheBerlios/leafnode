@@ -1,3 +1,9 @@
+Changes since 20031129a:
+- Change: In response to LIST NEWSGROUPS, don't flush 215 line, but
+  concatenate answer into same packet. Reduces packet count in response,
+  for instance, when clients send this command often to get newsgroup
+  descriptions.
+
 20031129a: Changes since 20031122a:
 - Cleanup: Remove global variable "current_server".
 - Bugfix: The previous cleanup also reinstates only_group_pcre matching

@@ -140,6 +140,23 @@ nntpprintf(const char *fmt, ...)
     va_end(args);
 }
 
+/* same as nntpprintf_as, but don't flush output */
+static void nntpprintf_as(const char *fmt, ...)
+    __attribute__ ((format(printf, 1, 2)));
+static void
+nntpprintf_as(const char *fmt, ...)
+{
+    char buffer[1024];
+    va_list args;
+
+    va_start(args, fmt);
+    (void)vsnprintf(buffer, sizeof(buffer), fmt, args);
+    if (debugmode & DEBUG_NNTP)
+	ln_log(LNLOG_SDEBUG, LNLOG_CALL, ">%s", buffer);
+    printf("%s\r\n", buffer);
+    va_end(args);
+}
+
 static void
 main_loop(void)
 {
@@ -1013,7 +1030,7 @@ dolist(char *oarg)
 	    }
 	    fputs(".\r\n", stdout);
 	} else if (str_isprefix(arg, "newsgroups")) {
-	    nntpprintf("215 Descriptions in form \"group description\".");
+	    nntpprintf_as("215 Descriptions in form \"group description\".");
 	    if (active) {
 		if (strlen(arg) == 10)
 		    list(active, 1, NULL);
