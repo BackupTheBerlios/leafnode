@@ -50,13 +50,16 @@ Ralfs TODO:
   Summon on leafnode-list July 21/22 2004).
 
 * forward port leafnode-1 STAT blacklisting code? Or go for real posting
-stuff?
+  stuff?
 
 * make sure filters or some other mechanism can allow local, but block
   remote control messages (christophe Raverdy <craverdy@teaser.fr>
   2002-12-05 leafnode-list)
 
 Matthias:
+
+* Cory C. Albrecht: let newsq print articles to be retrieved in
+  delaybody mode. (2004-08-29)
 
 * line 1605 fetchnews.c (if active && ...) needs to be fixed. The whole
   process may need to be split in phases 1-obtain group lists, 2-post,
@@ -72,7 +75,7 @@ Matthias:
 * when server supports DATE, compensate for offset when sending
   NEWGROUPS et al.? See report of John Carlyle-Clarke of 2004-01-27
 
-* store group lists per server and merge them into a DB?
+* store group lists (active file) per server and merge them into a DB?
 
 * separate audit logging (who subscribes, who downloads) from debug
   logging
