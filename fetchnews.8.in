@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.11 2003/05/23 22:32:37 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.12 2003/07/16 08:51:13 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -15,9 +15,9 @@ fetchnews \- fetch news via NNTP
 .SH SYNOPSIS
 .B fetchnews -V
 .br
-.B fetchnews [-D debugmode] [-v] [-F configfile] [-M message-id]
-.br
-.B fetchnews [-BDfHnPv] [-F configfile] [-x number] [-S server[:port]] [-N newsgroup] [-t #]
+.B fetchnews [-BDfHnPv] [-D debugmode] [-v] [-F configfile]
+[-M message-id] [...] [-x number] [-S server[:port]]
+[-N newsgroup] [...] [-t #]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -37,8 +37,9 @@ articles to or from the upstream NNTP server.
 .SH OPTIONS
 .TP
 .I -B
-Get only article bodies. Works only if "delaybody" option is set in the
-configuration file (see below.)
+Get article bodies from groups that are in "delaybody" mode. Done by
+default unless one of -H -M -R -P is used. See the configuration
+section of leafnode(8) for "delaybody".
 .TP
 .I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
@@ -56,14 +57,17 @@ Force rereading of whole active file from all upstream servers. This is
 usually occurring only very infrequently because it takes a long time.
 .TP
 .I -H
-Get only article headers. Works only if "delaybody" option is set in the
-configuration file (see below).
+Get article headers for groups that are in "delaybody" mode. Done by
+default unless one of -B -M -R -P is used. See the configuration
+section of leafnode(8) for "delaybody".
 .TP
 .I -M message-id
-Get only article with this message-id. NOTE: The message-id MUST be
+Get article with this message-id. NOTE: The message-id MUST be
 surrounded by angle brackets. Use single quotes to protect the
 message-ID angle brackets, dollar signs and other meta characters from
-shell interpretation. EXAMPLE:
+shell interpretation. The -M option can be used multiple times to get
+more than one article.
+.B Example:
 
 fetchnews -M '<1234$5678@example.org>'
 .TP
@@ -73,13 +77,19 @@ Don't unlink files in the
 directory. This avoids automatic unsubscription of newsgroups.
 .TP
 .I -N newsgroup
-Get only articles posted to "newsgroup".
+Get only articles posted to "newsgroup". The -N option can be used
+multiple times to get articles from more than one group.
 .TP
 .I -P
-Only post articles that have accumulated in the
+Post articles that have accumulated in the
 .I out.going
-directory but do not fetch articles from upstream servers.
+directory. Done by default unless one of -B -H -M -R is used.
 .TP
+.TP
+.I -R
+Get articles from groups that are not in "delaybody" mode. Done by
+default unless one of -B -H -M -P is used. See the configuration
+section of leafnode(8) for "delaybody".
 .I -S server[:port]
 Only get articles on "server". You can specify this option multiple times
 with different servers if you want to query several servers at once.
@@ -190,9 +200,10 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
 .PP
 Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>,
-Markus Enzenberger <enz@cip.physik.uni-muenchen.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997-2000.
+Markus Enzenberger <enz@cip.physik.uni-muenchen.de>, Randolf Skerka
+<Randolf.Skerka@gmx.de>, Matthias Andree <matthias.andree@gmx.de> and
+Jörg Lüders <joerg.lueders@gmx.de>.
+Copyright of the modifications 1997-2003.
 
 .SH SEE ALSO
 .BR filterfile (5),
