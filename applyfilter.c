@@ -200,7 +200,14 @@ static int applyfilter(const char *name, struct newsgroup *g,
 		char *msgid = NULL;
 		if (strlen(l)) {
 		    msgid = mgetheader("Message-ID:", l);
-		    delete_article(msgid, "applyfilter", "filtered");
+		    if (msgid) {
+			delete_article(msgid, "applyfilter", "filtered");
+		    } else {
+			ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+				"%s: Article %s has no Message-ID header",
+			       g->name, name);
+			unlink(name);
+		    }
 		} else {
 		    unlink(name);
 		}
