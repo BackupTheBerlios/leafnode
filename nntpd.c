@@ -1268,12 +1268,13 @@ dopost(void)
 	if (!line) {
 	    /* client died */
 	    log_unlink(inname);
-	    nntpprintf("400 Premature end of input. Exiting.");
-	    exit(EXIT_FAILURE);
+	    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
+		    "Client disconnected while POSTing headers. Exit.");
+	    exit(0);
 	}
 
 	/* premature end (no body) */
-	if (!strcmp(line, ".")) {
+	if (0 == strcmp(line, ".")) {
 	    err = TRUE;
 	    break;
 	}
@@ -1379,11 +1380,15 @@ dopost(void)
 	    debug = 0;
 	    line = getaline(stdin);
 	    debug = debugmode;
+
 	    if (!line) {
+		/* client died */
 		log_unlink(inname);
-		nntpprintf("400 Premature end of input. Exiting.");
-		exit(EXIT_FAILURE);
+		ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
+			"Client disconnected while POSTing body. Exit.");
+		exit(0);
 	    }
+
 	    if (line[0] == '.') {
 		/* escape or skip if single dot */
 		if (line[1]) {
