@@ -1,5 +1,57 @@
+2004-08-23  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040823b =
+	* fetchnews.c: Revert plausibility tests to not abort. Found by
+	Jack Raats.
+
+	= snapshot 20040823a =
+	* NEWS: Clean up around timeout_delaybody.
+	* NEWS, configure.ac: 20040823a
+	* NEWS, config.example, config.table, configutil.c, fetchnews.c,
+	leafnode.8.in, leafnode.h: Implement timeout_delaybody. Suggested
+	by Cory C. Albrecht.
+	* nntputil.c: Use server-specific timeout as timeout for connecting
+	and reading the banner.
+	* leafnode.8.in: document timeout_client
+	* configutil.c: Consistent debug mode logging, all server-specific
+	options now PREfixed with server name.
+	* Makefile.am: Revise post-install message.
+
+2004-08-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, fetchnews.c: Quit from getgroup if only_group_pcre is set.
+	Reported by Cory C. Albrecht.
+	* NEWS, configutil.c: Cleanup ln_log -> ln_log_sys for
+	LNLOG_SDEBUG, for consistency.
+	* leafnode.8.in: Escape a backslash.
+	* filterfile.5.in: Revise man page now that everything is a PCRE.
+	Reported by Jörg Lüders.
+	* fetchnews.8.in, leafnode.8.in: pcre(7) -> pcre(3)
+
+2004-08-20  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c:
+	(getmarked) Diagnose write errors on the group.name file.
+	(getmarked) Initialize failed-list early to avoid overhead
+	(getmarked) Don't write the error message (getbymsgid clobbers l)
+	but the real information.
+	* configutil.c:
+	(freeconfig) Free spooldir.
+
+2004-08-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Add diagnostics for fetching marked articles.
+	* config.example, leafnode.8.in: Reword hostname documentation.
+	* NEWS, fetchnews.c, nntpd.c: Expire interesting.group delaybody
+	articles after time, not after 4 retries.
+	* Makefile.am, expire_lookup.c, leafnode.h, texpire.c: Split
+	lookup_expire into an own file.
+
 2004-08-18  Matthias Andree <matthias.andree@gmx.de>
 
+	* ChangeLog, NEWS, configure.ac: 2.0.0.alpha20040818a
+
+	= snapshot 20040818a =
 	* fetchnews.c: Handle old interesting.groups files without retry
 	counter.
 	* leafnode.h: Add COUNT_OF macro.
