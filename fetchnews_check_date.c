@@ -62,7 +62,7 @@ check_date(const struct serverlist *server)
     }
 
     /* upstream supports the DATE command */
-    if (scan_date(lastline, &tm)) {
+    if (!scan_date(lastline, &tm)) {
 	/* too few fields */
 	if ((debugmode & debugmask) == debugmask) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CSERVER, "check_date: %s: too few fields in DATE reply "
