@@ -82,7 +82,7 @@ store_err(int i)
     }
 }
 
-#define BAIL(r,msg) do { rc = (r); if (*msg) ln_log(LNLOG_SERR, LNLOG_CARTICLE, ("store: " msg)); goto bail; } while(0);
+#define BAIL(r,msg) { rc = (r); if (*msg) ln_log(LNLOG_SERR, LNLOG_CARTICLE, ("store: " msg)); goto bail; }
 
 /** Read an article from input stream and store it into message.id and
  *  link it into the newsgroups.
