@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.60 2004/02/06 18:07:40 emma Exp $
+# $Id: Makefile.am,v 1.61 2004/02/16 20:02:12 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -165,9 +165,11 @@ noinst_PROGRAMS = \
 
 check_PROGRAMS= \
 		t.getwatermarks \
-		xsnprintf strutil
+		xsnprintf strutil \
+		grouplist
 
 strutil_CPPFLAGS=$(AM_CPPFLAGS) -DTEST
+grouplist_CPPFLAGS=$(AM_CPPFLAGS) -DTEST
 
 TESTS= \
 	xsnprintf
