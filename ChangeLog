@@ -1,3 +1,17 @@
+2002-07-04  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* rnews.c: Portability:  no empty switch case.
+	* artutil.c, checkgroups.c, configutil.c, fetchnews.c, filterutil.c,
+	leafnode.h, miscutil.c, store.c, xoverutil.c: Consistently use
+	SKIP*() macros instead of while(isspace(p)) etc.  Fixes several
+	potential array bounds reads in rare cases.
+	* nntpd.c: Use news@fqdn as pseudo article author.  Partly done in
+	last checkin already.
+
+2002-07-04  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac, Makefile.am: Drop CAT.
+
 2002-07-03  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* applyfilter.c, getwatermarks.c, store.c, xoverutil.c: Never lower
