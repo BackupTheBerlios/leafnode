@@ -1481,6 +1481,8 @@ dopost(void)
 	char *moderator = 0;
 	char *approved = 0;
 	char *legalgroup = 0;
+	mastr *outgoingname = NULL;
+	mastr *incomingname = NULL;
 
 	f = fopen(inname, "r");
 	if (f) {
@@ -1518,24 +1520,22 @@ dopost(void)
 	    }
 	}
 
-	{
-	    int  tmp = msgid_allocate(inname, mid);
-	    switch(tmp) {
-		case 1:
-		    nntpprintf("441 435 Duplicate, article not posted");
-		    log_unlink(inname, 0);
-		    goto cleanup;
-		    break;
-		case 0:
-		    /* OK */
-		    break;
-		default:
-		    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot link %s to %s: %m",
-			    inname, lookup(mid));
-		    log_unlink(inname, 0);
-		    goto cleanup;
-		    break;
-	    }
+	/* check if we can obtain the MID or if the article is duplicate */
+	switch(msgid_allocate(inname, mid)) {
+	    case 1:
+		nntpprintf("441 435 Duplicate, article not posted");
+		log_unlink(inname, 0);
+		goto cleanup;
+		break;
+	    case 0:
+		/* OK */
+		break;
+	    default:
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot link %s to %s: %m",
+			inname, lookup(mid));
+		log_unlink(inname, 0);
+		goto cleanup;
+		break;
 	}
 
 	if ((forbidden = checkstatus(groups, 'n'))) {
@@ -1543,126 +1543,96 @@ dopost(void)
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to non-writable group %s", forbidden);
 	    nntpprintf("441 Posting to %s not allowed", forbidden);
-	    log_unlink(inname, 0);
+	    msgid_deallocate(inname, mid);
+	    free(forbidden);
 	    goto cleanup;
 	}
 
-	if ((modgroup = checkstatus(groups, 'm'))) {
-	    /* Post to a moderated group */
+	/* set up all that we need */
+	legalgroup = checkstatus(groups, 'y');
+	modgroup = checkstatus(groups, 'm');
+	if (modgroup)
 	    moderator = getmoderator(modgroup);
-	    if (!moderator && is_alllocal(modgroup)) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP,
-		       "Did not find moderator address for local moderated "
-		       "group %s", modgroup);
-		nntpprintf("503 Configuration error: No moderator for %s",
-			   modgroup);
-		log_unlink(inname, 0);
-		goto cleanup;
-	    }
-	    approved = getheader(inname, "Approved:");
-	}
+	approved = getheader(inname, "Approved:");
+	outbasename = strrchr(inname, '/');
+	outbasename++;
+	mastr_vcat(outgoingname, spooldir, "/out.going/", outbasename, NULL);
+	mastr_vcat(incomingname, spooldir, "/in.coming/", outbasename, NULL);
 
-	if ((!moderator || (moderator && approved)) && !is_alllocal(groups)) {
-	    /* also posted to external groups
-	     * or moderated group with unknown moderator,
-	     * or approved, store into out.going */
-	    mastr *s = mastr_new(LN_PATH_MAX);
-	    outbasename = strrchr(inname, '/');
-	    outbasename++;
-	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
-	    if (sync_link(inname, mastr_str(s))) {
-		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		       "unable to schedule for posting to upstream, "
-		       "link %s -> %s failed: %m", inname, mastr_str(s));
-		nntpprintf("503 Could not schedule article for posting "
-			   "to upstream, see syslog.");
-		log_unlink(inname, 0);
-		mastr_delete(s);
-		goto cleanup;
-	    }
-	    mastr_delete(s);
-	    if (modgroup && !approved) {
-		nntpprintf("240 Posting scheduled for posting to "
-			   "upstream, be patient");
-		log_unlink(inname, 0);
-		goto cleanup;
-	    }
-	}
+	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
+		modgroup && !approved
+		? "MODERATED" 
+		: ( is_anylocal(groups)
+		    ? ( is_alllocal(groups)
+			? "LOCAL" 
+			: "LOCAL+UPSTREAM")
+		    : "UPSTREAM"), mid, groups);
 
-	if (moderator && !approved) {
-	    /* Mail the article to the moderator */
-	    mastr *s = mastr_new(LN_PATH_MAX);
-	    int fd;
-
-	    fd = open(inname, O_RDONLY);
-	    if (fd < 0) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP, "Couldn't open article %s: %m",
-		       inname);
-	    } else if (mailto(moderator, fd)) {
-		nntpprintf("503 Posting to moderator %s failed: %m", moderator);
-	    } else {
-		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		       "Message %s mailed to moderator %s", inname, moderator);
-		nntpprintf("240 Article mailed to moderator");
-	    }
-
-	    if (fd >= 0)
-		log_close(fd);
-	    log_unlink(inname, 0);
-	    outbasename = strrchr(inname, '/');
-	    outbasename++;
-	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
-	    (void)unlink(mastr_str(s));
-	    mastr_delete(s);
-	    goto cleanup;
-	}
-
-	if (!(modgroup || (legalgroup = checkstatus(groups, 'y')))) {
-	    /* Article was only posted to unknown groups */
-	    mastr *s = mastr_new(LN_PATH_MAX);
+	if (!modgroup && !legalgroup) {
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to unknown groups %s", groups);
-	    nntpprintf("441 Posting to unknown groups: %s", groups);
-	    log_unlink(inname, 0);
-	    outbasename = strrchr(inname, '/');
-	    outbasename++;
-	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
-	    (void)unlink(mastr_str(s));
-	    mastr_delete(s);
+	    nntpprintf("441 No such newsgroups %s.", groups);
+	    msgid_deallocate(inname, mid);
 	    goto cleanup;
 	}
-	if (legalgroup)	free(legalgroup);
-	    
+
+	if (modgroup && !approved) {
+	    if (moderator) {
+		int fd = open(inname, O_RDONLY);
+		if (fd < 0) {
+		    ln_log(LNLOG_SERR, LNLOG_CTOP, "Couldn't open article %s: %m",
+			    inname);
+		    nntpprintf("503 file open error caught at %s:%lu", __FILE__,
+			    (unsigned long)__LINE__);
+		} else {
+		    if (mailto(moderator, fd)) {
+			nntpprintf("503 posting to moderator <%s> failed: %m", moderator);
+		    } else {
+			ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+				"message %s, ID <%s> mailed to moderator <%s>", inname,
+				mid, moderator);
+			nntpprintf("240 Article mailed to moderator <%s>", moderator);
+		    }
+		    (void)close(fd);
+		}
+		msgid_deallocate(inname, mid);
+		goto cleanup;
+	    } else if (is_alllocal(groups)) {
+		nntpprintf("503 Configuration error: no moderator for group %s.", modgroup);
+		msgid_deallocate(inname, mid);
+		goto cleanup;
+	    }
+	}
+
+	if (!is_alllocal(groups)) {
+	    if (sync_link(inname, mastr_str(outgoingname))) {
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		       "unable to schedule for posting to upstream, "
+		       "link %s -> %s failed: %m", inname, mastr_str(outgoingname));
+		nntpprintf("503 Could not schedule article for posting "
+			   "to upstream, see syslog.");
+		msgid_deallocate(inname, mid);
+		goto cleanup;
+	    }
+	}
 
 	if (0 == no_direct_spool /* means: may spool directly */ || is_anylocal(groups)) {
 	    /* at least one internal group is given, store into in.coming */
-	    mastr *s = mastr_new(LN_PATH_MAX);
-	    outbasename = strrchr(inname, '/');
-	    outbasename++;
-	    mastr_vcat(s, spooldir, "/in.coming/", outbasename, NULL);
-	    if (sync_link(inname, mastr_str(s))) {
+	    if (sync_link(inname, mastr_str(incomingname))) {
 		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		       "unable to schedule for posting to local spool, "
-		       "link %s -> %s failed: %m", inname, mastr_str(s));
+		       "link %s -> %s failed: %m", inname, mastr_str(incomingname));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to local spool, see syslog.");
-		log_unlink(inname, 0);
 		/* error with spooling locally -> also drop from out.going (to avoid
 		 * that the user resends the article after the 503 code)
 		 */
-		mastr_clear(s);
-		mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
-		(void)unlink(mastr_str(s));
-		mastr_delete(s);
+		if (!is_alllocal(groups))
+			log_unlink(mastr_str(outgoingname), 0);
+		msgid_deallocate(inname, mid);
 		goto cleanup;
 	    }
-	    mastr_delete(s);
 	}
-
-	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
-	       is_anylocal(groups) ? (
-		   is_alllocal(groups) ? "LOCAL" : "LOCAL+UPSTREAM")
-	       : "UPSTREAM", mid, groups);
 
 	switch (fork()) {
 	case -1:
@@ -1701,9 +1671,11 @@ cleanup:
 	if (mid) free(mid);
 	if (groups) free(groups);
 	if (modgroup) free(modgroup);
+	if (legalgroup) free(legalgroup);
 	if (moderator) free(moderator);
-	if (forbidden) free(forbidden);
 	if (approved) free(approved);
+	if (outgoingname) mastr_delete(outgoingname);
+	if (incomingname) mastr_delete(incomingname);
 	return;
     }
 
