@@ -18,6 +18,7 @@
 #include "h_error.h"
 #include "masock.h"
 #include "msgid.h"
+#include "mailto.h"
 
 /* FIXME: write wrapper for this fellow */
 #ifdef SOCKS
