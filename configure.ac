@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020902a])
+AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020904a])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.33 $)
+AC_REVISION($Revision: 1.34 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
