@@ -1,9 +1,10 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.19 2002/06/16 19:58:28 ralf Exp $
+# $Id: Makefile.am,v 1.20 2002/06/17 08:26:37 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
+SUBDIRS		= tools
 VPATH		= $(srcdir)
 
 # external programs
@@ -154,22 +155,25 @@ noinst_PROGRAMS = \
 	amiroot \
 	b_sortnl
 
-# EXTRASRC lists files to include in the distribution tar
 EXTRA_DIST = \
 	aclocal.m4 \
 	config_defs.h \
 	config.example \
 	config.table \
 	config.h.in \
+	COPYING.LGPL \
 	CREDITS \
 	Doxyfile \
+	ENVIRONMENT \
 	FAQ \
 	genconfigparam_data.awk \
 	leafnode.spec \
 	leafnode.spec.in \
 	mergesort.3 \
 	README \
+	README_FIRST \
 	README.html \
+	rnews.c \
 	update.sh \
 	UPDATING
 

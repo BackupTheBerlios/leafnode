@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10post3.3-CVS])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.20 $)
+AC_REVISION($Revision: 1.21 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -319,6 +319,6 @@ printf "spooldir:   " ; eval echo "$SPOOLDIR"
 printf "lockfile:   " ; eval echo "$LOCKFILE"
 echo
 
-AC_CONFIG_FILES([Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8
-filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
+AC_CONFIG_FILES([Makefile tools/Makefile leafnode.spec leafnode.8 newsq.1
+applyfilter.8 filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
 AC_OUTPUT
