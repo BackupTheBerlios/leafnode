@@ -115,6 +115,28 @@ mastr_cpy(mastr * m, const char *s)
 }
 
 int
+mastr_ncpy(mastr * m, const char *s, size_t max)
+{
+    size_t l, want;
+
+    if (!m || !s)
+	return 0;
+
+    l = strlen(s);
+    want = l > max ? max : l;
+
+    if (want >= m->bufsize)
+	if (0 == mastr_resizekill(m, want)) {
+	    mastr_oom();
+	    /*@notreached@*/ return 0;
+	}
+    memcpy(m->dat, s, want);
+    m->dat[want] = 0;
+    m->len = l;
+    return 1;
+}
+
+int
 mastr_cat(mastr * m, /*@unique@*/ /*@observer@*/ const char *const s)
 {
     size_t li;
