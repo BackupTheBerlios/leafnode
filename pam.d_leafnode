@@ -1,0 +1,4 @@
+#%PAM-1.0
+# some systems use pam_pwdb instead
+auth	requisite	pam_unix2.so
+account	requisite	pam_unix2.so
