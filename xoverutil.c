@@ -125,6 +125,7 @@ getxoverline(
 		if (*l) {
 		    msgid = critstrdup(l, "getxoverline");
 		    tab2spc(msgid);
+		    D(d_stop_mid(msgid));
 		}
 	    } else if (!references && !strncasecmp("References:", l, 11)) {
 		l += 11;
@@ -146,8 +147,9 @@ getxoverline(
 	    free(block);
 	}
 
-	while ((l = getaline(f)))
+	while ((l = getaline(f))) {
 	    linecount++;
+	}
 
 	if (from != NULL && date != NULL && subject != NULL && msgid != NULL && bytes) {
 	    if (!require_messageidlink || ihave(msgid)) {

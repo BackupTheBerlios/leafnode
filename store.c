@@ -183,6 +183,7 @@ store_stream(FILE * in /** input file */ ,
 		BAIL(-3, "more than one Message-ID header found");
 	    SKIPLWS(p);
 	    mid = critstrdup(p, "store");
+	    D(d_stop_mid(mid));
 	}
 
 	if (str_isprefix(line, "Newsgroups:")) {
