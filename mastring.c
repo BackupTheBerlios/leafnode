@@ -59,9 +59,11 @@ mastr_oom(void)
 mastr *
 mastr_new(size_t size)
 {
-    mastr *n = (mastr *)malloc(sizeof(mastr));
+    mastr *n;
 
     assert(size != 0);
+
+    n = (mastr *)malloc(sizeof(mastr));
     if (!n) {
 	mastr_oom();
 	/*@notreached@*/ return NULL;
@@ -89,7 +91,7 @@ mastr_newstr(const char *s)
     n = mastr_new((l = strlen(s)));
     if (!n)
 	return NULL;
-    strcpy(n->dat, s); /* RATS: ignore */
+    memcpy(n->dat, s, l + 1);
     n->len = l;
     return n;
 }
@@ -107,7 +109,7 @@ mastr_cpy(mastr * m, const char *s)
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
-    strcpy(m->dat, s); /* RATS: ignore */
+    memcpy(m->dat, s, l + 1);
     m->len = l;
     return 1;
 }
@@ -125,7 +127,7 @@ mastr_cat(mastr * m, /*@unique@*/ /*@observer@*/ const char *const s)
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
-    strcpy(m->dat + m->len, s); /* RATS: ignore */
+    memcpy(m->dat + m->len, s, li + 1);
     m->len += li;
     return 1;
 }
