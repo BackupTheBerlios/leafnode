@@ -67,9 +67,11 @@ vln_log_core(int slg, FILE * console, int severity,
     }
     *y = '\0';
     vsnprintf(buf, sizeof(buf), fmt, ap);
+#ifndef TESTMODE
     if (slg != 0) {
 	syslog(severity, "%s", buf);
     }
+#endif /* TESTMODE */
 
     if (severity <= LNLOG_SERR) {
 	/* check if environment demands kill on first error */
