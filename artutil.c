@@ -12,6 +12,7 @@
 #include "mastring.h"
 #include "msgid.h"
 #include "get.h"
+#include "system.h"
 
 #include <ctype.h>
 #include <stdio.h>
