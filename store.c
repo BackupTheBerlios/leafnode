@@ -58,7 +58,7 @@ store_err(int i)
     case 0:
 	return "success";
     case -1:
-	return "OS trouble: %m";
+	return "OS trouble, see previous log messages for details";
     case -2:
 	return "duplicate";
     case -3:
@@ -87,7 +87,10 @@ store_stream(FILE * in /** input file */ ,
 	     int nntpmode /** if 1, unescape . and use . as end marker */ ,
 	     const struct filterlist *f /** filters or NULL */ ,
 	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */,
-	     int delayflg /** delayed download, 0: no 1: pseudo head, 2: all */)
+	     int delayflg /** delayed download, 0 == no, full article,
+			    1 == yes, pseudo head
+			    2 == yes, full article */
+	)
 {
     int rc = -1;		/* first, assume something went wrong */
     mastr *tmpfn = mastr_new(4095l);
