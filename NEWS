@@ -1,6 +1,6 @@
-KNOWN BUG:
-Valgrind-2.1.X will interfere with writeactive, break fchmod.
-Use Valgrind 2.0.
+KNOWN BUGS:
+* Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
+* The code sometimes uses timeout_client where it should use a server timeout.
 |
 20040823a: Changes since 20040818a:
 - Bugfix: only_group_pcre now also applies to delaybody groups. Reported
@@ -13,6 +13,8 @@ Use Valgrind 2.0.
 - Cleanup: Make debug output of configuration parser consistent.
 - Documentation: revise hostname documentation
 - Documentation: revise filterfile manual page
+- Documentation: add missing timeout_client documentation to manual
+  page.
 
 20040818a: Changes since 20040813a:
 - Feature: forward ported the "noread" feature from leafnode-1,
