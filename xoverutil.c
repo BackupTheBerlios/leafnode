@@ -263,14 +263,42 @@ crunchxover(struct xoverinfo *xi, unsigned long count)
     return i;
 }
 
-/**
- * Read xoverfile into struct xoverinfo.
- * \return 
+/** checks if directory is more current than .overview, if so,
+ * update overview. The .overview is also updated if g is non-NULL and the
+ * .overview file is more current than the active file.
+ * \return
  * - 0 problem
  * - 1 success
  */
 int
-getxover(void)
+maybegetxover(/*@null@*/ struct newsgroup *g) {
+    struct stat sd, sf;
+
+    if (stat (".", &sd)) return 0;
+    if (stat (".overview", &sf)) {
+	if (errno != ENOENT) return 0;
+	return xgetxover(g);
+    }
+    if (sd.st_mtime > sf.st_mtime) return xgetxover(g);
+    if (g && sf.st_mtime > query_active_mtime()) return xgetxover(g);
+    return 1;
+}
+
+int
+getxover(void) {
+    return xgetxover(NULL);
+}
+
+/**
+ * Read xoverfile into struct xoverinfo.
+ * \return
+ * - 0 problem
+ * - 1 success
+ */
+int
+xgetxover(/*@null@*/ struct newsgroup *g
+	  /** if set, update first/last/count of this group */
+    )
 {
     struct stat st;
     char *overview = NULL;
@@ -455,6 +483,12 @@ getxover(void)
     /* sort xover */
     xcount = current;
     sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
+
+    if (g) {
+	g->first = xfirst;
+	g->last = xlast;
+	g->count = current;
+    }
 
     if (update)
 	writexover();
