@@ -96,6 +96,14 @@ insertgroup(const char *name, char status, long unsigned first,
     lold = l;
 }
 
+/** Queries the mtime of the active file in memory. \return -1 if no
+ * active has been read, time_t mtime otherwise. */
+time_t query_active_mtime(void)
+{
+    if (active && activetime) return activetime;
+    return (time_t)-1;
+}
+
 /*
  * change description of newsgroup, if the group is not found, nothing happens.
  */
