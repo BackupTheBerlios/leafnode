@@ -123,9 +123,9 @@ decompresspipe(FILE *original, const char *const compressor[])
 		case 0:		/* child -- exploder */
 		    close(feedpipe[1]);
 		    close(explodepipe[0]);
-		    if (0 == close(0) && 0 == dup(feedpipe[0])) {
+		    if (0 == dup2(feedpipe[0], STDIN_FILENO)) {
 			close(feedpipe[0]);
-			if (0 == close(1) && 1 == dup(explodepipe[1])) {
+			if (1 == dup2(explodepipe[1], STDOUT_FILENO)) {
 			    close(explodepipe[1]);
 			    /* leaks argv */
 			    execve(compressor[0], argv, NULL);
@@ -146,9 +146,13 @@ decompresspipe(FILE *original, const char *const compressor[])
 		close(explodepipe[1]);
 
 		while(!feof(original) && (r = fread(buf, 1, sizeof(buf), original))) {
-		    if (write(feedpipe[1], buf, r)) {
-			rc = 1;
-			break;
+		    size_t w = r;
+		    while (w) {
+			if ((w = write(feedpipe[1], buf, r)) == -1) {
+			    rc = 1;
+			    break;
+			}
+			r -= w;
 		    }
 		}
 
@@ -189,6 +193,7 @@ fprocessfile(FILE * f)
 	{ "cunbatch", { GZIP, "-c", "-d", NULL} },
 	{ "gunbatch", { GZIP, "-c", "-d", NULL} },
 	{ "zunbatch", { GZIP, "-c", "-d", NULL} },
+	{ "bunbatch", { BZIP2, "-c", "-d", NULL} },
     };
 
     l = getaline(f);
