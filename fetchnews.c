@@ -44,7 +44,8 @@ static unsigned long globalkilled = 0;
 static unsigned long globalposted = 0;
 static unsigned long groupfetched;
 static unsigned long groupkilled;
-static jmp_buf jmpbuffer;
+static sigjmp_buf jmpbuffer;
+static volatile sig_atomic_t canjump;
 struct serverlist *current_server;
 time_t now;
 
@@ -64,8 +65,8 @@ static const char *action_description[] = {
     "get articles", "get headers", "get bodies", "post articles"
 };
 
-struct stringlist *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
-struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
+static struct stringlist *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
+static struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
 
 /* function declarations */
 static void usage(void);
@@ -114,9 +115,12 @@ server_info(const char *spool, const char *server,
 static RETSIGTYPE
 sigcatch(int signo)
 {
-    if (signo == SIGINT || signo == SIGTERM)
+    if (signo == SIGINT || signo == SIGTERM) {
+	if (canjump == 0)
+	    return;
+	canjump = 0;
 	siglongjmp(jmpbuffer, signo);
-    else if (signo == SIGUSR1)
+    } else if (signo == SIGUSR1)
 	verbose++;
     else if (signo == SIGUSR2)
 	verbose--;
@@ -2016,6 +2020,8 @@ main(int argc, char **argv)
 	rc = 2;			/* and prevent writing "complete markers"
 				   if we omit this, we may never get rid of
 				   deleted newsgroups */
+    } else {
+	canjump = 1;
     }
 
     while (servers) {
