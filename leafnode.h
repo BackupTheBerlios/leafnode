@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.46 2002/06/16 19:59:19 ralf Exp $ */
+/* $Id: leafnode.h,v 1.47 2002/06/17 12:19:19 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -255,9 +255,14 @@ extern "C" {
 
     /* free memory occupied by a stringlist */
     int stringlistlen(/*@null@*/ const struct stringlist *list);
-    /*@null@*/ /*@only@*/ struct stringlist *cmdlinetolist(const char *cmdline);
 
     /* convert a space separated string into a stringlist */
+    /*@null@*/ /*@only@*/ struct stringlist *cmdlinetolist(const char *cmdline);
+
+    /* match str against patterns in a stringlist */
+    /*@null@*/ /*@dependent@*/ struct stringlist*
+      matchlist(struct stringlist *patterns, const char *str);
+
 /*
  * filtering headers for regexp
  */

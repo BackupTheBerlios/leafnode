@@ -777,6 +777,22 @@ cmdlinetolist(const char *cmdline)
     return s;
 }
 
+/*
+ * match str against patterns in a stringlist
+ * return matching item or NULL
+ */
+/*@null@*/ /*@dependent@*/ struct stringlist*
+matchlist(struct stringlist *patterns, const char *str)
+{
+    struct stringlist *a = patterns;
+    while (a) {
+	if (0 == ngmatch((const char *)&a->string, str))
+	    break;
+	a = a->next;
+    }
+    return a;
+}
+
 /* next few routines implement a mapping from message-id to article
    number, and clearing the entire space */
 struct msgidtree {
