@@ -117,8 +117,6 @@ Ralfs TODO:
 
 2.2 track which user posted an article (Stefan Fleiter)
 
-2.2 make user that leafnode runs under (now hard-wired to "news") configurable
-
 2.2 also run feedincoming on exit of programs that lock (after they free
     the lock)
 
@@ -268,6 +266,10 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-06-18 Ralf Wildenhues
+	   make user that leafnode runs under (now hard-wired to "news")
+	   configurable
 
 2002-06-14 Matthias Andree
 	   Leopold Tötsch: offer 1.9-style posting: do not store a

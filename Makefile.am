@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.20 2002/06/17 08:26:37 emma Exp $
+# $Id: Makefile.am,v 1.21 2002/06/18 11:25:36 ralf Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -218,6 +218,8 @@ config.c: Makefile
 	@echo >>.$@ "const char *BZIP2 = \"$(BZIP2)\";"
 	@echo >>.$@ "const char *CAT = \"$(CAT)\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
+	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
+	@echo >>.$@ "const char *RUNAS_GROUP = \"$(RUNAS_GROUP)\";"
 #	@echo >>.$@ 'const char *compileinfo = "*** leafnode @PACKAGE_VERSION@ ***\ncompile date:' "`env - PATH=/bin:/usr/bin TZ=GMT date`" '\ncompile machine: ' "`uname -a`" '\\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)";'
 	if test -f $@ && cmp >/dev/null .$@ $@ && rm -f .$@ ; then touch $@ ; else rm -f $@ ; mv .$@ $@ ; fi
 
@@ -250,24 +252,24 @@ install-data-hook:
 # directories
 	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)
 	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)/leaf.node
-	-./amiroot && chown news $(DESTDIR)$(SPOOLDIR)
-	-./amiroot && chown news $(DESTDIR)$(SPOOLDIR)/leaf.node
-	-./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)
-	-./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)/leaf.node
+	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)
+	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)/leaf.node
+	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)
+	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)/leaf.node
 	p=$(DESTDIR)$(SPOOLDIR)/leaf.node/groupinfo ; \
 	test -f $$p || cp /dev/null $$p
 	p=`dirname $(DESTDIR)$(LOCKFILE)` ; \
 	if test ! -d $$p ; then \
 	  $(INSTALL) -d -m 750 $$p ; \
-	  ./amiroot && chown news $$p ; \
-	  ./amiroot && chgrp news $$p ; true ; \
+	  ./amiroot && chown $(RUNAS_USER) $$p ; \
+	  ./amiroot && chgrp $(RUNAS_GROUP) $$p ; true ; \
         fi
 # don't use test -e, it's broken on Solaris (only in /usr/bin/test)
 	p=$(DESTDIR)$(LIBDIR)/local.groups ; \
 	test -f $$p || cp /dev/null $$p
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
-		&& chgrp news $$p && chmod 2755 $$p  ; true
+		&& chgrp $(RUNAS_GROUP) $$p && chmod 2755 $$p  ; true
 	@echo
 	@echo "*** DO MAKE SURE THAT YOU RUN texpire -r IF YOU HAVE ARTICLES IN THE SPOOL ***"
 	@echo

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.47 2002/06/17 12:19:19 ralf Exp $ */
+/* $Id: leafnode.h,v 1.48 2002/06/18 11:25:36 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -390,6 +390,8 @@ extern "C" {
     extern const char *BZIP2;
     extern const char *CAT;
     extern const char *DEFAULTMTA;
+    extern const char *RUNAS_USER;
+    extern const char *RUNAS_GROUP;
 
 /*
  * global variables from config file. These are defined in configutil.c

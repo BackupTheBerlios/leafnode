@@ -89,12 +89,14 @@ initvars(const char *const progname, int logtostdout)
     /*@=noeffect@*/
 
 #ifndef TESTMODE
-    if (uid_getbyuname("news", &ui)) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot uid_getbyuname(news,&ui): %m\n");
+    if (uid_getbyuname(RUNAS_USER, &ui)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot uid_getbyuname(%s,&ui): %m\n",
+		RUNAS_USER);
 	return FALSE;
     }
-    if (gid_getbyuname("news", &gi)) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot gid_getbyuname(news,&gi): %m\n");
+    if (gid_getbyuname(RUNAS_GROUP, &gi)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot gid_getbyuname(%s,&gi): %m\n",
+		RUNAS_GROUP);
 	return FALSE;
     }
 #endif /* not TESTMODE */

@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10post3.3-CVS])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.21 $)
+AC_REVISION($Revision: 1.22 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -143,6 +143,28 @@ AC_ARG_WITH(lockfile,
 LOCKFILE=$withval
 AC_MSG_RESULT($LOCKFILE)
 AC_SUBST(LOCKFILE)
+
+dnl check which user to use
+AC_MSG_CHECKING(runas-user)
+AC_ARG_WITH(runas-user,
+[  --with-runas-user       user (news)],
+  ,
+  withval=news
+)
+RUNAS_USER=$withval
+AC_MSG_RESULT($RUNAS_USER)
+AC_SUBST(RUNAS_USER)
+
+dnl check which user to use
+AC_MSG_CHECKING(runas-group)
+AC_ARG_WITH(runas-group,
+[  --with-runas-group      group (news)],
+  ,
+  withval=news
+)
+RUNAS_GROUP=$withval
+AC_MSG_RESULT($RUNAS_GROUP)
+AC_SUBST(RUNAS_GROUP)
 
 dnl check for rpm build dir
 dnl Check for rpm build dir
@@ -313,10 +335,12 @@ AC_SUBST(PCRE_DEFINES)
 
 echo
 echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
-printf "prefix:     " ; eval echo "$prefix"
-printf "sysconfdir: " ; eval echo "$sysconfdir"
-printf "spooldir:   " ; eval echo "$SPOOLDIR"
-printf "lockfile:   " ; eval echo "$LOCKFILE"
+printf "prefix:      " ; eval echo "$prefix"
+printf "sysconfdir:  " ; eval echo "$sysconfdir"
+printf "spooldir:    " ; eval echo "$SPOOLDIR"
+printf "lockfile:    " ; eval echo "$LOCKFILE"
+printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
+printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
 echo
 
 AC_CONFIG_FILES([Makefile tools/Makefile leafnode.spec leafnode.8 newsq.1
