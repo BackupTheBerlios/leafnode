@@ -28,7 +28,7 @@
 
 int debug = 0;
 
-void process_input(char *s);
+static void process_input(char *s);
 void
 process_input(char *s)
 {
@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 	    exit(EXIT_FAILURE);
 	}
     }
-    if (optind == 0) {
+    if (optind == 0 || optind == argc) {
 	usage();
 	exit(EXIT_FAILURE);
     }
@@ -105,7 +105,7 @@ main(int argc, char *argv[])
     }
 
     whoami();
-    umask(2);
+    umask((mode_t)2);
 
     /* lock */
     if (lockfile_exists(FALSE)) {
