@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: redblack.c,v 1.5 2002/01/19 02:12:02 emma Exp $";
+static char rcsid[] = "$Id: redblack.c,v 1.6 2002/04/03 21:45:07 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -254,7 +254,6 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
     struct rbnode *x, *y, *z;
     int cmp;
     int found = 0;
-    int cmpmods();
 
     y = RBNULL;			/* points to the parent of x */
     x = rbinfo->rb_root;
@@ -929,8 +928,11 @@ dumptree(struct rbnode * x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.6  2002/04/03 21:45:07  emma
+ * remove unnecessary declaration of cmpmods in rb_traverse.
+ *
  * Revision 1.5  2002/01/19 02:12:02  emma
- * support dmalloc
+ * writes.c
  *
  * Revision 1.4  2002/01/07 21:48:08  emma
  * Handle OOM in rb_openlist. Found by Ralf Wildenhues.  Bug filed on
