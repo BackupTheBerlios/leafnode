@@ -766,7 +766,7 @@ doxover(struct stringlist **stufftoget,
 	    (num_groups = parsekill_xref_line(xover[8], &newsgroups_list, NULL, 0)) == -1) {
 	    /* newsgroups filling by hand */
 	    num_groups = 1;
-	    newsgroups_list = critmalloc(num_groups * sizeof *newsgroups_list, "doxhdr");
+	    newsgroups_list = critmalloc(num_groups * sizeof *newsgroups_list, "doxover");
 	    newsgroups_list[0] = groupname;
 	}
 
@@ -832,7 +832,7 @@ doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
     if (l == NULL || (!get_long(l, &reply)) || (reply != 221)) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "Unknown reply to XHDR command: %s", l ? l : "(null)");
-	return -1;
+	return -2;
     }
     while ((l = getaline(nntpin)) && strcmp(l, ".")) {
 	/* format is: [# of article] [message-id] */
@@ -989,6 +989,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     long outstanding = 0;
     unsigned long last = 0;
     int delaybody_this_group;
+    int tryxhdr = 0;
 
     /* lots of plausibility tests */
     if (!g)
@@ -1049,18 +1050,26 @@ getgroup(struct newsgroup *g, unsigned long first)
     /* use XOVER since it is often faster than XHDR. User may prefer
        XHDR if they know what they are doing and no additional information
        is requested */
-    if (current_server->usexhdr && !f && !delaybody_this_group) {
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: considering %ld articles %lu - %lu, using XHDR", g->name,
-	       (last - first + 1), first, last);
-	outstanding = doxhdr(&stufftoget, first, last);
-    } else {
+    if (!current_server->usexhdr || f || delaybody_this_group) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: considering %ld %s %lu - %lu, using XOVER", g->name,
 		(last - first + 1),
 		delaybody_this_group ? "headers" : "articles",
 		first, last);
 	outstanding = doxover(&stufftoget, first, last, f, g->name);
+
+	/* fall back to XHDR only without filtering or delaybody mode */
+	if (outstanding == -2 && !f && !delaybody_this_group)
+	    tryxhdr = 1;
+    } else {
+	tryxhdr = 1;
+    }
+
+    if (tryxhdr) {
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: considering %ld articles %lu - %lu, using XHDR", g->name,
+	       (last - first + 1), first, last);
+	outstanding = doxhdr(&stufftoget, first, last);
     }
 
     switch (outstanding) {
@@ -1070,14 +1079,14 @@ getgroup(struct newsgroup *g, unsigned long first)
     case -1:
 	freefilter(f);
 	freelist(stufftoget);
-	return first;		/* error; consider again */
+	return first;			/* error */
     case 0:
 	freefilter(f);
 	freelist(stufftoget);
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		"%s: all %s already there", g->name,
 		delaybody_this_group ? "headers" : "articles");
-	return last + 1;	/* all articles already here */
+	return last + 1;
     default:
 	if (delaybody_this_group) {
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
@@ -1104,7 +1113,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 	   g->name, groupfetched, g->last, groupkilled);
     globalfetched += groupfetched;
     globalkilled += groupkilled;
-    return (last + 1);
+    return last + 1;
 }
 
 /** Split a line which is assumed in RFC-977 LIST format.  Puts a
