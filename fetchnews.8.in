@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.15 2003/12/18 14:10:30 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.16 2004/08/13 15:56:52 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -50,7 +50,7 @@ for details on how to configure the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@sysconfdir@/leafnode/config.
+@sysconfdir@/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is
@@ -290,5 +290,5 @@ Copyright of the modifications 1997-2003.
 .BR pcre (7),
 .BR stat (2),
 .BR ntpd (8), ntp.conf (5).
-.BR @sysconfdir@/leafnode/filters.example ,
+.BR @sysconfdir@/filters.example ,
 .B "RFC 977"

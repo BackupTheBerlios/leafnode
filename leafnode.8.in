@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.22 2004/02/27 01:23:02 emma Exp $
+.\" $Id: leafnode.8.in,v 1.23 2004/08/13 15:56:52 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -47,11 +47,11 @@ Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems with your upstream server(s). If debug mode has already been
 set in the config file, increase verbosity. See
-.I @sysconfdir@/leafnode/config.example
+.I @sysconfdir@/config.example
 for a description of this parameter.
 .TP
 .I -F configfile
-Read configuration from an alternative file instead of @sysconfdir@/leafnode/config.
+Read configuration from an alternative file instead of @sysconfdir@/config.
 .TP
 .I -V
 Report leafnode version and exit.
@@ -65,18 +65,18 @@ I recommend that either firewalling or tcpd be used for access control.
 
 .SH FILES
 All the files in
-.I @sysconfdir@/leafnode
+.I @sysconfdir@
 .B must
 be readable, but not writable, by user "news".
 .PP
-.I @sysconfdir@/leafnode/config
+.I @sysconfdir@/config
 contains the configuration parameters for
 .B leafnode.
 See
 .B CONFIGURATION
 below.
 .PP
-.I @sysconfdir@/leafnode/users
+.I @sysconfdir@/users
 contains the passwords if authenticate = internal is set. See
 .B GENERAL OPTIONAL PARAMETERS
 below.
@@ -149,7 +149,7 @@ as user news.
 
 .SH CONFIGURATION
 All configuration is done using the file
-.I @sysconfdir@/leafnode/config.
+.I @sysconfdir@/config.
 .B All global parameters must be mentioned before server and
 server-specific parameters.
 .PP
@@ -257,7 +257,7 @@ do this only for users who cannot log in (where the "shell" field in
 passwd is a statically linked /sbin/nologin, for instance).
 .IP
 If METHOD is \fBinternal\fR, leafnode expects a file
-@sysconfdir@/leafnode/users which lists users and their passwords. The
+@sysconfdir@/users which lists users and their passwords. The
 file has one line per user, with the user name (which cannot contain
 spaces), then a colon (:), then the crypt(3) encrypted password.
 .IP
@@ -273,7 +273,7 @@ type:
 perl -wT tools/make_pass.pl 'enigma' 'break!me'
 
 and copy the resulting line to the
-.I @sysconfdir@/leafnode/users
+.I @sysconfdir@/users
 file.
 .TP
 hostname = host.domain.country
@@ -326,7 +326,7 @@ possible to specify
 .BR glob (7)-like
 wildcard expressions.
 .TP
-filterfile = @sysconfdir@/leafnode/filters
+filterfile = @sysconfdir@/filters
 Leafnode can filter the input headers for arbitrary regular expressions.
 These are stored in a file designated "filterfile". The format of "filterfile"
 is described in
@@ -520,5 +520,5 @@ has been paid for by Uninett AS (http://www.uninett.no/).
 .BR checkgroups (8),
 .BR glob (7),
 .BR pcre (7),
-.BR @sysconfdir@/leafnode/filters.example ,
+.BR @sysconfdir@/filters.example ,
 .B "RFC 977"

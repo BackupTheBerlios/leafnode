@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.6 2002/08/20 00:17:09 emma Exp $
+.\" $Id: texpire.8.in,v 1.7 2004/08/13 15:56:52 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -71,7 +71,7 @@ to make sense.
 Print texpire version information and exit.
 
 .SH FILES
-.I @sysconfdir@/leafnode/config.example
+.I @sysconfdir@/config.example
 documents the debug modes.
 
 See

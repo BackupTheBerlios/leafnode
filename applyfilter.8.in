@@ -45,7 +45,7 @@ for details on how to set the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@sysconfdir@/leafnode/config.
+@sysconfdir@/config.
 .TP
 .I -n
 Dry run.  Do not actually delete anything.  Use in combination with
@@ -80,7 +80,7 @@ Cancel mode does not report success or failure properly.
 
 .SH FILES
 .PP
-.I @sysconfdir@/leafnode/filters
+.I @sysconfdir@/filters
 contains the set of filtering rules that are applied to the newsspool.
 The file format is described in the
 .BR filterfile (5)
@@ -101,4 +101,4 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 .BR fetchnews (8),
 .BR leafnode (8),
 .BR texpire (8),
-.BR @sysconfdir@/leafnode/filters.example .
+.BR @sysconfdir@/filters.example .
