@@ -1,3 +1,7 @@
+Changes since 20040326a:
+- Do not run chmod -R on the spool unconditionally, it's too expensive.
+  Just print a message what to type.
+
 20040326a: Changes since 20040305a:
 - VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Documentation: document logstderr instead of the improper

@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.65 2004/03/26 14:47:04 emma Exp $
+# $Id: Makefile.am,v 1.66 2004/03/27 11:31:22 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -272,7 +272,8 @@ install-data-hook:
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
-	-chmod -R o= $(DESTDIR)$(SPOOLDIR)
+	@echo "### IF you are installing a version newer than 20040326a"
+	@echo "### for the first time, run: chmod -R o= $(DESTDIR)$(SPOOLDIR)"
 	@echo
 	@echo "*** DO MAKE SURE THAT YOU RUN texpire -r IF YOU HAVE ARTICLES IN THE SPOOL ***"
 	@echo
