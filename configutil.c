@@ -45,6 +45,9 @@ int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
 int timeout_client = 300;
+int timeout_delaybody = -1;	/* how many hours delaybody will retry to fetch
+				   an article after it has been marked
+				   default: use groupexpire or expire */
 int authentication = 0;		/* use authentication for NNTP access:
 				   possible values defined in leafnode.h */
 int ln_log_posterip = 0;
@@ -196,20 +199,21 @@ readconfig(/*@null@*/ const char *configfile)
 		    p->username = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: found username for %s", p->name);
+				   "config: %s: found username", p->name);
 		    break;
 		case CP_PASS:
 		    if (p->password) free(p->password);
 		    p->password = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: found password for %s", p->name);
+				   "config: %s: found password", p->name);
 		    break;
 		case CP_TIMEOUT:
 		    p->timeout = strtol(value, NULL, 10);
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: timeout is %d seconds", p->timeout);
+				   "config: %s: timeout %d seconds",
+				   p->name, p->timeout);
 		    break;
 		case CP_LINKS:
 		    if (value && strlen(value)) {
@@ -280,8 +284,8 @@ readconfig(/*@null@*/ const char *configfile)
 		    p->usexhdr = strtol(value, NULL, 10);
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: usexhdr is %d (default 0)",
-				   p->usexhdr);
+				   "config: %s: usexhdr is %d (default 0)",
+				   p->name, p->usexhdr);
 		    if (p->usexhdr && (filterfile || delaybody))
 			ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 				   "config: usexhdr does not work together "
@@ -398,27 +402,28 @@ readconfig(/*@null@*/ const char *configfile)
 		    p->port = strtol(value, NULL, 10);
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: nntpport is %d", p->port);
+				   "config: %s: nntpport is %d",
+				   p->name, p->port);
 		    break;
 		case CP_NOACTIVE:
 		    p->noactive = TRUE;
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: no active/grouplist updates for %s",
+				   "config: %s: no active file downloads",
 				   p->name);
 		    break;
 		case CP_NODESC:
 		    p->descriptions = FALSE;
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: no LIST NEWSGROUPS for %s",
+				   "config: %s: no XGTITLE/LIST NEWSGROUPS",
 				   p->name);
 		    break;
 		case CP_NOREAD:
 		    p->noread = TRUE;
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: not fetching articles from %s",
+				   "config: %s: not fetching articles",
 				   p->name);
 		    break;
 		case CP_INITIAL:
@@ -437,7 +442,7 @@ readconfig(/*@null@*/ const char *configfile)
 		case CP_SERVER:
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: server is %s", value);
+				   "config: server %s", value);
 		    p = create_server(value, 0);
 		    p->next = NULL;
 		    if (!servers)
@@ -474,7 +479,8 @@ readconfig(/*@null@*/ const char *configfile)
 			abort();
 		    }
 		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-			    "config: feedtype is %s", get_feedtype(p->feedtype));
+			    "config: %s: feedtype is %s",
+			    p->name, get_feedtype(p->feedtype));
 		    break;
 		case CP_ONLYGROUPSPCRE:
 		    {
@@ -484,13 +490,15 @@ readconfig(/*@null@*/ const char *configfile)
 			    exit(2);
 			p->group_pcre = r;
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				"config: only_groups_pcre = %s", value);
+				"config: %s: only_groups_pcre is %s",
+				p->name, value);
 		    }
 		    break;
 		case CP_POSTANY:
 		    p->post_anygroup = atoi(value);
 		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-			    "config: post_anygroup = %d", p->post_anygroup);
+			    "config: %s: post_anygroup = %d",
+			    p->name, p->post_anygroup);
 		    break;
 		case CP_LOGSTDERR:
 		    ln_log_stderronly = atoi(value);
