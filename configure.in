@@ -16,6 +16,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_CHECK_PROG( AR, ar, ar )
+AC_PATH_PROG( LYNX, lynx, lynx )
 AC_PATH_PROG( RPM, rpm )
 
 dnl Checks for header files.

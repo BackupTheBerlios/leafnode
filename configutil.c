@@ -47,7 +47,7 @@ int timeout_short = 2;
 int timeout_active = 90;
 int authentication = 0;	/* use authentication for NNTP access:
 			   possible values defined in leafnode.h */
-int filtermode = FM_XOVER & FM_HEAD ;
+int filtermode = FM_XOVER | FM_HEAD ;
 			/* filter xover headers or heads or both (default) */
 char * filterfile = NULL ;
 char * pseudofile = NULL ;	/* filename containing pseudoarticle body */
@@ -311,13 +311,13 @@ int readconfig( char * configfile ) {
 		p = (struct serverlist *)critmalloc( sizeof(struct serverlist),
 		     "allocating space for server name");
 		p->name = strdup( value );
-		p->descriptions = 1;
+		p->descriptions = TRUE;
 		p->next = NULL;
 		p->timeout = 30;	/* default 30 seconds */
 		p->port = 0;
 		p->username = NULL;
 		p->password = NULL;
-		p->active = 1;
+		p->active = TRUE;
 		if ( servers == NULL )
 		    servers = p;
 		else

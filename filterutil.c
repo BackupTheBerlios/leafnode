@@ -174,7 +174,7 @@ static struct filterlist * newfilter( void ) {
 
 /*
  * read filters into memory. Filters are just plain regexp's
- * return 1 for success, FALSE for failure
+ * return TRUE for success, FALSE for failure
  *
  * in addition, we initialize four standard regular expressions
  */
@@ -310,7 +310,7 @@ int readfilter( char *filterfile ) {
 	return FALSE;
     }
     else
-	return 1;
+	return TRUE;
 }
 
 /*
@@ -421,7 +421,7 @@ int killfilter( struct filterlist *f, char *hdr ) {
 		return FALSE;
 	    }
 	    else if ( strcasecmp( g->action, "kill" ) == 0 ) {
-		return 1;
+		return TRUE;
 	    }
 	    else {
 		score += strtol( g->action, NULL, 10 );
@@ -430,7 +430,7 @@ int killfilter( struct filterlist *f, char *hdr ) {
 	f = f->next ;
     }
     if ( score < 0 )
-	return 1;
+	return TRUE;
     else
 	return FALSE;
 }

@@ -1,7 +1,7 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.2 2000/11/12 18:05:48 emma Exp $
+# $Id: Makefile.in,v 1.3 2000/11/12 20:09:49 emma Exp $
 
-VERSION = 2.0b4-ma1
+VERSION = 2.0b5-ma1
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -36,7 +36,8 @@ SPOOLDIR = @SPOOLDIR@
 LIBDIR   = @sysconfdir@
 LOCKFILE = @LOCKFILE@
 
-# RPM crap
+# external programs
+LYNX = @LYNX@
 RPM = @RPM@
 
 MANFILES = newsq.1 fetchnews.5 applyfilter.8 checkgroups.8 fetchnews.8 \
@@ -64,7 +65,7 @@ libpcre.a: pcre/libpcre.a
 
 pcre/libpcre.a:
 	@echo "Building Philip Hazel's Perl regular expressions library..."
-	@cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) libpcre.a
+	@cd pcre && $(MAKE) libpcre.a
 
 nntpd: nntpd.o config.o liblnutil.a @CRYPTLIB@
 	$(CC) $(CFLAGS) -o $@ nntpd.o config.o -L. -llnutil $(CRYPTLIB) $(LIBS)
@@ -111,7 +112,7 @@ newsq.o: newsq.c leafnode.h
 .PHONY:	clean distclean realclean
 clean:
 	rm -f *.o *.a
-	cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) clean
+	cd pcre && $(MAKE) clean
 
 realclean: distclean
 
@@ -135,7 +136,7 @@ config.o: config.c Makefile
 		-DVERSION=\"$(VERSION)\" $<
 
 install-strip:
-	$(MAKE) $(MFLAGS) -$(MAKEFLAGS) install STRIP=-s
+	$(MAKE) install STRIP=-s
 
 install: liblnutil.a nntpd fetchnews texpire checkgroups applyfilter newsq
 	$(INSTALL) -d -o root -g 0 -m 755 $(INSTALLROOT)$(MANDIR)/man1
@@ -210,22 +211,21 @@ uninstall: uninstall-bins
 dist:	distclean
 	autoheader
 	autoconf
+	if test $(LYNX) ; then rm -f README ; $(LYNX) -dump README.html > README ; fi
 	mkdir -p leafnode-$(VERSION)
 	cp $(MANFILES) leafnode.h acconfig.h $(SRCFILES) \
-		INSTALL README CREDITS TODO ChangeLog FAQ \
+		INSTALL README* CREDITS TODO ChangeLog FAQ \
 		config.example config.h.in configure.in Makefile.in \
 		configure install-sh aclocal.m4 \
 		update.sh makerpm.sh leafnode-$(VERSION).lsm \
 		leafnode-$(VERSION)
 	chmod 644 leafnode-$(VERSION)/*
-	mkdir -p  leafnode-$(VERSION)/doc_german
+	cp -R doc_german leafnode-$(VERSION)/
+	cp -R doc_catalan leafnode-$(VERSION)
 	chmod 755 leafnode-$(VERSION)/doc_german
-	mkdir -p  leafnode-$(VERSION)/doc_catalan
 	chmod 755 leafnode-$(VERSION)/doc_catalan
 	mkdir -p  leafnode-$(VERSION)/tools
 	chmod 755 leafnode-$(VERSION)/tools
-	cp -R doc_german/* leafnode-$(VERSION)/doc_german/
-	cp doc_catalan/* leafnode-$(VERSION)/doc_catalan/
 	cp tools/* leafnode-$(VERSION)/tools/
 	chmod 755 leafnode-$(VERSION)/*sh
 	chmod 755 leafnode-$(VERSION)/configure

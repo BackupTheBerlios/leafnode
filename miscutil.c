@@ -99,7 +99,7 @@ int initvars( char * progname ) {
 	    return FALSE;
 	}
     }
-    return 1;
+    return TRUE;
 }
 
 /*
@@ -156,17 +156,17 @@ int parseopt( char *progname, char option, char * optarg, char * conffile ) {
     }
     else if ( option == 'v' ) {
 	verbose++;
-	return 1;
+	return TRUE;
     }
     else if ( option == 'D' ) {
 	debugmode++;
-	return 1;
+	return TRUE;
     }
     else if ( ( option == 'F' ) && optarg && strlen(optarg) ) {
 	if ( conffile )
 	    free( conffile );
 	conffile = strdup(optarg);
-	return 1;
+	return TRUE;
     }
     return FALSE;
 }
@@ -272,7 +272,7 @@ int isinteresting( const char *groupname ) {
     
     /* Local groups are always interesting. At least for the server :-) */
     if ( islocalgroup( groupname ) )
-	return 1;
+	return TRUE;
 
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
@@ -285,7 +285,7 @@ int isinteresting( const char *groupname ) {
     while( ( de = readdir( d ) ) != NULL ) {
     	if ( strcasecmp( de->d_name, groupname ) == 0 ) {
 	    closedir( d );
-	    return 1;
+	    return TRUE;
 	}
     }
     closedir( d );
@@ -776,7 +776,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.2 $
+/*  $Revision: 1.3 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"
@@ -803,7 +803,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
 **  only the last one does.
 **
 **  Once the control of one instance of DoMatch enters the star-loop, that
-**  instance will return either 1 or ABORT, and any calling instance
+**  instance will return either TRUE or ABORT, and any calling instance
 **  will therefore return immediately after (without calling recursively
 **  again).  In effect, only one star-loop is ever active.  It would be
 **  possible to modify the code to maintain this context explicitly,
@@ -827,7 +827,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
 
 
 /*
-**  Match text and p, return 1, FALSE, or ABORT.
+**  Match text and p, return TRUE, FALSE, or ABORT.
 */
 static int DoMatch(const char *text, const char *p)
 {
@@ -856,25 +856,25 @@ static int DoMatch(const char *text, const char *p)
 		continue;
 	    if (*p == '\0')
 		/* Trailing star matches everything. */
-		return 1;
+		return TRUE;
 	    while (*text)
 		if ((matched = DoMatch(text++, p)))
 		    return matched;
 	    return ABORT;
 	case '[':
-	    reverse = p[1] == NEGATE_CLASS ? 1 : FALSE;
+	    reverse = p[1] == NEGATE_CLASS ? TRUE : FALSE;
 	    if (reverse)
 		/* Inverted character class. */
 		p++;
 	    matched = FALSE;
 	    if (p[1] == ']' || p[1] == '-')
 		if (*++p == *text)
-		    matched = 1;
+		    matched = TRUE;
 	    for (last = *p; *++p && *p != ']'; last = *p)
 		/* This next line requires a good C compiler. */
 		if (*p == '-' && p[1] != ']'
 		    ? *text <= *++p && *text >= last : *text == *p)
-		    matched = 1;
+		    matched = TRUE;
 	    if (matched == reverse)
 		return FALSE;
 	    continue;
@@ -883,21 +883,21 @@ static int DoMatch(const char *text, const char *p)
 
 #ifdef	MATCH_TAR_PATTERN
     if (*text == '/')
-	return 1;
+	return TRUE;
 #endif	/* MATCH_TAR_PATTERN */
     return *text == '\0';
 }
 
 
 /*
-**  User-level routine.  Returns 1 or FALSE.
+**  User-level routine.  Returns TRUE or FALSE.
 **  This routine was borrowed from Rich Salz and appeared first in INN.
 */
 int wildmat(const char *text, const char *p) 
 {
 #ifdef	OPTIMIZE_JUST_STAR
     if (p[0] == '*' && p[1] == '\0')
-	return 1;
+	return TRUE;
 #endif	/* OPTIMIZE_JUST_STAR */
-    return DoMatch(text, p) == 1;
+    return DoMatch(text, p) == TRUE; /* FIXME */
 }

@@ -113,7 +113,7 @@ static char *cmd;		/* current command line */
 time_t activetime;
 
 int debug = 0;
-int authflag = 0;		/* 1 if authenticated */
+int authflag = 0;		/* TRUE if authenticated */
 time_t gmt_off;			/* offset between localtime and GMT in sec */
 
 static jmp_buf timeout;
@@ -676,7 +676,7 @@ void dogroup(const char *arg) {
 	    g->last  = 1;
 	    g->count = 1;
 	    artno = 1;
-	    pseudogroup = 1;
+	    pseudogroup = TRUE;
 	}
 	artno = g->first;
 	fflush( stdout );
@@ -1091,39 +1091,39 @@ void dopost( void ) {
 	}
 	if ( !strncasecmp( line, "From:", 5 ) ) {
 	    if ( havefrom )
-		err = 1;
+		err = TRUE;
 	    else
-		havefrom = 1;
+		havefrom = TRUE;
 	}
 	if ( !strncasecmp( line, "Path:", 5 ) ) {
 	    if ( havepath )
-		err = 1;
+		err = TRUE;
 	    else
-		havepath = 1;
+		havepath = TRUE;
 	}
 	if ( !strncasecmp( line, "Message-ID:", 11 ) ) {
 	    if ( havemessageid )
-		err = 1;
+		err = TRUE;
 	    else
-		havemessageid = 1;
+		havemessageid = TRUE;
 	}
 	if ( !strncasecmp( line, "Subject:", 8 ) ) {
 	    if ( havesubject )
-		err = 1;
+		err = TRUE;
 	    else
-		havesubject = 1;
+		havesubject = TRUE;
 	}
 	if ( !strncasecmp( line, "Newsgroups:", 11 ) ) {
 	    if ( havenewsgroups )
-		err = 1;
+		err = TRUE;
 	    else
-		havenewsgroups = 1;
+		havenewsgroups = TRUE;
 	}
 	if ( !strncasecmp( line, "Date:", 5 ) ) {
 	    if ( havedate )
-		err = 1;
+		err = TRUE;
 	    else
-		havedate = 1;
+		havedate = TRUE;
 	}
 	len = strlen( line );
 
@@ -1133,8 +1133,8 @@ void dopost( void ) {
 	   the following lines.
 	 */
 	if ( len > 1000 ) {
-	    hdrtoolong = 1;
-	    err = 1;
+	    hdrtoolong = TRUE;
+	    err = TRUE;
 	}
 
 	/* replace tabs with spaces */
@@ -1222,7 +1222,7 @@ void dopost( void ) {
 	    break;
 	}
 	case 0: {
-	    if ( lockfile_exists( 1, 1 ) ) {
+	    if ( lockfile_exists( TRUE, TRUE ) ) {
 		/* Something is really wrong. Move the article 
 		   to failed.postings */
 		syslog( LOG_ERR, "Could not store article %s." 
@@ -1388,11 +1388,11 @@ void doselectedheader(const char *header, const char *messages,
     markinterest();
     
     if ( !chdirgroup( group->name, FALSE ) )
-	pseudogroup = 1;
+	pseudogroup = TRUE;
 
     if ( !pseudogroup && ( xovergroup != group ) ) {
 	if ( !getxover() )
-	    pseudogroup = 1;
+	    pseudogroup = TRUE;
 	else
 	    xovergroup = group;
     }
@@ -1578,7 +1578,7 @@ void doxover(const char *arg) {
     }
 
     if ( !chdirgroup( group->name, FALSE ) )
-	pseudogroup = 1;
+	pseudogroup = TRUE;
 
     if ( !pseudogroup ) {
 	if ( xovergroup != group && getxover() )
@@ -1603,7 +1603,7 @@ void doxover(const char *arg) {
 	for( art=a; art<=b; art++ ) {
 	    index = findxover(art);
 	    if ( index >= 0 && xoverinfo[index].text != NULL ) {
-	        if ( flag == FALSE ) {
+	        if ( !flag ) {
 		    flag = TRUE;
 		    nntpprintf("224 Overview information for postings %lu-%lu:",
 				a, b );
@@ -1657,9 +1657,9 @@ void dolistgroup( const char * arg ) {
     markinterest();
     group = g;
     if ( !chdirgroup( g->name, FALSE ) )
-	pseudogroup = 1;
+	pseudogroup = TRUE;
     else if ( ( xovergroup != group ) && !getxover() )
-	pseudogroup = 1;
+	pseudogroup = TRUE;
     else {
 	pseudogroup = FALSE;
 	xovergroup = group;
@@ -1708,9 +1708,9 @@ static int readpasswd( void ) {
 
 int isauthorized( void ) {
     if ( !authentication )
-	return 1;
+	return TRUE;
     if ( authflag )
-	return 1;
+	return TRUE;
     nntpprintf( "480 Authentication required for command" );
     return FALSE;
 }
@@ -1719,7 +1719,7 @@ void doauthinfo( const char *arg ) {
     char cmd[MAXLINELENGTH] = "";
     char param[MAXLINELENGTH] = "";
 #ifdef TODO
-    char salt[3] = { 0 };
+    char salt[3] = { 0, 0, 0 };
 #endif
     static char * user = NULL;
     char * p;

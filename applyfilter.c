@@ -151,7 +151,7 @@ int main( int argc, char * argv[] ) {
 		score = killfilter(myfilter, l);
 	    } else {
 		/* article has no body - delete it */
-		score = 1;
+		score = TRUE;
 	    }
 	    if ( score ) {
 		unlink( de->d_name );

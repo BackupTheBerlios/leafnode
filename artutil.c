@@ -30,7 +30,7 @@ char *mgetheader ( const char *hdr, char *buf ) {
     p = buf;
     while ( !havehdr && p && *p ) {
 	if ( strncasecmp( p, hdr, strlen(hdr) ) == 0 ) {
-	    havehdr = 1;
+	    havehdr = TRUE;
 	    p += strlen(hdr)+1;
 	    while (isspace((unsigned char)*p))
 		p++;
@@ -155,7 +155,7 @@ void storearticle ( char * filename, char * msgid, char * newsgroups ) {
 	    *q++ = '\0';
 	if ( *p && ( isinteresting( p ) || create_all_links ) ) {
 	    cg = findgroup( p );
-	    if ( cg && chdirgroup( p, 1 ) ) {
+	    if ( cg && chdirgroup( p, TRUE ) ) {
 		if (xref)
 		    cxref = strdup( xref );
 		if (( xrefno = lookup_xref( cxref, cg->name )) != NULL ) {
@@ -314,7 +314,7 @@ void store( const char * filename, FILE * filehandle, char * newsgroups,
 		cg = findgroup( p );
 		if ( cg ) {
 		    if ( isinteresting(cg->name) || create_all_links )
-		        (void) chdirgroup( p, 1 );
+		        (void) chdirgroup( p, TRUE );
 		    else
 		    	cg = NULL;
 		}

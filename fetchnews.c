@@ -53,7 +53,8 @@ time_t now;
 
 /* Variables set by command-line options which are specific for fetch */
 unsigned long extraarticles = 0;
-unsigned int windowsize = 5;	/* number of NNTP commands to pipeline */
+unsigned long windowsize = 5;
+			/* number of NNTP commands to pipeline */
 int throttling = 0;	/* the higher the value, the less bandwidth is used */
 int postonly = 0;	/* if 1, don't read files from upstream server */
 int noexpire = 0;	/* if 1, don't automatically unsubscribe newsgroups */
@@ -168,14 +169,14 @@ static int checkforpostings( void ) {
     while ( (de=readdir( d )) != NULL ) {
 	/* filenames of articles to post begin with digits */
 	if ( isdigit( (unsigned char )de->d_name[0] ) )
-	    return 1;
+	    return TRUE;
     }
     return FALSE;
 }
 
 /*
  * check whether any of the newsgroups is on server
- * return 1 if yes, FALSE otherwise
+ * return TRUE if yes, FALSE otherwise
  */
 int isgrouponserver( char * newsgroups ) {
     char * p, *q;
@@ -192,7 +193,7 @@ int isgrouponserver( char * newsgroups ) {
 	    *q++ = '\0';
 	putaline( "GROUP %s", p );
 	if ( nntpreply() == 211 )
-	    retval = 1;
+	    retval = TRUE;
 	p = q;
 	while ( p && *p && isspace((unsigned char)*p) )
 	    p++;
@@ -203,7 +204,7 @@ int isgrouponserver( char * newsgroups ) {
 
 /*
  * check whether message-id is on server
- * return 1 if yes, FALSE otherwise
+ * return TRUE if yes, FALSE otherwise
  *
  * Since the STAT implementation is buggy in some news servers (esp.
  * nntpcache), we use HEAD instead, although this causes more traffic.
@@ -218,7 +219,7 @@ int ismsgidonserver( char * msgid ) {
     l = getaline( nntpin );
     if ( get_long( l, &a ) == 1 && a == 221 ) {
 	_ignore_answer( nntpin );
-	return 1;
+	return TRUE;
     }
     else {
 	return FALSE;
@@ -263,10 +264,7 @@ void delposted( time_t before ) {
  */
 static int getbymsgid( char *msgid ) {
     putaline( "ARTICLE %s", msgid );
-    if ( getarticle( NULL ) > 0 )	/* no filtering */
-	return 1;
-    else
-	return FALSE;
+    return ( getarticle( NULL ) > 0 ) ? TRUE : FALSE;
 }
 
 /*
@@ -524,44 +522,49 @@ static int doxover( struct stringlist ** stufftoget,
 	if ( q && *q )
 	    *q++ = '\0';
 	messageid = p;
-	c = lookup( messageid );
-	if ( c ) {
-	    /* no good but this server is for small sites */
-	    struct stat st;
-	    if ( stat( c, &st ) == 0 )
-	    /* we have the article already */
-		continue;
-	}
 	p = q;
 	q = strchr( p, '\t' );
 	if ( q && *q )
 	    *q++ = '\0';
 	references = p;
 	p = q;
-	q = strchr( p, '\t' );
-	if ( q && *q )
-	    *q++ = '\0';
-	bytes = p;
-	p = q;
-	q = strchr( p, '\t' );
-	if ( q && *q )
-	    *q++ = '\0';
-	lines = p;
+	if ( !p ) {
+	     /* this happens with References: lines that are too long;
+	        generated e.g. by Netscape Collabra at news.mozilla.org
+		in that case we generate guesstimates for average articles
+	      */
+	    bytes = NULL;
+	    lines = NULL;
+	}
+	else {
+	    q = strchr( p, '\t' );
+	    if ( q && *q )
+		*q++ = '\0';
+	    bytes = p;
+	    p = q;
+	    q = strchr( p, '\t' );
+	    if ( q && *q )
+		*q++ = '\0';
+	    lines = p;
+	}
 
 	/* is there an Xref: header present as well? */
 	p = q;
-	q = strchr( p, '\t' );
-	if ( q == NULL || *q == '\0' ) {
-	    ;
-	}
-	else
-	    *q = '\0';
-	/* parse Xref: header if present */
-	if ( strncasecmp( p, "Xref:", 5 ) != 0 ) {
+	if ( p == NULL || *p == '\0' ) {
 	    /* no Xref: header */
 	    newsgroups = groupname;
 	}
 	else {
+	    q = strchr( p, '\t' );
+	    if ( q && *q )
+		*q = '\0';
+	    if ( strncasecmp( p, "Xref:", 5 ) != 0 ) {
+		/* something here, but it's no Xref: header */
+		newsgroups = groupname;
+	    }
+	}
+	if ( !newsgroups ) {
+	    /* Xref: header is present and must be parsed */
 	    p += 5;
 	    q = p;
 	    while ( q && *q && isspace((int)*q) )
@@ -607,16 +610,32 @@ static int doxover( struct stringlist ** stufftoget,
 			  "Message-ID: %s\n"
 			  "References: %s\n"
 			  "Date: %s\n"
-			  "Lines: %s\n"
-		          "Bytes: %s\n"
 			  "Newsgroups: %s\n",
-			  from, subject, messageid, references, date, lines,
-			  bytes, newsgroups );
+			  from, subject, messageid, references, date,
+			  newsgroups );
+	    if ( lines ) {
+		strcat( hdr, "Lines: " );
+		strcat( hdr, lines );
+		strcat( hdr, "\n" );
+	    }
+	    if ( bytes ) {
+		strcat( hdr, "Bytes: " );
+		strcat( hdr, bytes );
+		strcat( hdr, "\n" );
+	    }
 	    if ( killfilter(filter, hdr) ) {
 		groupkilled++;
 		/* filter pseudoheaders */
 		free( hdr );
 		continue;
+	    }
+	    c = lookup( messageid );
+	    if ( c ) {
+		/* no good but this server is for small sites */
+		struct stat st;
+		if ( stat( c, &st ) == 0 )
+		    /* we have the article already */
+		    continue;
 	    }
 	    if ( delaybody ) {
 		/* write pseudoarticle */
@@ -709,7 +728,7 @@ static int doxhdr( struct stringlist ** stufftoget,
  */
 
 /*
- * Check whether the relevant headers are present. Return 1 if yes,
+ * Check whether the relevant headers are present. Return TRUE if yes,
  * FALSE if not
  */
 static int legalheaders( char * hdr, unsigned long artno ) {
@@ -720,13 +739,13 @@ static int legalheaders( char * hdr, unsigned long artno ) {
     p = hdr;
     while ( p && *p && ( (q = strchr( p, '\n' )) != NULL) ) {
 	if ( !havepath && strncasecmp( p, "Path:", 5 ) == 0 )
-	    havepath = 1;
+	    havepath = TRUE;
 	if ( !havemsgid && strncasecmp( p, "Message-ID:", 11 ) == 0 )
-	    havemsgid = 1;
+	    havemsgid = TRUE;
 	if ( !havefrom && strncasecmp( p, "From:", 5 ) == 0 )
-	    havefrom = 1;
+	    havefrom = TRUE;
 	if ( !haveng && strncasecmp( p, "Newsgroups:", 11 ) == 0 )
-	    haveng = 1;
+	    haveng = TRUE;
 	p = q + 1;
     }
     if ( !havepath )
@@ -879,6 +898,11 @@ static unsigned long getarticles( struct stringlist * stufftoget,
     return server;
 }
 
+/*
+ * getgroup():
+ * returns 0 if group is unavailable, otherwise last article number in that
+ * group
+ */
 unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
     struct stringlist * stufftoget = NULL;
     struct filterlist * f = NULL;
@@ -908,7 +932,7 @@ unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
 	first = 1;
     if ( g->first > g->last )
 	g->last = g->first ;
-    (void) chdirgroup( g->name, 1 );	/* to create the directory */
+    (void) chdirgroup( g->name, TRUE );	/* to create the directory */
 
     x = getfirstlast( g, &first, &last );
     switch ( x ) {
@@ -1283,7 +1307,7 @@ static void processupstream( const char * server, const int port ) {
 		}
 		else
 		    newserver = getgroup( g, 1 );
-		if ( f != NULL )
+		if ( ( f != NULL ) && newserver )
                     fprintf( f, "%s %lu\n", g->name, newserver );
             } else {
 		printf( "%s not found in groupinfo file\n", de->d_name );
@@ -1386,7 +1410,7 @@ static int getparam( char *arg ) {
 }
 
 /*
- * works current_server. Returns 1 if no other servers have to be queried,
+ * works current_server. Returns TRUE if no other servers have to be queried,
  * FALSE otherwise
  */
 static int do_server( char *msgid, time_t lastrun ) {
@@ -1410,7 +1434,7 @@ static int do_server( char *msgid, time_t lastrun ) {
 	    /* if retrieval of the message id is successful at one
 	       server, we don't have to check the others */
 	    if ( getbymsgid( msgid ) ) {
-		return 1;
+		return TRUE;
 	    }
 	}
 	else {
@@ -1494,11 +1518,11 @@ int main( int argc, char ** argv ) {
 		    sl->active = FALSE;
 		    sl = sl->next;
 		}
-	        flag = 1;
+	        flag = TRUE;
 	    }
 	    sl = findserver(optarg);
 	    if ( sl ) {
-		sl->active = 1;
+		sl->active = TRUE;
 	    }
 	    else {
 		/* insert a new server in serverlist */
@@ -1509,7 +1533,7 @@ int main( int argc, char ** argv ) {
 		if ( ( p = strchr( sl->name, ':' ) ) != NULL ) {
 		    *p = '\0';
 		}
-		sl->descriptions = 1;
+		sl->descriptions = TRUE;
 		sl->next = servers;
 		sl->timeout = 30;	/* default 30 seconds */
 		sl->port = 0;		/* default port */
@@ -1522,7 +1546,7 @@ int main( int argc, char ** argv ) {
 		}
 		sl->username = NULL;
 		sl->password = NULL;
-		sl->active = 1;
+		sl->active = TRUE;
 		servers = sl;
 	    }
 	} else if ( ( option == 'N' ) && optarg && strlen( optarg ) ) {
@@ -1613,7 +1637,7 @@ int main( int argc, char ** argv ) {
 	    exit( EXIT_FAILURE );
 	}
 	alarm( 5 );
-	if ( lockfile_exists( FALSE, 1 ) )
+	if ( lockfile_exists( FALSE, TRUE ) )
 	    exit( EXIT_FAILURE );
 	alarm( 0 );
 
