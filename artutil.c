@@ -70,11 +70,11 @@ mgetheader(
     /* skip header tag */
     p += strlen(hdr);
     SKIPLWS(p);
-    q = p;
+    q = p - 1;
 
     /* accomodate folded lines */
     do {
-	++q;
+	++p;
 	q = strchr(p, '\n');
     } while (q && q[1] && isspace((unsigned char)q[1]));
 
