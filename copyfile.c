@@ -1,4 +1,9 @@
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "critmem.h"
 
 /*
