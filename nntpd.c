@@ -481,7 +481,7 @@ getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
 {
     char *xref, *p;
     char *markgroup = NULL;
-    unsigned long a;
+    unsigned long a = 0;	/* squish compiler warning */
     char **ngs, **artnos;
     int n, num_groups;
 
