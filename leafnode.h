@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.71 2002/07/15 02:58:54 emma Exp $ */
+/* $Id: leafnode.h,v 1.72 2002/08/19 16:17:48 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -466,7 +466,7 @@ extern "C" {
     extern int no_direct_spool; /* if set, do not store remote posts locally */
     extern long windowsize;
 /* Note: Sync the DEBUG_ flags below with config.example */
-#define DEBUG_MISC 1
+#define DEBUG_LOGGING 1
 #define DEBUG_IO   2
 #define DEBUG_SORT 4
 #define DEBUG_ACTIVE 8

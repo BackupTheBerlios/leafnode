@@ -7,10 +7,6 @@
 #include <string.h>
 #include <stdlib.h>		/* for getenv */
 
-#ifdef WITH_DMALLOC
-#include <dmalloc.h>
-#endif
-
 #include <signal.h>		/* for raise */
 /* add LOG_NEWS where it doesn't exist */
 #if !defined(LOG_NEWS)
@@ -19,6 +15,12 @@
 /* if LOG_CONS isn't supported, do without */
 #if !defined(LOG_CONS)
 #define LOG_CONS 0
+#endif
+
+#include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
 #endif
 
 extern int verbose;
@@ -68,7 +70,7 @@ vln_log_core(int slg, FILE * console, int severity,
     *y = '\0';
     vsnprintf(buf, sizeof(buf), fmt, ap);
 #ifndef TESTMODE
-    if (slg != 0) {
+    if (slg != 0 && (severity < LNLOG_SDEBUG || debugmode & DEBUG_LOGGING)) {
 	syslog(severity, "%s", buf);
     }
 #endif /* not TESTMODE */
@@ -83,7 +85,8 @@ vln_log_core(int slg, FILE * console, int severity,
     if (console) {
 	/* always log LNLOG_SERR and more severe,
 	   regardless of verbosity */
-	if (context <= verbose || severity <= LNLOG_SERR) {
+	if ((context <= verbose || severity <= LNLOG_SERR)
+		&& (severity < LNLOG_SDEBUG || debugmode & DEBUG_LOGGING)) {
 	    (void)fputs(buf, console);
 	    (void)fputc('\n', console);
 	}

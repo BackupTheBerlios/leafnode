@@ -16,7 +16,7 @@ expire = 20
 
 ## To aid in debugging, here is a switch. Sum up the debug info you
 ## want, or just use 4095 for "all". Optional.
-# MISC (unused): 1
+# ENABLE DEBUG LOG MESSAGES: 1
 # I/O (net, disk): 2
 # Sort functions: 4
 # Active handling: 8

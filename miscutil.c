@@ -816,10 +816,12 @@ int
 ngmatch(const char *pattern, const char *str)
 {
     int r = wildmat(str, pattern);
+#if 0
     if (debugmode & DEBUG_MISC) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "ngmatch(pattern = \"%s\", "
 	       "str = \"%s\") == %d", pattern, str, r);
     }
+#endif
     return !r;
 }
 
