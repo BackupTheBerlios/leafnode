@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.102 2004/08/15 21:37:43 emma Exp $ */
+/* $Id: leafnode.h,v 1.103 2004/08/18 15:25:25 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -23,6 +23,8 @@
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
+
+#define COUNT_OF(a) (sizeof(a)/sizeof((a)[0]))
 
 /* limits.h is supposed to contain PATH_MAX, we include sys/param.h too */
 #include <limits.h>
