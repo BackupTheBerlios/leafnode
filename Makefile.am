@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.3 2002/01/06 01:04:02 emma Exp $
+# $Id: Makefile.am,v 1.4 2002/01/06 02:39:14 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -186,7 +186,7 @@ checkgroups_SOURCES	= checkgroups.c
 newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 
-DISTCLEANFILES = config.c config_defs.h configparam_data.c
+DISTCLEANFILES = config.c config_defs.h configparam_data.c README
 
 # GENERATED SOURCES ========================================
 config.c: Makefile
@@ -234,23 +234,23 @@ install-data-hook:
 # directories
 	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)
 	$(INSTALL) -d -m 750 $(DESTDIR)$(SPOOLDIR)/leaf.node
-	./amiroot && chown news $(DESTDIR)$(SPOOLDIR)
-	./amiroot && chown news $(DESTDIR)$(SPOOLDIR)/leaf.node
-	./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)
-	./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)/leaf.node
+	-./amiroot && chown news $(DESTDIR)$(SPOOLDIR)
+	-./amiroot && chown news $(DESTDIR)$(SPOOLDIR)/leaf.node
+	-./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)
+	-./amiroot && chgrp news $(DESTDIR)$(SPOOLDIR)/leaf.node
 	p=$(DESTDIR)$(SPOOLDIR)/leaf.node/groupinfo ; \
 	test -f $$p || cp /dev/null $$p
 	p=`dirname $(DESTDIR)$(LOCKFILE)` ; \
 	if test ! -d $$p ; then \
 	  $(INSTALL) -d -m 750 $$p ; \
 	  ./amiroot && chown news $$p ; \
-	  ./amiroot && chgrp news $$p ; \
+	  ./amiroot && chgrp news $$p ; true ; \
         fi
 # don't use test -e, it's broken on Solaris (only in /usr/bin/test)
 	p=$(DESTDIR)$(LIBDIR)/local.groups ; \
 	test -f $$p || cp /dev/null $$p
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
-		&& chgrp news $$p && chmod 2755 $$p
+		&& chgrp news $$p && chmod 2755 $$p  ; true
 	@echo
 	@echo "Now edit /etc/inetd.conf to start $(DESTDIR)$(SBINDIR)/leafnode"
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
