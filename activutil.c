@@ -223,8 +223,7 @@ writeactive(void)
 	goto bye;
     }
 
-    if (fchmod(fd, 0664)) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot fchmod(%d, 0664): %m", fd);
+    if (log_fchmod(fd, 0664)) {
 	goto bye;
     }
 
