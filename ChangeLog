@@ -1,5 +1,22 @@
+2004-02-27  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040227a =
+	* leafnode.h, leafnode-2/leafnode.h: Fix incomplete type in
+	stringlistnode, for C89 compatibility.  Support PAM, based on
+	Hynek's patch, with modifications and documentation added.
+	* config.example, configure.ac, configutil.c, leafnode.8.in,
+	nntpd.c, leafnode-2/config.example, leafnode-2/configure.ac,
+	leafnode-2/configutil.c, leafnode-2/leafnode.8.in,
+	leafnode-2/nntpd.c: Import PAM, based on Hynek's patch, with
+	modifications and documentation added.
+	* genconfigdefs.awk, leafnode-2/genconfigdefs.awk: Suppress
+	trailing comma.
+	* ugid_gset.c, leafnode-2/ugid_gset.c: Clear supplementary group
+	IDs.
+
 2004-02-26  Matthias Andree <matthias.andree@gmx.de>
 
+	* ChangeLog, leafnode-2/ChangeLog: update
 	* fetchnews.c, leafnode-2/fetchnews.c: getaline -> mgetaline for
 	all NNTP-related reads, to fix undetected timeouts.  rename
 	_ignore_answer to ignore_answer.

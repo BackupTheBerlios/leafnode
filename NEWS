@@ -1,7 +1,13 @@
 Changes since 20040206a:
+- Feature: Supports PAM, based on a patch by Hynek Schlawack.
+- Bugfix: all fetchnews functions now read from the network with a
+  timeout limit.
 - Bugfix: -M could only retrieve articles from the first server it had
   successfully connected to. Reported by Daniel Zwick. This bug has
   slept for a long time before being discovered recently.
+- Robustness: the supplementary group ID list is now cut short when
+  dropping root privileges. We don't want root's groups (for instance
+  shadow on SuSE Linux) in our context.
 
 20040206a: Changes since 20040129a:
 - Feature: sanity check at initialization, to avoid operating on a bogus
