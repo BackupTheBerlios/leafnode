@@ -64,16 +64,12 @@ static struct serverlist *serverlist;	/* local copy to free list */
 const char *
 get_feedtype(enum feedtype t)
 {
-    /* this requires C9x support for "designated initializers"
-     * gcc 2.95.3 is fine
-     */
-    static const char *ftn[] = {
-	[CPFT_NNTP] = "NNTP",
-	[CPFT_UUCP] = "UUCP",
-	[CPFT_NONE] = "none",
-    };
-
-    return ftn[t];
+    switch (t) {
+	case CPFT_NNTP: return "NNTP";
+	case CPFT_UUCP: return "UUCP";
+	case CPFT_NONE: return "none";
+	default: abort();
+    }
 }
 
 /* parse a line, destructively */
