@@ -74,7 +74,7 @@ static void usage(void);
 static int isgrouponserver(char *newsgroups);
 static int ismsgidonserver(char *msgid);
 static unsigned long getgroup(struct newsgroup *g, unsigned long server);
-static int postarticles(void);
+static int postarticles(const struct serverlist *);
 static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *, int);
 static int getbymsgid(const char *msgid, int delayflg);
 
@@ -1471,7 +1471,7 @@ post_FILE(FILE * f, char **line)
  * -  0 if a posting is strange for some reason
  */
 int
-postarticles(void)
+postarticles(const struct serverlist *cursrv)
 {
     char *line = 0;
     int n;
@@ -1498,7 +1498,7 @@ postarticles(void)
 
 	    f1 = fgetheader(f, "Newsgroups:", 1);
 	    if (f1) {
-		if (isgrouponserver(f1)) {
+		if (cursrv->post_anygroup || isgrouponserver(f1)) {
 		    char *f2;
 
 		    f2 = fgetheader(f, "Message-ID:", 1);
@@ -1515,7 +1515,7 @@ postarticles(void)
 			} else {
 			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				   "Posting %s", *y);
-			    if (post_FILE(f, &line)) {
+			    if (post_FILE(f, &line) || strncmp(line, "441 435 ", 8) == 0) {
 				char *ngs = fgetheader(f, "Newsgroups:", 1);
 				if (ngs != NULL) {
 				    char *mod = checkstatus(ngs, 'm');
@@ -1529,7 +1529,7 @@ postarticles(void)
 					free(app);
 				    free(ngs);
 				}
-				/* POST was OK */
+				/* POST was OK or duplicate */
 				++n;
 			    } else {
 				/* POST failed */
@@ -1554,7 +1554,7 @@ postarticles(void)
     }
     free_dirlist(x);
     ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	   "%s: %d articles posted", current_server->name, n);
+	   "%s: %d articles posted", cursrv->name, n);
     globalposted += n;
     return 1;
 }
@@ -1812,7 +1812,7 @@ do_server(int forceactive)
 	switch(current_server->feedtype) {
 	    case CPFT_NNTP:
 		if (reply == 200) {
-		    res = postarticles();
+		    res = postarticles(current_server);
 		    if (res == 0 && rc >= 0)
 			rc = -1;
 		    else if (rc == 0)
