@@ -77,7 +77,7 @@ readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *de
 	k = strstr(nread > dlen ? *bufp + nread - dlen : *bufp, delim);
 
 	nread += res;
-	if (res < *size-nread-1) { /* FIXME: can short reads happen? */
+	if ((size_t)res < *size-nread-1) { /* FIXME: can short reads happen? */
 	    return k != NULL ? k : *bufp + nread;
 	}
 
