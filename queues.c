@@ -154,7 +154,7 @@ feedincoming(void)
     {
 	RBLIST *rl = rbopenlist(rb);
 	if (rl) {
-	    while ((ni = rbreadlist(rl))) {
+	    while ((ni = (char *)rbreadlist(rl))) {
 		gfixxover(ni);
 		free(ni);
 	    }
