@@ -24,6 +24,8 @@
 
 struct filterlist *filter = NULL;
 
+static void free_entry(struct filterentry *e);
+
 /*
  * find "needle" in "haystack" only if "needle" is at the beginning of a line
  * returns a pointer to the first char after "needle" which should be a
@@ -201,6 +203,28 @@ insertfilter(struct filterlist *f, char *ng)
     oldf = f;
 }
 
+static void
+removefilter(struct filterlist *r)
+{
+    struct filterlist *of = NULL, *f = filter;
+    while(f) {
+	if (f == r) {
+	    free_entry(f->entry);
+	    if (f == filter) {
+		filter = f->next;
+		free(f);
+		break;
+	    } else {
+		of->next = f->next;
+		free(f);
+		break;
+	    }
+	}
+	of = f;
+	f = f->next;
+    }
+}
+
 /*
  * read filters into memory. Filters are just plain regexp's
  * return TRUE for success, FALSE for failure
@@ -237,30 +261,34 @@ readfilter(const char *filterfilename)
 	if (parse_line(l, param, value)) {
 	    if (strcasecmp("newsgroup", param) == 0 ||
 		strcasecmp("newsgroups", param) == 0) {
+		if (ng) free(ng);
 		ng = critstrdup(value, "readfilter");
 	    } else if (strcasecmp("pattern", param) == 0) {
+		pcre *re;
 		if (!ng) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 			   "No newsgroup for expression %s found", value);
 		    continue;
 		}
-		f = newfilter();
-		insertfilter(f, ng);
-		if (((f->entry)->expr = pcre_compile(value, PCRE_MULTILINE,
+		re = pcre_compile(value, PCRE_MULTILINE,
 						     &regex_errmsg,
 						     &regex_errpos,
 #ifdef NEW_PCRE_COMPILE
 						     NULL
 #endif
-		     )) == NULL) {
+		    );
+		if (re) {
+		    f = newfilter();
+		    insertfilter(f, critstrdup(ng, "readfilter"));
+		    (f->entry)->expr = re;
+		    (f->entry)->cleartext = critstrdup(value, "readfilter");
+		} else {
+		    /* could not compile */
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "Invalid filter pattern %s: %s",
-			   value, regex_errmsg);
+			   "Invalid filter pattern %s (pos %d): %s",
+			   value, regex_errpos, regex_errmsg);
 		    pcre_free(f->entry);
 		    f->entry = NULL;
-		} else {
-		    (f->entry)->cleartext = critstrdup(value, "readfilter");
-		    (f->entry)->limit = -1;
 		}
 	    } else if ((strcasecmp("maxage", param) == 0) ||
 		       (strcasecmp("minlines", param) == 0) ||
@@ -273,19 +301,14 @@ readfilter(const char *filterfilename)
 		    continue;
 		}
 		f = newfilter();
-		insertfilter(f, ng);
+		insertfilter(f, critstrdup(ng, "readfilter"));
 		(f->entry)->cleartext = critstrdup(param, "readfilter");
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
 	    } else if (strcasecmp("action", param) == 0) {
 		if (!f || !f->entry || !(f->entry)->cleartext) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 			   "No pattern found for action %s", value);
-		    if ((f->entry)->expr)
-			pcre_free((f->entry)->expr);
-		    if (f->entry)
-			free(f->entry);
-		    if (f)
-			free(f);
+		    removefilter(f);
 		    continue;
 		} else {
 		    (f->entry)->action = critstrdup(value, "readfilter");
@@ -471,7 +494,6 @@ freefilter(struct filterlist *f)
     }
 }
 
-static void free_entry(struct filterentry *e);
 static void
 free_entry(struct filterentry *e)
 {
