@@ -1439,8 +1439,8 @@ nntpactive(int fa)
 	    if (e < 0)
 		ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", mastr_str(s));
 	}
-	mastr_delete(s);
     }
+    mastr_delete(s);
 }
 
 /* post article in open file f, return FALSE if problem, return TRUE if ok */

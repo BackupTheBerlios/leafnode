@@ -526,6 +526,8 @@ freeservers(void)
 	    free(p->username);
 	if (p->password)
 	    free(p->password);
+	if (p->group_pcre)
+	    free(p->group_pcre);
 	free(p);
 	p = t;
     }
