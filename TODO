@@ -110,6 +110,10 @@ Matthias:
     What is a proper approved: header? GnuPG signed? That's after-2.0
     stuff.
 
+2.2 allow higher crosspost limits for certain "antidote" groups such as
+    de.admin.* that regularly cause larger crossposts with single
+    followup-to, to avoid missing announcements while keeping spam out?
+
 10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
@@ -159,6 +163,12 @@ Matthias:
 2.2 Fix and amend copyright statements and licenses.
 
 2.2 nntpd control articles are also displayed
+
+2.2 add pathexclude features (spam, ) perhaps with regexp
+
+2.2 new syntax for parameters, to precede them by nothing (plain string
+    match), {GLOB} or {WILDMAT} for simple patterns, {PCRE} or {REGEXP}
+    for Perl or POSIX regexp?
 
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
