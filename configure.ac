@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20031221a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.78 $)
+AC_REVISION($Revision: 1.79 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -47,7 +47,7 @@ AC_SUBST(GCC_FLAGS)
 
 dnl check which user to use
 AC_MSG_CHECKING(runas-user)
-AC_ARG_ENABLE(runas-user, AC_HELP_STRING([--enable-runas-user],[user (news)]),
+AC_ARG_ENABLE(runas-user, AC_HELP_STRING([--enable-runas-user=USER],[user (news)]),
   :,
   enableval=news
 )
@@ -136,7 +136,7 @@ else
 fi
 
 AC_MSG_CHECKING(spooldir)
-AC_ARG_ENABLE(spooldir, AC_HELP_STRING([--enable-spooldir],[news spool directory (/var/spool/news)]),
+AC_ARG_ENABLE(spooldir, AC_HELP_STRING([--enable-spooldir=DIR],[news spool directory (/var/spool/news)]),
   if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
@@ -173,7 +173,7 @@ AC_MSG_NOTICE(note that "leafnode" is automatically appended to $sysconfdir)
 
 dnl check where to put the lockfile
 AC_MSG_CHECKING(lockfile)
-AC_ARG_ENABLE(lockfile, AC_HELP_STRING([--enable-lockfile],[lockfile (/var/lock/news/fetchnews.lck)]),
+AC_ARG_ENABLE(lockfile, AC_HELP_STRING([--enable-lockfile=FILE],[lockfile (/var/lock/news/fetchnews.lck)]),
   if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
