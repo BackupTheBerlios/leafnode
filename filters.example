@@ -71,7 +71,7 @@ pattern = ^Xref:.* gmane\.spam\.detected:
 action = kill
 
 ### Filter on some subject, except if the posting is a followup to your
-### messsage. This requires, that all your postings use a FQDN for the
+### message. This requires that all your postings use a FQDN for the
 ### Message-Id, see "hostname" in leafnode(8).
 newsgroups = .*
 pattern = ^Subject: some_subject
