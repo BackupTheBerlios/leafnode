@@ -1,3 +1,36 @@
+2002-01-14  Matthias Andree  <matthias.andree@gmx.de>
+
+	* *: keep clear of is* and str* name spaces to prevent future
+	collisions.
+
+	* mergesort.c: Fix up EVAL errno.h namespace pollution, rename to
+	eval.
+
+	* xoverutil.c: Drop arpa/inet.h (xoverutil does not need it).
+	Allocate overview for current+1 instead of current, patch by Ralf
+	Wildenhues.
+
+	* nntputil.c: Exempt arpa/inet.h from splint, patch by Ralf
+	Wildenhues.
+
+	* nntpd.c: Exempt arpa/inet.h from splint, patch by Ralf
+	Wildenhues.
+
+	* miscutil.c: Ralf Wildenhues: Introduce TESTMODE to skip uid/gid
+	changes.
+
+	* masock_*.c: Exempt arpa/inet.h from splint, patch by Ralf
+	Wildenhues.
+	* masock.h: Exempt arpa/inet.h from splint, patch by Ralf
+	Wildenhues.
+
+	* .lclintrc: Switch to -weak for now.
+	* fetchnews.c (processupstream): use closeinteresting on write
+	error, patch by Ralf Wildenhues.
+	* critmem.h: Include config.h, patch by Ralf Wildenhues.
+	* checkgroups.c: Minor fixes by Ralf Wildenhues.
+	* mergesort.c: Fix types. Code is now splint -weak clean.
+
 2002-01-11  Matthias Andree  <matthias.andree@gmx.de>
 
         === RELEASE 2.0b8_ma9rc2 ===
