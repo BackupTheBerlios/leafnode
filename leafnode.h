@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.32 2002/02/20 03:19:04 emma Exp $ */
+/* $Id: leafnode.h,v 1.33 2002/04/03 21:35:58 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -63,12 +63,20 @@ extern "C" {
 #define fork() ((pid_t)(-1))
 #endif
 
+/* work around splint not knowing the correct semantics for pcre and other stuff */
+#ifdef __LCLINT__
+#include "lclint_fixes.h"
+#else /* not __LCLINT__ */
 #include <pcre.h>
+#endif /* not __LCLINT__ */
+
 
     typedef int bool;
 
+    /*@constant int BLOCKSIZE;@*/
 #define BLOCKSIZE 16384
 
+    /*@constant mode_t MKDIR_MODE;@*/
 #define MKDIR_MODE 0750
 
 #define BASENAME(a) (strrchr((a), '/') ? strrchr((a), '/') : (a))
@@ -147,22 +155,24 @@ extern "C" {
     int findopt(char option, int argc, char *argv[]);
 
 /* conffile is changed */
-    int parseopt(const char *, int, /*@null@*/ const char *, char *conffile,
+    int parseopt(const char *, int, /*@null@*/ const char *, /*@unique@*/ char *conffile,
 		 size_t);
 
 /* converts a message-id to a file name, the return value points to static storage  */
     /*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
 
 /* handling of misc. lines */
-    /*@dependent@*/ char *getaline(FILE * f);	/* reads one line, regardless of length,
-				   returns pointer to static buffer */
-    char *mygetfoldedline(const char *, unsigned long, FILE * f);
+    /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);
+	/* reads one line, regardless of length, returns pointer to static buffer */
+
+    /*@null@*/ /*@only@*/ char *
+	mygetfoldedline(const char *, unsigned long, FILE * f);
     /* reads one line, regardless of length, returns malloc()ed string! */
 #define getfoldedline(a) mygetfoldedline(__FILE__,__LINE__,a)
-    /*@dependent@*/ char *mgetaline(FILE * f);
-    /*@dependent@*/ char *timeout_getaline(FILE * f, int seconds);
+    /*@null@*/ /*@dependent@*/ char *mgetaline(FILE * f);
+    /*@null@*/ /*@dependent@*/ char *timeout_getaline(FILE * f, unsigned int seconds);
 
-    int parse_line(char *l, char *param, char *value);
+    int parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value);
 
     /* parse a line of form "param = value" */
 #define TOKENSIZE 80		/* needed for parsing */
@@ -188,16 +198,21 @@ extern "C" {
 				   "Other status strings may exist." */
     };
 
+    extern /*@null@*/ /*@owned@*/ struct newsgroup *active;
+
     void insertgroup(const char *name, const char status, long unsigned first,
-		     long unsigned last, time_t date, const char *desc);
+		     long unsigned last, time_t date, const char *desc)
+	/*@modifies internalState@*/ ;
     void changegroupdesc(const char *groupname, char *desc);
-    void mergegroups(void);
+    void mergegroups(void)
+	/*@globals active@*/
+	/*@modifies active, internalState@*/ ;
     /*@null@*/ /*@dependent@*/ struct newsgroup *findgroup(const char *name, struct newsgroup *a,
 				size_t asize);	/* active must be read */
     time_t query_active_mtime(void);
     void rereadactive(void);	/* only reread if none read or if it has changed */
     int writeactive(void);
-    void freeactive(struct newsgroup *a);
+    void freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a);
     void mergeactives(struct newsgroup *old, struct newsgroup *new) ;
     struct newsgroup *cpactive(struct newsgroup *a);
 /*
@@ -207,7 +222,6 @@ extern "C" {
     void readlocalgroups(void);
     int is_localgroup(const char *groupname);
     int is_alllocal(const char *grouplist);
-    extern struct newsgroup /*@null@*/ *active;
     void freelocal(void);
 
 /* translation from message-id to article number, used in fetch and expire */
@@ -224,18 +238,18 @@ extern "C" {
 	char string[1];
     };
     void appendtolist(struct stringlist **list, struct stringlist **lastentry,
-		      char *newentry);
+		      /*@unique@*/ char *newentry);
     /* append "newentry" to "list". "lastentry" points to the last
        entry in "list" and must be supplied. */
-    /*@dependent@*//*@null@*/ char *findinlist(struct stringlist *haystack,
-						 /*@null@*/ const char * const needle);
+    /*@dependent@*//*@null@*/ char *findinlist(/*@null@*/ struct stringlist *haystack,
+					       /*@null@*/ const char * const needle);
 
     /* find a string in a stringlist by doing a linear search */
-    void freelist( /*@only@*/ struct stringlist *list);
+    void freelist(/*@null@*/ /*@only@*/ struct stringlist *list);
 
     /* free memory occupied by a stringlist */
     int stringlistlen(/*@null@*/ const struct stringlist *list);
-    struct stringlist *cmdlinetolist(const char *cmdline);
+    /*@null@*/ /*@only@*/ struct stringlist *cmdlinetolist(const char *cmdline);
 
     /* convert a space separated string into a stringlist */
 /*
@@ -277,12 +291,16 @@ extern "C" {
 	struct filterentry *entry;
 	struct filterlist *next;
     };
-    extern struct filterlist *filter;	/* all expressions precompiled */
-    int readfilter(const char *filterfile);
+    extern /*@null@*/ /*@owned@*/ struct filterlist *filter;
+	/* all expressions precompiled */
+    int readfilter(/*@null@*/ const char *filterfile)
+	/*@globals undef filter@*/ ;
     int killfilter(const struct filterlist *f, const char *hdr);
     struct filterlist *selectfilter(const char *groupname);
-    void freefilter(struct filterlist *f);	/* for selectfilter */
-    void freeallfilter(struct filterlist *f);	/* for deallocation */
+    void freefilter(/*@null@*/ /*@only@*/ struct filterlist *f);
+	/* for selectfilter */
+    void freeallfilter(/*@null@*/ /*@only@*/ struct filterlist *f);
+	/* for deallocation */
 
 /*
  * store articles
@@ -336,8 +354,10 @@ extern "C" {
     long findxover(unsigned long article);
 
     /* find index number for an article, return -1 on error */
-    int maybegetxover(struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
-    int xgetxover(const int, struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
+    int maybegetxover(/*@null@*/ struct newsgroup *g);
+	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
+    int xgetxover(const int, /*@null@*/ struct newsgroup *g);
+	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
     int getxover(const int);	/* set xoverinfo, return 0 on error, nonzero else */
     void fixxover(void);	/* repair all .overview files */
     void gfixxover(const char *g);	/* repair .overview in groups g */
@@ -369,7 +389,7 @@ extern "C" {
     extern time_t default_expire;
 
     struct serverlist {
-	struct serverlist *next;
+	/*@null@*/ struct serverlist *next;
 	char *name;		/* Servername */
 	char *username;
 	char *password;
@@ -381,7 +401,7 @@ extern "C" {
 	char active;
     };
 
-    extern struct expire_entry *expire_base;
+    extern /*@null@*/ struct expire_entry *expire_base;
 
     extern char *mta;		/* mail transfer agent for mailing to moderators */
     /* expire for certain groups */
@@ -429,10 +449,10 @@ extern "C" {
 #define FM_XOVER 1
 #define FM_HEAD  2
 #define FM_BOTH  FM_XOVER|FM_HEAD
-    extern char *filterfile;	/* filename where filter resides */
-    extern char *pseudofile;	/* filename of pseudoarticle body */
-    extern char *owndn;		/* own domain name, if you can't set one */
-    extern struct serverlist *servers;
+    extern /*@null@*/ char *filterfile;	/* filename where filter resides */
+    extern /*@null@*/ char *pseudofile;	/* filename of pseudoarticle body */
+    extern /*@null@*/ char *owndn;	/* own domain name, if you can't set one */
+    extern /*@null@*/ struct serverlist *servers;
     extern int killbogus;	/* kill bogus files in newsgroups */
 
     void freeconfig(void);
@@ -442,8 +462,8 @@ extern "C" {
  * other global variables
  */
 /* defined in nntputil.c */
-    /*@null@*/ extern FILE *nntpin;
-    /*@null@*/ extern FILE *nntpout;
+    extern /*@dependent@*/ FILE *nntpin;
+    extern /*@dependent@*/ FILE *nntpout;
     extern int stat_is_evil;
 
 /* defined in miscutil.c */
@@ -454,7 +474,7 @@ extern "C" {
 /*
  * misc prototypes
  */
-    int ihave(const char *mid);
+    /*@falsewhennull@*/ int ihave(/*@null@*/ const char *mid);
     int lockfile_exists(int block);
     void putaline(FILE *, const char *fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));
@@ -469,9 +489,9 @@ extern "C" {
 
     int initinteresting(void);
     void critinitinteresting(void);
-    RBLIST *openinteresting(void);
-    const char *readinteresting(RBLIST *);
-    void closeinteresting(RBLIST *);
+    /*@null@*/ /*@only@*/ RBLIST *openinteresting(void);
+    /*@null@*/ /*@owned@*/ const char *readinteresting(/*@null@*/ RBLIST *);
+    void closeinteresting(/*@null@*/ /*@only@*/ RBLIST *);
     void freeinteresting(void);
 
 #if 0
@@ -484,7 +504,7 @@ extern "C" {
  */
     bool authenticate(void);	/* authenticate ourselves at a server */
     int nntpreply(void);	/* decode an NNTP reply number */
-    int newnntpreply( /*@null@*//*@out@*/ char **);	/* decode an NNTP reply number */
+    int newnntpreply(/*@null@*/ /*@out@*/ char **);	/* decode an NNTP reply number */
     int nntpconnect(const struct serverlist *upstream);
 
     /* connect to upstream server */
@@ -496,10 +516,12 @@ extern "C" {
     int check_allnum_minus(const char *);	/* check if string is all made
 						   of digits and "-" */
 
-    char *cuttab(const char *in, int field);	/* break tab-separated field */
-    int str_nsplit(/*@out@*/ char **array, const char *in, const char *sep, int maxelem);	/* Perl-like, split
-										   string into substrings */
-    void free_strlist(char **hdl /** string array to free */ );	/* free array of strings */
+    /*@null@*/ /*@only@*/ char *cuttab(const char *in, int field);
+				/* break tab-separated field */
+    int str_nsplit(/*@out@*/ char **array, const char *in, const char *sep, int maxelem);
+				/* Perl-like, split string into substrings */
+    void free_strlist(/*@null@*/ char **hdl /** string array to free */ );
+				/* free array of strings */
     int str_isprefix(const char *string, const char *prefix);	/* strncasecmp variant */
 
 /* from dirutil.c */
@@ -526,7 +548,7 @@ extern "C" {
     void free_dirlist( /*@null@*//*@only@*/ char **);
 
 /* from fopen_reg.c */
-    FILE *fopen_reg(const char *path, const char *m);
+    /*@null@*/ /*@dependent@*/ FILE *fopen_reg(const char *path, const char *m);
 
 /* from nfswrite.c */
     ssize_t nfswrite(int fd, const void *b, size_t count);
@@ -599,11 +621,12 @@ extern "C" {
     /*@null@*/ /*@only@*/ char *checkstatus(const char *groups, const char status);
 
 /* getwatermarks.c */
-    int getwatermarks(unsigned long *, unsigned long *, unsigned long *);
+    int getwatermarks(unsigned long *, unsigned long *, unsigned long /*@null@*/ *);
 
 /* touch.c */
     int touch(const char *name);
 
+    extern void /*@exits@*/ internalerror(void);
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
 
 #if 0
