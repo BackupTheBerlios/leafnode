@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre3.1])
+AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre3.2])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.16 $)
+AC_REVISION($Revision: 1.17 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -242,23 +242,6 @@ fi
 
 AC_SUBST(PCRELIB)
 AC_SUBST(LINKPCRELIB)
-
-dnl Check for timezone and related stuff
-AC_CACHE_CHECK(for gmtoff in struct tm,cf_cv_have_gmtoff,[AC_TRY_COMPILE([
-#include <time.h>],[
-	time_t now;
-	long gmtoff;
-	struct tm gmt;
-	now = time(0);
-	gmt = *(gmtime(&now));
-	gmtoff = gmt.tm_gmtoff;],
-   [cf_cv_have_gmtoff="yes"],
-   [cf_cv_have_gmtoff="no"])
-])
-if test $cf_cv_have_gmtoff = "yes" ; then
-  AC_DEFINE(HAVE_GMTOFF, 1,
-  [define if your struct tm has a tm_gmtoff member])
-fi
 
 dnl Checks for library functions.
 AC_FUNC_CHOWN
