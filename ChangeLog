@@ -4,6 +4,34 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma3 -- changes since 2.0b5_ma2:
+
+- Now has a new configuration file switch named avoidxover, if that is
+  non-zero, then prefer XHDR over XOVER (only possible if not delaying
+  bodies and not filtering).
+
+- Reintroduce XOVER, make preferring XOVER over XHDR the default. INN is
+  DEAD slow on XHDR, and INN is in widespread use.
+
+- No longer uses syslog directly (avoids excess printf statements), but
+  has a all-in-one-log-to-syslog-and-console function. system
+  dependencies encapsulated in separate file.
+
+- miscutil.c: bugfix, drops root privileges BEFORE making
+  directories. Now makes all needed directories. (Removed from Makefile).
+
+- Bugfixes with unsigned long wrapping in fetchnews.c, which would then
+  fetch the world on the second invokation. Also recognizes "no new
+  news" again. Fixes to off-by-one errors.
+
+- SECURITY bugfixes in rnews.c. (was vulnerable against all kinds of
+  /tmp races, now uses mkstemp).
+
+- Add some missing strerror(errno) to logging.
+
+Maintainer only: Now uses gperf to speed up parsing, currently only for 
+config file.
+
 ** History of 2.0b5_ma2 -- changes since 2.0b5-ma1:
 
 NOTE: This version changes the dash in -ma1 to an underscore in _ma2 for

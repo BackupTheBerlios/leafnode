@@ -1,4 +1,4 @@
-.TH checkgroups 8 "21 Nov 1998" "" \" -*- nroff -*-
+.TH checkgroups 8 "@VERSION@" leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: checkgroups.8,v 1.2 2000/11/12 18:05:49 emma Exp $
+.\" $Id: checkgroups.8.in,v 1.1 2000/11/15 05:23:36 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -14,7 +14,7 @@ checkgroups \- update group descriptions
 
 .SH SYNOPSIS
 .B checkgroups -V
-br
+.br
 .B checkgroups [checkgroups script]
 
 .SH DESCRIPTION
@@ -26,7 +26,7 @@ desired.
 .B Checkgroups
 is the program which parses checkgroup scripts to include new/updated
 group descriptions into the active file (which is usually
-/var/spool/news/leaf.node/groupinfo).
+@SPOOLDIR@/leaf.node/groupinfo).
 .PP
 .B Checkgroups
 sets its real and effective uid to "news".

@@ -22,6 +22,8 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
 
 #ifdef SOCKS
 #include <socks.h>
@@ -36,7 +38,6 @@ See README for restrictions on the use of this software.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -118,7 +119,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 
 	if ( ( c != '\t' && c < ' ' ) || ( c > 126 && c < 160 ) ) {
 	    if ( debugmode )
-		syslog( LOG_DEBUG,
+		ln_log(LNLOG_DEBUG,
 			"%lu xover error: non-printable chars.", artno );
 	    return 0;
 	}
@@ -128,7 +129,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "%lu xover error: no Subject: header.", artno );
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Subject: header.", artno );
 	return 0;
     }
 
@@ -137,7 +138,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     while( p != q ) {
 	if ( !isdigit((unsigned char)*p) ) {
 	    if ( debugmode )
-        	syslog( LOG_DEBUG, "%lu xover error: article "
+        	ln_log(LNLOG_DEBUG, "%lu xover error: article "
 			"number must consists of digits.", artno );
 	    return 0;
 	}
@@ -148,7 +149,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "%lu xover error: no From: header.", artno );
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no From: header.", artno );
 	return 0;
     }
 
@@ -158,7 +159,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-            syslog( LOG_DEBUG, "%lu xover error: no Date: header.", artno );
+            ln_log(LNLOG_DEBUG, "%lu xover error: no Date: header.", artno );
 	return 0;
     }
 
@@ -168,7 +169,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-            syslog( LOG_DEBUG,
+            ln_log(LNLOG_DEBUG,
 		    "%lu xover error: no Message-ID: header.", artno );
 	return 0;
     }
@@ -179,7 +180,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: no References: or Bytes: header.",
 		    artno );
 	return 0;
@@ -189,7 +190,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 
     if ( *p != '<' ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not start with <.",
 		    artno );
 	return 0;
@@ -198,7 +199,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 	p++;
     if ( *p != '@' ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not contain @.", artno );
 	return 0;
     }
@@ -206,13 +207,13 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 	p++;
     if ( *p != '>' ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not end with >.", artno );
 	return 0;
     }
     if ( ++p != q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not end with >.", artno );
 	return 0;
     }
@@ -221,7 +222,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "%lu xover error: no Bytes: header.", artno );
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Bytes: header.", artno );
 	return 0;
     }
 
@@ -230,7 +231,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     while ( p != q ) {
 	if ( *p != '<' ) {
 	    if ( debugmode )
-        	syslog( LOG_DEBUG, "%lu xover error: "
+        	ln_log(LNLOG_DEBUG, "%lu xover error: "
 			"Reference does not start with <.", artno );
 	    return 0;
 	}
@@ -238,7 +239,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 	    p++;
 	if ( *p != '@' ) {
 	    if ( debugmode )
-        	syslog( LOG_DEBUG,
+        	ln_log(LNLOG_DEBUG,
 			"%lu xover error: Reference does not contain @.",
 			artno );
 	    return 0;
@@ -247,7 +248,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
 	    p++;
 	if ( *p++ != '>' ) {
 	    if ( debugmode )
-        	syslog( LOG_DEBUG,
+        	ln_log(LNLOG_DEBUG,
 			"%lu xover error: Reference does not end with >.",
 			artno );
 	    return 0;
@@ -260,7 +261,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     q = strchr( p, '\t' );
     if ( !q ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "%lu xover error: no Lines: header.", artno );
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Lines: header.", artno );
 	return 0;
     }
 
@@ -269,7 +270,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     while( p != q ) {
 	if ( !isdigit((unsigned char)*p) ) {
 	    if ( debugmode )
-		syslog( LOG_DEBUG, "%lu xover error: illegal digit "
+		ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
 			"in Bytes: header.", artno );
 	    return 0;
 	}
@@ -286,7 +287,7 @@ static int legalxoverline ( char * xover, unsigned long artno ) {
     while( p && *p && p != q ) {
 	if ( !isdigit((unsigned char)*p) ) {
 	    if ( debugmode )
-        	syslog( LOG_DEBUG, "%lu xover error: illegal digit "
+        	ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
 			"in Lines: header.", artno );
 	    return 0;
 	}
@@ -335,7 +336,7 @@ static void dogroup(struct newsgroup* g) {
 
     d = opendir(".");
     if (!d) {
-	syslog(LOG_ERR, "opendir in %s: %m", gdir);
+	ln_log(LNLOG_ERR, "opendir in %s: %s", gdir, strerror(errno));
 	return;
     }
 
@@ -363,7 +364,7 @@ static void dogroup(struct newsgroup* g) {
         printf("%s: low water mark %lu, high water mark %lu\n",
 	        g->name, first, last );
     if ( debugmode )
-	syslog( LOG_DEBUG,
+	ln_log(LNLOG_DEBUG,
 		"%s: expire %lu, low water mark %lu, high water mark %lu",
 		g->name, expire, first, last );
 
@@ -393,7 +394,8 @@ static void dogroup(struct newsgroup* g) {
 	overview = critmalloc((size_t)st.st_size + 1, "Reading article overview info");
 	if ((fd = open(".overview", O_RDONLY)) < 0 ||
 	    (read(fd, overview, (size_t)st.st_size) < (ssize_t)st.st_size)) {
-	    syslog(LOG_ERR, "can't open/read %s/.overview: %m", gdir);
+	    ln_log(LNLOG_ERR, "can't open/read %s/.overview: %s", gdir,
+		   strerror(errno));
 	    *overview = '\0';
 	    if (fd > -1)
 		close(fd);
@@ -460,11 +462,13 @@ static void dogroup(struct newsgroup* g) {
 			    /* exists, but points to another file */
 				articles[current-1].kill = 1;
 			    else
-				syslog(LOG_ERR, "relink of %s failed: %m (%s)",
-				       msgid, lookup( msgid ));
+				ln_log(LNLOG_ERR, 
+				       "relink of %s failed: %s (%s)",
+				       msgid, 
+				       lookup( msgid ), strerror(errno));
 			}
 			else
-			    syslog(LOG_INFO, "relinked message %s", msgid );
+			    ln_log(LNLOG_INFO, "relinked message %s", msgid );
 		    }
 		}
 	    } else if (articles[current-1].xover) {
@@ -496,15 +500,15 @@ static void dogroup(struct newsgroup* g) {
 	    sprintf(artfile, "%lu", articles[art].artno);
 	    if (!unlink(artfile)) {
 		if ( debugmode )
-		    syslog( LOG_DEBUG, "deleted article %s/%lu", 
+		    ln_log(LNLOG_DEBUG, "deleted article %s/%lu", 
 			    gdir, articles[art].artno );
 		deleted++;
 	    } else if (errno != ENOENT && errno != EEXIST) {
 		/* if file was deleted already or it was not a file */
 		/* but a directory, skip error message */
 		kept++;
-		syslog( LOG_ERR, "unlink %s/%lu: %m", 
-			gdir, articles[art].artno );
+		ln_log(LNLOG_ERR, "unlink %s/%lu: %s", 
+			gdir, articles[art].artno, strerror(errno));
 	    } else {
 		/* deleted by someone else */
 	    }
@@ -520,13 +524,14 @@ static void dogroup(struct newsgroup* g) {
 
     if ( deleted || kept ) {
 	printf("%s: %d articles deleted, %d kept\n", g->name, deleted, kept);
-	syslog( LOG_INFO,
+	ln_log(LNLOG_INFO,
 		"%s: %d articles deleted, %d kept", g->name, deleted, kept);
     }
 
     if ( !kept ) {
 	if ( unlink( ".overview" ) < 0 )
-	    syslog( LOG_ERR, "unlink %s/.overview: %m", gdir );
+	    ln_log(LNLOG_ERR, "unlink %s/.overview: %s", gdir, 
+		   strerror(errno));
 	if ( !chdir("..") && ( isinteresting(g->name) == 0 ) ) {
 	    /* delete directory and empty parent directories */
 	    while ( rmdir( gdir ) == 0 ) {
@@ -584,7 +589,7 @@ void savethread( struct exp *articles, char *refs, unsigned long acount ) {
 	    if ( articles[i].xover && articles[i].kill ) {
 		if ( strstr( articles[i].xover, p ) ) {
 		    if ( debugmode )
-			syslog(LOG_DEBUG, "rescued thread %lu", 
+			ln_log(LNLOG_DEBUG, "rescued thread %lu", 
 			       articles[i].artno);
 		    articles[i].kill = 0;
 		}
@@ -626,7 +631,7 @@ static void expiremsgid(void)
 	    if ( errno == ENOENT )
 		mkdir( s, 0755 ); /* file system damage again */
 	    if ( chdir( s ) ) {
-		syslog( LOG_ERR, "chdir %s: %m", s );
+		ln_log(LNLOG_ERR, "chdir %s: %s", s, strerror(errno));
 		continue;
 	    }
 	}
@@ -647,7 +652,7 @@ static void expiremsgid(void)
 
     if ( kept || deleted ) {
 	printf("total: %d articles deleted, %d kept\n", deleted, kept);
-	syslog( LOG_INFO, "%d articles deleted, %d kept", deleted, kept );
+	ln_log(LNLOG_INFO, "%d articles deleted, %d kept", deleted, kept );
     }
 }
 
@@ -677,11 +682,7 @@ int main(int argc, char** argv) {
     if ( !initvars( argv[0] ) )
 	exit(EXIT_FAILURE);
 
-#ifdef HAVE_OLD_SYSLOG
-    openlog( "texpire", LOG_PID );
-#else
-    openlog( "texpire", LOG_PID|LOG_CONS, LOG_NEWS );
-#endif
+    ln_log_open("texpire");
 
     while ( (option=getopt( argc, argv, "F:VDvf" )) != -1 ) {
 	if ( parseopt( "texpire", option, optarg, conffile ) ) {
@@ -724,7 +725,7 @@ int main(int argc, char** argv) {
 	    printf( "check mtime only\n" );
     }
     if ( debugmode )
-	syslog( LOG_DEBUG, "texpire %s: use_atime is %d", version, use_atime );
+	ln_log(LNLOG_DEBUG, "texpire %s: use_atime is %d", version, use_atime );
 
     if ( expire == 0 ) {
 	fprintf( stderr, "%s: no expire time\n", argv[0] );

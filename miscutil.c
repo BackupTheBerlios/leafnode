@@ -20,6 +20,10 @@ See file COPYING for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "critmem.h" 
+#include "ugid.h"
+#include "ln_log.h"
+
 #include <fcntl.h>
 #include <sys/uio.h>
 #include <sys/param.h>
@@ -31,7 +35,6 @@ See file COPYING for restrictions on the use of this software.
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
-#include <syslog.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -54,49 +57,79 @@ extern struct state _res;
 int debugmode = 0;
 int verbose = 0;
 
+struct mydir { 
+    char *name; mode_t m; 
+};
+
+static struct mydir dirs[]= {
+    { "failed.postings",     0755 },
+    { "interesting.groups",  0755 },
+    { "leaf.node",           0755 },
+    { "local.groups",        0755 },
+    { "message.id",         02755 },
+    { "out.going",          02755 },
+    { 0, 0 }
+};	
+
 int wildmat(const char *text, const char *p);
 
 /*
  * initialize all global variables
  */
 int initvars( char * progname ) {
-    struct passwd * pw;
+    uid_t ui;
+    gid_t gi;
+    struct mydir *md=&dirs[0];
+
+    if (uid_getbyuname("news", &ui)) {
+	fprintf(stderr, "news: %s\n", strerror(errno));
+	return FALSE;
+    }
+
+    if (gid_getbyuname("news", &gi)) {
+	fprintf(stderr, "news: %s\n", strerror(errno));
+	return FALSE;
+    }
+
+    if ( gid_ensure(gi) ) {
+	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi, 
+		strerror(errno));
+	return FALSE;
+    }
+    if ( uid_ensure(ui) ) {
+	fprintf(stderr, "cannot ensure uid %ld: %s\n", (long)ui,
+		strerror(errno));
+	return FALSE;
+    }
 
     /* config.c stuff does not have to be initialized */
-
     expire_base = NULL;
 
     /* These directories should exist anyway */
-    sprintf( s, "%s/interesting.groups", spooldir );
-    mkdir( s, (mode_t)0775 );
-    sprintf( s, "%s/leaf.node", spooldir );
-    mkdir( s, (mode_t)0755 );
-    sprintf( s, "%s/failed.postings", spooldir );
-    mkdir( s, (mode_t)0775 );
-    sprintf( s, "%s/out.going", spooldir );
-    mkdir( s, (mode_t)2755 );
-    chmod( s, (mode_t)(S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) );
-
-    if ( progname ) {
-	pw = getpwnam( "news" );
-	if ( !pw ) {
-	    fprintf( stderr, "no such user: news\n" );
+    while(md->name) {
+	char x[PATH_MAX];
+	snprintf(x, sizeof(x), "%s/%s", spooldir, md->name);
+	if(mkdir(x, 0110) && errno != EEXIST) {
+	    if(progname) fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr,"cannot mkdir(%s): %s\n", 
+		    x, strerror(errno));
 	    return FALSE;
 	}
-
-#if defined HAVE_SETGID && defined HAVE_SETUID
-	setgid( pw->pw_gid );
-	setuid( pw->pw_uid );
-	if ( getuid() != pw->pw_uid || getgid() != pw->pw_gid ) {
-#else
-	setregid( pw->pw_gid, pw->pw_gid );
-	setreuid( pw->pw_uid, pw->pw_uid );
-	if ( geteuid() != pw->pw_uid || getegid() != pw->pw_gid ) {
-#endif
-	    fprintf( stderr, "%s: must be run as news or root\n", progname );
+	if(chown(x, ui, gi)) {
+	    if(progname) fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr,"cannot chown(%s,%ld,%ld): %s\n", 
+		    x, (long)ui, (long)gi, strerror(errno));
 	    return FALSE;
 	}
+	if(chmod(x, md->m)) {
+	    if(progname) fprintf(stderr, "%s: ", progname);
+	    fprintf(stderr,"cannot chmod(%s,%o): %s\n", 
+		    x, md->m, strerror(errno));
+	    return FALSE;
+	}
+	md++;
     }
+    
     return TRUE;
 }
 
@@ -181,14 +214,14 @@ void checkinteresting( void ) {
 
     now = time( NULL );
     if ( chdir( spooldir ) || chdir( "interesting.groups" ) ) {
-	syslog( LOG_ERR, "unable to chdir to %s/interesting.groups: %m",
+	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %m",
 		spooldir );
 	return;
     }
 
     d = opendir( "." );
     if ( !d ) {
-	syslog( LOG_ERR, "unable to opendir %s/interesting.groups: %m",
+	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %m",
 		spooldir );
 	return;
     }
@@ -228,7 +261,7 @@ int lockfile_exists( int silent, int block ) {
 	if (!silent)
 	    printf( "Could not open lockfile %s for writing, "
 		    "abort program ...\n", lockfile );
-	syslog( LOG_ERR, "Could not open lockfile %s for writing: %m",
+	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %m",
 		lockfile );
 	return 1;
     }
@@ -242,13 +275,13 @@ int lockfile_exists( int silent, int block ) {
 	if ( errno == EACCES || errno == EAGAIN ) {
 	    if (!silent)
 		printf( "lockfile  %s exists, abort ...\n" ,lockfile );
-	    syslog( LOG_ERR, "lockfile %s exists, abort ...", lockfile);
+	    ln_log(LNLOG_ERR, "lockfile %s exists, abort ...", lockfile);
 	    return 1;
 	} else {
 	    if (!silent)
 		printf( " locking %s failed: %s, abort ...\n"
 			, lockfile, strerror( errno ) );
-	    syslog( LOG_ERR, "locking %s failed: %m, abort", lockfile );
+	    ln_log(LNLOG_ERR, "locking %s failed: %m, abort", lockfile );
 	    return 1;
 	}
     } else {
@@ -275,7 +308,7 @@ int isinteresting( const char *groupname ) {
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
     if ( !d ) {
-    	syslog( LOG_ERR, "Unable to open directory %s: %m", s );
+    	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s );
 	printf( "Unable to open directory %s\n", s );
 	return FALSE;
     }
@@ -311,7 +344,7 @@ const char * lookup ( const char *msgid ) {
     }
 
     if (!name) {
-	syslog( LOG_ERR, "malloc(%d) failed", i );
+	ln_log(LNLOG_ERR, "malloc(%d) failed", i );
 	exit(EXIT_FAILURE);
     }
 
@@ -355,11 +388,11 @@ static int makedir( char * d ) {
 	    continue; /* ok, I do use it sometimes :) */
 	if (errno==ENOENT)
 	    if (mkdir(p, 0775)) {
-		syslog( LOG_ERR, "mkdir %s: %m", d );
+		ln_log(LNLOG_ERR, "mkdir %s: %m", d );
 		exit(EXIT_FAILURE);
 	    }
 	if (chdir(p)) {
-	    syslog( LOG_ERR, "chdir %s: %m", d );
+	    ln_log(LNLOG_ERR, "chdir %s: %m", d );
 	    exit(EXIT_FAILURE);
 	}
     } while ( q );
@@ -680,7 +713,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.4 $
+/*  $Revision: 1.5 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

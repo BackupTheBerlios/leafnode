@@ -18,6 +18,10 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "get.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <sys/types.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -31,7 +35,6 @@ See README for restrictions on the use of this software.
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#include <syslog.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -147,30 +150,20 @@ static void usage( void ) {
 static int checkforpostings( void ) {
     DIR * d;
     struct dirent * de;
-    int error;
 
-    if ( chdir( spooldir ) || chdir ( "out.going" ) ) {
-	error = errno;
-        syslog( LOG_ERR, "Unable to cd to outgoing directory: %m" );
-        printf( "Unable to cd to %s/out.going: %s\n", spooldir,
-		strerror(error) );
-        return FALSE;
-    }
-
-    d = opendir( "." );
+    d = log_open_spool_dir( "out.going" );
     if ( !d ) {
-	error = errno;
-        syslog( LOG_ERR, "Unable to opendir out.going: %m" );
-        printf( "Unable to opendir %s/out.going/: %s\n", spooldir,
-		strerror(error) );
         return FALSE;
     }
 
     while ( (de=readdir( d )) != NULL ) {
 	/* filenames of articles to post begin with digits */
-	if ( isdigit( (unsigned char )de->d_name[0] ) )
+	if (check_allnum(de->d_name)) {
+	    closedir(d);
 	    return TRUE;
+	}
     }
+    closedir(d);
     return FALSE;
 }
 
@@ -234,26 +227,23 @@ int ismsgidonserver( char * msgid ) {
 void delposted( time_t before ) {
     struct stat st;
     struct dirent * de;
+    char x[PATH_MAX];
     DIR * d;
 
-    if ( chdir( spooldir ) || chdir ( "out.going" ) ) {
-	printf( "Unable to cd to outgoing directory\n" );
-        syslog( LOG_ERR, "Unable to cd to outgoing directory: %m" );
-        return;
-    }
-
-    d = opendir( "." );
+    d = log_open_spool_dir( "out.going" );
     if ( !d ) {
-	syslog( LOG_ERR, "Unable to opendir out.going: %m" );
-	printf( "Unable to opendir %s/out.going\n", spooldir );
+	ln_log(LNLOG_ERR, "Unable to opendir out.going: %s", strerror(errno));
 	return;
     }
 
     while( ( de = readdir( d ) ) != NULL ) {
-	if ( ( stat( de->d_name, &st ) == 0 ) && S_ISREG( st.st_mode ) &&
+	snprintf(x, sizeof(x), "%s/out.going/%s",
+		 spooldir, de->d_name);
+	if ( ( stat( x, &st ) == 0 ) && S_ISREG( st.st_mode ) &&
 	     ( st.st_ctime < before ) ) {
 	    if ( unlink( de->d_name ) )
-		syslog( LOG_ERR, "Failed to unlink %s: %m", de->d_name );
+		ln_log(LNLOG_ERR, 
+			"Failed to unlink %s: %s", x, strerror(errno));
 	}
     }
     closedir( d );
@@ -280,11 +270,13 @@ static void getmarked( struct newsgroup* group ) {
     char filename[ 1024 ];
 
     if ( verbose )
-        printf( "Getting bodies of marked messages for group %s ...\n",
-                group->name );
+        ln_log_prt(LNLOG_INFO,
+		   "Getting bodies of marked messages for group %s ...\n",
+		   group->name );
     sprintf( filename, "%s/interesting.groups/%s", spooldir, group->name );
     if ( ! ( f = fopen( filename, "r" ) ) ) {
-        syslog( LOG_ERR, "Cannot open %s for reading", filename );
+        ln_log(LNLOG_ERR, "Cannot open %s for reading: %s", 
+	       filename, strerror(errno));
 	return;
     }
 
@@ -301,11 +293,13 @@ static void getmarked( struct newsgroup* group ) {
 
     /* write back ids of all articles which could not be retrieved */
     if ( ! ( f = fopen( filename, "w" ) ) )
-	syslog( LOG_ERR, "Cannot open %s for writing", filename );
+	ln_log(LNLOG_ERR, "Cannot open %s for writing: %s", 
+	       filename, strerror(errno));
     else {
 	ptr = failed;
 	while ( ptr ) {
-	    fprintf( f, "%s\n", ptr->string );
+	    fputs(ptr->string, f);
+	    fputc('\n', f);
 	    ptr = ptr->next ;
 	}
 	fclose( f );
@@ -328,13 +322,14 @@ static FILE * fopenmsgid( const char * filename, int overwrite ) {
 
     if ( !stat( filename, &st ) ) {
 	if ( !overwrite ) {
-	    syslog( LOG_INFO, "article %s already stored", filename );
+	    ln_log(LNLOG_INFO, "article %s already stored", filename );
 	    return NULL;
 	}
 	else {
 	    f = fopen( filename, "w" );
 	    if ( f == NULL )
-		syslog( LOG_ERR, "unable to store article %s: %m", filename );
+		ln_log(LNLOG_ERR, "unable to store article %s: %s", 
+		       filename,strerror(errno));
 	    return f;
 	}
     }
@@ -347,8 +342,8 @@ static FILE * fopenmsgid( const char * filename, int overwrite ) {
 		*slp = '\0';
 	    if ( stat( c, &st ) ) {
 		if ( mkdir( c, 0775 ) < 0 ) {
-		    syslog( LOG_ERR, "Cannot create directory %s: %m", c );
-		    printf( "Cannot create directory %s\n", c );
+		    ln_log(LNLOG_ERR, "Cannot create directory %s: %s", 
+			   c,strerror(errno) );
 		}
 	    }
 	    free( c );
@@ -357,7 +352,8 @@ static FILE * fopenmsgid( const char * filename, int overwrite ) {
 	return f;
     }
     else {
-	syslog( LOG_INFO, "unable to store article %s: %m", filename );
+	ln_log(LNLOG_INFO, "unable to store article %s: %s", 
+	       filename,strerror(errno));
 	return NULL;
     }
 }
@@ -408,17 +404,16 @@ static int getfirstlast( struct newsgroup *g, unsigned long *first,
 	*first = h;
     }
 
-    if ( *first > (*last+1) ) {
-	syslog( LOG_INFO,
+    if ( *first > *last+1 ) {
+	ln_log(LNLOG_INFO,
 		"%s: last seen article was %lu, server now has %lu-%lu",
 		g->name, *first, window, *last );
 	if ( *first > (*last+5) ) {
 	    if ( verbose )
 		printf( "%s: switched upstream servers? %lu > %lu\n",
-			g->name, *first-1, *last );
+			g->name, *first, *last );
 	    *first = window;	/* check all upstream articles again */
-	}
-	else {
+	} else {
 	    if ( verbose )
 		printf( "%s: rampant spam cancel? %lu > %lu\n",
 			g->name, *first-1, *last );
@@ -426,29 +421,24 @@ static int getfirstlast( struct newsgroup *g, unsigned long *first,
 	}
     }
 
-    if ( (*first == 1) && initiallimit && (*last-*first > initiallimit) ) {
-	if ( verbose > 1 )
-	    printf( "skipping articles %lu-%lu inclusive (initial limit)\n",
-		    *first, *last-initiallimit );
-	syslog( LOG_INFO, "skipping articles %lu-%lu inclusive (initial limit)",
-		*first, *last-initiallimit );
-	*first = *last-initiallimit+1;
+    if ( (*first == 1) && initiallimit && (*last+1-*first > initiallimit) ) {
+	ln_log(LNLOG_INFO, "%s: skipping articles %lu-%lu inclusive (initial limit)",
+		g->name, *first, *last-initiallimit );
+	*first = *last+1-initiallimit;
     }
 
-    if ( artlimit && (*last-*first ) > artlimit ) {
-	if ( verbose > 1 )
-	    printf( "skipping articles %lu-%lu inclusive (article limit)\n",
-		    *first, *last-artlimit );
-	syslog( LOG_INFO, "skipping articles %lu-%lu inclusive (article limit)",
-		*first, *last-artlimit );
-	*first = *last-artlimit+1;
+    if ( artlimit && (*last+1-*first) > artlimit ) {
+	ln_log(LNLOG_INFO, 
+	       "%s: skipping articles %lu-%lu inclusive (article limit)",
+	       g->name, *first, *last-artlimit );
+	*first = *last+1-artlimit;
     }
 
     if ( window < *first )
 	window = *first;
     if ( window < 1 )
 	window = 1;
-    *first = window;
+    *first = window; 
 
     if ( *first > *last ) {
 	if ( verbose > 1 )
@@ -462,6 +452,8 @@ static int getfirstlast( struct newsgroup *g, unsigned long *first,
 /*
  * get headers of articles with XOVER and return a stringlist of article
  * numbers to get
+ * return -1 for error
+ * return -2 if XOVER was rejected
  */
 static int doxover( struct stringlist ** stufftoget,
 		    unsigned long first, unsigned long last,
@@ -475,9 +467,8 @@ static int doxover( struct stringlist ** stufftoget,
     putaline( "XOVER %lu-%lu", first, last );
     l = getaline( nntpin );
     if ( (!get_long(l, &reply )) || ( reply != 224 ) ) {
-	syslog( LOG_NOTICE, "Unknown reply to XOVER command: %s", l );
-	printf( "Unknown reply to XOVER command: %s\n", l );
-	return -1;
+	ln_log(LNLOG_NOTICE, "Unknown reply to XOVER command: %s", l );
+	return -2;
     }
     debug = 0;
     while ( (l = getaline( nntpin )) && strcmp( l, "." ) ) {
@@ -642,7 +633,7 @@ static int doxover( struct stringlist ** stufftoget,
 		FILE *f;
 
 		if ( !c ) {
-		    syslog( LOG_ERR, "lookup of %s failed", messageid );
+		    ln_log(LNLOG_ERR, "lookup of %s failed", messageid );
 		    free( hdr );
 		    continue;
 		}
@@ -687,8 +678,7 @@ static int doxhdr( struct stringlist ** stufftoget,
     putaline( "XHDR message-id %lu-%lu", first, last );
     l = getaline( nntpin );
     if ( ( !get_long( l, &reply )) || ( reply != 221 ) ) {
-        syslog( LOG_NOTICE, "Unknown reply to XHDR command: %s", l );
-        printf( "Unknown reply to XHDR command: %s\n", l );
+        ln_log(LNLOG_NOTICE, "Unknown reply to XHDR command: %s", l );
         return -1;
     }
     debug = 0;
@@ -749,14 +739,14 @@ static int legalheaders( char * hdr, unsigned long artno ) {
 	p = q + 1;
     }
     if ( !havepath )
-	syslog( LOG_INFO, "Discarding article %lu - no Path: header", artno );
+	ln_log(LNLOG_INFO, "Discarding article %lu - no Path: header", artno );
     else if ( !havemsgid )
-	syslog( LOG_INFO, "Discarding article %lu - no Message-ID: header",
+	ln_log(LNLOG_INFO, "Discarding article %lu - no Message-ID: header",
 		artno );
     else if ( !havefrom )
-	syslog( LOG_INFO, "Discarding article %lu - no From: header", artno );
+	ln_log(LNLOG_INFO, "Discarding article %lu - no From: header", artno );
     else if ( !haveng )
-	syslog( LOG_INFO, "Discarding article %lu - no Newsgroups: header",
+	ln_log(LNLOG_INFO, "Discarding article %lu - no Newsgroups: header",
 		artno );
     return ( havepath && havemsgid && havefrom && haveng );
 }
@@ -778,9 +768,7 @@ unsigned long getarticle( struct filterlist *filter ) {
     l = getaline( nntpin );
     if ( ( sscanf( l, "%3d %lu", &reply, &artno ) != 2 ) ||
          ( reply/10 != 22 ) ) {
-	if ( verbose )
-	    printf( "Wrong reply to ARTICLE command: %s\n", l );
-	syslog( LOG_NOTICE, "Wrong reply to ARTICLE command: %s", l );
+	ln_log(LNLOG_NOTICE, "Wrong reply to ARTICLE command: %s", l );
 	return 0;
     }
 
@@ -942,39 +930,38 @@ unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
     }
 
     if ( debugmode )
-	syslog( LOG_INFO, "%s: considering articles %lu-%lu", g->name,
+	ln_log(LNLOG_INFO, "%s: considering articles %lu-%lu", g->name,
 		first, last );
-    if ( verbose > 1 )
-	printf( "%s: considering articles %lu-%lu\n", g->name, first, last );
 
     if ( filter )
 	f = selectfilter( g->name );
-    /* use XOVER if filters are used or headers only requested, otherwise
-       XHDR to save traffic */
-    if ( f || delaybody )
+    if(!avoidxover || f || delaybody)
 	outstanding = doxover( &stufftoget, first, last, f, g->name );
-    else
+    else 
 	outstanding = doxhdr( &stufftoget, first, last );
 
     switch ( outstanding ) {
-	case -1: { return first; break; }	/* error; consider again */
-	case  0: { return last; break; }	/* all articles already here */
-	default: { break; }
+	case -2:
+	case -1: 
+	    /* error; consider again */
+	    return first;
+	case  0: 
+            /* all articles already here */
+	    return last;
+	default: 
+	    break;
     }
     if ( delaybody )
 	return last;
 
-    syslog( LOG_INFO, "%s: will fetch %lu articles", g->name, outstanding );
+    ln_log(LNLOG_INFO, "%s: will fetch %lu articles", g->name, outstanding );
     getarticles( stufftoget, outstanding, f );
     freefilter(f);
     freelist( stufftoget );
 
-    syslog( LOG_INFO, "%s: %lu articles fetched (to %lu), %lu killed",
+    ln_log(LNLOG_NOTICE, "%s: %lu articles fetched (to %lu), %lu killed",
 	    g->name, groupfetched, g->last, groupkilled );
     globalfetched += groupfetched; globalkilled += groupkilled;
-    if ( verbose > 1 )
-	printf( "%s: %lu articles fetched, %lu killed\n",
-		g->name, groupfetched, groupkilled );
     return(last+1);
 }
 
@@ -1005,8 +992,7 @@ static void nntpactive( time_t update ) {
 	strftime( timestr, 64, "%Y%m%d %H%M00", gmtime( &update ) );
 	putaline( "NEWGROUPS %s GMT", timestr+2 );
 	if ( nntpreply() != 231 ) {
-	    printf( "Reading new newsgroups failed.\n" );
-	    syslog( LOG_ERR, "Reading new newsgroups failed" );
+	    ln_log(LNLOG_ERR, "Reading new newsgroups failed" );
 	    return;
 	}
 	while ( (l=getaline(nntpin)) && ( *l != '.' ) ) {
@@ -1051,11 +1037,8 @@ static void nntpactive( time_t update ) {
 			} while ( l && *l && *l != '.' );
 			if ( error > 1 ) {
 			    current_server->descriptions = 0;
-			    syslog( LOG_NOTICE, "warning: %s does not process "
+			    ln_log(LNLOG_NOTICE, "warning: %s does not process "
 				   "LIST NEWSGROUPS %s correctly: use nodesc\n",
-				   current_server->name, helpptr->string );
-			    printf("warning: %s does not process LIST "
-				   "NEWSGROUPS %s correctly: use nodesc\n",
 				   current_server->name, helpptr->string );
 			}
 		    }
@@ -1065,12 +1048,11 @@ static void nntpactive( time_t update ) {
 	}
 	freelist( groups );
     } else {
-	if ( verbose )
-	    printf( "Getting all newsgroups from %s\n", current_server->name );
+	ln_log(LNLOG_INFO, "Getting all newsgroups from %s\n", 
+	       current_server->name );
 	putaline( "LIST" );
 	if ( nntpreply() != 215 ) {
-	    printf( "Reading all newsgroups failed.\n" );
-	    syslog( LOG_ERR, "Reading all newsgroups failed" );
+	    ln_log(LNLOG_ERR, "Reading all newsgroups failed" );
 	    return;
 	}
 	debug = 0;
@@ -1101,15 +1083,13 @@ static void nntpactive( time_t update ) {
 		/* INN 1.5.1: line already contains description */
 		;
 	    else {
-		printf( "Reading newsgroups descriptions failed: %s.\n", l );
-		syslog( LOG_ERR, "Reading newsgroups descriptions failed: %s",
+		ln_log(LNLOG_ERR, "Reading newsgroups descriptions failed: %s",
 			l );
 		return;
 	    }
 	}
 	else {
-	    printf( "Reading newsgroups descriptions failed.\n" );
-	    syslog( LOG_ERR, "Reading newsgroups descriptions failed" );
+	    ln_log(LNLOG_ERR, "Reading newsgroups descriptions failed" );
 	    return;
 	}
 	debug = 0;
@@ -1149,15 +1129,15 @@ int postarticles( void ) {
     n = 0;
 
     if ( chdir( spooldir ) || chdir ( "out.going" ) ) {
-	syslog( LOG_ERR, "Unable to cd to outgoing directory: %m" );
-	printf( "Unable to cd to %s/out.going\n", spooldir );
+	ln_log(LNLOG_ERR, "Unable to cd to outgoing directory: %s",
+	       strerror(errno));
 	return 1;
     }
 
     d = opendir( "." );
     if ( !d ) {
-	syslog( LOG_ERR, "Unable to opendir out.going: %m" );
-	printf( "Unable to opendir %s/out.going\n", spooldir );
+	ln_log(LNLOG_ERR, "Unable to opendir out.going: %s",
+	       strerror(errno));
 	return 1;
     }
 
@@ -1168,9 +1148,7 @@ int postarticles( void ) {
 	     isgrouponserver( fgetheader( f, "Newsgroups:" ) ) &&
 	     ( ( haveid = 
 		 ismsgidonserver( fgetheader( f, "Message-ID:" ) ) ) != 1 ) ) {
-	    if ( verbose > 2 )
-		printf( "Posting %s...\n", de->d_name );
-	    syslog( LOG_INFO, "Posting %s...",de->d_name );
+	    ln_log(LNLOG_INFO, "Posting %s...",de->d_name );
 	    putaline( "POST" );
 	    r = nntpreply();
 	    if ( r != 340 ) {
@@ -1178,10 +1156,10 @@ int postarticles( void ) {
 		    printf( "Posting %s failed: %03d reply to POST\n",
 			     de->d_name, r );
 		sprintf( s, "%s/failed.postings/%s", spooldir, de->d_name );
-		syslog( LOG_ERR, "unable to post (%d), moving to %s", r, s );
+		ln_log(LNLOG_ERR, "unable to post (%d), moving to %s", r, s );
 		if ( link( de->d_name, s ) )
-		    syslog( LOG_ERR, "unable to move failed posting to %s: %m",
-				      s );
+		    ln_log(LNLOG_ERR, "unable to move failed posting to %s: %s",
+				      s, strerror(errno));
 	    } else {
 	        debug = 0;
 		while ( ( line = getaline( f ) ) != NULL ) {
@@ -1211,27 +1189,25 @@ int postarticles( void ) {
 				de->d_name, line );
 		    sprintf( s, "%s/failed.postings/%s", 
 			     spooldir, de->d_name );
-		    syslog( LOG_ERR, 
+		    ln_log(LNLOG_ERR, 
 			    "Article %s rejected (%s), moving to %s",
 			    de->d_name, line, s );
 		    if ( link( de->d_name, s ) )
-			syslog( LOG_ERR,
-				"unable to link failed posting to %s: %m", s );
+			ln_log(LNLOG_ERR,
+			       "unable to link failed posting to %s: %s", s,
+			       strerror(errno));
 		} 
 	    }
 	    fclose( f );
 	    haveid = 0;
 	} else if ( haveid ) {
-	    syslog( LOG_INFO, "Message-ID of %s already in use upstream -- "
+	    ln_log(LNLOG_INFO, "Message-ID of %s already in use upstream -- "
 			"article discarded\n", de->d_name );
-	    if ( verbose > 2 )
-		printf( "%s already available upstream\n", de->d_name );
 	    unlink( de->d_name ); 
 	}
     }
     closedir( d );
-    if ( verbose && n )
-	syslog( LOG_INFO, "%s: %d articles posted", current_server->name, n );
+    ln_log(LNLOG_INFO, "%s: %d articles posted", current_server->name, n );
     return 1;
 }
 
@@ -1272,7 +1248,7 @@ static void processupstream( const char * server, const int port ) {
 	     spooldir );
     d = opendir( s );
     if ( !d ) {
-	syslog( LOG_ERR, "opendir %s: %m", s );
+	ln_log(LNLOG_ERR, "opendir %s: %s", s,strerror(errno));
 	return;
     }
 
@@ -1282,8 +1258,8 @@ static void processupstream( const char * server, const int port ) {
 	sprintf( s, "%s/leaf.node/%s:%d~", spooldir, server, port );
     f = fopen( s, "w" );
     if ( f == NULL ) {
-	syslog( LOG_ERR, "Could not open %s for writing.", s );
-        printf( "Could not open %s for writing.\n", s );
+	ln_log(LNLOG_ERR, "Could not open %s for writing: %s", s, 
+	       strerror(errno) );
     }
     while ( (de=readdir(d)) ) {
 	if ( isalnum((unsigned char)*(de->d_name)) ) {
@@ -1310,8 +1286,7 @@ static void processupstream( const char * server, const int port ) {
 		if ( ( f != NULL ) && newserver )
                     fprintf( f, "%s %lu\n", g->name, newserver );
             } else {
-		printf( "%s not found in groupinfo file\n", de->d_name );
-		syslog( LOG_INFO, "%s not found in groupinfo file",
+		ln_log(LNLOG_INFO, "%s not found in groupinfo file",
 			de->d_name );
 	    }
 	}
@@ -1342,13 +1317,13 @@ static int checkactive( void ) {
 	return 0;
     if ( ( now - st.st_mtime ) < ( timeout_active * SECONDS_PER_DAY ) ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG,
+	    ln_log(LNLOG_DEBUG,
 		    "Last LIST ACTIVE done %ld seconds ago: NEWGROUPS\n",
 		    (long)(now - st.st_mtime));
 	return ( now < st.st_atime ) ? now : st.st_atime ;
     } else {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "Last LIST ACTIVE done %ld seconds ago: LIST\n",
+	    ln_log(LNLOG_DEBUG, "Last LIST ACTIVE done %ld seconds ago: LIST\n",
 		    (long)(now - st.st_mtime));
 	return 0;
     }
@@ -1367,7 +1342,7 @@ static void updateactive( void ) {
     } else {
 	if ( now < st.st_atime ) {
 	    /* This may happen through hardware failures */
-	    syslog( LOG_NOTICE,
+	    ln_log(LNLOG_NOTICE,
 		    "active.read touched in the future: check atime and date" );
 	    buf.actime = st.st_atime ;
 	}
@@ -1381,8 +1356,7 @@ static void updateactive( void ) {
 	    if ( ( f = fopen( s, "w" ) ) != NULL )
 		fclose( f );
 	    else {
-		printf("Unable to access %s/active.read\n", spooldir );
-		syslog( LOG_NOTICE,
+		ln_log(LNLOG_NOTICE,
 			"Unable to access %s/active.read", spooldir );
 	    }
 	}
@@ -1417,7 +1391,7 @@ static int do_server( char *msgid, time_t lastrun ) {
     int reply;
 
     if ( verbose )
-	printf( "Trying to connect to %s ... ", current_server->name );
+	printf( "Trying to connect to %s... ", current_server->name );
     fflush( stdout );
     reply = nntpconnect( current_server );
     if ( reply ) {
@@ -1428,7 +1402,7 @@ static int do_server( char *msgid, time_t lastrun ) {
 	putaline( "MODE READER" );
 	reply = nntpreply();
 	if ( reply == 498 )
-	    syslog( LOG_INFO, "Connection refused by %s",
+	    ln_log(LNLOG_INFO, "Connection refused by %s",
 		    current_server->name );
 	else if ( msgid ) {
 	    /* if retrieval of the message id is successful at one
@@ -1475,11 +1449,7 @@ int main( int argc, char ** argv ) {
     if ( !initvars( argv[0] ) )
 	exit(EXIT_FAILURE);
 
-#ifdef HAVE_OLD_SYSLOG
-    openlog( "fetchnews", LOG_PID );
-#else
-    openlog( "fetchnews", LOG_PID|LOG_CONS, LOG_NEWS );
-#endif
+    ln_log_open("fetchnews");
 
     starttime = time( NULL );
     now       = time( NULL );
@@ -1610,7 +1580,7 @@ int main( int argc, char ** argv ) {
 	}
     }
 
-    syslog( LOG_DEBUG, "%s: verbosity level is %d; debugging level is %d",
+    ln_log(LNLOG_DEBUG, "%s: verbosity level is %d; debugging level is %d",
 		       version, verbose, debugmode );
     if ( verbose ) {
 	printf( "%s: verbosity level is %d\n", version, verbose );
@@ -1632,8 +1602,7 @@ int main( int argc, char ** argv ) {
 	if ( signal( SIGALRM, sigcatch ) == SIG_ERR )
 	    fprintf( stderr, "Cannot catch SIGALARM.\n" );
 	else if ( setjmp( jmpbuffer ) != 0 ) {
-	    printf( "lockfile %s exists, abort.\n", lockfile );
-	    syslog( LOG_NOTICE, "lockfile %s exists, abort", lockfile );
+	    ln_log(LNLOG_NOTICE, "lockfile %s exists, abort", lockfile );
 	    exit( EXIT_FAILURE );
 	}
 	alarm( 5 );
@@ -1686,7 +1655,7 @@ int main( int argc, char ** argv ) {
 
     switch ( fork() ) {
 	case -1: {
-	    syslog( LOG_ERR, "fork: %m" );
+	    ln_log(LNLOG_ERR, "fork: %s", strerror(errno));
 	    break;
 	}
 	case  0: {
@@ -1695,21 +1664,18 @@ int main( int argc, char ** argv ) {
 		updateactive();
 		writeactive();
 		if ( unlink( lockfile ) )
-		    syslog( LOG_INFO, "unlocking failed: %m" );
+		    ln_log(LNLOG_INFO, "unlocking failed: %s",strerror(errno));
 		fixxover();
 	    }
 	    delposted( starttime );
-	    syslog( LOG_DEBUG, "Background process finished" );
+	    ln_log(LNLOG_DEBUG, "Background process finished" );
 	    break;
 	}
 	default: {
 	    if ( !postonly ) {
-	        if ( verbose )
-		    printf( "%lu articles fetched, %lu killed, in %ld seconds\n",
-			globalfetched, globalkilled, time( NULL ) - starttime );
-		syslog( LOG_INFO,
+		ln_log(LNLOG_INFO,
 			"%lu articles fetched, %lu killed, in %ld seconds",
-			globalfetched, globalkilled, time( NULL ) - starttime );
+			globalfetched, globalkilled, time(0) - starttime);
 	    }
 	    break;
 	}

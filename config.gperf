@@ -1,0 +1,38 @@
+%{
+#include "config_defs.h"
+#include "configparam.h"
+%}
+struct configparam { const char *name; int code; }
+%%
+authenticate,CP_AUTH
+avoidxover,CP_AVOIDXOVER
+create_all_links,CP_LINKS
+debugmode,CP_DEBUG
+delaybody,CP_DELAY
+expire,CP_EXPIRE
+filterfile,CP_FILTFIL
+fqdn,CP_FQDN
+groupexpire,CP_GROUPEXP
+hostname,CP_HOST
+initialfetch,CP_INITIAL
+maxage,CP_MAXAGE
+maxbytes,CP_MAXBYT
+maxcrosspost,CP_MAXXP
+maxfetch,CP_MAXFETCH
+maxgroups,CP_MAXGR
+maxlines,CP_MAXLN
+maxold,CP_MAXOLD
+minlines,CP_MINLN
+name,CP_NAME
+nodesc,CP_NODESC
+password,CP_PASS
+port,CP_PORT
+pseudoarticle,CP_PSEUDO
+server,CP_SERVER
+supplement,CP_SUPPL
+timeout,CP_TIMEOUT
+timeout_active,CP_TOACTIVE
+timeout_long,CP_TOLONG
+timeout_short,CP_TOSHORT
+username,CP_USER
+%%

@@ -1,4 +1,4 @@
-.TH texpire 8 "21 Nov 1998" \" -*- nroff -*-
+.TH texpire 8 "@VERSION" leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8,v 1.2 2000/11/12 18:05:49 emma Exp $
+.\" $Id: texpire.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -14,7 +14,7 @@ texpire \- delete old news article threads
 
 .SH SYNOPSIS
 .B texpire -V
-br
+.br
 .B texpire [-Dv] [-F configfile] [-f]
 
 .SH DESCRIPTION
@@ -41,7 +41,7 @@ set in the config file, increase verbosity.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-/etc/leafnode/config.
+@sysconfdir@/config.
 .TP
 .I -f
 Force expire. Expire will be made regardless of the access time of the file.
@@ -91,7 +91,7 @@ may not delete an article as soon it should in certain circumstances;
 eventually it will.
 .PP
 If a group is removed by hand from the
-.I /var/spool/news/leaf.node/groupinfo
+.I @SPOOLDIR@/leaf.node/groupinfo
 file but the group's articles not deleted,
 .B texpire
 may never delete these articles.

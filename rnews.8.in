@@ -10,7 +10,7 @@ rnews \- sort batch files into spool
 
 .SH SYNOPSIS
 .B rnews -V
-br
+.br
 .B rnews [-v|D] [file|directory]
 
 .SH DESCRIPTION

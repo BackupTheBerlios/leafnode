@@ -1,4 +1,4 @@
-.TH fetchnews 8 "24 Jun 1999" \" -*- nroff -*-
+.TH fetchnews 8 "@VERSION" leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8,v 1.2 2000/11/12 18:05:49 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -48,7 +48,7 @@ set in the config file, increase verbosity.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-/etc/leafnode/config.
+@sysconfdir@/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is
@@ -130,12 +130,12 @@ does.
 .PP
 First, after connecting to the upstream NNTP server,
 all articles in
-.I /var/spool/news/out.going
+.I @SPOOLDIR@/out.going
 are posted using POST.  If a posting fails, that article is moved to
-.I /var/spool/news/failed.postings
+.I @SPOOLDIR@/failed.postings
 which an administrator has to clean up once in a while.  Moving a file
 back to
-.I /var/spool/news/out.going 
+.I @SPOOLDIR@/out.going 
 is sufficient to resubmit it.
 .PP
 Second, the upstream server's list of newsgroups (obtained using LIST

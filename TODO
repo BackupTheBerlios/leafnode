@@ -11,16 +11,10 @@ SHOWSTOPPERS:
 BUGS:
 ====
 
+- gperf unsigned detection is unreliable and may fail (Matthias)
+- can fetchnews cope with servers that reject XOVER? (Matthias)
 - maxage doesn't work
-- replace tmpnam in rnews.c to fix symlink attack (Matthias Andree)
 - signal needs to be worked around on Solaris 7 (Matthias Andree)
-- de.comp.os.unix.linux.infos: considering articles 699-699
-  skipping articles 1792-4294965087 inclusive (article limit)
-  de.comp.sys.amiga.comm: no new articles
-  skipping articles 7712-3711 inclusive (article limit)
-  
-  skipping articles 66961-62960 inclusive (article limit)
-  de.comp.os.unix.linux.hardware: considering articles 62961-66960
 
 general:
 =======

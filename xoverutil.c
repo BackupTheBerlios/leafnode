@@ -17,9 +17,12 @@ Copyright of the modifications 1998, 1999.
 See README for restrictions on the use of this software.
 */
 
+#include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "leafnode.h"
 #include <fcntl.h>
 #include <sys/uio.h>
 #include <sys/param.h>
@@ -34,7 +37,6 @@ See README for restrictions on the use of this software.
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <syslog.h>
 #include <time.h>
 #include <utime.h>
 #include <unistd.h>
@@ -254,7 +256,7 @@ int getxover( void ) {
 
     d = opendir( "." );
     if ( !d ) {
-	syslog( LOG_ERR, "opendir: %m" );
+	ln_log(LNLOG_ERR, "opendir: %m" );
 	return 0;
     }
 
@@ -345,7 +347,7 @@ int getxover( void ) {
     /* compare .overview contents with files on disk */
     d = opendir( "." );
     if ( !d ) {
-	syslog( LOG_ERR, "opendir %s: %m", getcwd( s, 1024 ) );
+	ln_log(LNLOG_ERR, "opendir %s: %m", getcwd( s, 1024 ) );
 	return 0;
     }
     while ( (de = readdir(d)) != NULL ) {
@@ -359,7 +361,7 @@ int getxover( void ) {
 		}
 	    }
 	    if ( stat( de->d_name, &st )) {
-		syslog( LOG_DEBUG, "Can't stat %s", de->d_name );
+		ln_log(LNLOG_DEBUG, "Can't stat %s", de->d_name );
 		continue;
 	    }
 	    else if ( S_ISREG( st.st_mode ) ) {
@@ -377,14 +379,14 @@ int getxover( void ) {
 	    else {
 		/* error getting xoverline from article - delete it */
 		getcwd( s, 1024 );
-		syslog( LOG_NOTICE, "illegal article: %s/%s", s, de->d_name );
+		ln_log(LNLOG_NOTICE, "illegal article: %s/%s", s, de->d_name );
 		if ( (lstat( de->d_name, &st ) == 0) && S_ISREG(st.st_mode) ) {
 		    if ( unlink( de->d_name ) )
-			syslog( LOG_WARNING, "failed to remove %s/%s",
+			ln_log(LNLOG_WARNING, "failed to remove %s/%s",
 				s, de->d_name );
 		}
 		else
-		    syslog( LOG_WARNING, "%s/%s is not a regular file",
+		    ln_log(LNLOG_WARNING, "%s/%s is not a regular file",
 			    s, de->d_name );
 	    }
 	} /* if ( art >= xfirst && art <= xlast ) */
@@ -418,12 +420,12 @@ void writexover( void ) {
     strcpy(lineend, "\n");
 #ifdef HAVE_MKSTEMP
     if ( (wfd=mkstemp(newfile)) == -1) {
-	syslog( LOG_ERR, "mkstemp of new .overview failed: %m" );
+	ln_log(LNLOG_ERR, "mkstemp of new .overview failed: %m" );
 	return;
     }
 #else
     if ( !( wfd=open( mktemp(newfile), O_WRONLY|O_CREAT|O_EXCL, 0664 ) ) ) {
-	syslog( LOG_ERR,
+	ln_log(LNLOG_ERR,
 		"open(O_WRONLY|O_CREAT|O_EXCL) of new .overview failed: %m" );
 	return;
     }
@@ -439,7 +441,7 @@ void writexover( void ) {
 	    oooh[vi++].iov_len = 1;
 	    if ( vi >= (UIO_MAXIOV - 1) ) {
 		if ( writev( wfd, oooh, vi ) != vc ) {
-		    syslog( LOG_ERR, "writev() for .overview failed: %m" );
+		    ln_log(LNLOG_ERR, "writev() for .overview failed: %m" );
 		    art = xlast+1;	/* so the loop will stop */
 		}
 		vi = vc = 0;
@@ -449,7 +451,7 @@ void writexover( void ) {
     }
     if ( vi ) {
 	if ( writev( wfd, oooh, vi ) != vc )
-	    syslog( LOG_ERR, "writev() for .overview failed: %m" );
+	    ln_log(LNLOG_ERR, "writev() for .overview failed: %m" );
 	else
 	    va = 1;
     }
@@ -458,14 +460,14 @@ void writexover( void ) {
     if ( va ) {
 	if ( rename( newfile, ".overview" ) ) {
 	    if ( unlink( newfile ) )
-		syslog( LOG_ERR, "rename() and unlink() both failed: %m" );
+		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %m" );
 	    else
-		syslog( LOG_ERR, "rename(%s/%s, .overview) failed: %m",
+		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %m",
 			getcwd(s, 1024), newfile );
 	}
 	else {
 	    if ( debugmode )
-		syslog(LOG_DEBUG, "wrote %s/.overview\n", getcwd(s, 1024));
+		ln_log(LNLOG_DEBUG, "wrote %s/.overview\n", getcwd(s, 1024));
 	}
     }
     else {
@@ -503,7 +505,7 @@ void fixxover( void ) {
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
     if ( !d ) {
-	syslog( LOG_ERR, "opendir %s: %m", s );
+	ln_log(LNLOG_ERR, "opendir %s: %m", s );
 	return;
     }
 

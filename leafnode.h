@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.3 2000/11/13 00:58:38 emma Exp $ */
+/* $Id: leafnode.h,v 1.4 2000/11/15 05:23:37 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -22,9 +22,6 @@
 
 #include "config.h"	/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
 
-#include "get.h"
-#include "critmem.h"
-
 #ifdef HAVE_AP_CONFIG_H
 #define AP_CONFIG_H
 #endif
@@ -45,19 +42,11 @@ extern int errno;
 char * strdup (const char *);
 #endif
 
-/* add LOG_NEWS where it doesn't exist */
-#include <syslog.h>
-#if !defined( LOG_NEWS )
-#define LOG_NEWS LOG_DAEMON
-#endif
-#if !defined( LOG_CONS )
-#define LOG_CONS 0 /* if it isn't supported, make do without */
-#endif
-
 #include <sys/types.h>	/* size_t */
 #include <stdio.h>	/* FILE */
 #include <time.h>	/* time_t */
 #include <stdarg.h>	/* va_list */
+#include <dirent.h>     /* DIR */
 
 #ifndef HAVE_SNPRINTF
 int snprintf( char *str, size_t n, const char *format, ... );
@@ -289,6 +278,7 @@ extern unsigned long artlimit;
 extern unsigned long initiallimit;
 			/* max # of articles to read at first time */
 extern int delaybody;	/* delay download of message body */
+extern int avoidxover;  /* prefer XHDR over XOVER */
 extern int debugmode;	/* log lots of stuff via syslog */
 extern int create_all_links;
 			/* store articles even in uninteresting groups */
@@ -355,9 +345,13 @@ void nntpdisconnect( void );	/* disconnect from upstream server */
 
 const char* rfctime(void);	/* An rfc type date */
 
-/* from getline.c */
-#ifndef HAVE_GETLINE
-ssize_t getline(char **, size_t *, FILE *); /* fgets replacement */
-#endif
+/* from strutil.c */
+int check_allnum(const char *); /* check if string is all made of digits */
+
+/* from dirutil.c */
+/* open directory, log problems */
+DIR *log_open_dir(const char *); 
+/* open directory, relative to spooldir, log problems */
+DIR *log_open_spool_dir(const char *); 
 
 #endif	/* #ifndef LEAFNODE_H */

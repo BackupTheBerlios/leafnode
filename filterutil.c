@@ -8,12 +8,14 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <time.h>
 
 struct filterlist * filter = NULL;
@@ -74,7 +76,7 @@ static int age( const char * date ) {
     while ( isdigit((unsigned char)*d) || isspace((unsigned char)*d) )
 	d++;
     if ( !isalpha((unsigned char)*d) ) {
-	syslog( LOG_INFO, "Unable to parse %s", date );
+	ln_log(LNLOG_INFO, "Unable to parse %s", date );
 	return 1003;
     }
     monthname[0] = *d++;
@@ -82,7 +84,7 @@ static int age( const char * date ) {
     monthname[2] = *d++;
     monthname[3] = '\0';
     if ( strlen(monthname) != 3 ) {
-	syslog( LOG_INFO, "Unable to parse month in %s", date );
+	ln_log(LNLOG_INFO, "Unable to parse month in %s", date );
 	return 1004;
     }
     while ( isalpha((unsigned char)*d) )
@@ -92,10 +94,10 @@ static int age( const char * date ) {
     year = strtol( d, NULL, 10 );
 
     if ( ( year < 1970 ) && ( year > 99 ) ) {
-	syslog( LOG_INFO, "Unable to parse year in %s", date );
+	ln_log(LNLOG_INFO, "Unable to parse year in %s", date );
 	return 1005;
     } else if ( !(day > 0 && day < 32) ) {
-	syslog( LOG_INFO, "Unable to parse day in %s", date );
+	ln_log(LNLOG_INFO, "Unable to parse day in %s", date );
 	return 1006;
     } else {
 	if ( !strcasecmp( monthname, "jan" ) )
@@ -123,7 +125,7 @@ static int age( const char * date ) {
 	else if ( !strcasecmp( monthname, "dec" ) )
 	    month = 11;
 	else {
-	    syslog( LOG_INFO, "Unable to parse %s", date );
+	    ln_log(LNLOG_INFO, "Unable to parse %s", date );
 	    return 1001;
 	}
 	if ( year < 70 )        /* years 2000-2069 in two-digit form */
@@ -197,7 +199,7 @@ int readfilter( char *filterfile ) {
 
     ff = fopen( filterfile, "r" );
     if ( !ff ) {
-	syslog( LOG_WARNING, "Unable to open filterfile %s: %m", filterfile );
+	ln_log(LNLOG_WARNING, "Unable to open filterfile %s: %m", filterfile );
 	if ( verbose )
 	    printf( "Unable to open filterfile %s\n", filterfile );
 	return FALSE;
@@ -218,7 +220,7 @@ int readfilter( char *filterfile ) {
 	    }
 	    else if ( strcasecmp( "pattern", param ) == 0 ) {
 		if ( !ng ) {
-		    syslog( LOG_NOTICE,
+		    ln_log(LNLOG_NOTICE,
 			    "No newsgroup for expression %s found", value );
 		    if ( verbose )
 			printf( "No newsgroup for expression %s found", value );
@@ -240,7 +242,7 @@ int readfilter( char *filterfile ) {
 		if ( ( (f->entry)->expr = pcre_compile( value, PCRE_MULTILINE ,
 		       &regex_errmsg, &regex_errpos ) ) == NULL ) {
 #endif
-		    syslog( LOG_NOTICE, "Invalid filter pattern %s: %s",
+		    ln_log(LNLOG_NOTICE, "Invalid filter pattern %s: %s",
 			    value, regex_errmsg );
 		    if ( verbose )
 			printf( "Invalid filter pattern %s: %s",
@@ -259,7 +261,7 @@ int readfilter( char *filterfile ) {
 		      ( strcasecmp( "maxbytes", param ) == 0 ) ||
 		      ( strcasecmp( "maxcrosspost", param ) == 0 ) ) {
 	        if ( !ng ) {
-		    syslog( LOG_NOTICE,
+		    ln_log(LNLOG_NOTICE,
 			    "No newsgroup for expression %s found", value );
 		    if ( verbose )
 			printf( "No newsgroup for expression %s found", value );
@@ -279,7 +281,7 @@ int readfilter( char *filterfile ) {
 	    }
 	    else if ( strcasecmp( "action", param ) == 0 ) {
 		if ( !f || !f->entry || !(f->entry)->cleartext ) {
-		    syslog( LOG_NOTICE, "No pattern found for action %s",
+		    ln_log(LNLOG_NOTICE, "No pattern found for action %s",
 			    value );
 		    if ( (f->entry)->expr )
 			free( (f->entry)->expr );
@@ -293,7 +295,7 @@ int readfilter( char *filterfile ) {
 		    (f->entry)->action = strdup( value );
 /*
 		    if ( debugmode ) {
-			syslog( LOG_DEBUG, "filtering in %s: %s -> %s",
+			ln_log(LNLOG_DEBUG, "filtering in %s: %s -> %s",
 				(f->entry)->newsgroup,
 				(f->entry)->cleartext,
 				(f->entry)->action );
@@ -306,7 +308,7 @@ int readfilter( char *filterfile ) {
     debug = debugmode;
     fclose( ff );
     if ( filter == NULL ) {
-	syslog( LOG_WARNING, "filterfile did not contain any valid patterns" );
+	ln_log(LNLOG_WARNING, "filterfile did not contain any valid patterns" );
 	return FALSE;
     }
     else
@@ -335,7 +337,7 @@ struct filterlist * selectfilter ( char * groupname ) {
 		fold->next = f;
 	    fold = f;
 	    if ( debugmode ) {
-		syslog( LOG_DEBUG, "filtering in %s: %s -> %s",
+		ln_log(LNLOG_DEBUG, "filtering in %s: %s -> %s",
 			groupname, (f->entry)->cleartext, (f->entry)->action );
 	    }
 	}

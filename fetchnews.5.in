@@ -1,4 +1,4 @@
-.TH fetchnews 5 "06 Jan 2000" \" -*- nroff -*-
+.TH fetchnews 5 "@VERSION@" leafnode Leafnode \" -*- nroff -*-
 .SH NAME
 fetchnews \- fetch news via NNTP
 

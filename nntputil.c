@@ -18,6 +18,8 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "ln_log.h"
+
 #include <fcntl.h>
 #include <sys/uio.h>
 #include <sys/param.h>
@@ -34,7 +36,6 @@ See README for restrictions on the use of this software.
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
@@ -66,8 +67,8 @@ void putaline( const char *fmt, ... ) {
 
     va_start( args, fmt );
     vsnprintf( lineout, sizeof(lineout), fmt, args );
-    if ( debug > 1 )
-	syslog( LOG_DEBUG, ">%s", lineout );
+    if ( debug )
+	ln_log(LNLOG_DEBUG, ">%s", lineout );
     strcpy(last_command, lineout);
     fprintf(nntpout, "%s\r\n", lineout);
     fflush(nntpout);
@@ -82,11 +83,11 @@ int authenticate( void ) {
     int d, reply;
 
     if ( !current_server ) {
-	syslog( LOG_INFO, "authenticate: unknown server" );
+	ln_log(LNLOG_INFO, "authenticate: unknown server" );
 	return FALSE;
     }
     if ( !current_server->username ) {
-	syslog( LOG_INFO, "%s: username needed for authentication",
+	ln_log(LNLOG_INFO, "%s: username needed for authentication",
 		current_server->name );
 	return FALSE;
     }
@@ -95,7 +96,7 @@ int authenticate( void ) {
     debug = debugmode;
     fprintf( nntpout, "AUTHINFO USER %s\r\n", current_server->username );
     if ( debug )
-	syslog( LOG_DEBUG, ">AUTHINFO USER [username]" );
+	ln_log(LNLOG_DEBUG, ">AUTHINFO USER [username]" );
     fflush( nntpout );
 
     reply = nntpreply();
@@ -103,26 +104,26 @@ int authenticate( void ) {
     if (reply == 281) {
 	return TRUE;
     } else if ( reply != 381 ) {
-	syslog( LOG_INFO, "username rejected: %03d", reply);
+	ln_log(LNLOG_INFO, "username rejected: %03d", reply);
 	return FALSE;
     }
 
     if ( !current_server->password ) {
-	syslog( LOG_INFO, "%s: password needed for authentication",
+	ln_log(LNLOG_INFO, "%s: password needed for authentication",
 		current_server->name );
 	return FALSE;
     }
     debug = debugmode;
     fprintf( nntpout, "authinfo pass %s\r\n", current_server->password );
     if ( debug )
-	syslog( LOG_DEBUG, ">AUTHINFO PASS [password]" );
+	ln_log(LNLOG_DEBUG, ">AUTHINFO PASS [password]" );
     fflush( nntpout );
 
     reply = nntpreply();
     debug = d;
 
     if ( reply != 281) {
-	syslog( LOG_INFO, "password failed: %03d", reply);
+	ln_log(LNLOG_INFO, "password failed: %03d", reply);
 	return FALSE;
     }
     return TRUE;
@@ -147,7 +148,7 @@ int nntpreply(void) {
     while (c) {
 	response=getaline(nntpin);
 	if (!response) {
-	    syslog( LOG_ERR, "NNTP server went away" );
+	    ln_log(LNLOG_ERR, "NNTP server went away" );
 	    return 498;
 	}
 	if (strlen(response)>2
@@ -204,7 +205,7 @@ int nntpconnect( const struct serverlist * upstream ) {
     if (upstream->port == 0) {
 	sp = getservbyname("nntp", "tcp");
 	if (sp == NULL) {
-	    syslog( LOG_ERR, "unable to find service NNTP" );
+	    ln_log(LNLOG_ERR, "unable to find service NNTP" );
 	    return FALSE;
 	}
     } else {
@@ -247,7 +248,7 @@ int nntpconnect( const struct serverlist * upstream ) {
 
             reply = nntpreply();
 	    if ( reply == 200 || reply == 201 ) {
-		syslog( LOG_INFO, "connected to %s: %d",
+		ln_log(LNLOG_INFO, "connected to %s: %d",
 			inet_ntoa( s_in.sin_addr ), reply );
 		return reply;
 	    }

@@ -14,6 +14,9 @@
  */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <ctype.h>
 #include <dirent.h>
 #include <limits.h>
@@ -164,18 +167,17 @@ struct newsgroup * findgroup(const char *name) {
 void writeactive( void ) {
     FILE * a;
     struct newsgroup * g;
-    char *c;
+    char c[PATH_MAX];
     char l[PATH_MAX];
     size_t count;
     int err;
-
-    c = critmalloc( PATH_MAX, "Allocating buffer" );
 
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/groupinfo.new");
     a = fopen( s, "w" );
     if ( !a ) {
-	syslog( LOG_ERR, "cannot open new groupinfo file: %m" );
+	ln_log_sys( LNLOG_ERR, "cannot open new groupinfo file: %s", 
+		    strerror(errno) );
 	return;
     }
 
@@ -202,7 +204,8 @@ void writeactive( void ) {
     }
     fclose( a );
     if ( err == EOF ) {
-	syslog( LOG_ERR, "failed writing new groupinfo file (disk full?)" );
+	ln_log_sys( LNLOG_ERR, 
+		    "failed writing new groupinfo file (disk full?)" );
 	unlink(s);
 	return;
     }
@@ -252,24 +255,24 @@ void readactive( void ) {
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/groupinfo");
     if ( stat( s, &st ) ) {
-    	syslog( LOG_ERR, "can't stat %s: %m", s );
+    	ln_log_sys(LNLOG_ERR, "can't stat %s: %s", s, strerror(errno));
 	return;
     } else if ( !S_ISREG( st.st_mode ) ) {
-    	syslog( LOG_ERR, "%s not a regular file", s );
+    	ln_log_sys(LNLOG_ERR, "%s not a regular file", s );
 	return;
     }
     buf = critmalloc( (size_t)st.st_size+2, "Reading group info" );
     if (( f = fopen( s, "r" )) != NULL ) {
     	bufsize = fread( buf, 1, (size_t)st.st_size, f );
 	if ( bufsize < (size_t)st.st_size ) {
-	    syslog( LOG_ERR,
-	    	    "Groupinfo file truncated while reading: %ld < %ld.",
-		    (long)bufsize, (long)st.st_size );
+	    ln_log_sys(LNLOG_ERR,
+		       "Groupinfo file truncated while reading: %ld < %ld.",
+		       (long)bufsize, (long)st.st_size);
 	}
 	fclose( f );
     }
     else {
-     	syslog( LOG_ERR, "unable to open %s: %m", s );
+     	ln_log_sys(LNLOG_ERR, "unable to open %s: %m", s );
 	return;
     }
 
@@ -316,9 +319,9 @@ void readactive( void ) {
 		q = p+30;
 		*q = '\0';
 	    }
-	    syslog( LOG_ERR,
-		    "Groupinfo file possibly truncated or damaged: >%s<",
-		    p );
+	    ln_log_sys(LNLOG_ERR,
+		       "Groupinfo file possibly truncated or damaged: %s",
+		       p);
 	    break;
 	}
 	*r++ = '\0';
@@ -327,8 +330,8 @@ void readactive( void ) {
 	g->name = strdup(p);
 	if ( sscanf(r, "%lu %lu %lu",
 		    &g->last, &g->first, &g->age) != 3 ) {
-	    syslog( LOG_ERR,
-		    "Groupinfo file possibly truncated or damaged: %s", p );
+	    ln_log_sys(LNLOG_ERR,
+		       "Groupinfo file possibly truncated or damaged: %s", p );
 	    break;
 	}
 	if ( g->first == 0 )
@@ -387,7 +390,7 @@ void fakeactive( void ) {
     strcat( s, "/interesting.groups" );
     d = opendir( s );
     if ( !d ) {
-	syslog( LOG_ERR, "cannot open directory %s: %m", s );
+	ln_log(LNLOG_ERR, "cannot open directory %s: %m", s );
 	return;
     }
 
@@ -422,8 +425,9 @@ void fakeactive( void ) {
 	    }
 	    closedir( ng );
 	    if ( debugmode )
-	    	syslog( LOG_DEBUG, "parsed directory %s: first %lu, last %lu",
-			de->d_name, first, last );
+	    	ln_log_sys(LNLOG_DEBUG, 
+			   "parsed directory %s: first %lu, last %lu",
+			   de->d_name, first, last );
 	    insertgroup( de->d_name, first, last, 0, NULL );
 	}
     }
@@ -433,7 +437,8 @@ void fakeactive( void ) {
     strcat( s, "/local.groups" );
     d = opendir( s );
     if ( !d ) {
-	syslog( LOG_ERR, "cannot open directory %s: %m", s );
+	ln_log_sys(LNLOG_ERR, "cannot open directory %s: %s", s,
+		   strerror(errno));
 	return;
     }
 
@@ -462,8 +467,9 @@ void fakeactive( void ) {
 	    }
 	    closedir( ng );
 	    if ( debugmode )
-	    	syslog( LOG_DEBUG, "parsed directory %s: first %lu, last %lu",
-			de->d_name, first, last );
+	    	ln_log_sys(LNLOG_DEBUG, 
+			   "parsed directory %s: first %lu, last %lu",
+			   de->d_name, first, last );
 	    insertgroup( de->d_name, first, last, 0, NULL );
 	}
     }

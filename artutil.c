@@ -8,11 +8,13 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -168,8 +170,8 @@ void storearticle ( char * filename, char * msgid, char * newsgroups ) {
 			errno = 0;
 		    } while ( link( outname, tmp )<0 && errno==EEXIST );
 		    if ( errno )
-			syslog( LOG_ERR, "error linking %s into %s/%s\n %m",
-				outname, p, tmp );
+			ln_log(LNLOG_ERR, "error linking %s into %s/%s: %s",
+				outname, p, tmp, strerror(errno));
 		    else if ( verbose )
 			fprintf( stderr, "storing %s as %s in %s\n",
 				 outname, tmp, p );
@@ -256,12 +258,11 @@ void supersede( const char *msgid ) {
 	    q = strchr( q, ' ' );
 	    if (q)
 		*q++ = '\0';
-            if ( unlink( p ) )
-                syslog( LOG_ERR, "Failed to unlink %s: %s: %m", r, p );
-            else {
-                if ( verbose > 2 )
-                    printf( "Superseded %s in %s\n", p, r );
-                syslog( LOG_INFO, "Superseded %s in %s", p, r );
+            if (unlink(p)) {
+                ln_log(LNLOG_ERR, "Failed to unlink %s: %s: %s", r, p,
+		       strerror(errno));
+            } else {
+		ln_log(LNLOG_INFO, "Superseded %s in %s", p, r );
             }
         }
 	if (q)
@@ -274,15 +275,15 @@ void supersede( const char *msgid ) {
     
     /* unlink the message-id hardlink */
     if ( stat( filename, &st ) )
-        syslog( LOG_ERR, "%s does not exist: %m", filename );
+        ln_log_sys(LNLOG_ERR, "cannot stat %s: %s", filename, 
+		   strerror(errno) );
     else if ( st.st_nlink > 1 )
-        syslog( LOG_ERR, "%s: link count is %d", filename, st.st_nlink );
+        ln_log_sys(LNLOG_ERR, "%s: link count is %d", filename, st.st_nlink);
     else if ( unlink( filename ) )
-        syslog( LOG_ERR, "Failed to unlink %s: %m", filename );
+        ln_log_sys(LNLOG_ERR, "Failed to unlink %s: %s", filename,
+		    strerror(errno) );
     else {
-        if ( verbose > 2 )
-            printf( "Superseded %s\n", filename );
-        syslog( LOG_INFO, "Superseded %s", filename );
+        ln_log(LNLOG_INFO, "Superseded %s", filename );
     }
     free( hdr );
 }
@@ -329,8 +330,8 @@ void store( const char * filename, FILE * filehandle, char * newsgroups,
 			       cg->last, cg->name );
 		} while ( link( filename, tmp )<0 && errno==EEXIST );
 		if ( errno )
-		    syslog( LOG_ERR, "error linking %s into %s: %m",
-			    filename, p );
+		    ln_log( LNLOG_ERR, "error linking %s into %s: %s",
+			    filename, p, strerror(errno) );
 		else {
 		    sprintf( x, " %s:%lu", cg->name, cg->last );
 		    x += strlen( x );

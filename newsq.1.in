@@ -1,4 +1,4 @@
-.TH NEWSQ 1 
+.TH newsq 1 "@VERSION@" leafnode Leafnode \" -*-nroff-*-
 .SH NAME
 newsq \- view the leafnode news queue
 .SH SYNOPSIS

@@ -6,6 +6,10 @@
  */
 
 #include "leafnode.h"
+#include "get.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <ctype.h>
@@ -20,14 +24,17 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define GZIP "/bin/gzip"
+#define TEMPLATE "/tmp/rnews.XXXXXX"
 
 extern int optind;
 
 int debug = 0;
 
 int processfile ( char * filename );
+
 
 static void usage( void ) {
     fprintf( stderr,
@@ -47,33 +54,43 @@ static void usage( void ) {
  */
 static int processbatch( char * filename ) {
     FILE * f, * artfile;
-    char * l, * artname;
+    char * l;
+    char *artname = TEMPLATE; /* clobbered by mkstemp */
+    int afd;
     long bytes;
 
     f = fopen( filename, "r" );
     if ( !f ) {
-	fprintf( stderr, "unable to open batchfile %s -- abort\n", filename );
+	fprintf( stderr, "unable to open batchfile %s: %s\n", 
+		 filename, strerror(errno));
 	return 0;
     }
-    artname = tmpnam( NULL ); /* FIXME */
-    if ( !artname ) {
-	fprintf( stderr, "unable to create temporary article -- abort\n" );
+
+    afd = mkstemp(artname);
+    if(afd < 0) {
+	fprintf( stderr, "unable to create temporary article: %s\n",
+		 strerror(errno));
 	fclose( f );
 	return 0;
     }
+
     while ( ( l = getaline( f ) ) ) {
 	const char tomatch[]="#! rnews ";
 	if(strncmp(l, tomatch, strlen(tomatch))) {
-		fprintf(stderr, "expected `#! rnews', got `%-.40s[...]' ", 
+		fprintf(stderr, "expected `#! rnews', got `%-.40s[...]'", 
 			l);
-		return 0;
+		goto pb_bail;
 	}
 	if(!get_long(l+strlen(tomatch),&bytes)) {
-		fprintf(stderr, "cannot extract article length from
-`%-.40s[...]' ", l);
-		return 0;
+		fprintf(stderr, "cannot extract article length from `%-.40s[...]'\n", l);
+		goto pb_bail;
 	}
-	artfile = fopen( artname, "w" );
+	artfile = fdopen( afd, "w+" );
+	if(!artfile) {
+	    fprintf(stderr, "cannot fdopen to filedes %d: %s", afd, 
+		    strerror(errno));
+	    goto pb_bail;
+	}
 	copyfile( f, artfile, bytes );
 	fclose( artfile );
 	processfile( artname );
@@ -81,34 +98,42 @@ static int processbatch( char * filename ) {
     unlink( artname );
     fclose( f );
     return 1;
+ pb_bail:
+    close(afd);
+    return 0;
 }
 
 /*
  * copy a compressed newsbatch to tmp
- * return NULL if unsuccessful, otherwise name of compressed file without suffix
+ * return NULL if unsuccessful, otherwise name of compressed file 
+ * without suffix
  */
 static char * makecompressedfile( FILE * infile ) {
     FILE * outfile ;
-    char * c, * buf;
+    char * buf;
+    char *c = TEMPLATE;
     size_t i;
+    int cfd;
+    int ofd;
 
-    c = tmpnam( NULL ); /* FIXME */
-    if ( !c ) {
-	fprintf( stderr, "unable to create temporary file -- abort\n" );
+    cfd = mkstemp(c);
+    if ( cfd < 0) {
+	fprintf( stderr, "unable to create temporary file: %s\n",
+		 strerror(errno));
 	return NULL;
     }
     sprintf( s, "%s.gz", c );
-    outfile = fopen( s, "r" );
-    if ( outfile ) {
-	fprintf( stderr, "temporary file %s already exists -- abort\n",
-		 s );
-	fclose( outfile );
+    ofd = open(s, O_WRONLY|O_EXCL|O_CREAT);
+    if(ofd < 0) {
+	fprintf( stderr, "unable to create temporary file %s: %s\n",
+		 s, strerror(errno));
 	return NULL;
     }
-    outfile = fopen( s, "w" );
+    outfile = fdopen( ofd, "w" );
     if ( !outfile ) {
-	fprintf( stderr, "unable to open temporary file %s -- abort\n",
-		 s );
+	fprintf( stderr, "unable to fdopen filedes %d: %s\n",
+		 ofd, strerror(errno));
+	close(ofd);
 	return NULL;
     }
     buf = critmalloc( BLOCKSIZE+1, "Allocating memory" );
@@ -267,11 +292,7 @@ int main(int argc, char *argv[] ) {
     if ( !initvars( argv[0] ) )
 	exit(EXIT_FAILURE);
 
-#ifdef HAVE_OLD_SYSLOG
-    openlog( argv[0], LOG_PID );
-#else
-    openlog( argv[0], LOG_PID|LOG_CONS, LOG_NEWS );
-#endif
+    ln_log_open(argv[0]);
 
     while ( ( option = getopt( argc, argv, "DVv" )) != -1 ) {
 	if ( !parseopt( "rnews", option, NULL, NULL ) ) {

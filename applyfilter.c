@@ -8,6 +8,9 @@
  */
  
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -60,11 +63,7 @@ int main( int argc, char * argv[] ) {
     if ( !initvars( argv[0] ) )
 	exit(EXIT_FAILURE);
 
-#ifdef HAVE_OLD_SYSLOG
-    openlog( "applyfilter", LOG_PID );
-#else
-    openlog( "applyfilter", LOG_PID|LOG_CONS, LOG_NEWS );
-#endif
+    ln_log_open("applyfilter");
 
     while ( ( option = getopt( argc, argv, "F:DVv" ) ) != -1 ) {
 	if ( !parseopt( "applyfilter", option, optarg, conffile ) ) {

@@ -1,4 +1,4 @@
-.TH leafnode 8 "21 Nov 1998" \" -*- nroff -*-
+.TH leafnode 8 "@VERSION@" leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8,v 1.2 2000/11/12 18:05:49 emma Exp $
+.\" $Id: leafnode.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -14,7 +14,7 @@ leafnode \- NNTP server for small (dialup) sites
 
 .SH SYNOPSIS
 .B leafnode -V
-br
+.br
 .B leafnode [-D] [-F configfile]
 
 .SH DESCRIPTION
@@ -49,7 +49,7 @@ problems with your upstream server(s). If debug mode has already been
 set in the config file, increase verbosity.
 .TP
 .I -F configfile
-Read configuration from an alternative file instead of /etc/leafnode/config.
+Read configuration from an alternative file instead of @sysconfdir@/config.
 .TP
 .I -V
 Report leafnode version and exit.
@@ -66,14 +66,14 @@ All these files and directories
 .I must
 be writable by user "news".
 .PP
-.I /etc/leafnode/config
+.I @sysconfdir@/config
 contains the configuration parameters for
 .B leafnode.
 See CONFIGURATION below.
 .PP
-.I /var/spool/news
+.I @SPOOLDIR@
 contains the news articles; e.g.
-.I /var/spool/news/alt/fan/agulbra
+.I @SPOOLDIR@/alt/fan/agulbra
 contains the articles in the 
 .I alt.fan.agulbra
 group.  Each directory contains articles in numbered files (decimal
@@ -85,7 +85,7 @@ group.
 .PP
 Several subdirectories are special:
 .PP
-.I /var/spool/news/leaf.node
+.I @SPOOLDIR@/leaf.node
 contains the files that leafnode creates during operation, for example the
 .BR groupinfo
 file which contains information about each USENET newsgroup. This file
@@ -97,19 +97,19 @@ with the parameter -f (see
 .BR fetchnews
 (8)).
 .PP
-.I /var/spool/news/out.going
+.I @SPOOLDIR@/out.going
 contains local postings that
 .BR fetchnews (8)
 is to pass to the upstream NNTP server.
 .PP
-.I /var/spool/news/failed.postings
+.I @SPOOLDIR@/failed.postings
 contains local postings that the upstream server rejected.
 .BR fetchnews (8)
 will create files in this directory, but none of the
 .B leafnode
 programs will delete anything in it.
 .PP
-.I /var/spool/news/message.id
+.I @SPOOLDIR@/message.id
 contains hard links to each message; this is used in place of the
 .B dbz
 database typically used by bigger servers.  (A directory such as this
@@ -117,7 +117,7 @@ is probably more efficient for the small servers
 .B leafnode
 is designed for but scales very badly.)
 .PP
-.I /var/spool/news/interesting.groups
+.I @SPOOLDIR@/interesting.groups
 contains one file for each group an NNTP client has asked to read.
 .B leafnode
 will touch the the relevant file when a LISTGROUP, XOVER, XHDR, STAT,
@@ -140,7 +140,7 @@ as user news.
 
 .SH CONFIGURATION
 All configuration is done using the file
-.I /etc/leafnode/config.
+.I @sysconfdir@/config.
 There is no GUI configuration tool yet.
 .PP
 The file has a rather standard Unix format: one line per argument, comments
@@ -243,7 +243,7 @@ possible to specify
 (7)-like wildcard expressions.
 .TP
 .TP
-filterfile = /etc/leafnode/filters
+filterfile = @sysconfdir@/filters
 Leafnode can filter the input headers for arbitrary regular expressions.
 These are stored in a file designated "filterfile". The format of "filterfile"
 is described in

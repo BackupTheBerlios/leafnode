@@ -11,12 +11,14 @@
  */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
+
 #include <ctype.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <syslog.h>
 
 struct localgroup {
     char * name;
@@ -46,7 +48,7 @@ void insertlocal(const char *name) {
 		a = &((*a)->right);
 	    else {
 		/* this shouldn't happen */
-		syslog( LOG_NOTICE, "Two identical local groups: %s = %s",
+		ln_log(LNLOG_NOTICE, "Two identical local groups: %s = %s",
 			(*a)->name, name );
 		return;
 	    }
@@ -60,7 +62,7 @@ void insertlocal(const char *name) {
 	    (*a)->right = NULL;
 	    (*a)->name  = strdup( name );
 	    if ( (*a)->name == NULL ) {
-		syslog( LOG_ERR, "Not sufficient memory for newsgroup %s",
+		ln_log(LNLOG_ERR, "Not sufficient memory for newsgroup %s",
 				 name );
 		free( *a );
 		return;
@@ -86,7 +88,7 @@ void insertlocal(const char *name) {
  * news.group.name[whitespace]Description
  */
 void readlocalgroups( void ) {
-    unsigned char *l, *p;
+    char *l, *p;
     FILE *f;
 
     strcpy( s, spooldir );
@@ -95,7 +97,7 @@ void readlocalgroups( void ) {
     if (( f = fopen( s, "r" )) == 0 ) {
 	/* not very dramatic because the user probably just
 	   does not want local groups */
-	syslog( LOG_DEBUG, "unable to open %s: %m", s );
+	ln_log(LNLOG_DEBUG, "unable to open %s: %m", s );
 	return;
     }
 
@@ -104,9 +106,9 @@ void readlocalgroups( void ) {
     while ( (l = getaline( f )) != NULL ) {
 	p = l;
 
-	while ( p && *p && !isspace((int)*p) )
+	while ( p && *p && !isspace((unsigned char)*p) )
 	    p++;
-	while ( p && *p && isspace((int)*p) )
+	while ( p && *p && isspace((unsigned char)*p) )
 	    *p++ = '\0';
 
 	/* l points to group name, p to description */

@@ -23,6 +23,8 @@ See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
+#include "critmem.h"
+#include "ln_log.h"
 
 #ifdef SOCKS
 #include <socks.h>
@@ -46,7 +48,6 @@ See README for restrictions on the use of this software.
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <syslog.h>
 #include <time.h>
 #include <sys/time.h>
 #define __USE_XOPEN   /* for glibc's crypt() */
@@ -142,7 +143,7 @@ static time_t gmtoff( void ) {
     len = 4 + ( zone ? strlen(zone) : 0 );
     oldzone = (char *)calloc( len, sizeof(char) );
     if ( !oldzone ) {
-	syslog( LOG_NOTICE, "Unable to allocate %d chars, using GMT", len );
+	ln_log(LNLOG_NOTICE, "Unable to allocate %d chars, using GMT", len );
 	return(0);
     }
     snprintf( oldzone, len, "TZ=%s", zone ? zone : "" );
@@ -183,7 +184,7 @@ static void nntpprintf( const char *fmt, ... ) {
     va_start( args, fmt );
     vsnprintf( buffer, sizeof(buffer), fmt, args );
     if ( debugmode > 1 )
-	syslog( LOG_DEBUG, ">%s", buffer );
+	ln_log(LNLOG_DEBUG, ">%s", buffer );
     printf( "%s\r\n", buffer );
     fflush( stdout );
     va_end( args );
@@ -198,7 +199,7 @@ void rereadactive(void) {
     if ( (!stat(s, &st) && (st.st_mtime > activetime)) ||
 	 (active==NULL) ) {
 	if ( debugmode )
-	    syslog( LOG_DEBUG, "rereading %s", s );
+	    ln_log(LNLOG_DEBUG, "rereading %s", s );
 	readactive();
 	activetime = st.st_mtime;
     }
@@ -362,8 +363,8 @@ static void fprintpseudobody( FILE * pseudoart, const char * groupname ) {
     }
     else {
 	if ( pseudofile )
-	    syslog( LOG_NOTICE, "Unable to read pseudoarticle from %s: %m",
-		    pseudofile );
+	    ln_log(LNLOG_NOTICE, "Unable to read pseudoarticle from %s: %s",
+		    pseudofile, strerror(errno));
 	fprintf(pseudoart,
 	  "This server is running leafnode, which is a dynamic NNTP proxy.\n"
 	  "This means that it does not retrieve newsgroups unless someone is\n"
@@ -393,10 +394,10 @@ FILE * buildpseudoart(const char * grp) {
 
     f = tmpfile();
     if (!f) {
-	syslog( LOG_ERR, "Could not create pseudoarticle for group %s", grp );
+	ln_log(LNLOG_ERR, "Could not create pseudoarticle for group %s", grp );
 	return f;
     }
-    syslog( LOG_INFO, "Creating pseudoarticle for group %s", grp );
+    ln_log(LNLOG_INFO, "Creating pseudoarticle for group %s", grp );
 
     fprintf(f, "Path: %s\n", owndn ? owndn : fqdn);
     fprintf(f, "Newsgroups: %s\n", grp);
@@ -419,7 +420,7 @@ FILE * fopenpseudoart(const char * arg, const unsigned long article_num) {
     struct newsgroup * g;    
 
     if ( debugmode )
-	syslog( LOG_DEBUG, "%s: first %lu last %lu artno %lu",
+	ln_log(LNLOG_DEBUG, "%s: first %lu last %lu artno %lu",
     		group->name, group->first, group->last, article_num );
     if ( article_num && article_num == group->first &&
 	 group->first >= group->last ) {
@@ -489,7 +490,7 @@ static int markdownload( char * msgid ) {
 	        return 0; /* already marked */
 	}
 	fprintf( f, "%s\n", msgid );
-	syslog( LOG_DEBUG, "Marking %s: %s for download", group->name, msgid );
+	ln_log(LNLOG_DEBUG, "Marking %s: %s for download", group->name, msgid );
 	fclose( f );
     }
     return 1;
@@ -636,7 +637,7 @@ void markinterest( void ) {
 	if ( f )
 	    fclose( f );
 	else
-	    syslog( LOG_ERR, "Could not create %s: %m", s );
+	    ln_log(LNLOG_ERR, "Could not create %s: %s", s, strerror(errno));
     }
 }
     
@@ -666,11 +667,11 @@ void dogroup(const char *arg) {
 		    g->count = i - 2;	/* for "." and ".." */
 		}
 	    }
-	    nntpprintf("211 %lu %lu %lu %s group selected", 
+	    nntpprintf("211 %lu %lu %lu %s",
 		   g->count, g->first, g->last, g->name);
 	    pseudogroup = FALSE;
 	} else {
-	    nntpprintf("211 1 1 1 %s group selected (pseudo article)",
+	    nntpprintf("211 1 1 1 %s",
 		    g->name );
 	    g->first = 1;
 	    g->last  = 1;
@@ -820,7 +821,7 @@ void dolist( char *arg ) {
 	rereadactive();
 	if (!active) {
 	    nntpprintf("503 Group information file does not exist!");
-	    syslog( LOG_ERR, "Group information file does not exist!" );
+	    ln_log(LNLOG_ERR, "Group information file does not exist!" );
 	} else if ( !*arg || !strncasecmp(arg, "active", 6) ) {
 	    nntpprintf("215 Newsgroups in form \"group high low flags\".");
 	    if ( active ) {
@@ -892,7 +893,7 @@ void donewnews(char *arg) {
     } else if ( b < 1000 ) {
     	/* YYYMMDD - happens with buggy newsreaders */
 	/* In these readers, YYY=100 is equivalent to YY=00 or YYYY=2000 */
-	syslog( LOG_NOTICE,
+	ln_log(LNLOG_NOTICE,
 		"NEWGROUPS year is %d: please update your newsreader", b );
 	timearray.tm_year = b ;
     } else {
@@ -917,7 +918,8 @@ void donewnews(char *arg) {
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
     if ( !d ) {
-	syslog( LOG_ERR, "Unable to open directory %s: %m", s );
+	ln_log(LNLOG_ERR, "Unable to open directory %s: %s", s,
+	       strerror(errno));
 	printf(".\r\n" );
 	return;
     }
@@ -969,7 +971,7 @@ void donewgroups(const char *arg) {
     } else if ( b < 1000 ) {
     	/* YYYMMDD - happens with buggy newsreaders */
 	/* In these readers, YYY=100 is equivalent to YY=00 or YYYY=2000 */
-	syslog( LOG_NOTICE,
+	ln_log(LNLOG_NOTICE,
 		"NEWGROUPS year is %d: please update your newsreader", b );
 	timearray.tm_year = b ;
     } else {
@@ -1072,7 +1074,7 @@ void dopost( void ) {
     if ( out < 0 ) {
 	char *error = strerror(errno);
 	printf( "441 Unable to open spool file %s: %s\r\n", outname, error );
-	syslog( LOG_ERR, ">441 Unable to open spool file %s: %s",
+	ln_log(LNLOG_ERR, ">441 Unable to open spool file %s: %s",
 		outname, error );
 	return;
     }
@@ -1217,7 +1219,7 @@ void dopost( void ) {
 	fclose( f );
 	switch ( fork() ) {
 	case -1: {
-	    syslog( LOG_ERR, "fork: %m" );
+	    ln_log(LNLOG_ERR, "fork: %s",strerror(errno));
 	    nntpprintf( "503 Could not store article in newsgroups" );
 	    unlink( outname );
 	    break;
@@ -1226,14 +1228,15 @@ void dopost( void ) {
 	    if ( lockfile_exists( TRUE, TRUE ) ) {
 		/* Something is really wrong. Move the article 
 		   to failed.postings */
-		syslog( LOG_ERR, "Could not store article %s." 
+		ln_log(LNLOG_ERR, "Could not store article %s." 
 			"Moving it to failed.postings.", outname );
 		outbasename = strrchr( outname, '/');
 		outbasename++;
 		sprintf( s, "%s/failed.postings/%s", spooldir, outbasename );
 		if ( link( outname, s ) )
-                    syslog( LOG_ERR, "unable to move failed posting to %s: %m",
-                                      s );
+                    ln_log(LNLOG_ERR, 
+			   "unable to move failed posting to %s: %s",
+			   s, strerror(errno));
 		unlink( outname );
 		_exit(EXIT_FAILURE);
 	    }
@@ -1697,7 +1700,7 @@ static int readpasswd( void ) {
     sprintf( s, "%s/users", libdir );
     if ( ( f = fopen( s, "r" ) ) == NULL ) {
 	error = errno;
-	syslog( LOG_ERR, "unable to open %s: %m", s );
+	ln_log(LNLOG_ERR, "unable to open %s: %s", s, strerror(errno));
 	return error;
     }
     while ( ( l = getaline(f) ) != NULL ) {
@@ -1759,7 +1762,7 @@ void doauthinfo( const char *arg ) {
 		r = q;
 		while ( r && *r && !isspace((unsigned char *)r) ) {
 		    r++;
-		    syslog( LOG_DEBUG, "%s", r );
+		    ln_log(LNLOG_DEBUG, "%s", r );
 		}
 		salt[0] = passwd[0];
 		salt[1] = passwd[1];
@@ -1831,15 +1834,11 @@ int main( int argc, char ** argv ) {
     if ( !initvars( NULL ) )
 	exit(EXIT_FAILURE);
 
-#ifdef HAVE_OLD_SYSLOG
-    openlog( "leafnode", LOG_PID );
-#else
-    openlog( "leafnode", LOG_PID|LOG_CONS, LOG_NEWS );
-#endif
+    ln_log_open("leafnode");
 
     while ( (option=getopt( argc, argv, "F:DV" )) != -1 ) {
 	if ( !parseopt( "leafnode", option, optarg, conffile ) ) {
-	    syslog( LOG_NOTICE, "Unknown option %c", option );
+	    ln_log(LNLOG_NOTICE, "Unknown option %c", option );
 	    exit(EXIT_FAILURE);
 	}
 	debug = debugmode ;
@@ -1849,7 +1848,7 @@ int main( int argc, char ** argv ) {
     if ( ( reply = readconfig( conffile ) ) != 0 ) {
 	printf( "503 Unable to read configuration from %s, exiting (%s)\r\n",
 		conffile, strerror(reply) );
-	syslog( LOG_NOTICE,
+	ln_log(LNLOG_NOTICE,
 		"Reading configuration from %s failed, exiting (%s)",
 		conffile, strerror(reply) );
 	exit(EXIT_FAILURE);
@@ -1899,19 +1898,19 @@ int main( int argc, char ** argv ) {
     umask((mode_t)02);
 
     if ( getpeername(0, (struct sockaddr *)&peer, &fodder) )
-	syslog( LOG_ERR, "Connect from unknown client");
+	ln_log(LNLOG_ERR, "Connect from unknown client");
     else {
 #ifdef HAVE_IPV6
 	/* FIXME: do nothing, because we don't know how */
 #else
-	syslog( LOG_INFO, "Connect from %s", inet_ntoa(peer.sin_addr) );
+	ln_log(LNLOG_INFO, "Connect from %s", inet_ntoa(peer.sin_addr) );
 #endif
     }
 
     if ( authentication && ( reply = readpasswd() ) > 0 ) {
 	printf( "503 Unable to read user list, exiting (%s)\r\n",
 		strerror(reply) );
-	syslog( LOG_NOTICE, ">503 Unable to read user list, exiting (%s)",
+	ln_log(LNLOG_NOTICE, ">503 Unable to read user list, exiting (%s)",
 		strerror(reply) );
 	exit(EXIT_FAILURE);
     }

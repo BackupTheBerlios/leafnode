@@ -18,10 +18,12 @@
 */
 
 #define _GNU_SOURCE
-#include "leafnode.h"
 #include <stdio.h>
 #include <sys/types.h>
-#include <syslog.h>
+
+#include "getline.h"
+#include "ln_log.h"
+#include "leafnode.h"
 
 char *getaline(FILE *f) {
     static char *buf;       /* buffer for line */
@@ -40,6 +42,6 @@ char *getaline(FILE *f) {
                                possibly overwriting newline */
 
     if ( debug )
-        syslog( LOG_DEBUG, "<%s\n", buf );
+        ln_log(LNLOG_DEBUG, "<%s", buf );
     return buf;
 }

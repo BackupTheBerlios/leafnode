@@ -83,7 +83,7 @@ static char * msetup(char *str, size_t n)
 	return (e);
 }
 
-static void mcatch( void )
+static void mcatch(int i)
 {
 	siglongjmp(bail, 1);
 }
@@ -112,7 +112,7 @@ vsnprintf(str, n, fmt, ap)
 {
 	struct sigaction osa, nsa;
 	char *p;
-	int ret = n + 1;	/* if we bail, indicated we overflowed */
+	int ret;	/* if we bail, indicated we overflowed */
 
 	memset(&nsa, 0, sizeof nsa);
 	nsa.sa_handler = mcatch;
@@ -129,6 +129,8 @@ vsnprintf(str, n, fmt, ap)
 			return (0);
 		}
 		ret = vsprintf(p, fmt, ap);
+	} else { /* caught SIGSEGV */
+	    return n+1; 
 	}
 	mcleanup(str, n, p);
 	(void) sigaction(SIGSEGV, &osa, NULL);

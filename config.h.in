@@ -3,6 +3,12 @@
 /* Define to empty if the keyword does not work.  */
 #undef const
 
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
+
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
 /* Define if you have the strftime function.  */
 #undef HAVE_STRFTIME
 
@@ -11,6 +17,15 @@
 
 /* Define if utime(file, NULL) sets file's timestamp to the present.  */
 #undef HAVE_UTIME_NULL
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef mode_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
@@ -27,6 +42,9 @@
 /* Define if your <sys/time.h> declares struct tm.  */
 #undef TM_IN_SYS_TIME
 
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
 /* Define if you have the pcre library (-lpcre). */
 #undef HAVE_LIBPCRE
 
@@ -39,8 +57,14 @@
 /* Define if tm_gmtoff is present in struct tm */
 #undef HAVE_GMTOFF
 
+/* Define if off_t is 8 bytes */
+#undef HAVE_OFFT_8
+
 /* Define if you have IPv6 */
 #undef HAVE_IPV6
+
+/* Define if your gperf wants unsigned int as length */
+#undef GPERF_UNSIGNED
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
@@ -98,9 +122,6 @@
 
 /* Define if you have the vsnprintf function.  */
 #undef HAVE_VSNPRINTF
-
-/* Define if you have the <ap_config.h> header file.  */
-#undef HAVE_AP_CONFIG_H
 
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H

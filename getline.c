@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include "critmem.h"
-#include "leafnode.h"
+#include "getline.h" 
 
 /* Matthias Andree: implement fgets replacement that returns the number
    of characters read, excluding the terminating NUL byte. Reads at most
