@@ -72,6 +72,9 @@ Matthias:
 10pre5
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
+2.2 do not allow crossposts into local and upstream groups at the same
+    time
+
 10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
@@ -467,13 +470,14 @@ FIXED ITEMS:
 
 2001-06-27 Matthias Andree
 	   fix bug introduced on 2001-01-28. This bug was only present
-	   in 2.0b8_ma-pre3-WIP and 2.0b8_ma-pre3-snapshot.
-	   2.0b8_ma2 did not yet have the bug, 2.0b8_ma3 already fixed it.
-	   broken versions (CVS): 1.7.2.4...1.7.2.7
+	   in 2.0b8_ma2.1-alpha, 2.0b8_ma-pre3-WIP and
+	   2.0b8_ma-pre3-snapshot.  2.0b8_ma2 did not yet have the bug,
+	   2.0b8_ma3 already fixed it.  broken versions (CVS):
+	   1.7.2.4 up to 1.7.2.7 (including either one)
 
 	   out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
-	   sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo
-	   Schwalbe, <51nig9.kv.ln@abu.ivos.de>
+	   sein, geht das Posting verschütt. Ohne Fehlermeldung."
+	   Ivo Schwalbe, <51nig9.kv.ln@abu.ivos.de>
 	   (he lost articles when running fetchnews while not connected
 	    to the internet)
 
