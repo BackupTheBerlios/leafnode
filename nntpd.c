@@ -96,7 +96,7 @@ static void doselectedheader(/*@null@*/ const struct newsgroup *, const char *,
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dolistgroup(/*@null@*/ struct newsgroup *group, const char *,
 				     unsigned long *);
-static int markinterest(const struct newsgroup *);
+static int markinterest(const char *);
 
 static /*@null@*/ /*@only@*/ char *NOPOSTING;
 				/* ok-to-print version of getenv("NOPOSTING") */
@@ -443,7 +443,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	if (f)
 	    *artno = a;
 
-	markinterest(group);	/* FIXME: check error */
+	markinterest(group->name);	/* FIXME: check error */
 	/* else try message-id lookup */
     } else if (arg && *arg == '<') {
 	f = fopen(lookup(arg), "r");
@@ -455,7 +455,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	if (!f)
 	    f = fopenpseudoart(group, s, *artno);
 	/* warning: f may be NULL */
-	markinterest(group);	/* FIXME: check error */
+	markinterest(group->name);	/* FIXME: check error */
     }
 
     /* do not return articles with zero size (these have been truncated by
@@ -714,7 +714,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 /* note bug.. need not be _immediately after_ GROUP */
 /* returns 0 for success, errno for error */
 static int
-markinterest(const struct newsgroup *group)
+markinterest(const char *group)
 {
     struct stat st;
     struct utimbuf buf;
@@ -723,15 +723,15 @@ markinterest(const struct newsgroup *group)
     FILE *f;
     mastr *s;
 
-    if (is_localgroup(group->name))
+    if (is_localgroup(group))
 	return 0;		/* local groups don't have to be marked */
-    if (is_dormant(group->name))
+    if (is_dormant(group))
 	return 0;		/* dormant groups don't have to be marked */
 
     not_yet_interesting = 0;
 
     s = mastr_new(LN_PATH_MAX);
-    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, NULL);
+    mastr_vcat(s, spooldir, "/interesting.groups/", group, NULL);
 
     if (stat(mastr_str(s), &st) == 0) {
 	/* already marked interesting, update atime */
@@ -788,7 +788,7 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 	/* If this group is interesting and requested, update the time stamp
 	   so it remains interesting even without articles */
 	if (is_interesting(g->name))
-	    markinterest(g);
+	    markinterest(g->name);
 	if (chdirgroup(g->name, FALSE)) {
 	    maybegetxover(g);
 	    if (g->count == 0) {
@@ -1102,6 +1102,8 @@ donewnews(char *arg)
 	mastr_delete(s);
 	return;
     }
+    if (!strpbrk((const char *)&l->string, "\\*?[")) 
+	markinterest((const char *)&l->string);
     while ((de = readdir(d))) {
 	if (ngmatch((const char *)&(l->string), de->d_name) == 0) {
 	    chdirgroup(de->d_name, FALSE);
@@ -1813,7 +1815,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	return;
     }
 
-    markinterest(group);
+    markinterest(group->name);
 
     /* check if header can be obtained from overview */
     OVfield = matchxoverfield(header);
@@ -2004,7 +2006,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	return;
     }
 
-    markinterest(group);
+    markinterest(group->name);
 
     if (!*arg)
 	arg = 0;		/* simplify subsequent tests */
@@ -2089,7 +2091,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     group = g;
     if ((pseudogroup = is_pseudogroup(g->name))) {
 	/* group has not been visited before */
-	markinterest(group);
+	markinterest(group->name);
     } else if ((xovergroup != group) && chdirgroup(group->name, FALSE) &&
 	        !getxover(1)) {
 	if (is_interesting(g->name)) {
@@ -2099,7 +2101,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     } else {
 	xovergroup = group;
     }
-    markinterest(group);
+    markinterest(group->name);
     if (pseudogroup) {
 	nntpprintf("211 Article list for %s follows (pseudo)", g->name);
 	printf("%lu\r\n", g->first ? g->first : 1);
