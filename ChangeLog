@@ -1,3 +1,10 @@
+2002-08-21  Joerg Dietrich <joerg@dietrich.net>
+
+	* TODO: Update 
+	* nntpd.c: dopost: Check that Newsgroups: contains at least one
+	valid group; fix bug in previous patch where article was unlinked
+	from in.coming instead of out.going 
+
 2002-08-20  Matthias Andree <matthias.andree@gmx.de>
 
 	* fetchnews.c: even more detailed XOVER stats logging.  
