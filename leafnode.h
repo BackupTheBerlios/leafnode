@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.29 2002/02/04 20:54:48 emma Exp $ */
+/* $Id: leafnode.h,v 1.30 2002/02/11 01:24:28 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -192,12 +192,14 @@ extern "C" {
 		     long unsigned last, time_t date, const char *desc);
     void changegroupdesc(const char *groupname, char *desc);
     void mergegroups(void);
-    struct newsgroup *findgroup(const char *name);	/* active must be read */
+    struct newsgroup *findgroup(const char *name, struct newsgroup *a,
+				size_t asize);	/* active must be read */
     time_t query_active_mtime(void);
     void rereadactive(void);	/* only reread if none read or if it has changed */
     int writeactive(void);
-    void freeactive(void);
-
+    void freeactive(struct newsgroup *a);
+    void mergeactives(struct newsgroup *old, struct newsgroup *new) ;
+    struct newsgroup *cpactive(struct newsgroup *a);
 /*
  * local groups
  */
@@ -205,7 +207,7 @@ extern "C" {
     void readlocalgroups(void);
     int is_localgroup(const char *groupname);
     int is_alllocal(const char *grouplist);
-    extern struct newsgroup *active;
+    extern struct newsgroup /*@null@*/ *active;
     void freelocal(void);
 
 /* translation from message-id to article number, used in fetch and expire */
@@ -598,7 +600,7 @@ extern "C" {
     char *checkstatus(const char *groups, const char status);
 
 /* getwatermarks.c */
-    int getwatermarks(unsigned long *, unsigned long *, unsigned long * /*@null@*/);
+    int getwatermarks(unsigned long *, unsigned long *, unsigned long *);
 
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
 

@@ -110,7 +110,7 @@ main(int argc, char *argv[])
     if (lockfile_exists(FALSE))
 	exit(EXIT_FAILURE);
     rereadactive();
-    g = findgroup(argv[optind]);
+    g = findgroup(argv[optind], active, -1);
     if (!g) {
 	printf("Newsgroups %s not found in active file.\n", argv[optind]);
 	unlink(lockfile);

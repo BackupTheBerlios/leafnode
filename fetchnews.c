@@ -977,6 +977,7 @@ nntpactive(void)
     char *l, *p, *q;
     struct stringlist *groups = NULL;
     struct stringlist *helpptr = NULL;
+    struct newsgroup *oldactive;
     char s[PATH_MAX];		/* FIXME: possible overrun below */
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
     int reply = 0, error;
@@ -1044,7 +1045,7 @@ nntpactive(void)
 	    helpptr = helpptr->next;
 	}
 	freelist(groups);
-    } else {
+    } else {    /* read new active */
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: getting newsgroups list", current_server->name);
 	putaline(nntpout, "LIST");
@@ -1053,6 +1054,7 @@ nntpactive(void)
 		   "%s: reading all newsgroups failed", current_server->name);
 	    return;
 	}
+	oldactive = cpactive(active);
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    last = first = 0;
 	    count++;
@@ -1065,7 +1067,7 @@ nntpactive(void)
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
 	    if (is_interesting(l)
-		&& (forceactive || !(active && findgroup(l)))
+		&& (forceactive || !(active && findgroup(l, active, -1)))
 		&& chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
@@ -1073,16 +1075,16 @@ nntpactive(void)
 		    /* trouble */
 		    first = last = 0;
 		}
-	    }
+	    } 
 	    insertgroup(l, p[0], first, last, 0, NULL);
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: read %lu newsgroups", current_server->name, count);
 
 	mergegroups();
-	if (!l)
-	    /* timeout */
-	    return;
+	/*		if (!l)
+		timeout 
+		return; */
 
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: getting newsgroup descriptions", current_server->name);
@@ -1123,6 +1125,10 @@ nntpactive(void)
 	}
 	if (!l)
 	    return;		/* timeout */
+	mergeactives(oldactive, active);
+	free(oldactive); /* Do not call freeactive(). The pointers in 
+			    oldactive will be free()d by freeactive(active)
+			    at the end. */
     }
     /* touch file */
     {
@@ -1282,7 +1288,7 @@ do_group(const char *ng, /** which group to operate on */
     int from;
     mastr *s;
 
-    g = findgroup(ng);
+    g = findgroup(ng, active, -1);
     if (g) {
 	/* get server high water mark */
 	s = mastr_new(1024);
@@ -1654,8 +1660,7 @@ main(int argc, char **argv)
 	       myname);
     }
 
-    if (!forceactive)
-	rereadactive();
+    rereadactive();
 
     feedincoming();
 
@@ -1757,7 +1762,8 @@ main(int argc, char **argv)
 /*    delposted(starttime);  *//* FIXME */
     wait(0);
     freexover();
-    freeactive();
+    freeactive(active);
+    active = NULL;
     if (filter)
 	freeallfilter(filter);
     freelocal();

@@ -371,7 +371,7 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
 	    msgidbuf[127] = '\0';
 	    if ((c = strchr(msgidbuf, '@')) != NULL) {
 		*c = '\0';
-		g = findgroup(msgidbuf);
+		g = findgroup(msgidbuf, active, -1);
 		if (g)
 		    f = buildpseudoart(g->name);
 	    }
@@ -675,7 +675,7 @@ dogroup(const char *arg, unsigned long *artno)
     int hardlinks;
 
     rereadactive();
-    g = findgroup(arg);
+    g = findgroup(arg, active, -1);
     if (g) {
 	freexover();
 	xovergroup = 0;
@@ -1920,7 +1920,7 @@ dolistgroup(struct newsgroup *group, const char *arg, unsigned long *artno)
     int pseudogroup;
 
     if (arg && strlen(arg)) {
-	g = findgroup(arg);
+	g = findgroup(arg, active, -1);
 	if (!g) {
 	    nntpprintf("411 No such group: %s", arg);
 	    return 0;
@@ -2267,7 +2267,8 @@ main(int argc, char **argv)
 				   round trips for clients. */
     main_loop();
     freexover();
-    freeactive();
+    freeactive(active);
+    active = NULL;
     freelocal();
     freeconfig();
     /* Ralf Wildenhues: close stdout before freeing its buffer */

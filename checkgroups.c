@@ -55,7 +55,7 @@ process_input(char *s)
 		p++;
 	    if (*p)
 		*p++ = '\0';
-	    if ((g = findgroup(l)) != NULL) {
+	    if ((g = findgroup(l, active, -1)) != NULL) {
 		fprintf(stderr, "%s\n", l);
 		if (strlen(p) > 0)
 		    g->desc = critstrdup(p, "process_input");

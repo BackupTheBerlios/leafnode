@@ -94,7 +94,7 @@ checkstatus(const char *groups, const char status)
 	    SKIPLWS(q);
 	}
 
-	g = findgroup(grp);
+	g = findgroup(grp, active, -1);
 	if (g) {
 	    if (g->status == status) {
 		free(p);

@@ -33,7 +33,7 @@ static ino_t activeinode = 0;
 static time_t localmtime = 0;
 static ino_t localinode = 0;
 
-struct newsgroup *active = NULL;
+struct newsgroup /*@null@*/ *active  = NULL;
 
 struct nglist {
     struct newsgroup *entry;
@@ -68,7 +68,7 @@ insertgroup(const char *name, char status, long unsigned first,
     if (strchr("j=", status)) status = 'y';
 
     if (active) {
-	g = findgroup(name);
+	g = findgroup(name, active, -1);
 	if (g)
 	    return;
     }
@@ -112,7 +112,7 @@ changegroupdesc(const char *groupname, char *description)
     struct newsgroup *ng;
 
     if (groupname && description) {
-	ng = findgroup(groupname);
+	ng = findgroup(groupname, active, -1);
 	if (ng) {
 	    if (ng->desc)
 		free(ng->desc);
@@ -163,18 +163,22 @@ mergegroups(void)
 }
 
 /*
- * find a newsgroup in the active file, active must already be read
+ * find a newsgroup in the active file a, active must already be read.
+ * The size of the active file can be passed to asize. If asize == -1 
+ * activesize will be used.
  */
 struct newsgroup *
-findgroup(const char *name)
+findgroup(const char *name, struct newsgroup *a, size_t asize)
 {
     char *n = critstrdup(name, "findgroup");
     struct newsgroup ng = { 0, 0, 0, 0, 0, 0, 0 };
     struct newsgroup *found;
 
     ng.name = n;
-    if (active) {
-	found = (struct newsgroup *)bsearch(&ng, active, activesize,
+    if (a) {
+	found = (struct newsgroup *)bsearch(&ng, a,
+					    (asize == (size_t)-1 ?
+					     activesize : asize),
 					    sizeof(struct newsgroup),
 					    _compactive);
     } else {
@@ -308,22 +312,22 @@ writeactive(void)
  * safe to call without active
  */
 void
-freeactive(void)
+freeactive(struct newsgroup *a)
 {
     struct newsgroup *g;
 
-    if (active == NULL)
+    if (a == NULL)
 	return;
 
-    g = active;
+    g = a;
     while (g->name) {
 	free(g->name);
 	if (g->desc)
 	    free(g->desc);
 	g++;
     }
-    free(active);
-    active = 0;
+    free(a);
+    a = 0;
 }
 
 /*
@@ -340,7 +344,8 @@ readactive(void)
     char s[PATH_MAX];		/* FIXME: possible overrun below */
     char *t;
 
-    freeactive();
+    freeactive(active);
+    active = 0;
     t = mastrcpy(s, spooldir);
     t = mastrcpy(t, GROUPINFO);
 
@@ -462,3 +467,55 @@ rereadactive(void)
     free(s2);
     free(s1);
 }
+
+/*
+ * Merge newly read active with old active. Do not reset watermarks and
+ * timestamps. (c) 2002 Joerg Dietrich
+ */
+void mergeactives(struct newsgroup *old, struct newsgroup *new) 
+{
+    size_t oldsize;
+    struct newsgroup *g;
+    struct newsgroup *ogrp;
+
+    oldsize = 0;
+    g = old;
+    while (g->name) {
+	oldsize++;
+	g++;
+    }
+    g = new;
+    while (g->name) {
+	if ( (ogrp = findgroup(g->name, old, oldsize)) != NULL ) {
+	    g->first = (g->first > ogrp->first) ? ogrp->first : g->first;
+	    g->last = (g->last > ogrp->last) ? g->last : ogrp->last;
+	    g->age = (g->age > ogrp-> age) ? g->age : ogrp->age;
+	} else {
+	    g->age = time(NULL);
+	}
+	g++;
+    }
+    g = active = new;
+    activesize = 0;
+    while (g->name) {
+	activesize++;
+	g++;
+    }
+}
+
+/* 
+ * Duplicate active file. Return pointer to copy. Does not duplicate the
+ * pointers in the newsgroup structure!
+ * (c) 2002 Joerg Dietrich
+ */
+struct newsgroup *cpactive(struct newsgroup *a)
+{
+    static struct newsgroup *b;
+
+    b = (struct newsgroup *)critmalloc((1+activesize) *
+				       sizeof(struct newsgroup),
+				       "allocating active copy");
+    b = memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
+    return b;
+}
+
