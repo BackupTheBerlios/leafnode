@@ -77,7 +77,7 @@ sub process($ )
 # ----------------------------------------------------------------------
 
 my @a = safe_pipe_read(1, 'indent', '--version');
-die "requires GNU indent 2.2.5" if (!@a or $a[0] !~ m/GNU indent 2\.2\./);
+die "requires GNU indent 2.2.5" if (!@a or $a[0] !~ m/GNU indent:? 2\.2\./);
 
 my $f;
 while ($f = shift @ARGV) {
