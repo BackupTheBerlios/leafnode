@@ -12,7 +12,7 @@
  * replacement for malloc, logs allocation failures
  * and exits with the error message
  */
-void *
+/*@only@*/ /*@out@*/ /*@notnull@*/ void *
 mycritmalloc(const char *f, long l, size_t size, const char *message)
 {
     void *a;
@@ -27,7 +27,7 @@ mycritmalloc(const char *f, long l, size_t size, const char *message)
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "malloc(%d) failed: %s", (int)size, message);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
     return a;
 }
