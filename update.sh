@@ -1,9 +1,9 @@
 #!/bin/sh
 # This script updates leafnode installations < 1.6
 
-if [ $# -ne 3 ]
+if [ $# -ne 5 ]
 then
-    echo usage: $0 [spooldir] [libdir] [lockfile]
+    echo usage: $0 [spooldir] [libdir] [lockfile] [runas_user] [runas_group]
     echo This script should preferentially be called from the Makefile only.
     exit 1
 fi
@@ -11,6 +11,8 @@ fi
 SPOOLDIR=$1
 LIBDIR=$2
 LOCKFILE=$3
+RUNAS_USER=$4
+RUNAS_GROUP=$5
 SRCDIR=`pwd`
 
 if [ `id | cut -c5` -ne 0 ]
@@ -57,7 +59,7 @@ then
     mv ${LIBDIR}/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
     echo Move other files ...
     find ${LIBDIR} -type f -not -name 'config*' -exec mv '{}' ${SPOOLDIR}/leaf.node/ \;
-    chown news:news ${SPOOLDIR}/leaf.node/*
+    chown $RUNAS_USER:$RUNAS_GROUP ${SPOOLDIR}/leaf.node/*
     chmod 664 ${SPOOLDIR}/leaf.node/*
     echo Done.
     rm ${LOCKFILE}
@@ -69,5 +71,5 @@ mv ${SPOOLDIR}/leaf.node/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
 ${SRCDIR}/lsort > ${SPOOLDIR}/leaf.node/groupinfo
 echo Done.
 rm ${LOCKFILE}
-chown news.news ${SPOOLDIR}/leaf.node/groupinfo
+chown $RUNAS_USER.$RUNAS_GROUP ${SPOOLDIR}/leaf.node/groupinfo
 exit 0

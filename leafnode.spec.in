@@ -10,10 +10,12 @@ Copyright: see COPYING
 Group: Applications/News
 Source: ftp://wpxx02.toxi.uni-wuerzburg.de/pub/leafnode-%version.tar.gz
 
-%define prefix   /usr
-%define spooldir /var/spool/news
-%define confdir  /etc/leafnode
-%define lockfile /var/lock/fetchnews.lck
+%define prefix      /usr
+%define spooldir    /var/spool/news
+%define confdir     /etc/leafnode
+%define lockfile    /var/lock/fetchnews.lck
+%define runas_user  news
+%define runas_group news
 
 # Distribution: ${DISTRIBUTION}
 Buildroot: /var/tmp/leafnode-%version-buildroot/
@@ -34,7 +36,8 @@ regelm‰ﬂig lesen, vom Newsserver des Providers.
 %setup
 CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix --mandir=%_mandir \
  --with-spooldir=%spooldir\
- --sysconfdir=%confdir --with-lockfile=%lockfile
+ --sysconfdir=%confdir --with-lockfile=%lockfile \
+ --with-runas-user=%{runas_user} --with-runas-group=%{runas_group}
 
 %build
 make
@@ -50,15 +53,15 @@ make  DESTDIR=$RPM_BUILD_ROOT install-strip
 %attr(750,root,root) %{prefix}/sbin/checkgroups
 %attr(750,root,root) %{prefix}/sbin/leafnode
 #%attr(750,root,root) %{prefix}/sbin/rnews
-%attr(4750,news,news) %{prefix}/sbin/fetchnews
-%attr(4750,news,news) %{prefix}/sbin/texpire
+%attr(4750,%{runas_user},%{runas_group}) %{prefix}/sbin/fetchnews
+%attr(4750,%{runas_user},%{runas_group}) %{prefix}/sbin/texpire
 %doc %_mandir/man1/*
 %doc %_mandir/man5/*
 %doc %_mandir/man8/*
 %doc ChangeLog AUTHORS CREDITS FAQ INSTALL README TODO 
 %doc README.html
 #%doc tools/*.pl
-%attr(2755,news,news) %spooldir
+%attr(2755,%{runas_user},%{runas_group}) %spooldir
 
 %clean
 rm -rf $RPM_BUILD_ROOT

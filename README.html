@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.15 2002/02/11 00:36:45 emma Exp $
+<P>Version ID of this document: $Id: README.html,v 1.16 2002/06/27 16:00:07 ralf Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -156,26 +156,30 @@ to add /opt/pcre-3.7 to LD_LIBRARY_PATH or to /etc/ld.so.conf.
 <P>The configure script can take some flags (replace DIR by a directory name,
 FILE by a file name):
 <pre>
---spooldir=DIR    To override the default /var/spool/news, where leafnode puts
-                  its news spool.
+--spooldir=DIR		  To override the default /var/spool/news,
+			  where leafnode puts its news spool.
 
---lockfile=FILE   To override the default /var/run/news/fetchnews.lock, where
-                  leafnode puts its lock file.
+--lockfile=FILE		  To override the default /var/run/news/fetchnews.lock,
+			  where leafnode puts its lock file.
 
---prefix=DIR      Leafnode installs itself normally in the /usr/local/sbin
-                  directory. If you want to use another directory, use this
-		  flag. For example, if you want to install leafnode in
-		  /usr/sbin, use --prefix=/usr
+--prefix=DIR		  Leafnode installs itself normally in the /usr/local/sbin
+			  directory. If you want to use another directory, use this
+			  flag. For example, if you want to install leafnode in
+			  /usr/sbin, use --prefix=/usr
 
---sysconfdir=DIR  Default path for configuration is /etc/leafnode when --prefix
-                  is not used or set to /usr, and PREFIX/etc otherwise.
-		  You can use this to change the config file location from
-		  its default.
+--sysconfdir=DIR          Default path for configuration is /etc/leafnode when
+			  --prefix is not used or set to /usr, and PREFIX/etc
+			  otherwise.  You can use this to change the config file
+			  location from its default.
 
---with-dmalloc    Lets leafnode include dmalloc header files and link
-		  against libdmalloc. Only useful for debugging, not
-		  needed for normal operation. This option requires
-		  dmalloc, available from http://dmalloc.com/.
+--with-dmalloc            Lets leafnode include dmalloc header files and link
+			  against libdmalloc. Only useful for debugging, not
+			  needed for normal operation. This option requires
+			  dmalloc, available from http://dmalloc.com/.
+
+--with-runas-user=USER    Lets leafnode run as user USER, defaults to "news".
+
+--with-runas-group=GROUP  Lets leafnode run as group GROUP, defaults to "news".
 </pre>
 
 <strong>BEWARE:</strong> Former versions always defaulted their sysconfdir to
@@ -192,7 +196,8 @@ There should be no errors.
 
 <LI>Become root.
 
-<LI>As root, create a user "news" if you don't have one.
+<LI>As root, create user and group "news" (or the configured user and group)
+if you don't have those already. 
 
 <LI>Type
 <pre>

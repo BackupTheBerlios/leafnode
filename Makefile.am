@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.22 2002/06/22 00:31:59 emma Exp $
+# $Id: Makefile.am,v 1.23 2002/06/27 16:00:07 ralf Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -247,7 +247,7 @@ configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
 
 .PHONY:	update
 update:
-	@./update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
+	@./update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE) $(RUNAS_USER) $(RUNAS_GROUP)
 
 install-data-hook:
 # directories
