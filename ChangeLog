@@ -1,5 +1,9 @@
 2003-06-21  Matthias Andree <matthias.andree@gmx.de>
 
+	= snapshot 20030621b =
+	* fetchnews.c: Fix ISO C99 syntax that broke gcc 2.95.3 and older.  
+	= snapshot 20030621a =
+	* ChangeLog, configure.ac: Snapshot 2.0.0.alpha20030621a 
 	* nntpd.c: Do not report difference between freshly marked/already
 	marked to the user (delaybody mode).  Do not store unapproved
 	articles for moderated groups locally ever. Reported by Timo Geusch.  
