@@ -1,3 +1,54 @@
+2002-10-23  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release alpha20021023a ---
+	* Makefile.am, NEWS, config.example, config.table, configutil.c,
+	fetchnews.c, groupselect.c, groupselect.h, leafnode.8.in,
+	leafnode.h: Forward port only_groups_pcre feature of leafnode-1.  
+	* configure.ac: Bump version.  
+	* CREDITS: Hose CREDITS. :-( 
+	* redblack.c: Initialize cmp. Fixes compiler warning.  
+	* rnews.c: Fix compiler warning.  
+	* mailto.c: Add test code. Add To: header if missing.  
+	* nntpd.c: Include the new mailto.h.  
+	* configure.ac: Build tools/sendbatch.bash 
+	* tools/Makefile.am: Add scripts.  
+	* Makefile.am: Unchoke automake-1.7.1 build.  
+	* arc4random.c: Add missing #include "arc4random.h".  
+	* leafnode.h, mailto.h: Split mailto() declaration.  
+
+2002-10-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode-version.c: Note that external tools (leafwa) depend on
+	the first line of the output.  
+
+2002-10-05  Joerg Dietrich <joerg@dietrich.net>
+
+	* activutil.c: Clean-up mergeactives after check-in [394] 
+	* fetchnews.c: Add local groups to refetched active. Fix CVSTrac
+	#13.  
+	* fetchnews.c: Remove bogus fix of TODO item "try to post an
+	article to *every* server before moving into failed.postings" from
+	previous patch 
+	* fetchnews.c: Call feedincoming before active is moved. Fix
+	CVSTrack ticket #12. Add comments about possible problems.  
+	* activutil.c: pass correct activesize to findgroup. Fix CVSTrack
+	ticket #11 
+
+2002-09-30  Matthias Andree <matthias.andree@gmx.de>
+
+	* tools/: sendbatch.bash.in, uucp: Use sendbatch script and uucp
+	configuration from Tim König for now. Needs rework.  
+	* tools/newsgroup2groupinfo.pl: Add new script to convert
+	newsgroups->groupinfo.  
+	* rnews.c: Integrate patches from Tim König <tk2652@compuserve.de> 
+	* activutil.c, configure.ac, fetchnews.c, leafnode.h: Fix CVSTrac
+	#10: fetchnews -f does not remove non-existent groups 
+
+2002-09-23  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Bugfix: do not release the Message-ID in regular
+	operation. Reported by Jeff Grossman.  
+
 2002-09-20  Matthias Andree <matthias.andree@gmx.de>
 
 	--- release 2.0.0.alpha20020921a ---
