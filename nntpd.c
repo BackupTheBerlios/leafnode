@@ -131,7 +131,7 @@ nntpprintf(const char *fmt, ...)
 
     va_start(args, fmt);
     (void)vsnprintf(buffer, sizeof(buffer), fmt, args);
-    if (debugmode & DEBUG_IO)
+    if (debugmode & DEBUG_NNTP)
 	ln_log(LNLOG_SDEBUG, LNLOG_CALL, ">%s", buffer);
     printf("%s\r\n", buffer);
     (void)fflush(stdout);
@@ -155,7 +155,7 @@ main_loop(void)
 	while (waitpid(-1, 0, WNOHANG) > 0);
 
 	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
-	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "< %s", cmd);
+	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", cmd);
 
 	size = strlen(cmd);
 	if (size == 0)
