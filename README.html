@@ -6,6 +6,10 @@
 
 <h2 align=center>LEAFNODE</h2>
 
+<P>Preface: This documentation is about to be migrated to a different
+format. Do not file bug reports against section numbering or references within
+this document.
+
 <h3 align=center>Table of Contents</h3>
 
 <OL>
@@ -114,22 +118,25 @@ Of course, Leafnode also has weaknesses. Some of these are:
 as binary package with many current Linux/BSD distributions, and is also
 available as port for *BSD. Just install the binary package for your operating
 system if it ships with one. If it comes without PCRE, don't worry, the
-installation from source is simple. To install PCRE, do:
+installation from source is simple. To install PCRE, do (AS NORMAL USER, NOT AS root!)
 <OL>
 <LI>Download the current PCRE version from <a
 href="http://www.pcre.org/">http://www.pcre.org/</a>.
 <LI>Unpack PCRE: gunzip -c | tar xvf -
 <LI>cd pcre-3.7 <BR><I>(This is for PCRE-3.7, for other versions, replace that by the path that tar wrote when unpacking.)</I>
 <LI>type <KBD>./configure && make</KBD> <br><i>there should be no errors</i>
+<LI>become root
 <LI>as root, do <KBD>make install</KBD>
 <LI>as root, do <KBD>ldconfig</KBD> <br><i>this may not be needed on all
 systems, but better safe than sorry</i>
+<LI>exit your root shell
 <LI>DONE!
 </OL>
 <LI>Leafnode uses GNU autoconf to determine the configuration of the
-machine it will be compiled on. Type
+machine it will be compiled on. It also uses GNU automake for all the standard
+features that GNU automake offers. Type (AS NORMAL USER, NOT AS root!)
 <pre>
-         sh ./configure
+         /bin/sh ./configure
 </pre>
 to create an appropriate Makefile and config.h. If leafnode cannot find your
 PCRE, it is probably an old version without pcre-config, or pcre-config is not
@@ -137,7 +144,7 @@ in your path. Either add the directory containing pcre-config to your $PATH, or
 call configure like this (we assume PCRE is in /opt/pcre-3.7):
 
 <pre>
-         env CPPFLAGS="-I/opt/pcre-3.7" LDFLAGS="-L/opt/pcre-3.7" sh ./configure
+         env CPPFLAGS="-I/opt/pcre-3.7" LDFLAGS="-L/opt/pcre-3.7" /bin/sh ./configure
 </pre>
 
 NOTE: on some machines, when PCRE is linked against a shared library, you will need
@@ -175,7 +182,9 @@ is more appropriate.
 </pre>
 There should be no errors.
 
-<LI>Create a user "news" if you don't have one.
+<LI>Become root.
+
+<LI>As root, create a user "news" if you don't have one.
 
 <LI>Type
 <pre>
@@ -188,7 +197,7 @@ use
 </pre>
 instead.
 
-<LI>For packagers: if you want to prefix all installation paths with a common
+<br><I>For packagers: if you want to prefix all installation paths with a common
 prefix, e. g. to support RPM's BuildRoot feature: You can use
 <KBD>make install-strip INSTALLROOT=/var/tmp/leafnode-root</KBD>, it may change
 to DESTDIR in a future version though.
@@ -313,6 +322,8 @@ fetchnews working, run it with -vvv.
 
 <LI>Run texpire. It will create directories missing after the first install.
 
+<LI>Exit your root shell.
+
 <LI>Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
 pointing to your own host). Select the groups you want to read in
 the future. You will find them empty except a default article.
@@ -322,8 +333,8 @@ the groups for further fetching.
 <p>After this, you should have empty files in
 /var/spool/news/interesting.groups/ for every group you want to read.
 
-<LI>Run fetchnews again. This run should pick up all the groups you want
-to read.
+<LI>Become root and run fetchnews again, then exit your root shell.
+This run should pick up all the groups you want to read.
 </OL>
 
 <hr>
