@@ -2442,8 +2442,7 @@ main(int argc, char **argv)
 
     if ((reply = readconfig(conffile)) != 0) {
 	ln_log_so(LNLOG_SERR, LNLOG_CTOP,
-		  "503 Unable to read configuration from %s: %s",
-		  conffile, strerror(reply));
+		  "503 Server misconfiguration: cannot read configuration file.");
 	exit(EXIT_FAILURE);
     }
     if (conffile)
