@@ -45,9 +45,6 @@ Ralfs TODO:
 	  "%d articles deleted' message not correct.
 	* delaybody mode: Cancels for marked bodies lead to marks not being
 	  removed (supersedes are handled ok) until expiry of the pseudo header.
-	* Leftover link in temp.files for each (successfully?) posted article.
-	  Reported by Robert Marshall in
-	  <3D39D38D.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
 	* Fix handling of pseudo article.
 	* XPAT hdr range *PATTERN WITH SPACES* does not work, cf. RFC2980
@@ -105,16 +102,6 @@ Matthias:
     NOTE: only worked around, not fixed.
     TODO: only delete articles successfully posted
 
-11pre1
-2.2 Report by Peter Holm, filtering does NOT happen on XOVER, but only
-    on articles later: 
-    Aug  7 18:04:43 holm fetchnews[1534]: news.utanet.at: found 3 new newsgroups
-    Aug  7 19:58:30 holm fetchnews[1534]: alt.binaries.pictures.erotica.close-up: 0  articles fetched (to 2205), 102 killed
-    With 2 hours of download on a constant 5.9 kB/s link.
-    NOTE: likely the download of XOVER data took so long. Since
-    20020819, leafnode should tell if XOVER filtering killed these
-    articles already.
-
 2.2 Add custom headers like Organization: or X-Complaints-To: (Jeff
     Grossman, 2002-03-09)
 
@@ -146,8 +133,6 @@ Matthias:
 2.2 Fix and amend copyright statements and licenses.
 
 2.2 nntpd control articles are also displayed
-
-2.2 convert Newsgroup: to lowercase on external newsgroups.
 
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
@@ -261,6 +246,15 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2003-02-03 Matthias Andree
+	   Leftover link in temp.files for posted articles. Reported by
+	   Robert Marshall.
+
+2003-01-27 Matthias Andree
+	   Newsgroup with colliding names (only differing in case) are
+	   now ignored, we only use the version with less upper-case
+	   letters.
 
 2002-09-07 Matthias Andree
 	   race condition in fetchnews: a second fetchnews can read the active file
@@ -454,6 +448,11 @@ FIXED ITEMS:
 
 ========================================================================
 DROPPED ITEMS:
+
+2003-02-03 Matthias Andree
+	Peter Holm's report about filtering not happening on XOVER. No
+	sufficient hints to leafnode bug -- likely his malformatted PCRE
+	caused the troubles.
 
 2002-07-08 Matthias Andree
 	use separate repairspool program

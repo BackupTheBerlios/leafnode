@@ -1,3 +1,16 @@
+2003-02-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews_check_date.c: Do not send an empty command after DATE
+	that brings leafnode out of sync. Reported by Robert Marshall
+	<robert@chezmarshall.freeserve.co.uk>.  
+	* DEBUGGING, Makefile.am, leafnode.spec.in: Ship a DEBUGGING text
+	file.  
+
+2003-01-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* leafnode.spec.in: Install leafnode-version program. (Reported by
+	Kevin R. Bulgrien.) 
+
 2003-01-28  Matthias Andree <matthias.andree@gmx.de>
 
 	* configure.ac: Bump version.  
