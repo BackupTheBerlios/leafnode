@@ -67,6 +67,9 @@ Ralfs TODO:
 0.0 use separate repairspool program
 
 10pre5
+1.1 exit code of fetchnews always zero
+
+10pre5
 1.1 try to post an article to *every* server before moving into
     failed.postings. suggested by Jeff Grossman.
 
