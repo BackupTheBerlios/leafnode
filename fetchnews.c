@@ -990,6 +990,7 @@ nntpactive(void)
 	    }
 	    /* see if the newsgroup is interesting.  if it is, and we
 	       don't have it in groupinfo, figure water marks */
+	    /* FIXME: save high water mark in .last.posting? */
             if (isinteresting(l)
 		&& !(active && findgroup(l))
                 && chdirgroup(l, FALSE))
@@ -1104,6 +1105,27 @@ post_FILE(FILE * f, char **line)
     return FALSE;
 }
 
+/** Strip off directories from file and move that file to dir below
+ * spooldir, logging difficulties.
+ * \return the return value of the embedded rename(2) syscall
+ */
+static
+int moveto(const char *file /** source file */,
+	   const char *dir /** destination directory */) {
+    int r, e;
+
+    mastr *s = mastr_new(PATH_MAX);
+    mastr_vcat(s, spooldir, dir,
+	       BASENAME(file), 0);
+    r = rename(file, mastr_str(s));
+    e = errno;
+    if (r) ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot move %s to %s: %m",
+		  file, dir);
+    mastr_delete(s);
+    errno = e;
+    return r;
+}
+
 /*
  * post all spooled articles to currently connected server
  *
@@ -1158,21 +1180,19 @@ postarticles(void)
 			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				   "Posting %s", *y);
 			    if (post_FILE(f, &line)) {
-				/* Post OK */
-				/* FIXME: unlink here? */
+				/* POST was OK */
+				if (checkstatus(f1, 'm'))
+				    (void)moveto(*y, "/backup.moderated/");
 				++n;
 			    } else {
-				char s[PATH_MAX + 1];	/* FIXME */
-				sprintf(s, "%s/failed.postings/%s", spooldir, BASENAME(*y));	/* FIXME */
+				/* POST failed */
+				const char xx[] = "/failed.postings/";
+
 				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 				       "Unable to post %s: \"%s\", "
-				       "moving to %s", *y, line, s);
-				if (rename(*y, s)) {
-				    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-					   "unable to move failed posting"
-					   " to %s: %m", s);
-				    /* Post failed */
-				}
+				       "moving to %s/%s", *y, line,
+				       spooldir, xx);
+				(void)moveto(*y, xx);
 			    }
 			}
 			free(f2);
@@ -1339,7 +1359,7 @@ do_server(char *msgid, time_t lastrun, char *newsgrp)
 	} else if (newsgrp) {
 	    /* FIXME */
 	} else {
-	    if (reply == 200)
+	    if (reply == 200 && !current_server->dontpost)
 		(void)postarticles();
 	    if (!postonly) {
 		nntpactive();
