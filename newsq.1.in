@@ -19,6 +19,12 @@ example, texpire or fetchnews were running).
 .P
 failed.postings carries all articles that have been rejected by upstream
 servers.
+.SH SECURITY
+newsq is supposed to be installed set-group-id (mode 02755) to your
+.I news
+group. Do
+.B not
+install it set-user-id anything!
 .SH AUTHOR
 This manual page was written by Joey Hess,
 for the Debian GNU/Linux system, and updated by Matthias Andree.
