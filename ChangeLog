@@ -1,3 +1,7 @@
+2002-01-19  Matthias Andree  <matthias.andree@gmx.de>
+
+        === RELEASE 2.0b8_ma9 ===
+	
 2002-01-16  Matthias Andree  <matthias.andree@gmx.de>
 
 	* texpire.c: Log when .overview has been unlinked.
