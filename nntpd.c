@@ -159,7 +159,7 @@ main_loop(void)
 	size = strlen(cmd);
 	if (size == 0)
 	    continue;		/* necessary for netscape to be quiet */
-	else if (size > MAXLINELENGTH) {
+	else if (size > MAXLINELENGTH || size > INT_MAX) {
 	    /* ignore attempts at buffer overflow */
 	    nntpprintf("500 Dazed and confused");
 	    (void)fflush(stdout);
