@@ -219,10 +219,7 @@ readconfig(char *configfile)
 				   "config: hostname is %s", value);
 		    break;
 		case CP_AUTH:
-		    if (strcmp("name", value) == 0)
-			authentication = AM_NAME;
-		    else
-			authentication = AM_FILE;
+		    authentication = AM_FILE;
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "authentication method: %d", authentication);
