@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20030127a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.44 $)
+AC_REVISION($Revision: 1.45 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -15,13 +15,13 @@ dnl Checks for programs.
 AC_C_INLINE
 AC_C_VOLATILE
 AC_CHECK_TOOL([STRIP],[strip])
-AC_PATH_TOOL([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
+AC_PATH_PROG([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-AC_CHECK_PROG(AR,ar,ar)
+AC_CHECK_TOOL(AR,ar,ar)
 AC_PATH_PROG(LYNX,lynx,no)
 AC_PATH_PROG(RPM,rpm)
 AC_PATH_PROG(GZIP,gzip,false)
@@ -90,7 +90,7 @@ AC_HEADER_STDBOOL
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h])
+AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h stdint.h inttypes.h])
 
 dnl Check whether all necessary include files are there
 AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
