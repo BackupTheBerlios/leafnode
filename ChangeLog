@@ -1,3 +1,20 @@
+2002-12-29  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release alpha20021229a ---
+	* configure.ac: Update.
+	* malloc.c, realloc.c: Add replacement malloc/realloc for systems
+	that return NULL for malloc(0) or realloc(0), to avoid bogus OOM
+	aborts. (Needed for AIX and others.) 
+	* queues.c: Only store articles from in.coming that go to 'good' to
+	'moderated' groups; require an Approved: header for storing into a
+	'moderated' group. Reported by Jörg Dietrich. Fixes CVSTrac #16.  
+
+2002-12-15  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c, timeout_getaline.c: Forward port setjmp -> sigsetjmp
+	patch from Richard van der Hoff <richard@rvanderhoff.org.uk> to
+	leafnode-2. Should fix the 'timeout undetected' bug.  
+
 2002-11-08  Matthias Andree <matthias.andree@gmx.de>
 
 	--- release alpha20021108a ---
