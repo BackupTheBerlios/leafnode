@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.25 2002/07/03 15:48:58 emma Exp $
+# $Id: Makefile.am,v 1.26 2002/07/03 16:14:06 ralf Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -27,6 +27,7 @@ man_MANS = \
 	fetchnews.8 \
 	leafnode.8 \
 	newsq.1 \
+	rnews.8 \
 	texpire.8
 
 dist_MANS = \
@@ -175,7 +176,6 @@ EXTRA_DIST = \
 	README \
 	README_FIRST \
 	README.html \
-	rnews.c \
 	update.sh \
 	UPDATING
 
@@ -197,6 +197,7 @@ applyfilter_SOURCES	= applyfilter.c
 fetchnews_SOURCES	= fetchnews.c
 leafnode_SOURCES	= nntpd.c
 lsort_SOURCES		= lsort.c
+rnews_SOURCES		= rnews.c
 texpire_SOURCES		= texpire.c
 checkgroups_SOURCES	= checkgroups.c
 newsq_SOURCES		= newsq.c
