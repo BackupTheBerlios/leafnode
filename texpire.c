@@ -1050,7 +1050,8 @@ main(int argc, char **argv)
 
     expiregroup(active);
     writeactive();
-    freeactive();		/* throw away active data */
+    freeactive(active);		/* throw away active data */
+    active = NULL;
     freexover();		/* throw away overview data */
     expiremsgid();
     /* do not release the lock earlier to prevent confusion of other daemons */

@@ -294,7 +294,7 @@ store_stream(FILE * in /** input file */ ,
 	    && isspace((unsigned char)*(q - 1)))
 	    continue;		/* skip if duplicate */
 	if (create_all_links || is_interesting(name) || is_alllocal(name)) {
-	    g = findgroup(name);
+	    g = findgroup(name, active, -1);
 	    if (g) {
 		int ls = 0;
 		(void)chdirgroup(name, TRUE);

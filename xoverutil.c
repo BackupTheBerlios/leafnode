@@ -592,7 +592,7 @@ gfixxover(const char *i)
 	    *q++ = '\0';
 	    SKIPLWS(q);
 	}
-	if (chdirgroup(g, FALSE) && findgroup(g)) {
+	if (chdirgroup(g, FALSE) && findgroup(g, active, -1)) {
 	    getxover(1);
 	    freexover();
 	}
@@ -625,7 +625,7 @@ fixxover(void)
     }
 
     while ((de = readdir(d))) {
-	if ((de->d_name[0] != '.') && findgroup(de->d_name)) {
+	if ((de->d_name[0] != '.') && findgroup(de->d_name, active, -1)) {
 	    if (chdirgroup(de->d_name, FALSE)) {
 		getxover(1);
 		freexover();
