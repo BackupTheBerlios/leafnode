@@ -14,6 +14,7 @@
 #include "format.h"
 #include "msgid.h"
 #include "groupselect.h"
+#include "fetchnews.h"
 
 #include <sys/types.h>
 #include <ctype.h>
@@ -1782,6 +1783,8 @@ do_server(int forceactive)
     }
 
     rc = 1;	/* now assume success */
+
+    check_date(current_server->name);
 
     /* fetch by MID */
     switch (getmsgidlist(&msgidlist)) {

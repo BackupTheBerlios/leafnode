@@ -14,8 +14,12 @@ incompatible changes:
 - Debug logging to syslog and console is now only enabled if the
   debugmode figure is odd (1, 3, 5, ...), to cut down the size of
   logging in verbose mode somewhat.
+- fetchnews now compares the local clock to the server's clock if the
+  server supports the DATE command and complains if the two are more
+  than 10 minutes apart.
 
 other changes:
+- fixed the timeout-goes-unnoticed bug, thanks to Richard van der Hoff.
 - tries to fix the infamous "unsigned -1" corruption in groupinfo.
 - build toolchain updated to automake 1.7.1/autoconf 2.54
 - forward-port of only_groups_pcre option from leafnode-1.
