@@ -77,7 +77,7 @@ static char *
 server_info(const char *spool, const char *server,
 	    const unsigned short port, const char *suffix)
 {
-    mastr *s = mastr_new(0);
+    mastr *s = mastr_new(256);
     char *res;
     char portstr[20] = "";
 
@@ -1075,7 +1075,7 @@ nntpactive(void)
 		    /* trouble */
 		    first = last = 0;
 		}
-	    } 
+	    }
 	    insertgroup(l, p[0], first, last, 0, NULL);
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
@@ -1132,9 +1132,8 @@ nntpactive(void)
     }
     /* touch file */
     {
-	int fd;
-	fd = open(s, O_CREAT | O_WRONLY | O_TRUNC, (mode_t) 0664);
-	if (fd < 0 || close(fd) < 0)
+	int fd = touch(s);
+	if (fd < 0)
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
     }
 }
