@@ -730,15 +730,6 @@ dogroup(const char *arg, unsigned long *artno)
 	    }
 	}
 
-	if (g->count == 0) {
-	    g->first = g->last = 0ul;
-	}
-
-	if (is_pseudogroup(g->name)) {
-	    g->first = g->last = g->count = 1ul;
-
-	}
-
 	nntpprintf("211 %lu %lu %lu %s group selected",
 		   g->count, g->first, g->last, g->name);
 	*artno = g->first;
@@ -852,13 +843,10 @@ list(struct newsgroup *g, int what, char *pattern)
     }
     ng = g;
     while (ng->name) {
-	if (what) {
-	    if (!pattern)
+	if (!pattern || !ngmatch(pattern, ng->name)) {
+	    if (what)
 		printf("%s\t%s\r\n", ng->name, ng->desc ? ng->desc : "-x-");
-	    else if (ngmatch(pattern, ng->name) == 0)
-		printf("%s\t%s\r\n", ng->name, ng->desc ? ng->desc : "-x-");
-	} else {
-	    if (!pattern || (ngmatch(pattern, ng->name) == 0))
+	    else
 		printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,
 		       ng->first, ng->status);
 	}
@@ -875,7 +863,7 @@ dolist(char *oarg)
 	nntpprintf("202 extensions supported follow");
 	fputs(" HDR\r\n" " OVER\r\n" " PAT\r\n" " LISTGROUP\r\n", stdout);
 	if (authentication)
-	    printf(" AUTHINFO USER\r\n");
+	    fputs(" AUTHINFO USER\r\n", stdout);
 	fputs(".\r\n", stdout);
     } else if (!strcasecmp(arg, "overview.fmt")) {
 	nntpprintf("215 information follows");
@@ -901,10 +889,7 @@ dolist(char *oarg)
 		    list(active, 0, NULL);
 		else {
 		    char *p = arg;
-		    while (*p && (!isspace((unsigned char)*p)))
-			p++;
-		    while (*p && isspace((unsigned char)*p))
-			p++;
+		    SKIPWORD(p);
 		    list(active, 0, p);
 		}
 	    }
@@ -916,10 +901,7 @@ dolist(char *oarg)
 		    list(active, 1, NULL);
 		else {
 		    char *p = arg;
-		    while (*p && (!isspace((unsigned char)*p)))
-			p++;
-		    while (*p && isspace((unsigned char)*p))
-			p++;
+		    SKIPWORD(p);
 		    list(active, 1, p);
 		}
 	    }
@@ -1103,7 +1085,7 @@ donewgroups(const char *arg)
     ng = active;
     while (ng->name) {
 	if (ng->age >= age)
-	    printf("%s %lu %lu %c\r\n", ng->name, ng->first, ng->last, ng->status);
+	    printf("%s %lu %lu %c\r\n", ng->name, ng->last, ng->first, ng->status);
 	ng++;
     }
     fputs(".\r\n", stdout);
@@ -1389,14 +1371,13 @@ dopost(void)
 		/* escape or skip if single dot */
 		if (line[1]) {
 		    writes(out, line + 1);
-		    writes(out, "\r\n");
 		} else {
 		    break;	/* end of article */
 		}
 	    } else {
 		writes(out, line);
-		writes(out, "\r\n");
 	    }
+	    writes(out, "\r\n");
 	}
 	/* safely write to disk before reporting success */
 	if (log_fsync(out))
@@ -1743,41 +1724,43 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    return;
 	}
 
-	if (OVfield != XO_ERR)
+	if (OVfield != XO_ERR) {
 	    nntpprintf("221 First line of %s pseudo-header follows:", hd);
+	    printf("%lu ", group->first);
+	}
 	switch (OVfield) {
 	case XO_SUBJECT:
-	    printf("1 Leafnode placeholder for group %s\r\n", group->name);
+	    printf("Leafnode placeholder for group %s\r\n", group->name);
 	    break;
 	case XO_FROM:
-	    printf("1 Leafnode <nobody@%s>\r\n", owndn ? owndn : fqdn);
+	    printf("Leafnode <news@%s>\r\n", owndn ? owndn : fqdn);
 	    break;
 	case XO_DATE:
-	    printf("1 %s\r\n", rfctime());
+	    printf("%s\r\n", rfctime());
 	    break;
 	case XO_MESSAGEID:
-	    printf("1 <leafnode:placeholder:%s@%s>\r\n", group->name,
+	    printf("<leafnode:placeholder:%s@%s>\r\n", group->name,
 		   owndn ? owndn : fqdn);
 	    break;
 	case XO_REFERENCES:
-	    printf("1 (none)\r\n");	/* FIXME */
+	    printf("\r\n");
 	    break;
 	case XO_BYTES:
-	    printf("1 %d\r\n", 1024);	/* just a guess */
+	    printf("%d\r\n", 1024);	/* just a guess */
 	    break;
 	case XO_LINES:
-	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
+	    printf("%d\r\n", 22);	/* FIXME: from buildpseudoart() */
 	    break;
 	case XO_XREF:
-	    printf("1 %s %s:1\r\n", fqdn, group->name);
+	    printf("%s %s:%lu\r\n", fqdn, group->name, group->first);
 	    break;
 	default:
 	    if (!strcasecmp(header, "Newsgroups:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
-		printf("1 %s\r\n", group->name);
+		printf("%lu %s\r\n", group->first, group->name);
 	    } else if (!strcasecmp(header, "Path:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
-		printf("1 %s!not-for-mail\r\n", owndn ? owndn : fqdn);
+		printf("%lu %s!not-for-mail\r\n", group->first, owndn ? owndn : fqdn);
 	    } else {
 		nntpprintf("221 No such header: %s", hd);
 	    }
@@ -1951,19 +1934,21 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	}
     } else {
 	/* _is_ pseudogroup */
-	if (arg && (b < 1 || a > 1 || a > b)) {
+	if (arg && (b < group->first || a > group->last+1 || a > b)) {
 	    nntpprintf("420 No articles in specified range.");
 	    return;
 	}
-	nntpprintf("224 Overview information (pseudo) for postings 1-1:");
-	nntpprintf("1\t"
+	nntpprintf("224 Overview information (pseudo) for postings %lu-%lu:",
+		group->first, group->first);
+	nntpprintf("%lu\t"
 		   "Leafnode placeholder for group %s\t"
-		   "nobody@%s (Leafnode)\t%s\t"
+		   "news@%s (Leafnode)\t%s\t"
 		   "<leafnode.%s@%s>\t\t1000\t40\t"
-		   "Xref: %s %s:1",
-		   group->name,
+		   "Xref: %s %s:%lu",
+		   group->first, group->name,
 		   owndn ? owndn : fqdn, rfctime(), group->name,
-		   owndn ? owndn : fqdn, fqdn, group->name);
+		   owndn ? owndn : fqdn, fqdn, group->name,
+		   group->first);
 	fputs(".\r\n", stdout);
     }
 }
@@ -2006,7 +1991,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     markinterest(group);
     if (pseudogroup) {
 	nntpprintf("211 Article list for %s follows (pseudo)", g->name);
-	printf("%lu \r\n", g->last ? g->last : 1);
+	printf("%lu\r\n", g->first ? g->first : 1);
     } else if (emptygroup) {
 	nntpprintf("211 No articles in %s", g->name);
     } else {
@@ -2014,7 +1999,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 		   g->name, xfirst, xlast);
 	for (idx = 0; idx < xcount; idx++) {
 	    if (xoverinfo[idx].text)
-		printf("%lu \r\n", xoverinfo[idx].artno);
+		printf("%lu\r\n", xoverinfo[idx].artno);
 	}
     }
     fputs(".\r\n", stdout);
