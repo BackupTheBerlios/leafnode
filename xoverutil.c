@@ -672,4 +672,5 @@ freexover(void)
 	free(xoverinfo);
 	xoverinfo = 0;
     }
+    xcount = 0;
 }
