@@ -1,9 +1,9 @@
 /** \file lockfile.c 
  *  library module to safely create a lock file.
  *  \author Matthias Andree
- *  \date 2001
+ *  \date 2001 - 2002
  *
- *  Copyright (C) 2001  Matthias Andree <matthias.andree@web.de>
+ *  Copyright (C) 2001 - 2002  Matthias Andree <matthias.andree@web.de>
  *
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as
@@ -24,6 +24,7 @@
 #include "leafnode.h"
 #include "ln_log.h"
 #include "critmem.h"
+#include "validatefqdn.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -196,28 +197,24 @@ safe_mkstemp(
  */
 int
 lockfile_exists(
-/** Flag, if set, wait until lock becomes available */
-		   const int block,
-/** Timeout, if nonzero, wait at most this many seconds. Ignored when
- * block == 0. */
+/** Timeout, if nonzero, wait at most this many seconds. */
 		   unsigned long timeout)
 {
+    const int block = 1;
     char *l2, *pid;
     int fd;
     int have_lock = 0;
     int quiet = 0;
     const char *const append = ".XXXXXXXXXX";
+    const int have_timeout = (timeout != 0);
 
-    if (debugmode & DEBUG_LOCKING)
+    if (debugmode)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-	       "lockfile_exists(block=%d, timeout=%lu), fqdn=\"%s\"",
-	       block, timeout, fqdn);
+	       "lockfile_exists(timeout=%lu), fqdn=\"%s\"",
+	       timeout, fqdn);
 
     /* kill bogus fqdn */
-    if (!strchr(fqdn, '.')
-	|| !strncasecmp(fqdn, "localhost", 9)
-	|| !strncmp(fqdn, "127.0.0.", 8)
-	) {
+    if (!is_validfqdn(fqdn)) {
 	ln_log(LNLOG_SCRIT, LNLOG_CTOP,
 	       "Internal error: "
 	       "must not try to lock with local host name \"%s\"", fqdn);
@@ -283,10 +280,12 @@ lockfile_exists(
 		if (stale == -1 || !block)
 		    break;
 
-		if (timeout == 0)
-		    break;
+		if (have_timeout) {
+		    if (timeout == 0)
+			break;
 
-		--timeout;
+		    --timeout;
+		}
 
 		/* retry after a second, select does not interfere w/ alarm */
 		if (select(0, NULL, NULL, NULL, &tv) < 0) {
@@ -315,4 +314,26 @@ lockfile_exists(
 
     /* mind the return logic */
     return have_lock ? 0 : 1;
+}
+
+/** Tries to hand over lock to the process with the given pid. \return
+ * 0 for success, nonzero for failure -- check errno for details in
+ * case of error.
+ */
+int handover_lock(pid_t pid) {
+  int fd = open(lockfile, O_RDWR|O_TRUNC, (mode_t)0600);
+  char *buf = (char *)critmalloc(strlen(fqdn) + sizeof(unsigned long) * 4 + 4,
+				 "handover_lock");
+  if (fd < 0) { free(buf); return fd; }
+  sprintf(buf, "%lu\n%s\n", (unsigned long)pid, fqdn);
+  if (-1 == writes(fd, buf)) goto close_bail;
+  if (-1 == fsync(fd)) goto close_bail;
+  if (-1 == close(fd)) goto close_bail;
+  free(buf);
+  return 0;
+
+ close_bail:
+  (void)close(fd); 
+  free(buf);
+  return -1;
 }

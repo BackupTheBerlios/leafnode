@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.50 2002/06/22 00:31:59 emma Exp $ */
+/* $Id: leafnode.h,v 1.51 2002/06/23 10:30:24 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -495,7 +495,8 @@ extern "C" {
  * misc prototypes
  */
     /*@falsewhennull@*/ int ihave(/*@null@*/ const char *mid);
-    int lockfile_exists(const int block, unsigned long timeout);
+    int lockfile_exists(unsigned long timeout);
+    int handover_lock(pid_t pid);
     void putaline(FILE *, const char *fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));
     extern char last_command[1025];
