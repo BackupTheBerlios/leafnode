@@ -602,7 +602,14 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	fputs("\r\n", stdout);		/* empty separator line */
 
     if (what & 1) {
-	if (delaybody && *l != '\n') {
+	/*
+	 * in delaybody mode, we check for the separator line between
+	 * header and body. If this line is present, the body is also
+	 * present. If the blank line is missing, the body will also be
+	 * missing.
+	 */
+	if (delaybody && !l) {
+	    /* EOF -> no body */
 	    switch (markdownload(group, localmsgid)) {
 	    case 0:
 		fputs("\r\n\r\n"
@@ -627,7 +634,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 		       localartno, group->name);
 	    }
 	} else {
-	    while ((l = getaline(f)) && *l) {
+	    while ((l = getaline(f))) {
 		p = l;
 		if (*l == '.')
 		  putc('.', stdout);	/* escape . */
