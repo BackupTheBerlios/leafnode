@@ -288,13 +288,14 @@ main(int argc, char *argv[])
     char option;
     struct stat st;
     char *conffile = NULL;
+    const char *const myname = "rnews";
 
     ln_log_open(argv[0]);
     if (!initvars(argv[0], 0))
-	exit(EXIT_FAILURE);
+	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
-	if (parseopt("rnews", option, optarg, &conffile))
+	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch(option) {
 	    default:
@@ -310,18 +311,21 @@ main(int argc, char *argv[])
     if (conffile)
 	free(conffile);
 
-    umask((mode_t) 077);
-
-    if (lockfile_exists(5UL)) {
-	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
-	exit(EXIT_FAILURE);
-    }
-
     if (filterfile && !readfilter(filterfile)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 		"%s: Cannot read filterfile %s, aborting.",
 		argv[0], filterfile);
 	log_unlink(lockfile, 0);
+	exit(EXIT_FAILURE);
+    }
+
+    if (!init_post())
+	init_failed(myname);
+
+    umask((mode_t) 077);
+
+    if (attempt_lock(LOCKWAIT)) {
+	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
 
