@@ -1506,6 +1506,8 @@ postarticles(void)
 				++n;
 			    } else {
 				/* POST failed */
+				/* FIXME: TOCTOU race here - check for
+				 * duplicate article here */
 				static const char xx[] = "/failed.postings/";
 
 				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
