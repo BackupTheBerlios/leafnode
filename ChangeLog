@@ -1,6 +1,16 @@
+2003-07-16  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030716a =
+	* CREDITS, fetchnews.8.in: Merge Jörg Lüders' changes for -B -M -N
+	-R -P.  
+	* fetchnews.c: Fix regression from last patch: fetchnews -P only
+	tries the first server.  Reported by Jeff Grossman.  
+
 2003-07-14  Matthias Andree <matthias.andree@gmx.de>
 
-	= snapshot 20030712a =
+	* ChangeLog, NEWS, configure.ac: Snapshot 20030714a.  
+
+	= snapshot 20030714a =
 	* fetchnews.c: Post first, then fetch.  
 
 2003-07-13  Matthias Andree <matthias.andree@gmx.de>

@@ -1,3 +1,9 @@
+20030716a: Changes since 20030714a:
+- Bugfix: posting only tried the first server. Regression in 20030714a,
+  reported by Jeff Grossman.
+- Documentation: Clean up fetchnews.8.in, -B, -M, -N, -P and -R
+  descriptions. New sections courtesy of Jörg Lüders.
+
 20030714a: Changes since 20030712a:
 - Bugfix: fix double free() in filter handling. Reported by Robert J. Clark.
 - Bugfix: fix some memory leaks.
