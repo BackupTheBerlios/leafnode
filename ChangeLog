@@ -1,4 +1,70 @@
+2004-01-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, genconfigdefs.awk, genconfigparam_data.awk: Makefile
+	cleanup. Do not ship AWK-generated files.
+	* b_sortnl.c: Quench compiler warnings in SPARC64.
+	* critmem_realloc.c: Add missing variable declaration.
+	* Makefile.am, b_sortnl.c, configure.ac, critmem_calloc.c,
+	critmem_malloc.c, critmem_realloc.c, malloc.c, realloc.c,
+	xoverutil.c: Get rid of rpl_malloc and rpl_realloc cruft.
+	* Makefile.am: Do not ship config.c.
+	* tools/Makefile.am: Unwedge VPATH build.
+	* tools/Makefile.am: Make pod2man non-GNU make friendly.
+	* fetchnews.c: Read filterfile earlier, to support paths relative
+	to cwd.
+	* .cvsignore: add generated file.
+	* nntpd.c: Do not leak configuration file location into error
+	message.
+	* .cvsignore: add filterutil, grouplist
+	* minconfig, minfilter: Add minconfig/minfilter for testing
+	purposes.
+	* nntpd.c, texpire.c: Update initialization.
+	* rnews.c: Initialize properly to support -d option.  Read
+	filterfile before trying to lock, because attempt_lock() calls
+	chdir(). The filterfile might be relative in a minimal test suite
+	configuration.
+	* newsq.c: Initialize properly to support -d spooldir option.
+	* miscutil.c: Split initialization into initvars() and init_post().
+	Add new init_failed() function that prints to stderr and exits.
+	Drop #ifdef TESTMODE.  Add global variables spooldir and lockfile,
+	both char *.  Only drop permissions when root, to let a user use his
+	own -d. In preparation of a test suite.  Drop findopt and getoptarg
+	cruft, it's not needed for fetchnews any longer.  Support global
+	option "-d".
+	* fetchnews.c: Bugfix -F option.  Avoid "non-literal format"
+	warning (the code was safe, no % could be in the string) when
+	printing fetchnews mode, insert "%s".  Initialization updates.
+	* checkgroups.c: Use the right file in presence of options.
+	Initialize properly to support -d and -F options.  Drop the explicit
+	access check, removing a race condition.
+	* applyfilter.c: Split initialization, minor clean-ups.
+	* lockfile.c: Rename lockfile_exists to attempt_lock.
+	* activutil.c, config.table, configutil.c, localutil.c:
+	local.groups location now run-time configurable.
+	* leafnode.h: Prepare split of initialization and run-time
+	configuration of spooldir.  lockfile is derived from spooldir in
+	initialization, make non-const.  Rename lockfile_exists to
+	attempt_lock.
+	* configure.ac: Drop LOCKFILE.
+	* Makefile.am: Drop lockfile. Rename config.c's spooldir to
+	def_spooldir.
+	* ln_log.c, ln_log_open.c: Drop #ifdef TESTMODE.
+
+2004-01-14  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: LIST NEWSGROUPS/LIST ACTIVE crashed (NULL dereference)
+	when a non-wildcard pattern requested a non-existent group.  Patch
+	by Hans-Jürgen Ficker.
+
+2004-01-13  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* configure.ac: Fix bogus check, adding CFLAGS and LDFLAGS for pcre
+	whenever pcre-config returns nonempty flags.  Former grep would most
+	likely complain because of argument starting with '-'.
+
 2004-01-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20040108a
 
 	= snapshot 20040108a =
 	* fetchnews.c: Log user name when authentication fails.  Patch by
