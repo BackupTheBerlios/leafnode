@@ -250,8 +250,9 @@ main_loop(void)
 	}
 	free(cmd);
     }
-    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-	   "Warning: premature EOF in client input.");
+    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+	   "Warning: EOF in client input. Timeout or disconnect "
+	   "without prior QUIT command.");
     /* We used to send 400 before disconnecting, but the list of clients
      * reported broken keeps growing, and lists tin, slrn and pine,
      * three major text-mode news readers. We anticipate upcoming NNTP
