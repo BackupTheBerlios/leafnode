@@ -36,6 +36,7 @@ leafnode.spec
 liblnutil.a
 localutil.o
 Makefile
+Makefile.in
 miscutil.o
 newsq
 newsq.1
