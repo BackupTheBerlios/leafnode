@@ -1,0 +1,6 @@
+LN_LOG_ABORT_ON_ERROR
+	If this environment variable is defined (even empty), the first
+	error logged causes leafnode to abort().
+
+TZ
+	time zone variable

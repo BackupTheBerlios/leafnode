@@ -3,16 +3,28 @@
 #include <stdlib.h>
 #include "ln_log.h"
 
+#ifdef DEBUG_DMALLOC
+#include <dmalloc.h>
+#endif
+
 /*
  * replacement for realloc, logs allocation failures
  * and exits with the error message
  */
-char *
-critrealloc(char *a, size_t size, const char *message)
+void *
+mycritrealloc(const char *f, long l, void *a, size_t size, const char *message)
 {
-    a = (char *)realloc(a, size);
+
+#ifdef DEBUG_DMALLOC
+    a = _realloc_leap(f, l, a, size);
+#else
+    (void)f;
+    (void)l;			/* shut up compiler warnings */
+    a = realloc(a, size);
+#endif
     if (!a) {
-	ln_log(LNLOG_ERR, "realloc(%d) failed: %s", (int)size, message);
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "realloc(%d) failed: %s", (int)size, message);
 	exit(1);
     }
     return a;

@@ -1,13 +1,13 @@
-#include "config.h"
-
-#ifndef HAVE_INET_NTOP
-
-/*
- * inet_ntop
- * written by Matthias Andree
+/**
+ * \file inet_ntop
+ * inet_ntop emulation based on inet_ntoa.
+ * \author Matthias Andree
+ * 
  */
-
+#include "config.h"
+#ifndef HAVE_INET_NTOP
 #include "leafnode.h"
+#include "mastring.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,8 +20,7 @@ inet_ntop(int af, const void *s, char *dst, int x)
 {
     switch (af) {
     case AF_INET:
-	strncpy(dst, inet_ntoa(*(struct in_addr *)s), x);
-	dst[x] = 0;
+	mastrncpy(dst, inet_ntoa(*(const struct in_addr *)s), x);
 	return dst;
 	break;
     default:
@@ -30,12 +29,4 @@ inet_ntop(int af, const void *s, char *dst, int x)
 	break;
     }
 }
-
 #endif
-
-/* ANSI C forbids an empty source file... */
-static void
-dummy_func(void)
-{
-    dummy_func();
-}

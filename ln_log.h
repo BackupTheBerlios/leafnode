@@ -3,38 +3,45 @@
 
 #include "attributes.h"
 #include <stdarg.h>
-/* #include <syslog.h> */
 
 /* severities */
+/* in analogy to syslog levels, are passed on to syslog */
 #if 0
-#define	LNLOG_EMERG	0	/*   system is unusable */
-#define	LNLOG_ALERT	1	/*   action must be taken immediately */
-#define	LNLOG_CRIT	2	/*   critical conditions */
+#define	LNLOG_SEMERG	0	/*   system is unusable */
+#define	LNLOG_SALERT	1	/*   action must be taken immediately */
 #endif
-#define	LNLOG_ERR	3	/* * error conditions */
-#define	LNLOG_WARNING	4	/* * warning conditions */
-#define	LNLOG_NOTICE	5	/* * normal but significant condition */
-#define	LNLOG_INFO	6	/* * informational */
-#define	LNLOG_DEBUG	7	/* * debug-level messages */
-
-#define LNLOG_MIN     3		/* minimal used severity */
-
-/* IMPORT */
-extern int verbose;
+#define	LNLOG_SCRIT	2	/*   critical conditions */
+#define	LNLOG_SERR	3	/* * error conditions */
+#define	LNLOG_SWARNING	4	/* * warning conditions */
+#define	LNLOG_SNOTICE	5	/* * normal but significant condition */
+#define	LNLOG_SINFO	6	/* * informational */
+#define	LNLOG_SDEBUG	7	/* * debug-level messages */
+#define LNLOG_SMIN      2	/* minimal used severity */
+/* contexts */
+/* define the context the log message occurs in
+   think of it as "verbose level" */
+#define LNLOG_CTOP        0	/* top level, always log */
+#define LNLOG_CSERVER     1	/* server context */
+#define LNLOG_CGROUP      2	/* group context */
+#define LNLOG_CARTICLE    3	/* article context */
+#define LNLOG_CALL	  4	/* most verbose */
 
 /* EXPORT */
 extern void ln_log_open(const char *ident);
 
-extern void ln_log(int severity, const char *format, ...)
-    __attribute__ ((format(printf, 2, 3)));
+/* log to stderr and syslog */
+extern void ln_log(int severity, int context, const char *format, ...)
+    __attribute__ ((format(printf, 3, 4)));
 
-extern void ln_log_so(int severity, const char *format, ...)
-    __attribute__ ((format(printf, 2, 3)));
+/* log to stdout and syslog */
+extern void ln_log_so(int severity, int context, const char *format, ...)
+    __attribute__ ((format(printf, 3, 4)));
 
-extern void ln_log_prt(int severity, const char *format, ...)
-    __attribute__ ((format(printf, 2, 3)));
+/* log to stderr only */
+extern void ln_log_prt(int severity, int context, const char *format, ...)
+    __attribute__ ((format(printf, 3, 4)));
 
-extern void ln_log_sys(int severity, const char *format, ...)
-    __attribute__ ((format(printf, 2, 3)));
-
+/* log to syslog only */
+extern void ln_log_sys(int severity, int context, const char *format, ...)
+    __attribute__ ((format(printf, 3, 4)));
 #endif

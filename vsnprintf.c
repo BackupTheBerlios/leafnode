@@ -1,11 +1,9 @@
 #include "config.h"
-
 #ifndef HAVE_VSNPRINTF
-
 /*
  * Revision 12: http://theos.com/~deraadt/snprintf.c
  *
- * Copyright (c) 1997 Theo de Raadt
+ * Copyright(c) 1997 Theo de Raadt
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,21 +18,19 @@
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
  * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT
  * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 /*
  * Modified by Cornelius Krasel:
  * (1) vsnprintf() and snprintf() are now treated separately, with the macros
  *     HAVE_VSNPRINTF and HAVE_SNPRINTF
  * (2) declarations made ANSI because gcc issued warnings
  */
-
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -49,9 +45,12 @@
 #include <varargs.h>
 #endif
 #include <setjmp.h>
-
 #ifndef roundup
 #define roundup(x, y) ((((x)+((y)-1))/(y))*(y))
+#endif
+
+#ifdef DEBUG_DMALLOC
+#include <dmalloc.h>
 #endif
 
 static int pgsize;
@@ -59,7 +58,6 @@ static char *curobj;
 static sigjmp_buf bail;
 
 #define EXTRABYTES	2	/* XXX: why 2? you don't want to know */
-
 static char *
 msetup(char *str, size_t n)
 {
@@ -83,13 +81,11 @@ msetup(char *str, size_t n)
     *e = '\0';
     return (e);
 }
-
 static void
 mcatch(int i)
 {
     siglongjmp(bail, 1);
 }
-
 static void
 mcleanup(char *str, size_t n, char *p)
 {
@@ -120,7 +116,6 @@ char *ap;
     memset(&nsa, 0, sizeof nsa);
     nsa.sa_handler = mcatch;
     sigemptyset(&nsa.sa_mask);
-
     p = msetup(str, n);
     if (p == NULL) {
 	*str = '\0';
@@ -139,11 +134,8 @@ char *ap;
     (void)sigaction(SIGSEGV, &osa, NULL);
     return (ret);
 }
-
 #endif				/* HAVE_VSNPRINTF */
-
 #ifndef HAVE_SNPRINTF
-
 int
 #if __STDC__
 snprintf(char *str, size_t n, char const *fmt, ...)
@@ -156,18 +148,16 @@ va_dcl
 #endif
 {
     va_list ap;
+
 #if __STDC__
     va_start(ap, fmt);
 #else
     va_start(ap);
 #endif
-
     return (vsnprintf(str, n, fmt, ap));
     va_end(ap);
 }
-
 #endif				/* HAVE_SNPRINTF */
-
 /* ANSI C forbids en empty source file... */
 static void
 dummy_func(void)

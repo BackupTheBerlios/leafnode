@@ -10,39 +10,24 @@ expire = 20
 ## All the following parameters are optional
 ##
 
-## I have free access to my news server. If you don't have, comment out
-## the following two lines and change them accordingly.
-# username = gulbrandsen
-# password = secret
-
-## Standard news servers run on port 119. If your newsserver doesn't, comment
-## out the following line and change it accordingly.
-# port = 8000
-
-## This is another news server which stores some groups that are not
-## available on the first one. You can define username, password and port
-## for each server separately.
-# server = sex.and.warez.com
-# username = xenu
-# password = secret
-
-## This is a news server which does not understand the 
-## "LIST NEWSGROUP news.group" command. For this reason, we don't try to
-## download newsgroups descriptions when getting new newsgroups. This is
-## achieved by putting "nodesc = 1" somewhere behind the server
-## line.
-# server = broken.upstream.server
-# nodesc = 1
-
-## Here we have another news server which has a very slow connection. For
-## that reason, we wait a full minute before we give up trying to connect.
-## The default is 10 seconds.
-# server = really.slow.snail
-# timeout = 60
+## To aid in debugging, here is a switch. Sum up the debug info you
+## want, or just use 2047 for "all"
+# MISC (unused): 1
+# I/O (net, disk): 2
+# Sort functions: 4
+# Active handling: 8
+# Configuration parsing: 16
+# Filtering: 32
+# Locking: 64
+# NNTP dialogues: 128 (currently incomplete)
+# Expiring: 256
+# Additional XOVER debugging: 512
+# Cancelling and Superseding: 1024
+# debugmode = 1001
 
 ## Non-standard expire times (glob(7) wildcard constructs possible)
 # groupexpire comp.os.linux.* = 5 # groups too big to hold articles 20 days
-# groupexpire any.local.newsgroup = 100 # very interesting, hold articles longer
+# groupexpire any.local.newsgroup = 100 # very interesting, hold longer
 
 ## Never fetch more than this many articles from one group in one run.
 ## Be careful with this; setting it much below 1000 is probably a bad
@@ -102,6 +87,10 @@ expire = 20
 ## want to uncomment this.
 # create_all_links = 1
 
+## If you want bogus files such as core deleted from newsgroups,
+## uncomment this.
+# killbogus = 1
+
 ## If you want to filter out certain regular expressions in the header,
 ## create a "filterfile" (how this is done is explained in the README)
 ## and set
@@ -114,3 +103,33 @@ expire = 20
 ## the propagation of your messages.  Most modern newsreaders do provide
 ## a Message-ID.
 # hostname = host.domain.country
+
+## I have free access to my news server. If you don't have, comment out
+## the following two lines and change them accordingly.
+# username = gulbrandsen
+# password = secret
+
+## Standard news servers run on port 119. If your newsserver doesn't, comment
+## out the following line and change it accordingly.
+# port = 8000
+
+## This is another news server which stores some groups that are not
+## available on the first one. You can define username, password and port
+## for each server separately.
+# server = sex.and.warez.com
+# username = xenu
+# password = secret
+
+## This is a news server which does not understand the 
+## "LIST NEWSGROUP news.group" command. For this reason, we don't try to
+## download newsgroups descriptions when getting new newsgroups. This is
+## achieved by putting "nodesc = 1" somewhere behind the server
+## line.
+# server = broken.upstream.server
+# nodesc = 1
+
+## Here we have another news server which has a very slow connection. For
+## that reason, we wait a full minute before we give up trying to connect.
+## The default is 10 seconds.
+# server = really.slow.snail
+# timeout = 60

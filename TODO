@@ -1,89 +1,231 @@
-This file is both a buglist and a wishlist. Comments are appreciated.
---Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+ ----------------------------------------------------------------------
+		   Leafnode 2.0b8_ma branch TODO list
+ ----------------------------------------------------------------------
 
-Addresses: Matthias Andree <matthias.andree@web.de>
+
+NOTE: issues fixes in the current, possibly unreleased _ma versions, but
+persistent in the offical 2.0b tree, are not listed here.
 
 
-SHOWSTOPPERS:
-=============
-- get feedback on portability (Matthias Andree)
+This is a PRIORITIZED LIST. It has two columns, first the importance,
+second the urgence. (Matthias)
 
-BUGS:
-====
-- recently reported problems on mailing list and
-  de.comm.software.newsserver
-- authinfo handling in nntpd.c proper? (just user gives ACCEPT)
-- run everything through various static and dynamic checkers
-  (efence, dmalloc, lclint)
-- localgroups paths and dir vs. file inconsistent?
-- can't find /usr/local-installed PCRE on FreeBSD 4.0
-  CFLAGS/LDFLAGS required
-- Two reports of Llyod Zusman Dec-17 on leafnode mailing list.
-- "Das ist eine Macke von Leafnode. Wird von einem Server die komplette
-  Gruppenliste geholt, so werden neu hinzugekommene Gruppen bei
-  NEWGROUPS nicht aufgeführt. Der Reader findet sie daher nicht ohne
-  weiteres." (Stefan Wiens, de.comm.software.newsserver 2000-12-07,
-  Message-ID: <wkr93lxerw.fsf@helium.eswe.dyndns.org>)
-- see if the 1.9.17->1.9.18 bugfix can be simplified.
-  update: postarticles is a horrible mess. It deletes the articles
-  IMMEDIATELY if it's available on a server.
-- can fetchnews cope with servers that reject XOVER? (Matthias)
-- maxage doesn't work
-- fetchnews -N does not work
-  Jürgen Salk, Message-ID:
-  <3A3E8E47.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
-- signal needs to be worked around on Solaris 7 (Matthias Andree)
-- server dependent out.going, possibly a repost command?
-- move old articles from out.going to failed.postings if they are, say,
-  7 days, old? (Report by Stefan Wiens, Message-ID:
-  <3A1EDBFF.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
+importance:
+1 = most important, 5 = forget it
+urgence:
+1 = do now, 5 = postpone until bored
 
-general:
-=======
+"security relevant": at most 2.2
 
-- flag servers as "don't post here" (Robin S. Socha, 2000-12-17,
-  Message-ID: <3A3D1CB3.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
-- get rid of all those if(verbose > anything)
-- get rid of _all_ sscanf (Matthias Andree)
-- determine interesting groups from .newsrc?
-- how to make newsgroup names 8-bit compliant? E.g., how to produce
-  a newsgroups line of the form
+"works correctly, but suboptimal": importance and urgence at least 3.3
+
+0.0 Jörg Dietrich: message.id/XXX in Makefile anlegen.
+
+0.0 when taking in Jörg's status char patch, make sure that posts to
+moderated groups are backed up should the upstream server be
+misconfigured.
+
+0.0 do not store postings into moderated groups if Approved: header is
+missing. do not store crosspostings into moderated groups locally. Only
+post articles to moderated groups to one server. see next item
+
+0.0 for the previous item, add server preferences for posting?
+
+0.0 add support for local moderated news groups (define moderator
+address)
+
+0.0 local timezone for logging
+
+0.0 rnews is currently deactivated. Work in progress. Will have to
+    reintroduce rnews and find a way to feed news batches to UUCP mode
+    upstream (also listed at 3.3).
+
+1.1 article can be given out in spite of missing message.id file
+
+1.1 fix posting issues, introduce per-server queues?
+
+1.1 .overview must always be more current than groupinfo, so that nntpd
+    never offers article via GROUP that it cannot provide via XOVER
+    e. g. (Stefan Wiens)
+
+1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
+    sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
+    <51nig9.kv.ln@abu.ivos.de>
+    NOTE: only worked around, not fixed.
+    TODO: only delete articles successfully posted
+
+1.1 leafnode may store newly fetched articles into the gaps if groupinfo
+    is not current. groupinfo may be out of date after a crash, fix
+    watermarks.
+
+1.1 groupinfo not updated after timeout + subsequent SIGINT
+    ACTION: check if report still current
+
+1.3 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
+    ACTION: replace by proper state machine
+
+2.2 make user that leafnode runs under (now hard-wired to "news") configurable
+
+2.2 also run feedincoming on exit of programs that lock
+
+2.2 do not store cancel and perhaps other control messages locally?
+
+2.2 heed Expires: header in texpire
+
+2.2 Check RPM build
+
+2.2 pipeline GROUP commands for speed
+
+2.2 Create rpost/inews
+
+2.2 groupinfo is not updated for local groups (article low/high marks)
+    when these are reinserted.
+
+2.2 strings returned by {f,m,}getheader must be freed (Stefan Wiens)
+    ACTION: work in progress.
+    FIX: Use garbage collector instead?
+
+2.2 nntpd Control-Nachrichten und Artikel in moderierte Newsgroups
+    werden auch angezeigt. (Letzteres ist u.U. gar nicht so tragisch,
+    denn es verhindert, dass Newbies ihre "moderierten" Postings
+    wiederholt abschicken.) -> RFC violation (reported by Jörg Dietrich).
+
+2.2 report Raymond Scholz, rnews doesn't read from pipes.
+    ACTION: reimplement rnews from scratch.
+
+2.2 tolerate ", " instead of just "," in Newsgroup:
+    current NNTP drafts suggests that to be able to fold Newsgroup: headers.
+    ACTION: work in progress, fixed in some places.
+
+2.2 convert Newsgroup: to lowercase on external newsgroups.
+
+2.2 report by Alessio Bragadini,
+    <3AEFB20C.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
+    posting to moderated groups submitted more than once
+
+2.2 groupinfo is all 0 0 0 if groupinfo is entirely re-read, until
+    texpire is run.
+
+2.2 "rnews does not work in pipes", Jörg Dietrich,
+    <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
+    See 0.0 above as well.
+
+2.3 "Das ist eine Macke von Leafnode. Wird von einem Server die
+    komplette Gruppenliste geholt, so werden neu hinzugekommene Gruppen
+    bei NEWGROUPS nicht aufgeführt. Der Reader findet sie daher nicht
+    ohne weiteres." (Stefan Wiens, de.comm.software.newsserver
+    2000-12-07, Message-ID: <wkr93lxerw.fsf@helium.eswe.dyndns.org>)
+    Transl: if a complete group list is fetched from a server, newly
+    appeared groups are not offered in NEWGROUPS.
+    ACTION: fix.
+    Idea #1: Possibly emit list from mergegroups
+    Idea #2: diff newsgroups list before and after group list fetch
+    Idea #3: Store newsgroups in timestamped file.
+
+2.3 if XHDR and XOVER fail, fall back to HEAD!
+    ACTION: implement HEAD
+
+2.3 flag servers as "don't post here" (Robin S. Socha, 2000-12-17,
+    Message-ID: <3A3D1CB3.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
+    ACTION: implement server-specific configuration option
+
+3.3 add support for stderr logging so that multilog can be used
+    (clemensF <rabat@web.de>).
+
+3.3 add IHAVE support for feeding upstream
+
+3.3 add support for a NOPOSTING env variable that prevents posting
+    (possibly replacing the banner with the contents of the variable).
+
+3.3 does not send UUCP to upstream, introduce option to batch and spool
+    UUCP
+
+3.3 Fix nntputil.c and nntpd.c for proper IPv6 (getipnodebyname/byaddr
+    etc.)
+
+3.3 don't supersede() articles unconditionally
+    ACTION: figure criteria for allowing/denying supersede
+
+3.3 gethostbyname is not subject to timeout control
+
+3.3 make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt
+
+3.3 ACLs (possibly including identd) or regexp to prevent groups from
+    being shown (mind ARTICLE <message@id> and check against Xref or
+    Newsgroups: headers)
+
+3.3 ACLs (possibly including identd) or regexp to filter which groups
+    may be subscribed to (could include user specific)
+
+3.3 clean up fetchnews main function, it's a horrible mess with all
+    those !postonly, unmaintainable.
+
+3.3 Hook (ext. program) for editing group info,
+    <slrn9e1dv6.3il.wum@wum.truhaso.lu> and
+    <m3snj2d3k1.fsf@emma1.emma.line.org>
+
+3.3 fetchnews -N does not work
+    Jürgen Salk, Message-ID:
+    <3A3E8E47.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
+
+3.3 run everything through various static and dynamic checkers
+    (efence, dmalloc, lclint)
+
+3.3 get rid of _all_ sscanf (Matthias Andree)
+
+3.3 forbid crosspostings to local and global groups. (consider this for
+    local posts and check whether to ignore this for downstream pulled
+    articles)
+
+3.3 how to make newsgroup names 8-bit compliant? E.g., how to produce
+    a newsgroups line of the form
 	Newsgroups: norge.østfold
-  Some readers encode this as ISO-8859-1 but this apparently is not
-  understood upstream. It is also against the RFCs. son-of-rfc1036
-  says that all data must be transmitted with ASCII < 127.
-  draft-ietf-nntpext-base-07.txt says that the character set for all
-  NNTP commands is UTF-8 (unicode!). Another possible draft is
-  draft-ietf-usefor-article-01.txt (chapter 5.5.) which is not very
-  helpful either.
+    Some readers encode this as ISO-8859-1 but this apparently is not
+    understood upstream. It is also against the RFCs. son-of-rfc1036
+    says that all data must be transmitted with ASCII < 127.
+    draft-ietf-nntpext-base-07.txt says that the character set for all
+    NNTP commands is UTF-8 (unicode!). Another possible draft is
+    draft-ietf-usefor-article-01.txt (chapter 5.5.) which is not very
+    helpful either.
 
-xoverutil:
-=========
+3.3 fetchnews starts with an initialfetch (!)
 
-- check whether tabs may be incorporated into .overview file
+3.3 let texpire use the actual article date rather than mtime/atime
 
-fetchnews:
-=========
+3.4 postarticles is a horrible mess. It deletes the articles IMMEDIATELY
+    if it's available on a server.
 
-- implement NEWNEWS for broken Demon.co.uk servers (Carl Inglis)
-- don't supersede() articles unconditionally
-- groupinfo wird nach timeout und anschliessendem sigint nicht upgedated!
-- wenn connection nicht erfolgreich ist, haengt der rechner
-- problems with timeout. If timeout occurs, fetchnews should send itself
-  SIGINT.
-- starts with an initialfetch (!)
-- interrupt fetch every 100 postings and then reconnect, to beat the
-  INN configuration
-- delaybody only for certain groups?
-- articles are possibly lost when incorrectly linked (i.e. if
-  /var/spool/news/message.id/xxx/<bla@fasel> is already present
-  but /var/spool/news/news/group/name/nnnnnn is not).
+4.2 get rid of all those if (verbose > anything)
 
-nntpd:
-=====
+4.3 move old articles from out.going to failed.postings if they are,
+    say, 7 days, old? (Report by Stefan Wiens, Message-ID:
+    <3A1EDBFF.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
 
-- Control-Nachrichten und Artikel in moderierte Newsgroups werden auch
-  angezeigt. (Letzteres ist u.U. gar nicht so tragisch, denn es verhindert,
-  dass Newbies ihre "moderierten" Postings wiederholt abschicken.)
-- Memory leak in nntpd.
+4.4 implement detection if local group shadows server group
 
+4.4 make libwrap aware? implement standalone mode?
+
+4.4 can fetchnews cope with servers that reject XOVER? (Matthias Andree)
+
+4.4 signal needs to be worked around on Solaris 7 (Matthias Andree)
+
+4.4 server dependent out.going, possibly a repost command?
+
+4.4 interrupt fetch every 100 (configurable) postings and then
+    reconnect, to beat the INN configuration option.
+
+4.4 see if the dots that NNTP servers escape can remain in the articles
+    so that the body can be passed through to the client 1:1 (would need
+    review if CR is required, and would break "direct spool" operation)
+
+5.5 getgroup: "%s: considering %ld articles %lu - %lu" does not include
+    proper article count as sent by server, but just uses last-first+1
+
+5.5 determine interesting groups from .newsrc?
+    REJECT: other newsreaders have different formats
+
+5.5 delaybody only for certain groups?
+
+5.5 introduce Control: pseudo group functionality
+
+5.5 abort group fetch and proceed to next group

@@ -1,5 +1,4 @@
 #include "ugid.h"
-
 /* ensure that the current group IDs are gid
    return  0 for success
    return -1 for error */

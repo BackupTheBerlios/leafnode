@@ -1,5 +1,4 @@
 #include "ugid.h"
-
 /* ensure that the current user IDs are uid
    return  0 for success
    return -1 for error */

@@ -1,7 +1,7 @@
 # DO NOT EDIT!
 # @configure_input@
 
-Version: @VERSION@
+Version: @PACKAGE_VERSION@
 Summary: Leafnode - a leafsite NNTP server (Version %version)
 Summary(de): Leafnode - ein offline-Newsserver (Version %version)
 Name: leafnode

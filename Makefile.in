@@ -1,12 +1,13 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.11 2001/01/03 05:07:05 emma Exp $
+# @configure_input@
+# $Id: Makefile.in,v 1.12 2001/11/29 17:48:29 emma Exp $
 
-VERSION = @VERSION@
+VERSION = @PACKAGE_VERSION@
 
 SHELL = /bin/sh
 
-srcdir = @srcdir@
-VPATH = .:@srcdir@
+srcdir := @srcdir@
+VPATH  := .:@srcdir@
 
 # Programs
 CC      = @CC@
@@ -16,6 +17,8 @@ AWK	= @AWK@
 AR	= @AR@
 GZIP	= @GZIP@
 SED	= @SED@
+BZIP2	= @BZIP2@
+CAT	= @CAT@
 
 # Libraries
 PCRELIB = @PCRELIB@
@@ -23,12 +26,12 @@ LINKPCRELIB = @LINKPCRELIB@
 CRYPTLIB = @CRYPTLIB@
 
 # Flags
-DEBUG    = -g
-STRIP    =
-CFLAGS   = @CFLAGS@ -I. -I$(srcdir) @DEFS@ @GCC_FLAGS@ $(DEBUG)
-CPPFLAGS = @CPPFLAGS@
-LDFLAGS  = @LDFLAGS@
-LIBS     = @LIBS@
+DEBUG    := -g
+STRIP    :=
+CFLAGS   := @CFLAGS@ -I. -I$(srcdir) @DEFS@ @GCC_FLAGS@ $(DEBUG)
+CPPFLAGS := @CPPFLAGS@
+LDFLAGS  := @LDFLAGS@
+LIBS     := @LIBS@
 
 # Directories and Paths
 # News is stored in SPOOLDIR, configuration is kept in LIBDIR
@@ -37,120 +40,322 @@ PREFIX_USR = @prefix@
 PREFIX_VAR = /var
 USRDIR = $(PREFIX_USR)/bin
 BINDIR = $(PREFIX_USR)/sbin
-prefix = @prefix@
-MANDIR = @mandir@
+MANDIR = $(PREFIX_USR)/man
 SPOOLDIR = @SPOOLDIR@
 LIBDIR   = @sysconfdir@
 LOCKFILE = @LOCKFILE@
-RPMSRC	 = @RPMSRC@
+RPMSRC   = @RPMSRC@
 
 # external programs
 LYNX = @LYNX@
 RPM = @RPM@
 
-MANSRC   = applyfilter.8.in checkgroups.8.in fetchnews.5.in fetchnews.8.in \
-           leafnode.8.in newsq.1.in rnews.8.in texpire.8.in
+MANFILES = \
+	applyfilter.8 \
+	checkgroups.8 \
+	fetchnews.5 \
+	fetchnews.8 \
+	leafnode.8 \
+	newsq.1 \
+	rnews.8 \
+	texpire.8
 
-HDRFILES = leafnode.h ln_log.h acconfig.h config_defs.h configparam.h \
-	   critmem.h format.h get.h getline.h h_error.h ugid.h \
-	   attributes.h
+MANSRC = \
+	applyfilter.8.in \
+	checkgroups.8.in \
+	fetchnews.5.in \
+	fetchnews.8.in \
+	leafnode.8.in \
+	newsq.1.in \
+	rbcloselist.3 \
+	rbdelete.3 \
+	rbdestroy.3 \
+	rbfind.3 \
+	rbinit.3 \
+	rblookup.3 \
+	rbopenlist.3 \
+	rbreadlist.3 \
+	rbsearch.3 \
+	rbwalk.3 \
+	rnews.8.in \
+	texpire.8.in
 
-SRCFILES = nntputil.c configutil.c xoverutil.c activutil.c miscutil.c \
-	   artutil.c filterutil.c localutil.c \
-	   applyfilter.c checkgroups.c newsq.c nntpd.c fetchnews.c texpire.c \
-	   rnews.c critmem_malloc.c critmem_realloc.c ln_log.c \
-	   ln_log_open.c strutil.c get_any.c configparam.c dirutil.c \
-           ugid_gensure.c ugid_ggetbyuname.c ugid_gget.c ugid_gset.c \
-           ugid_uensure.c ugid_ugetbyuname.c ugid_uget.c ugid_uset.c \
-           vsnprintf.c strdup.c mkstemp.c getaline.c inet_ntop.c \
-	   h_error.c format_ulong.c b_sortnl.c getline.c \
-	   t_configparam.c t_format_ulong.c makedepend.sh
+SRCFILES = \
+	activutil.c \
+	applyfilter.c \
+	artutil.c \
+	b_sortnl.c \
+	checkgroups.c \
+	config.table \
+	configparam.c \
+	configutil.c \
+	copyfile.c \
+	critmem_calloc.c \
+	critmem_malloc.c \
+	critmem_realloc.c \
+	critmem_strdup.c \
+	dirutil.c \
+	fetchnews.c \
+	filterutil.c \
+	fopen_reg.c \
+	format_ulong.c \
+	format_ulong0.c \
+	genconfigparam_data.awk \
+	get_any.c \
+	getaline.c \
+	getfoldedline.c \
+	getline.c \
+	h_error.c \
+	inet_ntop.c \
+	leafnode-version.c \
+	ln_log.c \
+	ln_log_open.c \
+	localutil.c \
+	lockfile.c \
+	log_close.c \
+	log_fclose.c \
+	log_fsync.c \
+	log_rename.c \
+	log_unlink.c \
+	masock_sa2addr.c \
+	masock_sa2name.c \
+	mastrcpy.c \
+	mastring.c \
+	mastrncpy.c \
+	mergesort.c \
+	miscutil.c \
+	mkdir_parent.c \
+	msgid_hash.c \
+	msgid_sanitize.c \
+	newsq.c \
+	nfswrite.c \
+	nntpd.c \
+	nntputil.c \
+	parserange.c \
+	putaline.c \
+	queues.c \
+	redblack.c \
+	rnews.c \
+	sort.c \
+	store.c \
+	strutil.c \
+	sync_dir.c \
+	sync_link.c \
+	tab2spc.c \
+	texpire.c \
+	timeout_getaline.c \
+	ugid_gensure.c \
+	ugid_gget.c \
+	ugid_ggetbyuname.c \
+	ugid_gset.c \
+	ugid_uensure.c \
+	ugid_uget.c \
+	ugid_ugetbyuname.c \
+	ugid_uset.c \
+	vsnprintf.c \
+	wildmat.c \
+	writes.c \
+	xoverutil.c
 
-LIBFILES = activutil.o artutil.o config.o configparam_data.o		\
-configparam.o configutil.o critmem_malloc.o critmem_realloc.o dirutil.o	\
-filterutil.o format_ulong.o getaline.o get_any.o getline.o h_error.o	\
-inet_ntop.o ln_log.o ln_log_open.o localutil.o miscutil.o mkstemp.o	\
-nntputil.o strdup.o strutil.o ugid_gensure.o ugid_ggetbyuname.o		\
-ugid_gget.o ugid_gset.o ugid_uensure.o ugid_ugetbyuname.o ugid_uget.o	\
-ugid_uset.o vsnprintf.o xoverutil.o
+LIBFILES = \
+	@LIBOBJS@ \
+	activutil.o \
+	artutil.o \
+	config.o \
+	configparam.o \
+	configparam_data.o \
+	configutil.o \
+	copyfile.o \
+	critmem_calloc.o \
+	critmem_malloc.o \
+	critmem_realloc.o \
+	critmem_strdup.o \
+	dirutil.o \
+	filterutil.o \
+	fopen_reg.o \
+	format_ulong.o \
+	format_ulong0.o \
+	get_any.o \
+	getaline.o \
+	getfoldedline.o \
+	getline.o \
+	h_error.o \
+	ln_log.o \
+	ln_log_open.o \
+	localutil.o \
+	lockfile.o \
+	log_close.o \
+	log_fclose.o \
+	log_fsync.o \
+	log_rename.o \
+	log_unlink.o \
+	masock_sa2addr.o \
+	masock_sa2name.o \
+	mastrcpy.o \
+	mastring.o \
+	mastrncpy.o \
+	miscutil.o \
+	mkdir_parent.o \
+	msgid_hash.o \
+	msgid_sanitize.o \
+	nfswrite.o \
+	nntputil.o \
+	parserange.o \
+	putaline.o \
+	queues.o \
+	redblack.o \
+	sort.o \
+	store.o \
+	strutil.o \
+	sync_dir.o \
+	sync_link.o \
+	tab2spc.o \
+	timeout_getaline.o \
+	ugid_gensure.o \
+	ugid_gget.o \
+	ugid_ggetbyuname.o \
+	ugid_gset.o \
+	ugid_uensure.o \
+	ugid_uget.o \
+	ugid_ugetbyuname.o \
+	ugid_uset.o \
+	vsnprintf.o \
+	wildmat.o \
+	writes.o \
+	xoverutil.o
 
-OWNLIBS  = liblnutil.a @PCRELIB@
+# HDRFILES lists all include files
+HDRFILES = \
+	acconfig.h \
+	attributes.h \
+	configparam.h \
+	critmem.h \
+	format.h \
+	get.h \
+	getline.h \
+	h_error.h \
+	leafnode.h \
+	ln_dir.h \
+	ln_log.h \
+	masock.h \
+	mastring.h \
+	msgid.h \
+	redblack.h \
+	ugid.h
 
-PROGRAMS = applyfilter checkgroups fetchnews leafnode newsq rnews texpire 
+# PROGRAMS lists the programs to build
+PROGRAMS = \
+	applyfilter \
+	checkgroups \
+	fetchnews \
+	leafnode \
+	leafnode-version \
+	newsq \
+	rnews \
+	texpire
 
-HELPERS = b_sortnl stamp-h
+# EXTRASRC lists files to include in the distribution tar
+EXTRASRC = \
+	AUTHORS \
+	CREDITS \
+	ChangeLog \
+	Doxyfile \
+	FAQ \
+	INSTALL \
+	Makefile.in \
+	README.html \
+	TODO \
+	aclocal.m4 \
+	config.example \
+	config.h.in \
+	configure \
+	configure.in \
+	install-sh \
+	leafnode.spec.in \
+	makedepend.sh \
+	mergesort.3 \
+	stamp-h.in \
+	update.sh \
+	vcp.sh
 
-all: $(OWNLIBS) $(PROGRAMS)
+EXTRAGENSRC = \
+	config_defs.h \
+	leafnode.spec
+
+# ALLSOURCES combines all relevant source variables for maintainability
+ALLSOURCES = $(HDRFILES) $(SRCFILES) $(EXTRASRC) $(MANSRC) $(EXTRAGENSRC)
 
 # RULES
-
-.c.o:	leafnode.h
+.c.o:
 	@echo "compiling $<"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
 
 .o:
 	@echo "linking $@"
-	@$(CC) $(LDFLAGS) -o $@ $< liblnutil.a $(LIBS) $(LINKPCRELIB)
+	@$(CC) $(LDFLAGS) -o $@ $< liblnutil.a $(LIBS)
 
-# OBJECTS
-
-b_sortnl: b_sortnl.o
-	$(CC) $(LDFLAGS) -o $@ $<
+# DEFAULT
+all: Makefile $(PROGRAMS) $(MANFILES)
 
 # LIBRARIES
-
 liblnutil.a: $(LIBFILES)
-	@echo "archiving into $@"
-	@$(AR) $(ARFLAGS) $@ $?
-	@$(RANLIB) $@
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
 
 libpcre.a: pcre/libpcre.a
-	cp pcre/libpcre.a libpcre.a
+	cp pcre/libpcre.a $@
+
+pcre.h: $(srcdir)/pcre/pcre.h
 
 pcre/libpcre.a:
 	@echo "Building Philip Hazel's Perl regular expressions library..."
-	@cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) libpcre.a
+	cd pcre && $(MAKE) libpcre.a \
+	CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	CPPFLAGS="$(CPPFLAGS)"
 
-# PROGRAMS (only non-standard)
+# special rule to prevent recursion on liblnutil.a
+b_sortnl: b_sortnl.c mergesort.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $(srcdir)/b_sortnl.c $(srcdir)/mergesort.c
 
-leafnode: nntpd
-	ln $< $@ || cp $< $@ || exit 1
+# programs (non-standard)
+applyfilter: applyfilter.o liblnutil.a $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ applyfilter.o liblnutil.a $(LIBS) $(LINKPCRELIB)
 
-# phonies
+fetchnews: fetchnews.o liblnutil.a $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ fetchnews.o liblnutil.a $(LIBS) $(LINKPCRELIB) 
 
-.PHONY:	clean distclean realclean update
-clean:
-	rm -f *.o *.a
-	cd pcre && $(MAKE) clean
+leafnode: nntpd.o liblnutil.a $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ nntpd.o liblnutil.a $(LIBS) $(LINKPCRELIB) $(CRYPTLIB)
 
-realclean: distclean
-distclean: clean
-	rm -f nntpd $(PROGRAMS) $(HELPERS) *.[1578] cscope.out *~ \#*\#
-	rm -f config.h Makefile pcre/Makefile *.rej *.orig core
-	rm -f config.status config.cache config.log
-	rm -f config.c configparam_data.c
-	rm -f leafnode-*.tar.gz
-	rm -f leafnode-*.tar.bz2
+texpire: texpire.o liblnutil.a $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ texpire.o liblnutil.a $(LIBS) $(LINKPCRELIB)
 
-update:
-	$(SHELL) ./update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
+rnews: rnews.o liblnutil.a $(PCRELIB)
+	$(CC) $(LDFLAGS) -o $@ rnews.o liblnutil.a $(LIBS) $(LINKPCRELIB)
 
-# sources
+# programs (standard)
+checkgroups: checkgroups.o liblnutil.a
+leafnode-version: leafnode-version.o liblnutil.a
+newsq: newsq.o liblnutil.a
 
+# GENERATED SOURCES ========================================
 config.c: Makefile
 	@echo "creating config.c"
 	@echo  >.$@ "/* This file is automatically generated by Makefile"
 	@echo >>.$@ " * *** DO NOT EDIT ***"
 	@echo >>.$@ " */"
-	@echo >>.$@ "const char *bindir=\"$(BINDIR)\";"
-	@echo >>.$@ "const char *spooldir=\"@SPOOLDIR@\";"
-	@echo >>.$@ "const char *libdir=\"$(LIBDIR)\";"
-	@echo >>.$@ "const char *lockfile=\"@LOCKFILE@\";"
-	@echo >>.$@ "const char *version=\"@VERSION@\";"
-	@echo >>.$@ "const char *GZIP=\"@GZIP@\";"
-	@if test -f $@ && cmp >/dev/null .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
+	@echo >>.$@ "const char *bindir = \"$(BINDIR)\";"
+	@echo >>.$@ "const char *spooldir = \"@SPOOLDIR@\";"
+	@echo >>.$@ "const char *libdir = \"$(LIBDIR)\";"
+	@echo >>.$@ "const char *lockfile = \"@LOCKFILE@\";"
+	@echo >>.$@ "const char *version = \"@PACKAGE_VERSION@\";"
+	@echo >>.$@ "const char *GZIP = \"@GZIP@\";"
+	@echo >>.$@ "const char *BZIP2 = \"@BZIP2@\";"
+	@echo >>.$@ "const char *CAT = \"@CAT@\";"
+	@echo >>.$@ "const char *compileinfo = \"*** leafnode @PACKAGE_VERSION@ ***\ncompile date: `env - PATH=/bin:/usr/bin TZ=GMT date`\ncompile machine: `uname -a`\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)\";"
+	if test -f $@ && cmp >/dev/null .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
 
-config_defs.h: config.table configparam.h
+config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h
 	@echo creating $@
 	@$(AWK) -F, '\
 	BEGIN { \
@@ -164,136 +369,212 @@ config_defs.h: config.table configparam.h
 		print "};" \
 		}' <$(srcdir)/config.table >$@ || rm -f $@
 
-configparam_data.c: config.table b_sortnl Makefile
-	@echo "making configparam_data.c"
-	@./b_sortnl <$(srcdir)/config.table | awk '\
-	BEGIN	{ print "/* file generated from $<, do not edit! */\n";\
-  		  print "#include \"configparam.h\"";\
-		  print "#include \"config_defs.h\"\n";\
-		  print "const struct configparam configparam[] = {";\
-		  FS=","; }\
-	        { printf "  {\"%s\",%s},\n",$$1,$$2; }\
-	END 	{ print "};";\
-		  print "";\
-		  print "const int count_configparam = sizeof(configparam)/sizeof(configparam[0]);" }' >.$@ && mv .$@ $@
+configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
+	./b_sortnl <$(srcdir)/config.table \
+	| $(AWK) -f $(srcdir)/genconfigparam_data.awk >.$@ \
+	&& mv .$@ $@
+
+.PHONY:	clean
+clean:
+	rm -f *.o *.a
+	if test -f pcre/Makefile ; then cd pcre && $(MAKE) clean ; fi
+
+.PHONY:	distclean
+distclean: clean
+	rm -f $(PROGRAMS) *.d *.[1578]
+	rm -f config.h Makefile b_sortnl
+	rm -f config.status config.cache config.log
+	rm -f config.c config_defs.h configparam_data.c
+	if test -f pcre/Makefile ; then if cd pcre ; then \
+	  $(MAKE) distclean ; rm Makefile ; fi ; fi
+
+.PHONY:	maintainer-clean
+maintainer-clean: distclean
+	rm -f config.h.in configure leafnode.spec stamp-h stamp-h.in
+
+.PHONY:	update
+update:
+	@update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
 
 # ----------------------------------------------------------------------
 
+.PHONY:	install-strip
 install-strip:
 	$(MAKE) install STRIP=-s
 
+.PHONY:	install
 install: $(PROGRAMS)
-# make all directories; preserve permissions if directories already exist
-	for i in 1 5 7 8 ; do \
-		test -d $(INSTALLROOT)$(MANDIR)/man$${i} \
-			|| $(INSTALL) -d -o root -g 0 -m 755 \
-				$(INSTALLROOT)$(MANDIR)/man$${i} ; \
-	done
-	for i in $(BINDIR) $(USRDIR) ; do \
-		test -d $(INSTALLROOT)$${i} \
-			|| $(INSTALL) -d -o root -g bin -m 755 \
-				$(INSTALLROOT)$${i} ; \
-	done
-# install programs
-	$(INSTALL) -g news -m 750 -o news $(STRIP) \
-	  leafnode rnews checkgroups applyfilter \
-	  $(INSTALLROOT)$(BINDIR)
-	$(INSTALL) -g news -m 4750 -o root $(STRIP) fetchnews texpire \
-	  $(INSTALLROOT)$(BINDIR)
-	$(INSTALL) -g news -m 755 -o news $(STRIP) newsq \
-	  $(INSTALLROOT)$(USRDIR)
+# directories
+	if test -d $(INSTALLROOT)$(BINDIR) ; then : ; else \
+	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(BINDIR) ; fi
+	if test -d $(INSTALLROOT)$(USRDIR) ; then : ; else \
+	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(USRDIR) ; fi
+	if test -d $(INSTALLROOT)$(LIBDIR) ; then : ; else \
+	  $(INSTALL) -d -o root -g bin -m 755 $(INSTALLROOT)$(LIBDIR) ; fi
+# programs
+	$(INSTALL) -c -g news -m 750 -o news $(STRIP) \
+	  leafnode rnews checkgroups applyfilter $(INSTALLROOT)$(BINDIR)
+	$(INSTALL) -c -g news -m 750 -o root $(STRIP) \
+	  texpire fetchnews $(INSTALLROOT)$(BINDIR)
+	$(INSTALL) -c -g news -m 755 -o news $(STRIP) \
+	  newsq $(INSTALLROOT)$(USRDIR)
 # man pages
-	for i in 1 5 8 ; do \
-		$(INSTALL) -m 644 $(srcdir)/*.$${i} \
-			$(INSTALLROOT)$(MANDIR)/man$${i} ; \
+	for i in man1 man5 man7 man8 ; do \
+          test -d $(INSTALLROOT)$(MANDIR)/$$i || \
+	    $(INSTALL) -d -o root -m 755 $(INSTALLROOT)$(MANDIR)/$$i ; \
 	done
-	if test "$(PCRELIB)" ; then $(INSTALL) -m 644 \
-	  $(srcdir)/pcre/pcre.7 $(INSTALLROOT)$(MANDIR)/man7 ; fi
-# more directories and example files
-	for d in `dirname $(INSTALLROOT)$(LOCKFILE)` \
-	$(INSTALLROOT)$(SPOOLDIR) $(INSTALLROOT)$(LIBDIR) \
-	$(INSTALLROOT)$(SPOOLDIR)/local.groups ; do \
-		test -d $$d || install -o news -g news -d $$d ; \
-	done
-	$(INSTALL) -m 640 $(srcdir)/config.example $(INSTALLROOT)$(LIBDIR)
-	chmod 2755 $(INSTALLROOT)$(SPOOLDIR)
-	@echo Edit /etc/inetd.conf to start $(INSTALLROOT)$(BINDIR)/leafnode and restart inetd.
-	@echo Also read the instructions on updating in the README file.
+	$(INSTALL) -c -m 644 *.1 $(INSTALLROOT)$(MANDIR)/man1
+	$(INSTALL) -c -m 644 *.5 $(INSTALLROOT)$(MANDIR)/man5
+	if test "$(PCRELIB)" ; then $(INSTALL) -c -m 644 pcre/pcre.7 $(INSTALLROOT)$(MANDIR)/man7 ; fi
+	$(INSTALL) -c -m 644 *.8 $(INSTALLROOT)$(MANDIR)/man8
+# directories
+	$(INSTALL) -d -m 2755 -o news -g news $(INSTALLROOT)$(SPOOLDIR)
+	$(INSTALL) -d -m 2755 -o news -g news $(INSTALLROOT)$(SPOOLDIR)/leaf.node
+	if test -d `dirname $(INSTALLROOT)$(LOCKFILE)` ; then : ; \
+	else $(INSTALL) -d -m 750 -o news -g news \
+	  `dirname $(INSTALLROOT)$(LOCKFILE)` ; \
+        fi 
+# don't use test -e, it's broken on Solaris (only implemented in /usr/bin/test)
+	test -f $(INSTALLROOT)$(LIBDIR)/local.groups || \
+		echo -n >$(INSTALLROOT)$(LIBDIR)/local.groups
+	mkdir -p $(INSTALLROOT)$(LIBDIR)
+# configuration
+	$(INSTALL) -m 440 -o root -g news $(srcdir)/config.example $(INSTALLROOT)$(LIBDIR)
+# remove possible old active.read
+	rm -f $(INSTALLROOT)$(SPOOLDIR)/active.read
+	@echo
+	@echo Edit /etc/inetd.conf to start $(INSTALLROOT)$(BINDIR)/leafnode 
+	@echo and restart inetd. Also read the instructions on updating in the README file.
 
+.PHONY:	uninstall-bins
 uninstall-bins:
-	for i in fetchnews checkgroups texpire leafnode rnews applyfilter ; \
-	do -rm $(BINDIR)/$${i} ; done
+	-rm $(BINDIR)/fetchnews
+	-rm $(BINDIR)/checkgroups
+	-rm $(BINDIR)/texpire
+	-rm $(BINDIR)/leafnode
+	-rm $(BINDIR)/rnews
+	-rm $(BINDIR)/applyfilter
 	-rm $(USRDIR)/newsq
-	for i in fetchnews rnews checkgroups texpire leafnode applyfilter ; \
-	do -rm $(MANDIR)/man8/$${i}.8 ; done
+	-rm $(MANDIR)/man8/fetchnews.8
+	-rm $(MANDIR)/man8/rnews.8
+	-rm $(MANDIR)/man8/checkgroups.8
+	-rm $(MANDIR)/man8/texpire.8
+	-rm $(MANDIR)/man8/leafnode.8
+	-rm $(MANDIR)/man8/applyfilter.8
 	-rm $(MANDIR)/man5/fetchnews.5
 	-rm $(MANDIR)/man1/newsq.1
 	if test "$(PCRELIB)" ; then rm $(INSTALLROOT)$(MANDIR)/man7/pcre.7 ; fi
 
+.PHONY:	uninstall
 uninstall: uninstall-bins
 	-rm -r $(LIBDIR)
 	-rm -r $(SPOOLDIR)/leaf.node
 	-rm -r $(SPOOLDIR)/interesting.groups
-	-rm -r $(SPOOLDIR)/message.id/*
+	-rm -rf $(SPOOLDIR)/message.id/*
 	-rmdir $(SPOOLDIR)/out.going
 	@echo Edit /etc/inetd.conf to remove $(BINDIR)/leafnode and restart inetd
 
-.PHONY: dist
-dist: config.h.in configure
+.PHONY:	doxygen
+doxygen: 
+	-rm -rf $(srcdir)/dox/html/
+	cd $(srcdir) && doxygen
+
+.PHONY:	distdir
+distdir: depend $(ALLSOURCES) # doxygen
+	# clean old dist
+	-chmod -R a+rX leafnode-$(VERSION)
 	rm -rf leafnode-$(VERSION)
-	if test -x "$(LYNX)" ; then \
-		rm -f $(srcdir)/README ; \
-		echo >$(srcdir)/README \
-			' *** GENERATED FILE, DO NOT EDIT *** ' ; \
-		$(LYNX) -dump $(srcdir)/README.html >>$(srcdir)/README ;\
+	# regenerate text files
+	if test "$(LYNX)" != "no" ; then \
+		rm -f README ; \
+		$(LYNX) -dump $(srcdir)/README.html > README ; \
 	fi
+	# set up directories
 	mkdir -p leafnode-$(VERSION)
-	for i in $(MANSRC) $(HDRFILES) $(SRCFILES) config.table \
-		INSTALL AUTHORS README* CREDITS TODO ChangeLog FAQ \
-		config.example config.h.in configure.in Makefile.in \
-		configure install-sh aclocal.m4 stamp-h.in \
-		leafnode.spec.in \
-		update.sh leafnode-$(VERSION).lsm ; \
-	do cp $(srcdir)/$$i leafnode-$(VERSION) ; done
-	mkdir -p leafnode-$(VERSION)/tools
+	$(SHELL) $(srcdir)/vcp.sh $(VPATH) $(ALLSOURCES) leafnode-$(VERSION)
+	chmod a+r leafnode-$(VERSION)/*
+	: cp -R $(srcdir)/dox leafnode-$(VERSION)/ # disabled for the moment
 	cp -R $(srcdir)/doc_german leafnode-$(VERSION)/
 	cp -R $(srcdir)/doc_catalan leafnode-$(VERSION)/
+	mkdir -p  leafnode-$(VERSION)/tools
 	cp $(srcdir)/tools/*.pl leafnode-$(VERSION)/tools/
 	chmod -R a+rX leafnode-$(VERSION)
-	find leafnode-$(VERSION) -depth -name CVS -exec rm -rf '{}' ';'
+	find leafnode-$(VERSION) -name 'CVS' -print | xargs rm -rf
 	tar cf leafnode-$(VERSION).tar leafnode-$(VERSION)
-	mkdir -p leafnode-$(VERSION)/pcre
-	cp $(srcdir)/pcre/* leafnode-$(VERSION)/pcre/
-	chmod -R a+rX leafnode-$(VERSION)
-	find leafnode-$(VERSION) -depth -name CVS -exec rm -rf '{}' ';'
+	# with PCRE
+	if test -d pcre ; then \
+		mkdir -p leafnode-$(VERSION)/pcre ; \
+		cd pcre && test -f Makefile && make distclean ; \
+	fi
+	cp -p -r -f $(srcdir)/pcre leafnode-$(VERSION) ; \
+	chmod -R a+rX leafnode-$(VERSION) ; \
+	find leafnode-$(VERSION) -name 'CVS' -print | xargs rm -rf ; \
 	tar cf leafnode-pcre-$(VERSION).tar leafnode-$(VERSION)
-	@GZIP@ -f9 <leafnode-$(VERSION).tar >leafnode-$(VERSION).tar.gz \
-		|| rm leafnode-$(VERSION).tar.gz
-	@GZIP@ -f9 <leafnode-pcre-$(VERSION).tar \
-		>leafnode-pcre-$(VERSION).tar.gz \
-		|| rm leafnode-pcre-$(VERSION).tar.gz
-	@BZIP2@ -f9 <leafnode-$(VERSION).tar \
-		>leafnode-$(VERSION).tar.bz2 || rm leafnode-$(VERSION).tar.bz2
-	@BZIP2@ -f9 <leafnode-pcre-$(VERSION).tar \
+	rm -rf leafnode-$(VERSION)
+
+.PHONY:	dist
+dist: distdir leafnode-pcre-$(VERSION).tar.gz
+	$(GZIP) -9cf <leafnode-$(VERSION).tar \
+		>leafnode-$(VERSION).tar.gz
+	$(BZIP2) -9cf <leafnode-$(VERSION).tar \
+		>leafnode-$(VERSION).tar.bz2 \
+		|| rm -f leafnode-$(VERSION).tar.bz2
+	-$(BZIP2) -9cf <leafnode-pcre-$(VERSION).tar \
 		>leafnode-pcre-$(VERSION).tar.bz2 \
-		|| rm leafnode-pcre-$(VERSION).tar.bz2
-	rm -rf leafnode-$(VERSION) leafnode-$(VERSION).tar 
-	rm -rf leafnode-pcre-$(VERSION).tar
+		|| rm -f leafnode-pcre-$(VERSION).tar.bz2
+	ls -l *.tar*
 
-patch:
-	rm -f ../leafnode-$(VERSION).patch
-	rm -f ../leafnode-$(VERSION).patch.gz
-	@for i in * ; \
-	do \
-	  if [ -e $$i.orig ] ; \
-	  then \
-	    echo "diff --unified $$i.orig $$i" ; \
-	    diff --unified $$i.orig $$i >> ../leafnode-$(VERSION).patch ; \
-	  fi ; \
-	done
-	$(GZIP) -f9 ../leafnode-$(VERSION).patch
+leafnode-pcre-$(VERSION).tar.gz: distdir
+	-$(GZIP) -9cf <leafnode-pcre-$(VERSION).tar \
+		>leafnode-pcre-$(VERSION).tar.gz
 
-leafnode.spec: leafnode.spec.in config.status
+
+.PHONY:	distcheck
+distcheck: leafnode-pcre-$(VERSION).tar.gz
+	rm -rf =source =build
+	mkdir =source
+	( cd =source ; gzip -cd <../leafnode-pcre-$(VERSION).tar.gz \
+		| tar xf - )
+	mkdir =build
+	( cd =build ; ../=source/leafnode-$(VERSION)/configure \
+		&& make && make dist )
+	rm -r =source =build
+	a="leafnode-pcre-$(VERSION).tar.gz is ready for distribution" ; \
+	b=`echo "$$a" | sed -e 's/./=/g'` ; echo $$b ; echo $$a ; echo $$b
+
+$(srcdir)/configure: $(srcdir)/configure.in $(srcdir)/aclocal.m4
+	cd $(srcdir) && autoconf
+
+$(srcdir)/config.h.in: $(srcdir)/stamp-h.in
+$(srcdir)/stamp-h.in: $(srcdir)/configure.in $(srcdir)/aclocal.m4 $(srcdir)/acconfig.h
+	cd $(srcdir) && autoheader
+	echo timestamp >$(srcdir)/stamp-h.in
+
+.PHONY:	tags
+tags:
+	cd $(srcdir) && ctags -R .
+
+.PHONY:	TAGS
+TAGS:
+	cd $(srcdir) && ctags -e -R .
+
+config.h: stamp-h
+stamp-h: config.h.in config.status
+	./config.status
+	echo >stamp-h
+
+Makefile: $(srcdir)/Makefile.in config.status
+	./config.status Makefile
+	@echo "***"
+	@echo "*** Remade Makefile. If anything is strange,"
+	@echo "*** please re-run your current make command."
+	@echo "***"
+	@sleep 2
+
+config.status: configure
+	./config.status --recheck
+
+leafnode.spec: $(srcdir)/leafnode.spec.in config.status
 	./config.status
 
 %.8: %.8.in config.status
@@ -302,98 +583,149 @@ leafnode.spec: leafnode.spec.in config.status
 %.1: %.1.in config.status
 	./config.status
 
+.PHONY:	rpm
 rpm: dist leafnode.spec
-	rm -f $(RPMSRC)/SOURCES/leafnode-$(VERSION).tar.gz
 	-ln -s `pwd`/leafnode-$(VERSION).tar.gz $(RPMSRC)/SOURCES
-	rm -f $(RPMSRC)/SPECS/leafnode.spec
 	-ln -s `pwd`/leafnode.spec $(RPMSRC)/SPECS
-	rpm -ba $(RPMSRC)/SPECS/leafnode.spec
+	unset IFS ; rpm -ba $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
+	| grep '^Wrote:' | $(SED) -e 's/^Wrote: //' \
+	| while read r ; do mv "$$r" . || exit 1 ; done
 
 .PHONY:	depend
-depend:
-	$(SHELL) makedepend.sh Makefile.in *.c
+depend: config_defs.h
+	$(SHELL) -c "OWD=\"`pwd`\" ; cd $(srcdir) ; f=\"\" ; for i in $(SRCFILES) ; do case \"\$$i\" in *.c) f=\"\$$f \$$i\" ;; esac ; done ; $(SHELL) makedepend.sh Makefile.in -I. -I\$$OWD $(CFLAGS) $(CPPFLAGS) -- \$$f"
 	./config.status
 
-# autoconf related
-
-configure: configure.in aclocal.m4
-	cd $(srcdir) && autoconf
-
-config.h.in: stamp-h.in
-stamp-h.in: configure.in aclocal.m4 acconfig.h
-	cd $(srcdir) && autoheader
-	echo timestamp >stamp-h.in
-
-config.h: stamp-h
-stamp-h: config.h.in config.status
-	./config.status
-
-Makefile: Makefile.in config.status
-	./config.status
-
-config.status: configure
-	./config.status --recheck
-
+# - automatic dependencies - 
+# DO NOT ADD ANYHTING BELOW THIS LINE, 
+# IT WILL BE LOST IF YOU UPDATE THE DEPENDENCIES
+# ----------------------------------------------------------------------
 
 # DO NOT DELETE
 
-activutil.o: activutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
-applyfilter.o: applyfilter.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
-artutil.o: artutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
-b_sortnl.o: b_sortnl.c
-checkgroups.o: checkgroups.c leafnode.h config.h
-config.o: config.c
-configparam.o: configparam.c config_defs.h configparam.h config.h
-configparam_data.o: configparam_data.c configparam.h config.h \
- config_defs.h
-configutil.o: configutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h config_defs.h configparam.h get.h
+activutil.o: activutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h format.h \
+ mastring.h
+applyfilter.o: applyfilter.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h
+artutil.o: artutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h mastring.h
+b_sortnl.o: b_sortnl.c leafnode.h attributes.h redblack.h \
+ config.h
+checkgroups.o: checkgroups.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h
+configparam.o: configparam.c config_defs.h \
+ configparam.h config.h
+configutil.o: configutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h \
+ config_defs.h configparam.h get.h
+copyfile.o: copyfile.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h
+critmem_calloc.o: critmem_calloc.c critmem.h attributes.h ln_log.h
 critmem_malloc.o: critmem_malloc.c critmem.h ln_log.h attributes.h
 critmem_realloc.o: critmem_realloc.c critmem.h ln_log.h attributes.h
-dirutil.o: dirutil.c ln_log.h attributes.h leafnode.h config.h
-fetchnews.o: fetchnews.c leafnode.h config.h get.h critmem.h ln_log.h \
- attributes.h
-filterutil.o: filterutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
+critmem_strdup.o: critmem_strdup.c critmem.h ln_log.h attributes.h
+dirutil.o: dirutil.c mastring.h leafnode.h attributes.h redblack.h \
+ config.h
+fetchnews.o: fetchnews.c leafnode.h attributes.h redblack.h \
+ config.h get.h critmem.h ln_log.h \
+ mastring.h format.h
+filterutil.o: filterutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h
+fopen_reg.o: fopen_reg.c leafnode.h attributes.h redblack.h \
+ config.h
 format_ulong.o: format_ulong.c format.h
-getaline.o: getaline.c getline.h config.h ln_log.h attributes.h \
- leafnode.h
+format_ulong0.o: format_ulong0.c format.h
 get_any.o: get_any.c get.h
-getline.o: getline.c critmem.h getline.h config.h
+getaline.o: getaline.c getline.h config.h \
+ ln_log.h attributes.h leafnode.h redblack.h
+getfoldedline.o: getfoldedline.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h
+getline.o: getline.c leafnode.h attributes.h redblack.h \
+ config.h getline.h critmem.h
 h_error.o: h_error.c h_error.h
 inet_ntop.o: inet_ntop.c config.h
+leafnode-version.o: leafnode-version.c leafnode.h attributes.h \
+ redblack.h config.h
 ln_log.o: ln_log.c ln_log.h attributes.h
 ln_log_open.o: ln_log_open.c ln_log.h attributes.h
-localutil.o: localutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
-miscutil.o: miscutil.c leafnode.h config.h critmem.h ugid.h ln_log.h \
- attributes.h
-mkstemp.o: mkstemp.c config.h
-newsq.o: newsq.c leafnode.h config.h
-nntpd.o: nntpd.c leafnode.h config.h critmem.h ln_log.h attributes.h \
- get.h
-nntputil.o: nntputil.c leafnode.h config.h ln_log.h attributes.h \
- h_error.h
-rnews.o: rnews.c leafnode.h config.h get.h critmem.h ln_log.h \
- attributes.h
-strdup.o: strdup.c config.h
-strutil.o: strutil.c leafnode.h config.h critmem.h
-t_configparam.o: t_configparam.c configparam.h config.h
-texpire.o: texpire.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h format.h
-t_format_ulong.o: t_format_ulong.c format.h
-t_ln_log.o: t_ln_log.c ln_log.h attributes.h
+localutil.o: localutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h mastring.h
+lockfile.o: lockfile.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h critmem.h
+log_close.o: log_close.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+log_fclose.o: log_fclose.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+log_fsync.o: log_fsync.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+log_rename.o: log_rename.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+log_unlink.o: log_unlink.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+masock_sa2addr.o: masock_sa2addr.c masock.h \
+ config.h
+masock_sa2name.o: masock_sa2name.c masock.h \
+ config.h
+mastrcpy.o: mastrcpy.c mastring.h
+mastring.o: mastring.c mastring.h attributes.h getline.h \
+ config.h
+mastrncpy.o: mastrncpy.c mastring.h
+mergesort.o: mergesort.c leafnode.h attributes.h redblack.h \
+ config.h
+miscutil.o: miscutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ugid.h ln_log.h \
+ format.h msgid.h mastring.h get.h
+mkdir_parent.o: mkdir_parent.c ln_dir.h
+msgid_hash.o: msgid_hash.c msgid.h
+msgid_sanitize.o: msgid_sanitize.c msgid.h
+newsq.o: newsq.c leafnode.h attributes.h redblack.h \
+ config.h
+nfswrite.o: nfswrite.c leafnode.h attributes.h redblack.h \
+ config.h
+nntpd.o: nntpd.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h get.h \
+ mastring.h h_error.h masock.h
+nntputil.o: nntputil.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h h_error.h
+parserange.o: parserange.c leafnode.h attributes.h redblack.h \
+ config.h get.h
+putaline.o: putaline.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h mastring.h
+queues.o: queues.c ln_log.h attributes.h leafnode.h redblack.h \
+ config.h critmem.h
+redblack.o: redblack.c redblack.h
+rnews.o: rnews.c leafnode.h attributes.h redblack.h \
+ config.h get.h critmem.h ln_log.h
+sort.o: sort.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h
+store.o: store.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h mastring.h \
+ format.h ln_dir.h
+strutil.o: strutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h mastring.h
+sync_dir.o: sync_dir.c leafnode.h attributes.h redblack.h \
+ config.h mastring.h
+sync_link.o: sync_link.c leafnode.h attributes.h redblack.h \
+ config.h
+tab2spc.o: tab2spc.c leafnode.h attributes.h redblack.h \
+ config.h
+texpire.o: texpire.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h format.h
+timeout_getaline.o: timeout_getaline.c leafnode.h attributes.h \
+ redblack.h config.h ln_log.h
 ugid_gensure.o: ugid_gensure.c ugid.h
-ugid_ggetbyuname.o: ugid_ggetbyuname.c ugid.h
 ugid_gget.o: ugid_gget.c ugid.h
+ugid_ggetbyuname.o: ugid_ggetbyuname.c ugid.h
 ugid_gset.o: ugid_gset.c ugid.h
 ugid_uensure.o: ugid_uensure.c ugid.h
-ugid_ugetbyuname.o: ugid_ugetbyuname.c ugid.h
 ugid_uget.o: ugid_uget.c ugid.h
+ugid_ugetbyuname.o: ugid_ugetbyuname.c ugid.h
 ugid_uset.o: ugid_uset.c ugid.h
 vsnprintf.o: vsnprintf.c config.h
-xoverutil.o: xoverutil.c leafnode.h config.h critmem.h ln_log.h \
- attributes.h
+wildmat.o: wildmat.c leafnode.h attributes.h redblack.h \
+ config.h
+writes.o: writes.c leafnode.h attributes.h redblack.h \
+ config.h
+xoverutil.o: xoverutil.c leafnode.h attributes.h redblack.h \
+ config.h critmem.h ln_log.h get.h

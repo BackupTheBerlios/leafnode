@@ -1,12 +1,11 @@
-dnl autoconf script for leafnode
-dnl written by Cornelius Krasel & Matthias Andree, 1999-2000
+nl autoconf script for leafnode -*- m4 -*-
+dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(leafnode.h)
+AC_INIT([leafnode],[2.0b8_ma7.7pre],[matthias.andree@gmx.de])
+AC_PREREQ(2.52)
+AC_REVISION($Revision: 1.12 $)
+AC_CONFIG_SRCDIR([leafnode.h])
 AC_CONFIG_HEADER(config.h)
-
-dnl Version information
-VERSION="2.0b6_ma1"
-AC_SUBST(VERSION)
 
 dnl Checks for programs.
 AC_PROG_AWK
@@ -14,19 +13,29 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-AC_CHECK_PROG( AR, ar, ar )
-AC_PATH_PROG( LYNX, lynx )
-AC_PATH_PROG( RPM, rpm )
-AC_PATH_PROG( GZIP, gzip, false )
-AC_PATH_PROG( BZIP2, bzip2, false )
+AC_CHECK_PROG(AR,ar,ar)
+AC_PATH_PROG(LYNX,lynx,no)
+AC_PATH_PROG(RPM,rpm)
+AC_PATH_PROG(CAT,cat,false)
+AC_PATH_PROG(GZIP,gzip,false)
+AC_PATH_PROG(BZIP2,bzip2,false)
+AC_PATH_PROG(SED,sed,false)
 
 dnl If we're using gcc, enable some warnings
+AC_CACHE_CHECK(for additional compiler options, ac_cv_prog_gcc_flags, [
+ac_cv_prog_gcc_flags=""
 if test "$GCC" = yes
 then
-GCC_FLAGS="-Wall -W -Wstrict-prototypes -Wmissing-prototypes"
-else
-GCC_FLAGS=""
-fi
+  echo "void dummy(void);" >configure-dummy.c
+  echo "void dummy(void) {}" >>configure-dummy.c
+  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -Wunreachable-code -ggdb -fno-common ; do
+    $CC $i $ac_cv_prog_gcc_flags -c configure-dummy.c >/dev/null 2>&1 && 
+    ac_cv_prog_gcc_flags="$ac_cv_prog_gcc_flags $i"
+  done
+fi])
+rm -f configure-dummy.c configure-dummy.o
+GCC_FLAGS=$ac_cv_prog_gcc_flags
+AC_SUBST(GCC_FLAGS)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -35,20 +44,36 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([errno.h fcntl.h limits.h sys/time.h syslog.h unistd.h])
 
 dnl Check whether all necessary include files are there
-AC_MSG_CHECKING(for system include files)
-AC_CACHE_VAL(cf_cv_sysheaders, AC_TRY_COMPILE([
+AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/param.h>],[
      return 0;],
    [cf_cv_sysheaders="yes"],
    [cf_cv_sysheaders="no"])
-  )
-if test "$cf_cv_sysheaders" = "yes"
+)
+if test "$cf_cv_sysheaders" = "no"
 then
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
   AC_MSG_ERROR(Kernel sources not installed - unable to continue)
+fi
+
+dnl Check whether putenv uses a copy of the string
+AC_CACHE_CHECK(if putenv copies the string, cf_cv_putenv_copies, AC_TRY_RUN([
+#define __USE_XOPEN
+#include <stdlib.h>
+int main(void) {
+ 	char string[]="PUTENV_COPIES=1";
+	char *e;
+	if (putenv(string)) { exit(2); }
+	string[strlen(string)-1] = '0';
+	e = getenv("PUTENV_COPIES");
+	if (!e) { exit(2); }
+	exit (e[strlen(e)-1] == '0' ? 1 : 0);
+}
+],[cf_cv_putenv_copies="yes"],[cf_cv_putenv_copies="no"],[ : ])
+)
+if test "$cf_cv_putenv_copies" = "yes"
+then
+  AC_DEFINE(PUTENV_COPIES)
 fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -61,22 +86,21 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 dnl Check whether socklen_t is defined in /usr/include/sys/socket.h
-AC_MSG_CHECKING(for socklen_t)
-AC_CACHE_VAL(cf_cv_socklen_t, AC_TRY_COMPILE([
+AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>],[
     socklen_t fodder;
     return fodder;],
    [cf_cv_socklen_t="yes"],
    [cf_cv_socklen_t="no"])
-  )
+)
 if test "$cf_cv_socklen_t" = "yes"
 then
-  AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_SOCKLEN_T)
-else
-  AC_MSG_RESULT(no)
 fi
+
+dnl check whether to use dmalloc
+PETI_WITH_DMALLOC
 
 dnl check where to put the spooldir
 AC_MSG_CHECKING(spooldir)
@@ -101,13 +125,11 @@ else
   CONFDIR="$sysconfdir"
 fi
 if test "$CONFDIR" != "$sysconfdir"; then 
-  AC_WARN(***)
-  AC_WARN(*** overriding sysconfdir to $CONFDIR)
-  AC_WARN(*** use --sysconfdir to fix)
-  AC_WARN(*** use --sysconfdir='\$prefix/etc' to get)
-  AC_WARN(*** the default autoconf behaviour)
-  AC_WARN(***)
-  sleep 1
+  AC_MSG_WARN([overriding sysconfdir to $CONFDIR])
+  AC_MSG_WARN([use --sysconfdir to fix])
+  AC_MSG_WARN([use --sysconfdir='\$prefix/etc' to get])
+  AC_MSG_WARN([the default autoconf behaviour])
+  sleep 2
 fi
 sysconfdir=$CONFDIR
 AC_SUBST(sysconfdir)
@@ -141,20 +163,37 @@ AC_CHECK_LIB(crypt, crypt, [CRYPTLIB="-lcrypt"])
 AC_SUBST(CRYPTLIB)
 
 dnl Check for PCRE library.
-AC_MSG_CHECKING(if you have pcre.h)
-AC_CACHE_VAL(ac_cv_header_pcre_h,AC_TRY_COMPILE([#include <pcre.h>],
-[return 0;],[ac_cv_header_pcre_h=yes],[ac_cv_header_pcre_h=no]))
-AC_MSG_RESULT($ac_cv_header_pcre_h)
+AC_PATH_PROG(PCRECONFIG,pcre-config,no)
+if test "$PCRECONFIG" != "no" ; then
+  CF=`$PCRECONFIG --cflags`
+  if echo "$CFLAGS" | grep >/dev/null 2>&1 "$CF" 
+  then :
+  else echo "adding $CF to CFLAGS" ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
+  fi
+  LF=`$PCRECONFIG --libs`
+  if echo "$LDFLAGS" | grep >/dev/null 2>&1 "$LF" 
+  then :
+  else echo "adding $LF to LDFLAGS" ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
+  fi
+fi
+
+AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
+  AC_TRY_COMPILE([#include <pcre.h>],
+	[return 0;],
+	[ac_cv_header_pcre_h=yes],
+	[ac_cv_header_pcre_h=no])
+])
+
 if test "$ac_cv_header_pcre_h" = yes
 then
-  # do not add this to LIBS
+  # do not add this to LIBS (causes unnecessary linkage)
   AC_CHECK_LIB(pcre, pcre_compile, LINKPCRELIB="-lpcre")
 fi
+
 if test "$ac_cv_lib_pcre_pcre_compile" = yes
 then
   AC_DEFINE(HAVE_LIBPCRE)
-  AC_MSG_CHECKING(for pcre_compile version)
-  AC_CACHE_VAL(cf_cv_new_pcre_compile,[AC_TRY_COMPILE([
+  AC_CACHE_CHECK(for new pcre_compile API,cf_cv_new_pcre_compile,[AC_TRY_COMPILE([
 #include <pcre.h>],[
 	char * pattern;
 	int options;
@@ -164,16 +203,12 @@ then
 	pcre_compile(pattern, options, errptr, erroffset, tableptr);],
   [cf_cv_new_pcre_compile="yes"],
   [cf_cv_new_pcre_compile="no"])
- ])
+  ])
   if test $cf_cv_new_pcre_compile = "yes"
   then
-    AC_MSG_RESULT(2.01)
     AC_DEFINE(NEW_PCRE_COMPILE)
-  else
-    AC_MSG_RESULT(2.00)
   fi
-  AC_MSG_CHECKING(for pcre_exec version)
-  AC_CACHE_VAL(cf_cv_new_pcre_exec,[AC_TRY_COMPILE([
+  AC_CACHE_CHECK(for new pcre_exec API,cf_cv_new_pcre_exec,[AC_TRY_COMPILE([
 #include <pcre.h>],[
 	const pcre *pattern;
 	const pcre_extra *extra;
@@ -187,26 +222,30 @@ then
  ])
   if test $cf_cv_new_pcre_exec = "yes"
   then
-    AC_MSG_RESULT(2.06)
     AC_DEFINE(NEW_PCRE_EXEC)
-  else
-    AC_MSG_RESULT(2.05)
   fi
 fi
 
 if test "$ac_cv_lib_pcre_pcre_compile" != "yes"
 then
-  echo "*** I cannot find PCRE. leafnode depends on it."
   if test -d ${srcdir}/pcre ; then
-    echo "*** Trying to use PCRE from ${srcdir}/pcre"
+    echo "*** You don't have PCRE installed."
+    echo "*** Using PCRE from ${srcdir}/pcre"
     LINKPCRELIB="libpcre.a"
     PCRELIB="libpcre.a"
     AC_DEFINE(NEW_PCRE_COMPILE)
   else
+    echo "*** I cannot find PCRE. leafnode depends on it."
     echo
-    echo "*** Please download PCRE 3.4 or newer from http://www.pcre.org/"
+    echo "*** If you have PCRE installed, please locate"
+    echo "*** pcre.h and libpcre.a or libpcre.so.0 and report"
+    echo "*** the output of uname -a and the locations of these files"
+    echo "*** to matthias.andree@gmx.de"
+    echo
+    echo "*** If not, please download PCRE 3.4 or newer from http://www.pcre.org/"
     echo "*** and install it, preferably as shared version."
     echo "*** Then, reconfigure leafnode."
+    exit 1
   fi
 fi
 
@@ -214,8 +253,7 @@ AC_SUBST(PCRELIB)
 AC_SUBST(LINKPCRELIB)
 
 dnl Check for timezone and related stuff
-AC_MSG_CHECKING(for gmtoff in struct tm)
-AC_CACHE_VAL(cf_cv_have_gmtoff,[AC_TRY_COMPILE([
+AC_CACHE_CHECK(for gmtoff in struct tm,cf_cv_have_gmtoff,[AC_TRY_COMPILE([
 #include <time.h>],[
 	time_t now;
 	long gmtoff;
@@ -223,14 +261,11 @@ AC_CACHE_VAL(cf_cv_have_gmtoff,[AC_TRY_COMPILE([
 	now = time(0);
 	gmt = *(gmtime(&now));
 	gmtoff = gmt.tm_gmtoff;],
-   [cf_cv_have_gmtoff="yes"], [cf_cv_have_gmtoff="no"])
+   [cf_cv_have_gmtoff="yes"], 
+   [cf_cv_have_gmtoff="no"])
 ])
-if test $cf_cv_have_gmtoff = "yes"
-then
-  AC_MSG_RESULT(yes)
+if test $cf_cv_have_gmtoff = "yes" ; then
   AC_DEFINE(HAVE_GMTOFF)
-else
-  AC_MSG_RESULT(no)
 fi
 
 dnl Checks for library functions.
@@ -238,9 +273,7 @@ AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([getcwd gethostname gettext mkdir mktime regcomp rmdir socket strdup strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf])
-
-AC_REPLACE_FUNCS(getline inet_ntop)
+AC_CHECK_FUNCS([getcwd gethostname gettext mkdir mktime rmdir socket strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf])
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -253,12 +286,37 @@ AC_CHECK_FUNC(gethostent)
 if test $ac_cv_func_gethostent = no; then
   AC_CHECK_LIB(nsl, gethostent)
 fi
+
 AC_CHECK_FUNC(setsockopt)
 if test $ac_cv_func_setsockopt = no; then
   AC_CHECK_LIB(socket, setsockopt)
 fi
 
-### The 'pcre' library uses non-standard #define's
+AC_REPLACE_FUNCS(mergesort getline inet_ntop)
+
+dnl Check whether the system has AF_INET6
+AC_CACHE_CHECK(for AF_INET6 in <sys/socket.h>, cf_cv_ipv6, AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+],[return AF_INET6;],[cf_cv_ipv6=yes],[cf_cv_ipv6=no])
+)
+if test "$cf_cv_ipv6" = "yes"
+then
+  AC_MSG_NOTICE([------------------------------------------------------])
+  AC_MSG_NOTICE([AF_INET6 found, enabling IPv6.])
+  AC_DEFINE(HAVE_IPV6)
+else
+  AC_MSG_NOTICE([------------------------------------------------------])
+  AC_MSG_NOTICE([No AF_INET6 found, sticking with IPv4.])
+fi
+AC_MSG_NOTICE([------------------------------------------------------])
+AC_MSG_NOTICE([If this was misdetected, then run either])
+AC_MSG_NOTICE([  env cf_cv_ipv6=no /bin/sh ./config.status --recheck])
+AC_MSG_NOTICE([or])
+AC_MSG_NOTICE([  env cf_cv_ipv6=yes /bin/sh ./config.status --recheck])
+AC_MSG_NOTICE([------------------------------------------------------])
+
+dnl The 'pcre' library uses non-standard defines
 test ".$ac_cv_func_strerror" != ".yes" && \
 test ".$cf_cv_have_sys_errlist" = ".yes" && \
 	PCRE_DEFINES="$PCRE_DEFINES -DSTRERROR_FROM_ERRLIST"
@@ -266,15 +324,11 @@ test ".$ac_cv_func_memmove" != ".yes" && \
 test ".$cf_cv_good_bcopy" = ".yes" && \
 	PCRE_DEFINES="$PCRE_DEFINES -DUSE_BCOPY"
 
-dnl check whether called with --with-ipv6
-AC_ARG_WITH(ipv6,
-[  --with-ipv6             support IPv6],
-  if test "$withval" != "no" ; then
-    AC_DEFINE(HAVE_IPV6)
-  fi
-)
-
 AC_SUBST(PCRE_DEFINES)
-AC_SUBST(GCC_FLAGS)
 
-AC_OUTPUT(stamp-h Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8 pcre/Makefile)
+AC_CONFIG_FILES([stamp-h Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8], echo timestamp >stamp-h)
+
+if test -d ${srcdir}/pcre -a -f ${srcdir}/pcre/Makefile.in ; then
+  AC_CONFIG_FILES([pcre/Makefile])
+fi
+AC_OUTPUT

@@ -8,8 +8,9 @@
  *
  * See README for restrictions on the use of this software.
  */
-
 #include "leafnode.h"
+#include "critmem.h"
+
 #include <sys/types.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -28,7 +29,6 @@
 int debug = 0;
 
 void process_input(char *s);
-
 void
 process_input(char *s)
 {
@@ -37,10 +37,9 @@ process_input(char *s)
 
     f = fopen(s, "r");
     if (!f) {
-	fprintf(stderr, "%s deleted (shouldn't happen)\n", s);
+	fprintf(stderr, "%s deleted(shouldn't happen)\n", s);
 	return;
     }
-
     while ((l = getaline(f))) {
 	char *p;
 	struct newsgroup *g;
@@ -54,11 +53,10 @@ process_input(char *s)
 	    if ((g = findgroup(l)) != NULL) {
 		fprintf(stderr, "%s\n", l);
 		if (strlen(p) > 0)
-		    g->desc = strdup(p);
+		    g->desc = critstrdup(p, "process_input");
 	    }
 	}
     }
-
     fclose(f);
 }
 
@@ -77,14 +75,13 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    extern int optind;
     int option;
     FILE *f;
 
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
     while ((option = getopt(argc, argv, "DVv")) != -1) {
-	if (!parseopt("checkgroups", option, NULL, NULL)) {
+	if (!parseopt("checkgroups", option, NULL, NULL, 0)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -93,9 +90,7 @@ main(int argc, char *argv[])
 	usage();
 	exit(EXIT_FAILURE);
     }
-
     debug = debugmode;
-
     /* Check whether input file exists */
     if (!(f = fopen(argv[optind], "r"))) {
 	if (errno == EACCES)
@@ -104,14 +99,21 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "%s: checkgroups file %s doesn't exist\n",
 		    argv[0], argv[1]);
 	exit(EXIT_FAILURE);
-    } else
+    } else {
 	fclose(f);
+    }
 
     whoami();
     umask(2);
 
-    readactive();		/* read groupinfo file */
+    /* lock */
+    if (lockfile_exists(FALSE)) {
+	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
+	exit(EXIT_FAILURE);
+    }
+    rereadactive();		/* read groupinfo file */
     process_input(argv[1]);
     writeactive();		/* write groupinfo file */
+    (void)log_unlink(lockfile);	/* unlock */
     exit(0);
 }

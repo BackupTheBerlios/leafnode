@@ -10,7 +10,6 @@
 #include "leafnode.h"
 #include "critmem.h"
 #include "ln_log.h"
-
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -20,11 +19,18 @@
 #include <string.h>
 #include <unistd.h>
 #include <utime.h>
+#include <fcntl.h>
+
+#ifdef DEBUG_DMALLOC
+#include <dmalloc.h>
+#endif
 
 #define MAXHEADERSIZE 5000
 
+extern char *optarg;
+extern int optind, opterr, optopt;
+
 int debug = 0;
-/* int verbose; */
 int first, last;
 
 static void
@@ -50,26 +56,32 @@ main(int argc, char *argv[])
     unsigned long n;
     char *k, *l, *msgid;
     const char *msgidpath = "";
-    FILE *f;
+    int f;
     DIR *d;
     struct dirent *de;
     struct stat st;
     struct utimbuf u;
     struct newsgroup *g;
-    char *conffile;
+    char conffile[PATH_MAX];
     int err;
 
-    conffile = critmalloc(strlen(libdir) + 10,
-			  "Allocating space for config file name");
-    sprintf(conffile, "%s/config", libdir);
-
-    if (!initvars(argv[0]))
+    err = snprintf(conffile, sizeof(conffile), "%s/config", libdir);
+    if (err < 0 || err >= (int)sizeof(conffile)) {
+	/* overflow */
+	fprintf(stderr, "caught string overflow in configuration file name\n");
 	exit(EXIT_FAILURE);
+    }
+
+    if (!initvars(argv[0])) {
+	fprintf(stderr, "%s: cannot initialize\n", argv[0]);
+	exit(EXIT_FAILURE);
+    }
 
     ln_log_open("applyfilter");
 
     while ((option = getopt(argc, argv, "F:DVv")) != -1) {
-	if (!parseopt("applyfilter", option, optarg, conffile)) {
+	if (!parseopt("applyfilter", option, optarg, conffile,
+		      sizeof(conffile))) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -85,27 +97,27 @@ main(int argc, char *argv[])
 	exit(2);
     }
 
-    if (filterfile && readfilter(filterfile));
-    else {
+    if (!filterfile || !readfilter(filterfile)) {
 	printf("Nothing to filter -- no filterfile found.\n");
 	exit(EXIT_FAILURE);
     }
+
     if ((myfilter = selectfilter(argv[optind])) == NULL) {
-	printf("Nothing to filter -- no regexp for %s found.\n", argv[1]);
-	exit(EXIT_FAILURE);
+	printf("Nothing to filter -- no regexp for %s found.\n", argv[optind]);
+	exit(EXIT_SUCCESS);
     }
 
-    if (lockfile_exists(FALSE, FALSE))
-	exit(EXIT_FAILURE);
-    readactive();
+    whoami();
 
+    if (lockfile_exists(FALSE))
+	exit(EXIT_FAILURE);
+    rereadactive();
     g = findgroup(argv[optind]);
     if (!g) {
 	printf("Newsgroups %s not found in active file.\n", argv[optind]);
 	unlink(lockfile);
 	exit(EXIT_FAILURE);
     }
-
     g->first = INT_MAX;
     g->last = 0;
     if (!chdirgroup(g->name, FALSE)) {
@@ -118,12 +130,12 @@ main(int argc, char *argv[])
 	unlink(lockfile);
 	exit(EXIT_FAILURE);
     }
-
     i = 0;
     deleted = 0;
     kept = 0;
-    l = critmalloc(MAXHEADERSIZE + 1, "Space for article");
+    l = (char *)critmalloc(MAXHEADERSIZE + 1, "Space for article");
     while ((de = readdir(d)) != NULL) {
+	msgid = 0;
 	if (!isdigit((unsigned char)de->d_name[0])) {
 	    /* no need to stat file */
 	    continue;
@@ -140,13 +152,12 @@ main(int argc, char *argv[])
 	    }
 	}
 	stat(de->d_name, &st);
-	if (S_ISREG(st.st_mode) && (f = fopen(de->d_name, "r")) != NULL) {
-	    fread(l, sizeof(char), MAXHEADERSIZE, f);
-	    if (ferror(f)) {
-		printf("error reading %s\n", de->d_name);
-		clearerr(f);
+	if (S_ISREG(st.st_mode)
+	    && (f = open(de->d_name, O_RDONLY))) {
+	    if (read(f, l, MAXHEADERSIZE) < 0) {
+		printf("error reading %s: %s\n", de->d_name, strerror(errno));
 	    }
-	    fclose(f);
+	    close(f);
 	    msgid = mgetheader("Message-ID:", l);
 	    if ((k = strstr(l, "\n\n")) != NULL) {
 		*k = '\0';	/* cut off body */
@@ -160,7 +171,8 @@ main(int argc, char *argv[])
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
 		    msgidpath = lookup(msgid);
-		    if ((stat(msgidpath, &st) == 0) && (st.st_nlink < 2)) {
+		    if ((stat(msgidpath, &st) == 0)
+			&& (st.st_nlink < 2)) {
 			if (unlink(msgidpath) == 0)
 			    deleted++;
 		    }
@@ -182,6 +194,8 @@ main(int argc, char *argv[])
 	    }
 	} else
 	    printf("could not open %s\n", de->d_name);
+	if (msgid)
+	    free(msgid);
     }
     closedir(d);
     free(l);
@@ -189,7 +203,6 @@ main(int argc, char *argv[])
 	writeactive();
     unlink(lockfile);
     printf("%d articles deleted, %d kept.\n", deleted, kept);
-
     if (verbose)
 	printf("Updating .overview file\n");
     getxover();

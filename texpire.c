@@ -1,10 +1,32 @@
 /*
-  texpire -- expire old articles
+texpire -- expire old articles
 
-  See AUTHORS for copyright holders and contributors.
-  
-  See README for restrictions on the use of this software.
+Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
+Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
+22646949.
+Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+and Randolf Skerka <Randolf.Skerka@gmx.de>.
+Copyright of the modifications 1997.
+Modified by Kent Robotti <robotti@erols.com>. Copyright of the
+modifications 1998.
+Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
+Copyright of the modifications 1998.
+Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Copyright of the modifications 1998, 1999.
+Modified by Kazushi "Jam" Marukawa <jam@pobox.com>.
+Copyright of the modifications 1998, 1999.
+Modified by Joerg Dietrich <joerg@dietrich.net>.
+Copyright of the modifications 1999.
+Modified by Stefan Wiens <s.wi@gmx.net>.
+Copyright of the modifications 2001.
+
+See README for restrictions on the use of this software.
 */
+
+/* FIXME: scan for directories not listed in groupinfo (is this what
+ * texpire iterates over to expire?) and add them to allow them to be
+ * expired. 
+ */
 
 #include "leafnode.h"
 #include "critmem.h"
@@ -29,7 +51,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-/* FIXME: xoverstuff belongs to xover.h or something */
+#ifdef DEBUG_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define SUBJECT 1
 #define FROM 2
 #define DATE 3
@@ -39,57 +64,535 @@
 #define LINES 7
 #define XREF 8
 
-#define THREADSAFETY 99		/* We could set this to 1 if everybody obeyed
-				 * grandson of RFC 1036 */
-
-time_t now;
-
-int default_expire;
 
 int debug = 0;
 
-int use_atime = 1;		/* look for atime on articles to expire */
+static int dryrun = 0;		/* do not delete articles */
+static int use_atime = 1;	/* look for atime on articles to expire */
+static int repair_spool = 0;
+static int group_relinked = FALSE;
+				/* flags if current group has been relinked */
 
-struct exp {
-    char *xover;		/* putting this at the end of the struct leads
-				   to segfaults, indicating there is something wrong */
-    int kill;
-    unsigned long artno;	/* also present in xover, but needed so often that
-				   we it store seperately */
+char gdir[PATH_MAX];		/* name of current group directory */
+unsigned long deleted, kept;
+
+extern unsigned long xcount;
+
+/* Thread expiry by Stefan Wiens 2001-01-08 */
+
+/*
+ * All Message-IDs in the Message-ID: and References: XOVER field of an
+ * article together are considered as a thread. The first encountered
+ * article starts an initial thread.
+ * For all subsequent articles, we check if any of its IDs is member of an
+ * already known thread. Then we put together all subthreads this article
+ * is a member of.
+ * After all articles have been considered, we have a list of all threads
+ * in this group.
+ * Each thread is then searched for an article that has been created/read
+ * more recently than the expiry limit. If one exists, the entire thread
+ * is rescued from expiry. (Thanks to Joerg Dietrich for inspiration.)
+ *
+ * "threadlist" is the origin of a linked list of threads. Each element of
+ * this list points to a list of Message-IDs known to be members of this
+ * thread. Each Message-ID element (rnode) itself has a pointer to its
+ * thread list element, so we can easily determine which thread it
+ * belongs to.
+ * For quick lookup by Message-ID, each of those Message-ID elements
+ * (rnode) is also part of a list which contains all IDs with the same
+ * hash value. These hash lists are pointed to by a hash table.
+ */
+
+int use_middir = 0;		/* don't use message.id directory for stat() */
+
+struct rnode {
+    struct rnode *nhash;	/* next rnode in this hash list */
+    struct rnode *nthread;	/* next rnode in this thread */
+    struct thread *fthread;	/* start of this thread */
+    unsigned long artno;	/* article number, 0 if unknown */
+    const char *mid;		/* Message-ID */
 };
 
-char *xoverextract(char *xover, unsigned int field);
-void savethread(struct exp *articles, char *refs, unsigned long acount);
+struct thread {
+    struct thread *next;	/* next thread in list */
+    struct rnode *subthread;	/* first rnode in this thread */
+};
 
-void
-free_expire(void)
+#define HASHSIZE 12345
+
+struct rnode *hashtab[HASHSIZE];	/* each entry points to a list of */
+					/* rnodes with same hash value */
+
+static unsigned long hashval(const struct rnode *node);
+static void hash_thread(struct thread *thread);
+static struct rnode *newnode(const char *mid, unsigned long artno);
+static struct rnode *findnode(const struct rnode *node);
+static void merge_threads(struct thread *a, struct thread *b);
+static struct thread *xoverthread(char *xoverline, unsigned long artno);
+static struct thread *build_threadlist(unsigned long acount);
+static void free_threadlist(struct thread *);
+static unsigned long count_threads(struct thread *);
+static void remove_newer(struct thread *, time_t);
+static void delete_article(struct rnode *r);
+static void delete_threads(struct thread *);
+static void relink(const char *);
+static unsigned long low_wm(unsigned long high);
+
+
+/* very simple hash function ;-) */
+static unsigned long
+hashval(const struct rnode *node)
 {
-    struct expire_entry *a, *b;
+    unsigned long val;
+    const char *p;
+    int i;
 
-    b = expire_base;
-    while ((a = b)) {
-	b = a->next;
-	free(a);
+    val = 0;
+    p = node->mid;
+    for (i = 0; i < 20 && p && *p; ++i) {
+	val += val ^ (i + *p++);
+    }
+    return (val % HASHSIZE);
+}
+
+/* put all references in this thread into hash table */
+void
+hash_thread(struct thread *th)
+{
+    struct rnode *r;
+    unsigned long h;
+
+    r = th->subthread;
+    while (r) {
+	h = hashval(r);		/* no need to check for duplicates ;-) */
+	r->nhash = hashtab[h];
+	hashtab[h] = r;		/* push on list */
+	r = r->nthread;
     }
 }
 
-/*
-05/27/97 - T. Sweeney - Find a group in the expireinfo linked list and return
-                        its expire time. Otherwise, return zero.
-*/
+/* create a new reference node */
+struct rnode *
+newnode(const char *mid, unsigned long artno)
+{
+    struct rnode *newn;
+
+    newn = (struct rnode *)critmalloc(sizeof(struct rnode),
+				      "Allocating newnode reference");
+    newn->nhash = newn->nthread = NULL;
+    newn->fthread = NULL;
+    newn->artno = artno;
+    newn->mid = mid;
+    return newn;
+}
+
+/* find node with same message-ID, return node or NULL if not found */
+struct rnode *
+findnode(const struct rnode *node)
+{
+    struct rnode *f;
+
+    if (!*(node->mid)) {
+	return NULL;
+    }
+    f = hashtab[hashval(node)];
+    while (f) {
+	if (strcmp(f->mid, node->mid) == 0) {
+	    return f;
+	}
+	f = f->nhash;		/* try next in list */
+    }
+    return NULL;
+}
+
+/* merge thread b into a */
+void
+merge_threads(struct thread *a, struct thread *b)
+{
+    struct rnode *r;
+
+    if (!(r = b->subthread)) {	/* nothing to do */
+	return;
+    }
+    while (r->fthread = a,	/* update start of thread pointer */
+	   r->nthread) {	/* for all references in thread */
+	r = r->nthread;
+    }				/* r now points to the last reference in b */
+    r->nthread = a->subthread;	/* now link b in front of a */
+    a->subthread = b->subthread;
+    b->subthread = NULL;	/* FIXME: the now empty thread b */
+    /* could immediately be removed from threadlist */
+}
+
+/* 
+ * return a thread built from an XOVER line,
+ * containing its Message-ID and all references
+ */
+struct thread *
+xoverthread(char *xoverline, unsigned long artno)
+{
+    int i;
+    char *p, *q, *r;
+    struct thread *newthread;
+    struct rnode *node;
+
+    p = xoverline;
+    if (!p || !*p || !artno) {	/* illegal */
+	return NULL;
+    }
+    node = newnode("", artno);	/* make this the start of a new thread */
+    newthread = (struct thread *)critmalloc(sizeof(struct thread),
+					    "Allocating new thread");
+    newthread->next = NULL;
+    newthread->subthread = node;
+    node->fthread = newthread;
+    for (i = 0; i < MESSAGEID; ++i) {
+	if (!(p = strchr(p, '\t'))) {	/* find Message-ID field */
+	    return newthread;	/* cope with broken articles */
+	}
+	*p++ = '\0';
+    }
+    if (!(r = strchr(p, '\t'))) {
+	return newthread;
+    }
+    *r++ = '\0';		/* start of References */
+    if (!(p = strchr(p, '<')) || !(q = strchr(p, '>'))) {
+	return newthread;
+    }				/* p now is a valid Message-ID */
+    *++q = '\0';		/* zero terminate Message-ID */
+    node->mid = p;
+    p = q = r;			/* start of References: field */
+    if (!(r = strchr(r, '\t'))) {	/* end of references */
+	return newthread;
+    }
+    *r = '\0';
+    while (*q && q < r && (q = strchr(q, '>'))) {
+	*++q = '\0';		/* zero terminate this reference */
+	if ((p = strrchr(p, '<'))) {
+	    node = newnode(p, 0);	/* unknown artno */
+	    node->nthread = newthread->subthread;
+	    node->fthread = newthread;	/* put into this thread */
+	    newthread->subthread = node;
+	}
+	p = ++q;
+    }
+    return newthread;
+}
+
+/* 
+ * generate threadlist from xoverinfo
+ */
+struct thread *
+build_threadlist(unsigned long acount)
+{
+    unsigned long i;
+    struct thread *x, *firstfound;
+    struct thread *tl = 0;
+    struct rnode *f, *r, **u = 0;
+
+    for (i = 0; i < acount; ++i) {
+	if (xoverinfo[i].artno
+	    && xoverinfo[i].text
+	    && xoverinfo[i].exists
+	    && (x = xoverthread(xoverinfo[i].text, xoverinfo[i].artno))) {
+	    u = &(x->subthread);	/* needed for punching out elements */
+	    r = *u;
+	    firstfound = NULL;
+	    while (r) {
+		if ((f = findnode(r))) {	/* is this MID already known? */
+		    if (r->artno) {
+			if (f->artno == 0) {	/* possibly update artno */
+			    f->artno = r->artno;
+			} else if (f->artno != r->artno) {	/* duplicate */
+			    delete_article(r);
+			}
+		    }
+		    if (firstfound) {	/* link subthreads */
+			if (f->fthread != firstfound) {	/* not merged yet? */
+			    merge_threads(firstfound, f->fthread);
+			}
+		    } else {	/* this thread everything will go into */
+			firstfound = f->fthread;
+		    }
+		    *u = r->nthread;	/* remove this element from thread */
+		    free(r);
+		} else {
+		    u = &(r->nthread);
+		}
+		r = *u;
+	    }
+	    hash_thread(x);
+	    if (firstfound) {	/* this article is part of another thread */
+		merge_threads(firstfound, x);
+		free(x);
+	    } else {		/* entirely new thread */
+		x->next = tl;
+		tl = x;
+	    }
+	}
+    }
+    return tl;
+}
+
+/* free all rnodes and threads, empty hash table */
+void
+free_threadlist(struct thread *threadlist)
+{
+    unsigned long i;
+    struct rnode *r;
+    struct thread *t;
+
+    for (i = 0; i < HASHSIZE; ++i) {
+	while ((r = hashtab[i])) {
+	    hashtab[i] = r->nhash;
+	    free(r);
+	}
+    }
+    while ((t = threadlist)) {
+	threadlist = t->next;
+	free(t);
+    }
+}
+
+/* return number of threads in threadlist */
+static unsigned long
+count_threads(struct thread *t)
+{
+    unsigned long n = 0;
+
+    n = 0;
+
+    for (; t; t = t->next)
+	if (t->subthread)
+	    ++n;
+
+    return n;
+}
+
+/** remove all threads from expire list that have at least one new member
+ * assumes its cwd is the appropriate news group directory
+ */
+static void
+remove_newer(struct thread *threadlist, time_t expire)
+{
+    struct thread *t;
+
+    for (t = threadlist; t; t = t->next) {
+	struct rnode *r;
+	for (r = t->subthread; r; r = r->nthread) {
+	    if (r->artno) {
+		char name[40];
+		struct stat st;
+
+		str_ulong(name, r->artno);
+		if ((0 == stat(name, &st))
+		    && S_ISREG(st.st_mode)
+		    && ((use_atime ? st.st_atime : st.st_mtime)
+			> expire)) {
+		    /* a newer article was found, disconnect from
+		       threadlist.  we later free() from hashtab[] */
+		    t->subthread = NULL;
+		    break;
+		    /* no need to look further */
+		}
+	    }
+	}
+    }
+}
+
+/** delete article file which belongs to this node.
+ * r may be null.
+ * this function does nothing if the artno of this node is zero. */
+static void
+delete_article(struct rnode *r)
+{
+    char name[PATH_MAX];
+
+    if (!r || !r->artno) {
+	return;
+    }
+    str_ulong(name, r->artno);
+    if (dryrun) {
+	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+	       "dry-run: should delete %s/%lu", gdir, r->artno);
+	deleted++;
+    } else {
+	if (!unlink(name)) {
+	    if (debugmode & DEBUG_EXPIRE) {
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "deleted article %s/%lu", gdir, r->artno);
+	    }
+	    r->artno = 0;
+	    deleted++;
+	} else if (errno != ENOENT && errno != EEXIST) {
+	    /* if file was deleted already or it was not a file */
+	    /* but a directory, skip error message */
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		   "unlink %s/%lu: %m", gdir, r->artno);
+	}
+    }
+}
+
+/** delete all article files in all remaining threads */
+void
+delete_threads(struct thread *threadlist)
+{
+    struct thread *t;
+    struct rnode *r;
+
+    for (t = threadlist; t; t = t->next)
+	for (r = t->subthread; r; r = r->nthread)
+	    delete_article(r);
+}
+
+/** make sure group directory is consistent */
+static void
+killcruft(const char *groupname)
+{
+    struct rnode *r;
+    char name[PATH_MAX];
+    struct stat st, st2;
+    const char *m;
+    long i;
+
+    if (debugmode & DEBUG_EXPIRE)
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: enter killcruft", groupname);
+
+    for (i = 0; i < HASHSIZE; ++i) {
+	r = hashtab[i];
+	for (r = hashtab[i]; r; r = r->nhash) {
+	    if (r->artno && r->mid) {
+		str_ulong(name, r->artno);
+		if (!stat(name, &st)
+		    && S_ISREG(st.st_mode)) {
+		    /* check if message.id is the same file */
+		    m = lookup(r->mid);
+		    if (stat(m, &st2)) {
+			if (errno == ENOENT) {
+			    /* message.id file missing, kill off
+			     * article, since it has been left behind by
+			     * a crashed store() */
+			    if (debug & DEBUG_EXPIRE)
+				ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+				       "%s: article %lu has no "
+				       "message.id file", groupname, r->artno);
+			    delete_article(r);
+			}
+		    } else {
+			if (st2.st_ino != st.st_ino) {
+			    /* inode mismatch, relink from message.id */
+			    if (debug & DEBUG_EXPIRE)
+				ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+				       "%s: article %lu and message.id "
+				       "inode mismatch %lu != %lu",
+				       groupname,
+				       r->artno, (unsigned long)st.st_ino,
+				       (unsigned long)st2.st_ino);
+			    if (link(m, ".to.relink")
+				|| rename(".to.relink", name)) {
+				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				       "%s: cannot restore hard link "
+				       "%s -> %s: %m", groupname, m, name);
+			    } else {
+				ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+				       "%s: restored hard link "
+				       "%s -> %s", groupname, m, name);
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    /* FIXME: fsync directory here */
+
+    if (debugmode & DEBUG_EXPIRE)
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: exit killcruft", groupname);
+}
+
+/* create missing links in the message.id subdirectory */
+static void
+relink(const char *groupname)
+{
+    unsigned long i;
+    struct rnode *r;
+    const char *m;
+    char name[PATH_MAX];
+    struct stat st;
+
+    if (group_relinked) {	/* FIXME: this does not belong here */
+	return;			/* once per group is enough */
+    }
+    for (i = 0; i < HASHSIZE; ++i) {
+	r = hashtab[i];
+	for (r = hashtab[i]; r; r = r->nhash) {
+	    if (r->artno && r->mid) {
+		str_ulong(name, r->artno);
+		if (!stat(name, &st)
+		    && S_ISREG(st.st_mode)
+		    && (st.st_nlink < 2)
+		    && (m = lookup(r->mid))) {	/* repair fs damage */
+		    if (sync_link(name, m)) {
+			if (errno == EEXIST) {
+			    /* exists, but points to another file */
+			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				   "%s: cannot relink %s -> %s: file exists",
+				   groupname, name, m);
+			    delete_article(r);
+			} else {
+			    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				   "%s: relink %s -> %s failed: %m",
+				   groupname, name, m);
+			}
+		    } else {
+			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+			       "%s: relinked message %s to %s",
+			       groupname, name, m);
+		    }
+		}
+	    }
+	}
+    }
+    group_relinked = TRUE;	/* don't try twice for the same group */
+}
+
+/* 
+ * find lowest article number, lower than high,
+ * also count total number of articles
+ */
+unsigned long
+low_wm(unsigned long high)
+{
+    unsigned long low, i;
+    struct rnode *r;
+
+    low = high;
+    kept = 0;
+    for (i = 0; i < HASHSIZE; ++i) {
+	r = hashtab[i];
+	while (r) {
+	    if (r->artno) {	/* don't count nonexisting articles */
+		++kept;
+		if (r->artno < low) {
+		    low = r->artno;
+		}
+	    }
+	    r = r->nhash;
+	}
+    }
+    return low;
+}
 
 static time_t
 lookup_expire(char *group)
 {
     struct expire_entry *a;
 
-    a = expire_base;
-    while (a) {
-	if (!ngmatch(a->group, group))
+    for (a = expire_base; a; a = a->next) {
+	if (ngmatch(a->group, group) == 0)
 	    return a->xtime;
-	a = a->next;
     }
-    return 0;
+    return default_expire;
 }
 
 /*
@@ -111,8 +614,8 @@ legalxoverline(char *xover, unsigned long artno)
 	int c = (unsigned char)*p++;
 
 	if ((c != '\t' && c < ' ') || (c > 126 && c < 160)) {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG,
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		       "%lu xover error: non-printable chars.", artno);
 	    return 0;
 	}
@@ -121,8 +624,9 @@ legalxoverline(char *xover, unsigned long artno)
     p = xover;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Subject: header.", artno);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "%lu xover error: no Subject: header.", artno);
 	return 0;
     }
 
@@ -130,8 +634,9 @@ legalxoverline(char *xover, unsigned long artno)
 
     while (p != q) {
 	if (!isdigit((unsigned char)*p)) {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG, "%lu xover error: article "
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "%lu xover error: article "
 		       "number must consists of digits.", artno);
 	    return 0;
 	}
@@ -141,8 +646,9 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no From: header.", artno);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "%lu xover error: no From: header.", artno);
 	return 0;
     }
 
@@ -151,8 +657,9 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Date: header.", artno);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "%lu xover error: no Date: header.", artno);
 	return 0;
     }
 
@@ -161,8 +668,8 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "%lu xover error: no Message-ID: header.", artno);
 	return 0;
     }
@@ -172,8 +679,8 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "%lu xover error: no References: or Bytes: header.", artno);
 	return 0;
     }
@@ -181,25 +688,24 @@ legalxoverline(char *xover, unsigned long artno)
     /* message-id: <*@*> */
 
     if (*p != '<') {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "%lu xover error: Message-ID does not start with <.", artno);
 	return 0;
     }
-    while (p != q && *p != '@' && *p != '>' && *p != ' ') {
+    while (p != q && *p != '@' && *p != '>' && *p != ' ')
 	p++;
-    }
     if (*p != '@') {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "%lu xover error: Message-ID does not contain @.", artno);
 	return 0;
     }
     while (p != q && *p != '>' && *p != ' ')
 	p++;
     if ((*p != '>') || (++p != q)) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "%lu xover error: Message-ID does not end with >.", artno);
 	return 0;
     }
@@ -207,8 +713,9 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Bytes: header.", artno);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "%lu xover error: no Bytes: header.", artno);
 	return 0;
     }
 
@@ -216,24 +723,25 @@ legalxoverline(char *xover, unsigned long artno)
 
     while (p != q) {
 	if (*p != '<') {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG, "%lu xover error: "
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "%lu xover error: "
 		       "Reference does not start with <.", artno);
 	    return 0;
 	}
 	while (p != q && *p != '@' && *p != '>' && *p != ' ')
 	    p++;
 	if (*p != '@') {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG,
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		       "%lu xover error: Reference does not contain @.", artno);
 	    return 0;
 	}
 	while (p != q && *p != '>' && *p != ' ')
 	    p++;
 	if (*p++ != '>') {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG,
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		       "%lu xover error: Reference does not end with >.",
 		       artno);
 	    return 0;
@@ -245,16 +753,19 @@ legalxoverline(char *xover, unsigned long artno)
     p = q + 1;
     q = strchr(p, '\t');
     if (!q) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Lines: header.", artno);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "%lu xover error: no Lines: header.", artno);
 	return 0;
     }
 
     /* byte count */
+
     while (p != q) {
 	if (!isdigit((unsigned char)*p)) {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "%lu xover error: illegal digit "
 		       "in Bytes: header.", artno);
 	    return 0;
 	}
@@ -267,10 +778,12 @@ legalxoverline(char *xover, unsigned long artno)
 	*q = '\0';		/* kill any extra fields */
 
     /* line count */
+
     while (p && *p && p != q) {
 	if (!isdigit((unsigned char)*p)) {
-	    if (debugmode)
-		ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
+	    if (debugmode & DEBUG_EXPIRE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "%lu xover error: illegal digit "
 		       "in Lines: header.", artno);
 	    return 0;
 	}
@@ -282,243 +795,89 @@ legalxoverline(char *xover, unsigned long artno)
 
 /*
  * dogroup: expire group
- * 
- * works as follows:
- * (1) make an overview array of all articles in the current directory.
- * (2) mark all articles as to-be-deleted
- * (3) rescue those articles whose atime/mtime (dependent on whether
- *     texpire was called with -f) is newer than the expiry time or
- *     which are in a thread with a rescued article
  */
 static void
-dogroup(struct newsgroup *g)
+dogroup(struct newsgroup *g, time_t expire)
 {
-    char gdir[PATH_MAX];
-    char artfile[PATH_MAX];
-    char *p;
-    char *refs;
-    char *msgid;
-    DIR *d;
-    struct dirent *de;
-    struct stat st;
-    unsigned long first, last, art, acount, current;
-    struct exp *articles;
-    int fd;
-    char *overview;		/* xover: read then free */
+    unsigned long first, last, i, totalthreads;
+    struct thread *threadlist;
 
-    int deleted, kept;
-
-    acount = current = 0;
     deleted = kept = 0;
-    clearidtree();
 
-    /* eliminate empty groups */
+    /* skip empty groups */
     if (!chdirgroup(g->name, FALSE))
 	return;
+
     getcwd(gdir, PATH_MAX);
 
-    /* find low-water and high-water marks */
-
-    d = opendir(".");
-    if (!d) {
-	ln_log(LNLOG_ERR, "opendir in %s: %m", gdir);
+    /* read overview information */
+    freexover();
+    if (!getxover())
 	return;
-    }
 
+    /* find low-water and high-water marks */
     first = ULONG_MAX;
     last = 0;
-    while ((de = readdir(d)) != 0) {
-	if (!isdigit((unsigned char)de->d_name[0]) ||
-	    stat(de->d_name, &st) || !S_ISREG(st.st_mode))
-	    continue;
-	art = strtoul(de->d_name, &p, 10);
-	if (p && !*p) {
-	    acount++;
-	    if (art < first)
-		first = art;
-	    if (art > last)
-		last = art;
+    for (i = 0; xoverinfo[i].artno && i < xcount; ++i) {
+	if (xoverinfo[i].exists) {
+	    if (first > xoverinfo[i].artno) {
+		first = xoverinfo[i].artno;
+	    }
+	    if (last < xoverinfo[i].artno) {
+		last = xoverinfo[i].artno;
+	    }
 	}
     }
-
-    closedir(d);
-    if (last < first)
+    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+	   "%s: expire %lu, low water mark %lu, high water mark %lu",
+	   g->name, expire, first, last);
+    if (expire <= 0) {
 	return;
-
-    if (debugmode)
-	ln_log(LNLOG_DEBUG,
-	       "%s: expire %lu, low water mark %lu, high water mark %lu",
-	       g->name, expire, first, last);
-
-    if (expire <= 0)
-	return;
-
-    /* allocate and clear article array */
-
-    articles = (struct exp *)critmalloc((acount + 1) * sizeof(struct exp),
-					"Reading articles to expire");
-    for (art = 0; art < acount; art++) {
-	articles[art].xover = NULL;
-	articles[art].kill = 0;
-	articles[art].artno = 0;
     }
-
-    /* read in overview info, to be purged and written back */
-
-    overview = NULL;
-
-    /* if overview file does not exist, create it */
-    if (stat(".overview", &st))
-	getxover();
-
-    if (stat(".overview", &st) == 0) {
-	/* could use mmap() here but I don't think it would help */
-	overview = critmalloc((size_t) st.st_size + 1,
-			      "Reading article overview info");
-	if ((fd = open(".overview", O_RDONLY)) < 0 ||
-	    (read(fd, overview, (size_t) st.st_size) < (ssize_t) st.st_size)) {
-	    ln_log(LNLOG_ERR, "can't open/read %s/.overview: %m", gdir);
-	    *overview = '\0';
-	    if (fd > -1)
-		close(fd);
-	} else {
-	    close(fd);
-	    overview[st.st_size] = '\0';	/* 0-terminate string */
-	}
-
-	p = overview;
-	while (p && *p) {
-	    while (p && isspace((unsigned char)*p))
-		p++;
-	    art = strtoul(p, NULL, 10);
-	    if (art >= first && art <= last && current < acount &&
-		!articles[current].xover) {
-		articles[current].xover = p;
-		articles[current].artno = art;
-		current++;
-	    }
-	    p = strchr(p, '\n');
-	    if (p) {
-		*p = '\0';
-		if (p[-1] == '\r')
-		    p[-1] = '\0';
-		p++;
+    /* check the syntax of the .overview info */
+    if (debugmode & DEBUG_EXPIRE) {
+	for (i = 0; i < xcount; ++i) {
+	    if (xoverinfo[i].artno
+		&& !legalxoverline(xoverinfo[i].text, xoverinfo[i].artno)) {
+/*    xoverinfo[i].text = NULL; *//* I want these */
 	    }
 	}
     }
-
-    /* check the syntax of the .overview info, and delete all 
-       illegal stuff */
-
-    for (current = 0; current < acount; current++) {
-	/* by default, kill all articles */
-	articles[current].kill = 1;
-	if (!legalxoverline(articles[current].xover, articles[current].artno))
-	    articles[current].xover = NULL;	/* memory leak */
-	else {
-	    /* clear "kill" for new or read articles */
-	    sprintf(artfile, "%lu", articles[current - 1].artno);
-	    if (stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
-		((st.st_mtime > expire) ||
-		 (use_atime && (st.st_atime > expire)))) {
-		articles[current].kill = 0;
-	    }
-	}
+    group_relinked = FALSE;
+    threadlist = build_threadlist(xcount);
+    totalthreads = count_threads(threadlist);
+    if (repair_spool)
+	relink(g->name);
+    else
+	killcruft(g->name);
+    remove_newer(threadlist, expire);
+    if (debugmode & DEBUG_EXPIRE) {
+	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+	       "%s: threads total: %lu, to delete: %lu", g->name,
+	       totalthreads, count_threads(threadlist));
     }
+    delete_threads(threadlist);
+    /* compute new low-water mark, count remaining articles */
+    kept = 0;
+    first = low_wm(last);
+    /* free unused memory */
+    free_threadlist(threadlist);
+    threadlist = 0;
 
-    /* insert articles in tree, and clear 'kill' for new or read articles */
-
-    /* check whether file entries are legal */
-    /* save threads if an article in the thread is not killed */
-    for (current = acount; current > 0; current--) {
-	sprintf(artfile, "%lu", articles[current - 1].artno);
-	if (stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
-	    ((st.st_mtime > expire) || (use_atime && (st.st_atime > expire)))) {
-	    refs = xoverextract(articles[current - 1].xover, REFERENCES);
-	    msgid = xoverextract(articles[current - 1].xover, MESSAGEID);
-
-	    if (refs) {
-		savethread(articles, refs, acount);
-		free(refs);
-		refs = NULL;
-	    }
-	    if (msgid) {
-		if (findmsgid(msgid)) {	/* another file with same msgid? */
-		    articles[current - 1].kill = 1;
-		} else {
-		    insertmsgid(msgid, articles[current - 1].artno);
-		    if (st.st_nlink < 2) {	/* repair fs damage */
-			if (link(artfile, lookup(msgid))) {
-			    if (errno == EEXIST)
-				/* exists, but points to another file */
-				articles[current - 1].kill = 1;
-			    else
-				ln_log(LNLOG_ERR,
-				       "relink of %s failed: %s (%m)",
-				       msgid, lookup(msgid));
-			} else
-			    ln_log(LNLOG_INFO, "relinked message %s", msgid);
-		    }
-		}
-	    } else if (articles[current - 1].xover) {
-		/* data structure inconsistency: delete and be rid of it */
-		articles[current - 1].kill = 1;
-	    } else {
-		/* possibly read the xover line into memory? */
-	    }
-	    if (msgid) {
-		free(msgid);
-		msgid = NULL;
-	    }
-	}
-    }
-
-    /* compute new low-water mark */
-
-    first = last;
-    for (art = 0; art < acount; art++) {
-	if (!articles[art].kill && articles[art].artno < first)
-	    first = articles[art].artno;
-    }
     g->first = first;
-
-    /* remove old postings */
-
-    for (art = 0; art < acount; art++) {
-	if (articles[art].kill) {
-	    str_ulong(artfile, articles[art].artno);
-	    if (!unlink(artfile)) {
-		if (debugmode)
-		    ln_log(LNLOG_DEBUG, "deleted article %s/%lu",
-			   gdir, articles[art].artno);
-		deleted++;
-	    } else if (errno != ENOENT && errno != EEXIST) {
-		/* if file was deleted already or it was not a file */
-		/* but a directory, skip error message */
-		kept++;
-		ln_log(LNLOG_ERR, "unlink %s/%lu: %m",
-		       gdir, articles[art].artno);
-	    } else {
-		/* deleted by someone else */
-	    }
-	} else {
-	    kept++;
-	}
-    }
-    free(articles);
-    free(overview);
-
-    if (last > g->last)		/* try to correct insane newsgroup info */
+    if (last > g->last) {	/* try to correct insane newsgroup info */
 	g->last = last;
-
-    if (deleted || kept) {
-	ln_log(LNLOG_INFO,
-	       "%s: %d articles deleted, %d kept", g->name, deleted, kept);
     }
-
+    if (dryrun)
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: running without dry-run "
+	       "will delete %lu and keep %lu articles", g->name,
+	       deleted, kept - deleted);
+    else
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: %lu articles deleted, "
+	       "%lu kept", g->name, deleted, kept);
     if (!kept) {
 	if (unlink(".overview") < 0)
-	    ln_log(LNLOG_ERR, "unlink %s/.overview: %m", gdir);
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/.overview: %m", gdir);
 	if (!chdir("..") && (isinteresting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
@@ -531,60 +890,9 @@ dogroup(struct newsgroup *g)
      * .overview file. Otherwise unsubscribed groups will never be
      * deleted.
      */
-    getxover();
-}
-
-char *
-xoverextract(char *xover, unsigned int field)
-{
-    unsigned int n;
-    char *line;
-    char *p, *q, *tmp;
-
-    if (!xover)
-	return NULL;
-
-    tmp = p = strdup(xover);
-    for (n = 0; n < field; n++)
-	if (p && (p = strchr(p + 1, '\t')))
-	    p++;
-    q = p ? strchr(p, '\t') : NULL;
-    if (p && q) {
-	*q = '\0';
-	line = strdup(p);
-    } else
-	line = NULL;
-    free(tmp);
-    return line;
-}
-
-/*
- * mark all articles as not-to-be deleted which are contained in
- * the first THREADSAFETY entries of the References line "refs"
- * of the article we decided to save in dogroup()
- * this is rather slow because all articles are searched, and in groups
- * with many short threads, this will be done very repetitively.
- */
-void
-savethread(struct exp *articles, char *refs, unsigned long acount)
-{
-    char *p;
-    unsigned long i;
-    unsigned int n = 0;
-
-    while (refs && (p = strchr(refs, '<')) && (refs = strchr(p, '>')) &&
-	   (n++ < THREADSAFETY)) {
-	if (*++refs)
-	    *refs++ = '\0';
-	for (i = 0; i < acount; i++) {
-	    if (articles[i].kill && articles[i].xover &&
-		strstr(articles[i].xover, p)) {
-		if (debugmode)
-		    ln_log(LNLOG_DEBUG, "rescued thread %lu",
-			   articles[i].artno);
-		articles[i].kill = 0;
-	    }
-	}
+    if (chdirgroup(g->name, FALSE)) {
+	getxover();
+	freexover();
     }
 }
 
@@ -592,12 +900,12 @@ static void
 expiregroup(struct newsgroup *g)
 {
     struct newsgroup *ng;
+    time_t expire;
 
     ng = g;
     while (ng && ng->name) {
-	if (!(expire = lookup_expire(ng->name)))
-	    expire = default_expire;
-	dogroup(ng);
+	expire = lookup_expire(ng->name);
+	dogroup(ng, expire);
 	ng++;
     }
 }
@@ -610,17 +918,21 @@ expiremsgid(void)
     DIR *d;
     struct dirent *de;
     struct stat st;
-    int deleted, kept;
+//      unsigned long deleted, kept;
+    char s[PATH_MAX];
 
     deleted = kept = 0;
 
     for (n = 0; n < 1000; n++) {
-	sprintf(s, "%s/message.id/%03d", spooldir, n);
+	snprintf(s, sizeof(s), "%s/message.id/%03d", spooldir, n);
 	if (chdir(s)) {
-	    if (errno == ENOENT)
-		mkdir(s, 0755);	/* FIXME: this does not belong here */
+	    if (errno == ENOENT) {
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP, 
+		       "creating missing directory %s", s);
+		mkdir(s, 0755);
+	    }
 	    if (chdir(s)) {
-		ln_log(LNLOG_ERR, "chdir %s: %m", s);
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "chdir %s: %m", s);
 		continue;
 	    }
 	}
@@ -629,19 +941,24 @@ expiremsgid(void)
 	if (!d)
 	    continue;
 	while ((de = readdir(d)) != 0) {
+	    /* FIXME: do not stat more than once */
 	    if (stat(de->d_name, &st) == 0) {
-		if (st.st_nlink < 2 && !unlink(de->d_name))
+		if (st.st_nlink < 2 && !dryrun && !unlink(de->d_name)) {
+		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			   "%s/%s has less than 2 links, deleting",
+			   s, de->d_name);
 		    deleted++;
-		else if (S_ISREG(st.st_mode))
-		    kept++;
+		} else {
+		    if (S_ISREG(st.st_mode))
+			kept++;
+		}
 	    }
 	}
 	closedir(d);
     }
 
-    if (kept || deleted) {
-	ln_log(LNLOG_INFO, "%d articles deleted, %d kept", deleted, kept);
-    }
+    ln_log(LNLOG_SINFO, LNLOG_CTOP,
+	   "message.id: %lu articles deleted, %lu kept", deleted, kept);
 }
 
 static void
@@ -651,8 +968,10 @@ usage(void)
 	    "Usage:\n"
 	    "texpire -V\n"
 	    "    print version on stderr and exit\n"
-	    "texpire [-Dfv] [-F configfile]\n"
+	    "texpire [-fvnr] [-D debugmode] [-F configfile]\n"
 	    "    -D: switch on debugmode\n"
+	    "    -n: dry run mode, do not delete anything\n"
+	    "    -r: relink articles with message.id tree\n"
 	    "    -f: force expire irrespective of access time\n"
 	    "    -v: more verbose (may be repeated)\n"
 	    "    -F: use \"configfile\" instead of %s/config\n"
@@ -663,67 +982,90 @@ usage(void)
 int
 main(int argc, char **argv)
 {
+    time_t now;
     int option, reply;
-    char *conffile;
+    char conffile[4096];
 
-    conffile = critmalloc(strlen(libdir) + 10,
-			  "Allocating space for configuration file name");
-    sprintf(conffile, "%s/config", libdir);
+    snprintf(conffile, sizeof(conffile), "%s/config", libdir);
 
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
 
     ln_log_open("texpire");
 
-    while ((option = getopt(argc, argv, "F:VDvf")) != -1) {
-	if (parseopt("texpire", option, optarg, conffile)) {
+    while ((option = getopt(argc, argv, "F:VDvfrn")) != -1) {
+	if (parseopt("texpire", option, optarg, conffile, sizeof(conffile))) {
+	    /* FIXME: what happens here? */
 	    ;
-	} else if (option == 'f') {
-	    use_atime = 0;
-	} else {
-	    usage();
-	    exit(EXIT_FAILURE);
-	}
+	} else
+	    switch (option) {
+	    case 'f':
+		use_atime = 0;
+		break;
+	    case 'r':
+		repair_spool = 1;
+		break;
+	    case 'n':
+		dryrun = 1;
+		break;
+	    case 'F':
+		break;
+	    default:
+		usage();
+		exit(EXIT_FAILURE);
+	    }
     }
     debug = debugmode;
-    expire = 0;
     expire_base = NULL;
     if ((reply = readconfig(conffile)) != 0) {
-	ln_log(LNLOG_ERR, "Reading configuration from %s failed (%m).\n",
-	       conffile);
-	unlink(lockfile);
+	fprintf(stderr,
+		"Reading configuration from %s failed (%s).\n",
+		conffile, strerror(reply));
 	exit(2);
     }
 
-    checkinteresting();
-
-    if (lockfile_exists(FALSE, FALSE))
+    whoami();
+    if (lockfile_exists(FALSE))
 	exit(EXIT_FAILURE);
-    readactive();
+    rereadactive();
     if (!active) {
-	/* FIXME remove this fprintf? */
 	fprintf(stderr, "Reading active file failed, exiting "
 		"(see syslog for more information).\n"
 		"Has fetchnews been run?\n");
-	unlink(lockfile);
 	exit(2);
     }
 
-    ln_log(LNLOG_INFO, "%s",
-	   use_atime ? "checking atime and mtime" : "checking mtime");
+    if (verbose) {
+	printf("texpire %s: ", version);
+	if (use_atime)
+	    printf("check mtime and atime\n");
+	else
+	    printf("check mtime only\n");
+    }
 
-    if (expire == 0) {
-	ln_log(LNLOG_ERR, "no expire time");
+    if (verbose) {
+	printf("Checking if there are local posts sitting in the queue...\n");
+    }
+    feedincoming();
+
+    if (debugmode & DEBUG_EXPIRE) {
+	ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+	       "texpire %s: use_atime is %d; repair_spool is %d",
+	       version, use_atime, repair_spool);
+    }
+    if (default_expire == 0) {
+	fprintf(stderr, "%s: no expire time\n", argv[0]);
 	exit(2);
     }
 
     now = time(NULL);
-    default_expire = expire;
 
     expiregroup(active);
     writeactive();
-    unlink(lockfile);
+    freeactive();		/* throw away active data */
+    freexover();		/* throw away overview data */
     expiremsgid();
-    free_expire();
+    (void)log_unlink(lockfile);
+    freeconfig();
     return 0;
 }

@@ -22,5 +22,4 @@ gccargs=""
 while test "x$1" != "x--" ; do gccargs="$gccargs $1" ; shift ; done
 shift
 ${CC-gcc} $gccargs -MM  "$@" | sed -e 's+[ 	][^ 	][^ 	]*/+ +g' >>"${f}.mkdep"
-ln -f "${f}" "${f}~"
 mv "${f}.mkdep" "$f"

@@ -1,0 +1,11 @@
+INCOMPATIBLE CHANGES:
+---------------------
+
+1. all server files for servers that don't have a port number have been
+   renamed. These are files below interesting.groups and now always have
+   their port number attached, even if it's the default of 0.  This
+   simplifies the code.
+
+2. active.read is gone. It's replaced by leaf.node/last:server.name:port
+   instead which allows for implicit (automatic) recovery from a server
+   failure when getting all newsgroups.

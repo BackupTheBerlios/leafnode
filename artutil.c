@@ -1,16 +1,15 @@
-/*
-libutil -- stuff dealing with articles
-
-Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright 1998, 1999.
-
-See README for restrictions on the use of this software.
-*/
+/** \file artutil.c 
+ * stuff dealing with articles.
+ * Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+ * Copyright 1998, 1999.
+ * Modifications (C) 2001 by Matthias Andree <matthias.andree@gmx.de>
+ * See README for restrictions on the use of this software.
+ */
 
 #include "leafnode.h"
 #include "critmem.h"
 #include "ln_log.h"
-
+#include "mastring.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,84 +17,148 @@ See README for restrictions on the use of this software.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <errno.h>
+#include <signal.h>
+#include <assert.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
-char *lookup_xref(char *xref, const char *group);
+#ifdef DEBUG_DMALLOC
+#include <dmalloc.h>
+#endif
 
-/*
- * return arbitrary header from a buffer
-  */
+/**
+ * Return an arbitrary news article header from a memory buffer.
+ * Copes with folded header lines.
+ * NOTE: calls abort() if header does not contain a colon.
+ * \return malloc()ed copy of header without its tag (caller must free
+ * that) or NULL 
+ * \bug should rather use Boyer-Moore or something to be quicker
+ */
 char *
-mgetheader(const char *hdr, char *buf)
+mgetheader(
+/** header to find, must contain a colon, must not be NULL */
+	      const char *hdr,
+/** buffer to search, may be NULL */
+	      char *buf)
 {
+    mastr *hunt;
     char *p, *q;
     char *value = NULL;
-    int havehdr = FALSE;
 
-    p = buf;
-    while (!havehdr && p && *p) {
-	if (strncasecmp(p, hdr, strlen(hdr)) == 0) {
-	    havehdr = TRUE;
-	    p += strlen(hdr) + 1;
-	    while (isspace((unsigned char)*p))
-		p++;
-	    q = strchr(p, '\n');
-	    if (p && q) {
-		value = critmalloc((size_t) (q - p + 2),
+    assert(hdr);
+    if (!strchr(hdr, ':')) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "mgetheader called without : in header tag \"%s\"", hdr);
+	abort();
+    }
+
+    if (strisprefix(buf, hdr)) {
+	p = buf;
+    } else {
+	hunt = mastr_new(strlen(hdr) + 1);
+	(void)mastr_vcat(hunt, "\n", hdr, 0);
+	p = strstr(buf, mastr_str(hunt));
+	mastr_delete(hunt);
+	if (!p)
+	    return NULL;
+    }
+    p++;
+
+    /* skip header tag */
+    p += strlen(hdr);
+    SKIPLWS(p);
+    q = p;
+
+    /* accomodate folded lines */
+    do {
+	++q;
+	q = strchr(p, '\n');
+    } while (q && q[1] && isspace((unsigned char)q[1]));
+
+    if (p && q) {
+	int i;
+	value = (char *)critmalloc((size_t) (q - p + 1),
 				   "Allocating space for header value");
-		memset(value, 0, (size_t) (q - p + 2));
-		strncpy(value, p, (size_t) (q - p));
-	    }
-	} else {
-	    q = strchr(p, '\n');
-	    p = q + 1;
+	for (i = 0; i < q - p; i++) {
+	    /* sort of strncpy, replacing LF by space */
+	    value[i] = (p[i] == '\n' || p[i] == '\r') ? ' ' : p[i];
 	}
+	/* strip trailing whitespace */
+	while (i && isspace((unsigned char)*(value + i - 1)))
+	    i--;
+	value[i] = '\0';
     }
     return value;
 }
 
-/*
- * find a header in an article and return it. Strip the name of the header
- */
+/**
+ * Find a header in an open article file and return it.
+ * Copes with folded header lines.
+ * NOTE: calls abort() if header does not contain a colon.
+ * \return malloc()ed copy of header without tag (caller must free that)
+ * or NULL if not found. */
 char *
-fgetheader(FILE * f, const char *header)
+fgetheader(
+/** file to search for header, may be NULL */
+	      FILE * f,
+/** header to find, must contain a colon, must not be NULL */
+	      const char *header,
+/** flag, if set, the file is rewound before and after access */
+	      int rewind_file)
 {
-    char *hdr, *p;
+    char *hdr, *p, *block;
     size_t hlen;
-    int next;
 
     if (!f)
 	return NULL;
-    rewind(f);
+
+    assert(header);
+
+    if (!strchr(header, ':')) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "fgetheader called without : in header tag \"%s\"", header);
+	abort();
+    }
+
+    if (rewind_file)
+	rewind(f);
     debug = 0;
-    next = 0;
     hdr = NULL;
-    p = NULL;
     hlen = strlen(header);
-    while ((p = getaline(f)) && *p) {	/* read only headers */
-	/* allow for multiline headers */
-	if (isspace((unsigned char)*p) && hdr && next) {
-	    hdr = critrealloc(hdr, strlen(hdr) + strlen(p) + 2,
-			      "Allocating space for multiline headers");
-	    strcat(hdr, "\n");
-	    strcat(hdr, p);
-	} else if ((strncasecmp(p, header, hlen) == 0)) {
+
+    while ((p = block = getfoldedline(f))) {
+	if (!*p) {
+	    free(block);
+	    break;		/* read only headers */
+	}
+	if (0 == strncasecmp(p, header, hlen)) {
 	    p += hlen;
-	    if (*p && *p == ':')
-		p++;
-	    while (p && *p && isspace((unsigned char)*p))
-		p++;
-	    hdr = strdup(p);
-	    next = 1;
-	} else
-	    next = 0;
+	    SKIPLWS(p);
+	    hdr = critstrdup(p, "fgetheader");
+	    free(block);
+	    break;
+	}
+	free(block);
     }
     debug = debugmode;
-    rewind(f);
+    if (rewind_file)
+	rewind(f);
     return hdr;
 }
 
+/**
+ * Find a header in an article file and return it.
+ * Copes with folded header lines.
+ * NOTE: calls abort() if header does not contain a colon.
+ * \return malloc()ed copy of header without tag (caller must free that)
+ * or NULL if not found. */
 char *
-getheader(const char *filename, const char *header)
+getheader(
+/** filename of article to search */
+	     const char *filename,
+/** header to search */
+	     const char *header)
 {
     FILE *f;
     char *hdr;
@@ -105,252 +168,138 @@ getheader(const char *filename, const char *header)
 	return NULL;
     if ((f = fopen(filename, "r")) == 0)
 	return NULL;
-    hdr = fgetheader(f, header);
-    fclose(f);
+    hdr = fgetheader(f, header, 0);
+    (void)log_fclose(f);
     return hdr;
 }
 
-/*
- * store article in "filename" in /var/spool/news/message.id and the
- * corresponding newsgroups. No checks are made whether the filename
- * points to a real file or a directory.
+/**
+ * Delete a message in the local news base and in out.going.
  */
 void
-storearticle(char *filename, char *msgid, char *newsgroups)
-{
-    FILE *infile, *outfile;
-    const char *outname;
-    char *l, *xref;
-    char *cxref = NULL;
-    char *ssmid;
-    char *p, *q;
-    char *xrefno;
-    static struct newsgroup *cg = NULL;
-    char tmp[10];
-    char tmpxref[4096];		/* 1024 for newsgroups, plus article numbers */
-
-    if (strcmp(filename, "stdin") != 0) {
-	if ((infile = fopen(filename, "r")) == NULL)
-	    return;
-    } else
-	infile = stdin;
-    outname = lookup(msgid);
-    if ((outfile = fopen(outname, "r"))) {
-	/* if an article is already present, we overwrite it to create a
-	   corrected Xref: line. However, we have to parse the Xref:
-	   line which is already in the article because otherwise
-	   we'll create double instances of articles
-	 */
-	xref = fgetheader(outfile, "Xref:");
-	fclose(outfile);
-    } else
-	xref = NULL;
-    if ((outfile = fopen(outname, "w")) == NULL)
-	return;
-
-    debug = 0;
-    /* copy article headers except Xref: line */
-    while ((l = getaline(infile)) && strlen(l)) {
-	if (strncmp(l, "Xref:", 5))
-	    fprintf(outfile, "%s\n", l);
-    }
-
-    debug = debugmode;
-    /* create Xref: line and all the links in the newsgroups */
-    p = newsgroups;
-    strcpy(tmpxref, fqdn);
-    while (p && *p) {
-	cg = NULL;
-	q = strchr(p, ',');
-	if (q)
-	    *q++ = '\0';
-	if (*p && (isinteresting(p) || create_all_links)) {
-	    cg = findgroup(p);
-	    if (cg && chdirgroup(p, TRUE)) {
-		if (xref)
-		    cxref = strdup(xref);
-		if ((xrefno = lookup_xref(cxref, cg->name)) != NULL) {
-		    strcpy(tmp, xrefno);
-		    link(outname, tmp);
-		} else {
-		    do {
-			sprintf(tmp, "%ld", ++cg->last);
-			errno = 0;
-		    } while (link(outname, tmp) < 0 && errno == EEXIST);
-		    if (errno)
-			ln_log(LNLOG_ERR, "error linking %s into %s/%s: %m",
-			       outname, p, tmp);
-		    else if (verbose)
-			fprintf(stderr, "storing %s as %s in %s\n",
-				outname, tmp, p);
-		}
-		if (cxref)
-		    free(cxref);
-		strcat(tmpxref, " ");
-		strcat(tmpxref, p);
-		strcat(tmpxref, ":");
-		strcat(tmpxref, tmp);
-	    }
-	}
-	p = q;
-    }				/* while */
-    fprintf(outfile, "Xref: %s\n\n", tmpxref);
-
-    debug = 0;
-    /* copy rest of article */
-    while (((l = getaline(infile))) && !((*l) == '.' && (strlen(l) == 1))) {
-	fprintf(outfile, "%s\n", l);
-    }
-    debug = debugmode;
-    fclose(infile);
-    fclose(outfile);
-
-    if ((ssmid = getheader(outname, "Supersedes"))) {
-	supersede(ssmid);
-	free(ssmid);
-    }
-}
-
-/*
- * Returns the article number, if the article is already stored in group,
- * NULL otherwise.
- */
-char *
-lookup_xref(char *xref, const char *group)
-{
-    char *p, *q;
-
-    if (!xref || !group)
-	return NULL;
-    p = strstr(xref, group);
-    if (p)
-	p += strlen(group);
-    else
-	return NULL;
-    while (!isdigit((unsigned char)*p))
-	p++;
-    q = strchr(p, ' ');
-    if (q)
-	*q++ = '\0';
-    return p;
-}
-
-/*
- * delete a message
- */
-void
-supersede(const char *msgid)
+supersede_cancel(
+/** article to kill */
+		    const char *mid,
+/** "Supersede" or "Cancel" */
+		    const char *action,
+/** "Superseded" or "Cancelled" */
+		    const char *past_action)
 {
     const char *filename;
     char *p, *q, *r, *hdr;
     struct stat st;
+    char **dl, **t;
+    int fd = open(".", O_RDONLY);
+    char *msgidalloc = critstrdup(mid, "supersede_cancel");
+    char *msgid = msgidalloc;
+
+    if (fd < 0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot determine current "
+	       "working directory in supersede_cancel: %m");
+	free(msgidalloc);
+	return;
+    }
+
+    SKIPLWS(msgid);
+    if (*msgid != '<')
+	return;
+    if (!(r = strchr(msgid, '>')))
+	return;
+    r[1] = '\0';
+
+    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
 
     filename = lookup(msgid);
-    if (!filename)
+    if (!filename) {
+	close(fd);
+	free(msgidalloc);
 	return;
+    }
 
     p = hdr = getheader(filename, "Xref:");
-    if (!hdr)
+    if (!hdr) {
+	close(fd);
+	free(msgidalloc);
 	return;
+    }
 
     /* jump hostname entry */
     while (p && !isspace((unsigned char)*p))
 	p++;
-    while (p && isspace((unsigned char)*p))
-	p++;
+    SKIPLWS(p);
     /* now p points to the first newsgroup */
 
     /* unlink all the hardlinks in the various newsgroups directories */
-    while (p && ((q = strchr(p, ':')) != NULL)) {
+    while (p && ((q = strchr(p, ':')))) {
+	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+	       "debug %s: xref: \"%s\"", action, p);
 	*q++ = '\0';
+	/* p now points to the newsgroup, q to the article number */
 	if (chdirgroup(p, FALSE)) {
 	    r = p;
 	    p = q;
+	    /* chop off substring */
 	    q = strchr(q, ' ');
 	    if (q)
 		*q++ = '\0';
 	    if (unlink(p)) {
-		ln_log(LNLOG_ERR, "Failed to unlink %s: %s: %m", r, p);
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		       "%s: failed to unlink %s:%s: %m", action, r, p);
 	    } else {
-		ln_log(LNLOG_INFO, "Superseded %s in %s", p, r);
-	    }
-	}
-	if (q)
-	    p = q;
-	else
-	    p = NULL;
-	while (p && isspace((unsigned char)*p))
-	    p++;
-    }
-
-    /* unlink the message-id hardlink */
-    if (stat(filename, &st))
-	ln_log_sys(LNLOG_ERR, "cannot stat %s: %m", filename);
-    else if (st.st_nlink > 1)
-	ln_log_sys(LNLOG_ERR, "%s: link count is %ld", filename,
-		   (long)st.st_nlink);
-    else if (unlink(filename))
-	ln_log_sys(LNLOG_ERR, "Failed to unlink %s: %m", filename);
-    else {
-	ln_log(LNLOG_INFO, "Superseded %s", filename);
-    }
-    free(hdr);
-}
-
-/*
- * store articles in newsgroups which are already stored in
- * $SPOOLDIR/message.id/
- */
-void
-store(const char *filename, FILE * filehandle, char *newsgroups,
-      const char *msgid)
-{
-    char tmp[10];
-    static struct newsgroup *cg = NULL;
-    char xrefincase[4096];	/* 1024 for newsgroups, plus article numbers */
-    char *p;
-    char *q;
-    char *x;
-
-    x = xrefincase;
-    if (verbose > 2)
-	printf("storing %s: %s\n", msgid, newsgroups);
-
-    p = newsgroups;
-    while (p && *p) {
-	q = strchr(p, ',');
-	if (q)
-	    *q++ = '\0';
-	if (*p) {
-	    if (!cg || strcmp(cg->name, p)) {
-		cg = findgroup(p);
-		if (cg) {
-		    if (isinteresting(cg->name) || create_all_links)
-			(void)chdirgroup(p, TRUE);
-		    else
-			cg = NULL;
-		}
-	    }
-	    if (cg) {
-		do {
-		    sprintf(tmp, "%lu", ++cg->last);
-		    errno = 0;
-		    ln_log(LNLOG_DEBUG, "..as article %lu in %s",
-			   cg->last, cg->name);
-		} while (link(filename, tmp) < 0 && errno == EEXIST);
-		if (errno)
-		    ln_log(LNLOG_ERR, "error linking %s into %s: %m",
-			   filename, p);
-		else {
-		    sprintf(x, " %s:%lu", cg->name, cg->last);
-		    x += strlen(x);
-		}
-	    } else {
-		if (verbose > 2)
-		    printf(".. discarding unknown group %s\n", p);
+		ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+		       "%s %s:%s", past_action, r, p);
 	    }
 	}
 	p = q;
+	if (p)
+	    SKIPLWS(p);
     }
-    fprintf(filehandle, "Xref: %s%s\n", fqdn, xrefincase);
+
+    /* unlink the message-id hardlink */
+    if (stat(filename, &st) && errno != ENOENT) {
+	ln_log_sys(LNLOG_SERR, LNLOG_CARTICLE, "cannot stat %s: %m", filename);
+    } else {
+	if (st.st_nlink > 1) {
+	    ln_log_sys(LNLOG_SERR, LNLOG_CARTICLE,
+		       "%s error: %s: link count is %ld, "
+		       "inode no. %ld, running texpire is advised.",
+		       action, filename, (long)st.st_nlink, (long)st.st_ino);
+	    /* FIXME: not 64-bit aware */
+	}
+	if (unlink(filename)) {
+	    ln_log_sys(LNLOG_SERR, LNLOG_CARTICLE,
+		       "Failed to unlink %s: %m", filename);
+	} else {
+	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE, "%s %s", past_action, filename);
+	}
+    }
+
+    /* delete from out.going */
+    /* FIXME: also delete from in.coming */
+    dl = spooldirlist_prefix("out.going", DIRLIST_ALL, 0);
+    if (!dl) {
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+	       "Cannot read out.going directory: %m");
+    } else {
+	for (t = dl; *t; t++) {
+	    char *x = getheader(*t, "Message-ID:");
+	    if (x) {
+		if (!strcmp(x, msgid)) {
+		    if (0 == log_unlink(*t))
+			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+			       "%s %s", past_action, *t);
+/* break; *//* commented out to catch all */
+		}
+		free(x);
+	    }
+	}
+	free_dirlist(dl);
+    }
+
+    if (fchdir(fd))
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "cannot restore working directory " "in supersede_cancel: %m");
+    (void)log_close(fd);
+    free(msgidalloc);
+    free(hdr);
 }
