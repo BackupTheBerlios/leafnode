@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.19 2003/11/29 18:02:01 emma Exp $
+.\" $Id: leafnode.8.in,v 1.20 2004/01/05 23:56:19 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -270,6 +270,13 @@ upstream servers demand message IDs of a certain type. In this case,
 you can override the name of your computer by setting "hostname" to
 a sensible value. The use of "hostname" to create fancy message IDs
 is possible, but strongly discouraged.
+.TP
+log_poster_ip = 1
+If you set this option, leafnode will add a "X-Leafnode-NNTP-Posting-Host"
+to every outgoing post containing the IP address of the poster. This helps
+tracking abuses on a publicly available server. The standard header
+"NNTP-Posting-Host" cannot be used as the server leafnode forwards the post
+to would change it to your leafnode server IP address.
 .TP
 create_all_links = 1
 Normally, fetchnews will store articles only in the newsgroups which you
