@@ -57,9 +57,6 @@ Ralfs TODO:
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
 10pre5
-0.0 use separate repairspool program
-
-10pre5
 1.1 exit code of fetchnews always zero
 
 10pre5
@@ -78,12 +75,16 @@ Ralfs TODO:
     Wildenhues. Message-ID: <20020126133758.A428@uni-bonn.de>
 
 10pre5
-1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch
+1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch of 2002-02-04
+    note: cannot reproduce "SIGCHLD triggers getc() EOF" on Linux or
+    FreeBSD. Asked Jeffrey for explanation of OS and maybe scenario.
+    2002-07-08.
+    status: FEEDBACK PENDING
 
 10pre5
 1.1 groupinfo not updated after timeout + subsequent SIGINT
     bug confirmed by Jörg Dietrich 2002-01-04
-    ACTION: fix
+    ACTION: FEEDBACK: has this been fixed with sigaction on 2002-07-08?
 
 10pre5
 1.1 leafnode does not add a Lines: header, but has the Lines count in
@@ -388,7 +389,11 @@ FIXED ITEMS:
 ========================================================================
 DROPPED ITEMS:
 
-2002-07-07 getgroup: "%s: considering %ld articles %lu - %lu" does not include
+2002-07-08 Matthias Andree
+	use separate repairspool program
+
+2002-07-07 Matthias Andree & Ralf Wildenhues
+	getgroup: "%s: considering %ld articles %lu - %lu" does not include
 	   proper article count as sent by server, but just uses last-first+1
 	   The correct numbers are reported later on.
 
