@@ -1,4 +1,64 @@
+2005-03-24  Matthias Andree <matthias.andree@gmx.de>
+  * Fix compiler warning.
+
+    M ./fetchnews.c -1 +2
+
+  * Revise help output and manual pages (copyrights).
+
+    M ./NEWS -2 +3
+    M ./applyfilter.8.in -40 +14
+    M ./applyfilter.c -10 +6
+    M ./checkgroups.8.in -20 +10
+    M ./checkgroups.c -7 +12
+    M ./fetchnews.8.in -40 +15
+    M ./fetchnews.c -24 +19
+    M ./leafnode.8.in -10 +26
+    M ./leafnode.h +8
+    M ./newsq.1.in -3 +15
+    M ./newsq.c -7 +7
+    M ./rnews.8.in -24 +8
+    M ./rnews.c -6 +6
+    M ./texpire.8.in -35 +16
+    M ./texpire.c -11 +9
+
+  * Bugfix: the deleted-articles journal was always empty.
+
+    M ./NEWS +2
+    M ./artutil.c -3 +6
+
+2005-03-23  Matthias Andree <matthias.andree@gmx.de>
+  * Revise manual pages, with help from Dietrich Schaffer.
+
+    M ./CREDITS +1
+    M ./NEWS -1 +5
+    M ./applyfilter.8.in -1 +1
+    M ./checkgroups.8.in -4 +5
+    M ./configure.ac -1 +1
+    M ./fetchnews.8.in -2 +3
+    M ./filterfile.5.in -3 +3
+    M ./leafnode.8.in -3 +3
+    M ./newsq.1.in -5 +4
+    M ./rnews.8.in -4 +3
+    M ./texpire.8.in -3 +2
+
 2005-03-21  Matthias Andree <matthias.andree@gmx.de>
+  * remove obsolete UPDATING file
+
+    M ./release.sh -1 +1
+
+  tagged leafnode-2-0-0-alpha20050321a
+
+
+  * Fix GCC v4 warnings.
+
+    M ./fetchnews.c -1 +1
+    M ./mailto.c -1 +1
+
+  * snapshot leafnode-2.0.0.alpha20050321a
+
+    M ./ChangeLog +61
+    M ./configure.ac -1 +1
+
   * keep journal of articles to be masked in overview
   when deleting articles (supersedes, cancel, ...) and we don't rebuild
   the overview right away, store a line in a new file that marks the
