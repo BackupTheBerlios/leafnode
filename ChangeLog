@@ -1,5 +1,83 @@
+2001-12-20  Matthias Andree  <matthias.andree@gmx.de>
+
+	* configure.in: Add string.h and strings.h, switch echo -n to
+	printf.
+
+	* leafnode.h: Drop XOPEN stuff, include string.h and strings.h
+	depending on HAVE_... macros.
+	* leafnode-version.c: Drop compileinfo, add version and
+	DEFAULTMTA.
+
+	* texpire.c: Remove C++-style // comment (breaks compile on Sun
+	Workshop cc).
+
+	* store.c: Compile fixes for Sun WorkShop compiler.
+	* Makefile.in: Get rid of compileinfo in config.c for now, it
+	seems impossible to output this portably.  Compile fixes for
+	Solaris 2.5.1 (make doesn't support $< or .o: default rules or :=
+	immediate assignments).  Finally get rid of last pcre cruft.
+	Disable rnews for now, doesn't compile with SUNpro Workshop CC.
+	* TODO: Updates (Jörg Dietrich found some inaccuracies).
+	* store.c: Fix memory leak (mastr *ln was not deleted).
+	* README.html: Clarify things a little.
+	* Makefile.in: Make uninstall: do not delete config, just
+	config.example.
+
+	* filterutil.c: Fix memory allocation and recovery along with
+	segfaults. Reported by Raymond Scholz.
+	* fetchnews.c: Fix memory leak.
+	* configure.in: Fix IPv6 detection (was broken on SuSE
+	6.0). Reported by Leopold Tötsch.
+
+	* config.example: Document windowsize option.
+	* nntpd.c: Correctly terminate XHDR output for pseudo-group with,
+	support XHDR path on pseudo groups. (Reported by Andreas Karrer.)
+	Fix HEAD without argument on pseudo groups.
+
 2001-12-18  Matthias Andree  <matthias.andree@gmx.de>
 
+	* activutil.c: Fix memory leak in the insertgroup/mergegroups
+	protocol.
+
+	* fetchnews.c: Fix segfault when port is given in config
+	file. Patch by Raymond Scholz.
+
+	* README.html: Recommend to run texpire after the first fetchnews
+	run, to create missing message.id/000 ... message.id/999
+	directories.
+
+	* config.example: Add example and description for dontpost.
+	* README.html: Futher updates.  Fix --prefix example. Found by
+	Leopold Tötsch.
+
+	* Makefile.in: Drop PCRE junk.  Add lsort, call update.sh as
+	./update.sh (found by Leopold Tötsch)
+
+	* lsort.c: Readd this file, got lost since 1.9.x. Found by Leopold
+	Tötsch.
+
+	* leafnode.h: Pull in config.h earlier.  Always include <pcre.h>
+	("pcre/pcre.h" is gone).
+
+	* fetchnews.c: explain we expect regular files in out.going/
+	* ENVIRONMENT: Document NOPOSTING
+	* configure.in: Bump version to 2.0b8_ma8rc2.  Include
+	AC_HEADER_STAT (portability).  Override sysconfdir to
+	/etc/leafnode when --prefix=/usr (formerly, it would only be
+	overriden without --prefix).
+	Drop local PCRE support. The user must build PCRE
+	separately. Problems reported by Jörg Dietrich and Leopold Tötsch.
+	Also check for sockaddr_in6 and check if it contains
+	sin6_addr to enable IPv6.  Print a summary of paths at the
+	end. Found by Leopold Tötsch.
+
+	* fopen_reg.c: Moved fopen after argument checking.  Change
+	ENOTSUP to EINVAL. Not exactly what we want, but there is no
+	distinct condition to return "this is not a regular file". ENOTSUP
+	is not wide-spread and does not warrant autoconf support
+	either. Found by Leopold Tötsch.
+
+	=== release 2.0b8_ma8rc1 ===
 	* Makefile.in: Update dependencies (automatic).
 	* TODO: Update.
 	* store.c: Brown paper bag bug: Don't apply "missing message.id"
