@@ -93,7 +93,7 @@ server_info(const char *spool, const char *server,
     return res;
 }
 
-static void
+static RETSIGTYPE
 sigcatch(int signo)
 {
     if (signo == SIGINT || signo == SIGTERM || signo == SIGALRM)
@@ -697,29 +697,30 @@ getarticle(struct filterlist *filtlst)
     l = getaline(nntpin);
     if (!l) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		"Server went away when it should send an article.");
+	       "Server went away when it should send an article.");
 	return -2;
     }
 
     if ((sscanf(l, "%3d %lu", &reply, &artno) != 2) || (reply / 10 != 22)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "Wrong reply to ARTICLE command: %s", l);
-	if (reply / 100 == 5) return -2; /* fatal error */
+	if (reply / 100 == 5)
+	    return -2;		/* fatal error */
 	return -1;
     }
 
     switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
 			 -1)) {
-	case 1:
-	    groupkilled++;
-	    return artno;
-	case 0:
-	    groupfetched++;
-	    return artno;
-	case -1:
-	    return -2;
-	default:
-	    return 0;
+    case 1:
+	groupkilled++;
+	return artno;
+    case 0:
+	groupfetched++;
+	return artno;
+    case -1:
+	return -2;
+    default:
+	return 0;
     }
 }
 
@@ -758,7 +759,7 @@ getarticles(struct stringlist *stufftoget, long n, struct filterlist *f)
 	while (p && advance < window && (advance == 0 || remain > 100)) {
 	    const char *c;
 	    fprintf(nntpout, "ARTICLE %s\r\n", c = chopmid(p->string));
-	    remain -= 10 + strlen(c); /* ARTICLE + SP + CR + LF == 10 characters */
+	    remain -= 10 + strlen(c);	/* ARTICLE + SP + CR + LF == 10 characters */
 	    p = p->next;
 	    advance++;
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE, "sent ARTICLE %s command, "
@@ -771,7 +772,8 @@ getarticles(struct stringlist *stufftoget, long n, struct filterlist *f)
 	/* now read articles and feed ARTICLE commands one-by-one */
 	while (advance) {
 	    artno_server = getarticle(f);
-	    if (artno_server == -2) return 0; /* disconnected server or store OS error */
+	    if (artno_server == -2)
+		return 0;	/* disconnected server or store OS error */
 	    /* FIXME: add timeout here and force window to 1 if it triggers */
 	    if (p) {
 		const char *c;
@@ -831,7 +833,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     if (g->first > g->last)
 	g->last = g->first;
 
-    if (!chdirgroup(g->name, TRUE)) /* also creates the directory */
+    if (!chdirgroup(g->name, TRUE))	/* also creates the directory */
 	return 0;
 
     x = getfirstlast(g, &first, &last);
@@ -914,28 +916,30 @@ getgroup(struct newsgroup *g, unsigned long first)
  *         - 0 if the status character is invalid
  */
 static int
-splitLISTline(char *line, char **nameend, char **status) {
+splitLISTline(char *line, char **nameend, char **status)
+{
     char *p = line;
 
-    while (*p && !isspace((unsigned char)*p)) p++;
-    *nameend = p;       /* end of the group name */
+    while (*p && !isspace((unsigned char)*p))
+	p++;
+    *nameend = p;		/* end of the group name */
     SKIPLWS(p);
-    SKIPWORD(p); /* last */
-    SKIPWORD(p); /* first */
+    SKIPWORD(p);		/* last */
+    SKIPWORD(p);		/* first */
     /* p now points to the status char */
     *status = p;
     switch (*p) {
-	case 'y':
-	case 'n':
-	case 'm':
-	case 'j': /* j, = and x are for INN compatibility */
-	case '=':
-	case 'x':
-	    return 1;
-	default:
-	    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
-		   "bad status character in \"%s\", skipping", line);
-	    return 0;
+    case 'y':
+    case 'n':
+    case 'm':
+    case 'j':			/* j, = and x are for INN compatibility */
+    case '=':
+    case 'x':
+	return 1;
+    default:
+	ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
+	       "bad status character in \"%s\", skipping", line);
+	return 0;
     }
 }
 
@@ -954,8 +958,7 @@ dirtyactive(struct serverlist *srv)
     mastr_vcat(s, spooldir, "/leaf.node/last:", srv->name, ":", p, 0);
     r = unlink(mastr_str(s));
     if (r && errno != ENOENT) {
-	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m",
-	       mastr_str(s));
+	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m", mastr_str(s));
     }
     mastr_delete(s);
     return r;
@@ -996,7 +999,8 @@ nntpactive(void)
 	    char *r;
 	    count++;
 	    p = l;
-	    if (!splitLISTline(l, &p, &r)) continue;
+	    if (!splitLISTline(l, &p, &r))
+		continue;
 	    *p = '\0';
 	    insertgroup(l, *r, 0, 0, time(NULL), NULL);
 	    appendtolist(&groups, &helpptr, l);
@@ -1052,8 +1056,9 @@ nntpactive(void)
 	    last = first = 0;
 	    count++;
 	    p = l;
-	    if (!splitLISTline(l, &q, &p)) continue;
-	    *q = '\0'; /* cut out the group name */
+	    if (!splitLISTline(l, &q, &p))
+		continue;
+	    *q = '\0';		/* cut out the group name */
 
 	    /* see if the newsgroup is interesting.  if it is, and we
 	       don't have it in groupinfo, figure water marks */
@@ -1280,9 +1285,10 @@ postarticles(void)
 /* FIXME: this is U-G-L-Y */
 static int
 do_group(const char *ng, /** which group to operate on */
-	 struct stringlist *ngs /** upstream high water mark */, 
-	 /*@null@*/ /** where to write the new upstream 
-          high water mark */ FILE *const f) {
+	 struct stringlist *ngs /** upstream high water mark */ ,
+		    /*@null@ *//** where to write the new upstream 
+          high water mark */ FILE * const f)
+{
     struct newsgroup *g;
     unsigned long newserver = 0;
     char *l;
@@ -1307,8 +1313,7 @@ do_group(const char *ng, /** which group to operate on */
 	       NEWNEWS vs. XHDR/XOVER */
 	    t = strchr(l, ' ');
 	    from = 1;
-	    if (t && *t)
-	    {
+	    if (t && *t) {
 		/* group fetch from upstream is established */
 		a = strtoul(t, NULL, 10);
 		if (a)
@@ -1322,11 +1327,10 @@ do_group(const char *ng, /** which group to operate on */
 	newserver = getgroup(g, from);
 
 	if (f && newserver) {
-	    fprintf(f, "%s %lu\n", g->name,
-		    newserver > 0 ? newserver : from);
+	    fprintf(f, "%s %lu\n", g->name, newserver > 0 ? newserver : from);
 	}
 	return newserver;
-    } else {		/* g != NULL */
+    } else {			/* g != NULL */
 	if (!forceactive && (debug & DEBUG_ACTIVE))
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		   "%s not found in groupinfo file", ng);
@@ -1349,7 +1353,7 @@ processupstream(const char *const server, const int port,
     struct stringlist *ngs = NULL;
     struct stringlist *helpptr = NULL;
     char *s;
-    RBLIST *r = 0; /* =0 is to squish compiler warnings */
+    RBLIST *r = 0;		/* =0 is to squish compiler warnings */
 
     /* read info */
     s = server_info(spooldir, server, port, "");
@@ -1391,7 +1395,7 @@ processupstream(const char *const server, const int port,
 	       "Could not open %s for writing: %m", s);
 	free(s);
 	if (!newsgrp) {
-	  closeinteresting(r);
+	    closeinteresting(r);
 	}
 	return 0;
     }
@@ -1457,21 +1461,24 @@ do_server(char *msgid, time_t lastrun, char *newsgrp)
 
     fflush(stdout);
     reply = nntpconnect(current_server);
-    if (reply) {
+    if (reply > 0) {
 	char *e;
 
-	if (current_server->username) {
-	    if(!authenticate()) {
-		ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		       "%s: error, cannot authenticate", current_server->name);
-		return FALSE;
+	if (reply == 200 || reply == 201) {
+	    if (current_server->username) {
+		if (!authenticate()) {
+		    ln_log(LNLOG_SERR, LNLOG_CSERVER,
+			   "%s: error, cannot authenticate",
+			   current_server->name);
+		    return FALSE;
+		}
 	    }
+	    putaline(nntpout, "MODE READER");
+	    reply = newnntpreply(&e);
 	}
-	putaline(nntpout, "MODE READER");
-	reply = newnntpreply(&e);
-	if (reply < 0) {
+	if (reply != 200 && reply != 201) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		   "%s: error, server replied to MODE READER: \"%s\"",
+		   "%s: error: \"%s\"",
 		   current_server->name, e);
 	} else if (msgid) {
 	    /* if retrieval of the message id is successful at one
@@ -1734,8 +1741,7 @@ main(int argc, char **argv)
     if (!postonly) {
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles fetched, %lu killed, in %ld seconds",
-	       myname,
-	       globalfetched, globalkilled, time(0) - starttime);
+	       myname, globalfetched, globalkilled, time(0) - starttime);
 
 	switch (fork()) {
 	case -1:		/* problem */
