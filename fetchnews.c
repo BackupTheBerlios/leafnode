@@ -236,6 +236,7 @@ ismsgidonserver(char *msgid)
     }
 }
 
+#if 0
 /*
  * get articles by using NEWNEWS
  * returns last number of processed article or 0 if NEWNEWS didn't work
@@ -270,6 +271,7 @@ donewnews(struct newsgroup *g, time_t lastrun)
     return 0;
 #endif
 }
+#endif
 
 /*
  * get an article by message id
@@ -1258,31 +1260,73 @@ postarticles(void)
     return 1;
 }
 
+static int
+do_group(const char *ng, char **const s, 
+	     struct stringlist *ngs, FILE *const f) {
+    struct newsgroup *g;
+    unsigned long newserver = 0;
+    char *l;
+
+    g = findgroup(ng);
+    if (g) {
+	sprintf(*s, "%s ", g->name);
+	l = ngs ? findinlist(ngs, *s) : NULL;
+	if (l && *l) {
+	    char *t;
+	    unsigned long a;
+
+	    /* now check by which means we're checking for new articles,
+	       NEWNEWS vs. XHDR/XOVER */
+	    t = strchr(l, ' ');
+	    if (!t || !*t)
+		/* group not in groupinfo */
+		newserver = getgroup(g, 1);
+	    else {
+		/* group is in groupinfo */
+		a = strtoul(t, NULL, 10);
+		if (a)
+		    newserver = getgroup(g, a);
+		else
+		    newserver = getgroup(g, 1);
+	    }
+	} else {
+	    newserver = getgroup(g, 1);
+	    /* new group */
+	}
+	if ((f != NULL) && newserver)
+	    fprintf(f, "%s %lu\n", g->name, newserver);
+    } else {		/* g != NULL */
+	if (!forceactive || (debug & DEBUG_ACTIVE))
+	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+		   "%s not found in groupinfo file", ng);
+    }
+    return newserver;
+}
+
 /** process a given server/port,
  * \return 1 for success, 0 otherwise
  */
 static int
-processupstream(const char *server, const int port, time_t lastrun)
+processupstream(const char *const server, const int port,
+		const time_t lastrun, const char *const newsgrp)
 {
     FILE *f;
     const char *ng;
-    struct newsgroup *g;
-    int havefile;
-    int newnews_ok = FALSE;	/* FIXME */
-    unsigned long newserver = 0;
-    char *l;
+    unsigned long newserver;
     char *oldfile = 0;
+    int havefile;
     struct stringlist *ngs = NULL;
     struct stringlist *helpptr = NULL;
     char *s;
-    RBLIST *r;
+    RBLIST *r = 0; /* =0 is to squish compiler warnings */
 
-    /* read server info */
+    /* read info */
     s = server_info(spooldir, server, port, "");
 
     oldfile = critstrdup(s, "processupstream");
     havefile = 0;
     if ((f = fopen(s, "r"))) {
+	char *l;
 	/* FIXME: a sorted array or a tree would be better than a list */
 	ngs = NULL;
 
@@ -1296,68 +1340,37 @@ processupstream(const char *server, const int port, time_t lastrun)
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", s);
     }
 
-    critinitinteresting();
+    if (!newsgrp) {
+	critinitinteresting();
 
-    r = openinteresting();
-    if (!r) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
-	free(s);
-	return 0;
+	r = openinteresting();
+	if (!r) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
+	    free(s);
+	    return 0;
+	}
     }
 
     free(s);
     s = server_info(spooldir, server, port, "~");
 
     f = fopen(s, "w");
-    if (f == NULL) {
+    if (!f) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 	       "Could not open %s for writing: %m", s);
 	return 0;
     }
-    while ((ng = readinteresting(r))) {
-	if (isalnum((unsigned char)*ng)) {
-	    g = findgroup(ng);
-	    if (g) {
-		sprintf(s, "%s ", g->name);
-		l = havefile ? findinlist(ngs, s) : NULL;
-		if (l && *l) {
-		    char *t;
-		    unsigned long a;
 
-		    /* now check by which means we're checking for new articles,
-		       NEWNEWS vs. XHDR/XOVER */
-		    t = strchr(l, ' ');
-		    if (!t || !*t)
-			/* group not in groupinfo */
-			newserver = getgroup(g, 1);
-		    else {
-			/* group is in groupinfo */
-			if (newnews_ok) {
-			    newserver = donewnews(g, lastrun);
-			    if (!newserver)
-				newnews_ok = FALSE;
-			} else  {
-			    a = strtoul(t, NULL, 10);
-			    if (a)
-				newserver = getgroup(g, a);
-			    else
-				newserver = getgroup(g, 1);
-			}
-		    }
-		} else {
-		    newserver = getgroup(g, 1);
-		    /* new group */
-		}
-		if ((f != NULL) && newserver)
-		    fprintf(f, "%s %lu\n", g->name, newserver);
-	    } else {		/* g != NULL */
-		if (!forceactive || (debug & DEBUG_ACTIVE))
-		    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-			   "%s not found in groupinfo file", ng);
+    if (!newsgrp) {
+	while ((ng = readinteresting(r))) {
+	    if (isalnum((unsigned char)*ng)) {
+		newserver = do_group(ng, &s, havefile ? ngs : 0, f);
 	    }
 	}
+	closeinteresting(r);
+    } else {
+	newserver = do_group(newsgrp, &s, havefile ? ngs : 0, f);
     }
-    closeinteresting(r);
     free(s);
 
     if (f) {
@@ -1367,7 +1380,9 @@ processupstream(const char *server, const int port, time_t lastrun)
 	free(s);
     }
     free(oldfile);
-    freelist(ngs);
+    if (!newsgrp) {
+	freelist(ngs);
+    }
 
     return 1;
 }
@@ -1428,14 +1443,12 @@ do_server(char *msgid, time_t lastrun, char *newsgrp)
 	    if (getbymsgid(msgid)) {
 		return TRUE;
 	    }
-	} else if (newsgrp) {
-	    /* FIXME */
 	} else {
 	    if (!postonly) {
 		nntpactive();
 		/* get list of newsgroups or new newsgroups */
 		processupstream(current_server->name, current_server->port,
-				lastrun);
+				lastrun, newsgrp);
 	    }
 	    if (reply == 200 && !current_server->dontpost)
 		(void)postarticles();
