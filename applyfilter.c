@@ -118,6 +118,7 @@ readheaders(int fd, /*@unique@*/ const char *name, char **bufp, size_t *size)
     }
 }
 
+/* remove LF in LF+whitespace sequences, in place */
 static void unfold(char *p)
 {
     char *s, *q;
@@ -221,6 +222,7 @@ main(int argc, char *argv[])
     kept = 0;
     lsize = MAXHEADERSIZE + 1;
     l = (char *)critmalloc(lsize, "Space for article");
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "Applying filters...");
     while ((de = readdir(d)) != NULL) {
 	if (!isdigit((unsigned char)de->d_name[0])) {
 	    /* no need to stat file */
@@ -237,9 +239,13 @@ main(int argc, char *argv[])
 		printf("%s\n", de->d_name);
 	    }
 	}
-	stat(de->d_name, &st);
+	if (stat(de->d_name, &st))
+	    continue;
+	if (st.st_size == 0)
+	    score = TRUE;
 	if (S_ISREG(st.st_mode)
-	    && (fd = open(de->d_name, O_RDONLY))) {
+	    && (fd = open(de->d_name, O_RDONLY)) >= 0)
+	{
 	    int ret = readheaders(fd, de->d_name, &l, &lsize);
 	    if (ret != -1) { unfold(l); }
 	    switch (ret) {
@@ -262,7 +268,9 @@ main(int argc, char *argv[])
 	    close(fd);
 
 	    if (score && !dryrun) {
-		char *msgid = mgetheader("Message-ID:", l);
+		char *msgid = NULL;
+	        if (strlen(l))
+		    msgid = mgetheader("Message-ID:", l);
 		unlink(de->d_name);
 		/* delete stuff in message.id directory as well */
 		if (msgid) {
@@ -295,7 +303,7 @@ main(int argc, char *argv[])
 	    }
 	} else
 	    printf("could not open %s\n", de->d_name);
-    }
+    } /* while readdir */
     closedir(d);
     free(l);
     if (g->first > g->last) {
