@@ -91,7 +91,7 @@ check_date(const struct serverlist *server)
     } else {
 	if ((debugmode & debugmask) == debugmask) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER, "check_date: %s: server time %ld, our time %ld",
-		server->name, t, to);
+		server->name, (long int)t, (long int)to);
 	}
     }
 }

@@ -2226,7 +2226,7 @@ main(int argc, char **argv)
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles and %lu headers fetched, %lu killed, %lu posted, in %ld seconds",
-	       myname, globalfetched, globalhdrfetched, globalkilled, globalposted, time(0) - starttime);
+	       myname, globalfetched, globalhdrfetched, globalkilled, globalposted, (long int)(time(0) - starttime));
 
 	if (only_fetch_once)
 	    freegrouplist(done_groups);

@@ -1011,8 +1011,8 @@ donewnews(char *arg)
 	return;
     }
 
-    nntpprintf_as("230 List of new articles since %ld in newsgroup %s", age,
-	       l->head->string);
+    nntpprintf_as("230 List of new articles since %ld in newsgroup %s",
+		    (long int)age, l->head->string);
     s = mastr_new(LN_PATH_MAX);
     mastr_vcat(s, spooldir, "/interesting.groups", NULL);
     d = opendir(mastr_str(s));
