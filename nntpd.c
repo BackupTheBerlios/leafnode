@@ -825,12 +825,15 @@ list(struct newsgroup *g, int what, char *pattern)
     }
 
     if (!is_pattern(pattern)) {
-	/* accelerate */
+	/* not a pattern - accelerate and refresh subscription */
 	ng = findgroup(pattern, active, -1);
 	if (ng) {
 	    printlist(ng, what);
+	    if (what == 0 && is_interesting(pattern))
+		markinterest(pattern);
 	}
     } else {
+	/* have a pattern */
 	ng = g;
 	while (ng->name) {
 	    if (!pattern || !ngmatch(pattern, ng->name)) {
