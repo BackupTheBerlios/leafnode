@@ -545,7 +545,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
    what & 2: show header */
 {
     FILE *f;
-    char *p = NULL;
     unsigned long localartno;
     char *localmsgid = NULL;
     char *l;
@@ -585,13 +584,9 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
     nntpprintf("%3d %lu %s article retrieved - %s", 223 - what,
 	    localartno, localmsgid, t);
 
-    /* FIXME: put this into a separate function on its own? */
     while ((l = getaline(f)) && *l) {
 	if (what & 2) {
-	    p = l;
-	    if ((p = strchr(p, '\n')))
-		*p = '\0';
- 	    if (*l == '.')
+	    if (*l == '.')
 		putc('.', stdout);	/* escape . */
 	    fputs(l, stdout);
 	    fputs("\r\n", stdout);
@@ -635,7 +630,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	    }
 	} else {
 	    while ((l = getaline(f))) {
-		p = l;
 		if (*l == '.')
 		  putc('.', stdout);	/* escape . */
 		fputs(l, stdout);
