@@ -19,11 +19,6 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
-0.0 AUTOMAKE
-
-0.0: getgroup callers must handle error (fetchnews.c 1285)
-     Report by William J. Brinkman
-
 0.0 rnews is currently deactivated. Work in progress. Will have to
     reintroduce rnews and find a way to feed news batches to UUCP mode
     upstream (also listed at 3.3).
@@ -49,7 +44,8 @@ urgence:
     watermarks.
 
 1.1 groupinfo not updated after timeout + subsequent SIGINT
-    ACTION: check if report still current
+    bug confirmed by Jörg Dietrich 2002-01-04
+    ACTION: fix
 
 1.1 split post functionality from fetchnews to a separate daemon (but
     maybe call the new daemon automatically) Ozz 2001-06-12
@@ -162,10 +158,6 @@ urgence:
 3.3 Hook (ext. program) for editing group info,
     <slrn9e1dv6.3il.wum@wum.truhaso.lu> and
     <m3snj2d3k1.fsf@emma1.emma.line.org>
-
-3.3 fetchnews -N does not work
-    Jürgen Salk, Message-ID:
-    <3A3E8E47.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
 
 3.3 run everything through various static and dynamic checkers
     (efence, dmalloc, lclint)
