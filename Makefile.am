@@ -1,6 +1,5 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.72 2004/09/16 11:06:19 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 

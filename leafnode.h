@@ -1,4 +1,3 @@
-/* $Id: leafnode.h,v 1.107 2004/11/13 02:02:13 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 

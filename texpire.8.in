@@ -6,8 +6,6 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.10 2004/09/28 22:27:21 emma Exp $
-.\"
 .\" hilit19 is stupid: "
 .SH NAME
 texpire \- delete old news article threads

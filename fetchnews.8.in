@@ -6,8 +6,6 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.17 2004/08/22 09:21:39 emma Exp $
-.\"
 .\" hilit19 is stupid: "
 .SH NAME
 fetchnews \- fetch news via NNTP
