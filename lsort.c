@@ -29,8 +29,8 @@ main(void)
     char *l;
     char path[PATH_MAX];
     char **act;
-    unsigned long acount = 0;
-    unsigned long i;
+    size_t acount = 0;
+    size_t i;
     FILE *f;
 
     strcpy(path, spooldir);
@@ -54,12 +54,13 @@ main(void)
 	act[acount] = strdup(l);
 	acount++;
     }
-    fclose(f);
+    (void)fclose(f);
 
     qsort(act, acount, sizeof(char *), &comp);
 
     for (i = 0; i < acount; i++)
 	printf("%s\n", act[i]);
 
+    free(act);
     return 0;
 }
