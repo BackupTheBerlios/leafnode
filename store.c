@@ -365,8 +365,8 @@ store_stream(FILE * in /** input file */ ,
 		    rc = -1;
 		    goto bail;
 		}
+		(void)mastr_vcat(xref, " ", name, ":", nb, NULL);
 	    }
-	    (void)mastr_vcat(xref, " ", name, ":", nb, NULL);
 	}
     }
     if (fputs("Xref: ", tmpstream) == EOF)
