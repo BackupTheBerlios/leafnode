@@ -40,5 +40,5 @@ timeout_getaline(FILE * f, unsigned int timeout)
 char *
 mgetaline(FILE * f)
 {
-    return timeout_getaline(f, 300u);
+    return timeout_getaline(f, timeout_client);
 }

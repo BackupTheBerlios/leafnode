@@ -40,6 +40,7 @@ int delaybody = 0;
 int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
+int timeout_client = 300;
 int killbogus = 0; /** flag: if set, kill bogus files */
 int authentication = 0;		/* use authentication for NNTP access:
 				   possible values defined in leafnode.h */
@@ -274,6 +275,13 @@ readconfig(char *configfile)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: timeout_active is %d days",
 				   timeout_active);
+		    break;
+		case CP_TOCLIENT:
+		    timeout_client = strtol(value, NULL, 10);
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: timeout_client is %d secs",
+				   timeout_client);
 		    break;
 		case CP_WINDOW:
 		    windowsize = strtol(value, NULL, 10);

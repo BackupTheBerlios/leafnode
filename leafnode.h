@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.35 2002/04/10 22:51:49 emma Exp $ */
+/* $Id: leafnode.h,v 1.36 2002/04/23 11:40:41 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -444,6 +444,7 @@ extern "C" {
 				   /etc/leafnode/users (needed for password
 				   authentication) */
     extern int timeout_active;	/* reread active file after that many days */
+    extern int timeout_client;	/* activity timeout for clients in seconds */
     extern int filtermode;	/* can be one of */
 #define FM_NONE  0
 #define FM_XOVER 1
