@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.14 2003/12/18 10:44:02 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.15 2003/12/18 14:10:30 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -30,8 +30,8 @@ The design of
 is intended to self-repair after problems, and to require no
 manual maintenance.
 .PP
-.B Fetchnews
-(formerly called "fetch") is the program which submits and retrieves new
+.BR Fetchnews (8)
+is the program which submits and retrieves new
 articles to or from the upstream NNTP server.
 
 .SH OPTIONS
@@ -101,8 +101,8 @@ can specify an alternative port by adding a colon and the port number
 immediately behind the server name, without any whitespace inbetween.
 .TP
 .I -t number
-Wait this many seconds before fetching next article. Useful if you need
-bandwidth for something else but makes fetching slow.
+Wait this many seconds before fetching next article. This is useful if
+you need bandwidth for something else, but it makes fetching slow.
 .TP
 .I -v
 Be verbose.  A maximum of four
@@ -133,61 +133,27 @@ Go
 articles back and try to re-fetch what's missing. Useful to fill the
 gaps after filter rules that used to be too aggressive have been relaxed.
 
-.SH "EXPIRY OF NEWSGROUPS"
-.BR fetchnews (8)
-will drop newsgroup subscriptions after a certain amount of time a
-particular "interesting" group has not been read, unless run with the
-.I -n
-option.
-
-.BR Leafnode(8)
-will track for each group 1. when the last posting has been
-downloaded from the upstream (.last.posting), 2. when an article in the
-group or the group overview data has been requested by a client.  The
-former is marked in the ctime of the .last.posting file in the group
-directory (@SPOOLDIR@/group/name/.last.posting for the group
-group.name), the latter in the ctime of the group.name file below
-@SPOOLDIR@/interesting.groups. When the ctime difference between
-\.last.posting and the interesting.groups/group.name file exceeds
-.I timeout_long,
-the group is expired from interesting.groups. Use "ls -lc" or "ls -ltc" or
-the tools/lsmac.pl utility to view the ctime(s) of a particular directory
-or file or set of files.
-
-For a newly subscribed group that has not been read more than once, the
-interesting.group/group.name's ctime will match its mtime. In this case,
-.I timeout_short
-applies instead of
-.I timeout_long.
-
-Dormant groups do not expire.
-
-Note that this time mechanism does not recover when your system clock is
-changed, so make sure your system clock is right. A few minutes off
-don't matter practially, and daylight savings time is invisible to
-leafnode.
-
-It is a good idea to run some NTP software, for instance, "ntpd" or
-"chrony", against your ISP's NTP server, when you've got a permanent
-internet connection, or to run "ntpd -g -q -x" or "ntpdate" right after
-your dialup connection goes online. Chrony and Ntpd are third-party
-packages that do not ship with leafnode and the documentation of which
-are beyond the scope of this manual.
-
 .SH ALGORITHM
 Here is a brief description of what
 .B fetchnews
 does.
 .PP
-First, after connecting to the upstream NNTP server,
+First, it checks which newsgroups are no longer requested by clients,
+according to the procedure shown below in the section
+.B "EXPIRY OF NEWSGROUPS."
+.PP
+Then it will connect to the upstream NNTP servers one after another,
+and, unless changed by options, perform these steps:
+.PP
+First after connecting to the upstream NNTP server,
 all articles in
 .I @SPOOLDIR@/out.going
 are posted using POST.  If a posting fails, that article is moved to
 .I @SPOOLDIR@/failed.postings
 which an administrator has to clean up once in a while.  Moving a file
 back to
-.I @SPOOLDIR@/out.going 
-is sufficient to resubmit it.
+.I @SPOOLDIR@/out.going
+is sufficient to retry the submission.
 .PP
 Second, the upstream server's list of newsgroups (obtained using LIST
 ACTIVE and LIST NEWSGROUPS) is merged into
@@ -198,6 +164,73 @@ Third,
 .B fetchnews
 iterates over the list of newsgroups, performing a GROUP, an XOVER
 and a number of ARTICLE commands for each group which has been read recently.
+
+.SH "EXPIRY OF NEWSGROUPS"
+.BR Fetchnews (8)
+will drop newsgroup subscriptions after a certain amount of time a
+particular "interesting" group has not been read, unless run with the
+.I -n
+option.
+.PP
+.BR Leafnode(8)
+will track for each group (a) when the last posting has been downloaded
+from the upstream
+.I (.last.posting),
+(b) when an article in the group or
+the group overview data has been requested by a client.  Newsgroups are
+removed from the interesting.groups directory and hence no longer
+fetched when the newsgroup has not been accessed by any reader for
+.I timeout_long
+days after the freshest posting has arrived, or
+.I timeout_short
+days when the group has never been accessed since the placeholder
+article has been read.
+.PP
+This avoids the unsubscription of low-traffic newsgroups, for instance,
+announcements groups. As a consequence, newsgroups will only be removed
+from interesting.groups when
+.BR fetchnews (8)
+has downloaded postings AFTER you have unsubscribed the groups in your
+newsreader.
+.PP
+Technically, the arrival time of the freshest postings former is marked
+in the ctime of the
+.I .last.posting
+file in the group directory by
+.BR fetchnews (8),
+and the time of the last access by newsreaders is marked in the ctime of
+the
+.I group.name
+file below
+.I @SPOOLDIR@/interesting.groups
+by
+.BR leafnode (8).
+.PP
+For a newly subscribed group that has not been read more than once, the
+.I interesting.group/group.name's
+ctime will match its mtime. In this case,
+.I timeout_short
+applies instead of
+.I timeout_long.
+.PP
+You can use "ls -lc" or "ls -ltc" or the
+.BR lsmac.pl (1)
+utility to view the ctime(s) of a particular directory or file or set of
+files.
+.PP
+Dormant groups do not expire.
+.PP
+Note that this time mechanism does not recover when your system clock is
+changed, so make sure your system clock is right. A few minutes off
+don't matter practically; daylight savings time is invisible to
+leafnode and hence does not matter either.
+.PP
+It is a good idea to run some NTP software, for instance, "ntpd" or
+"chrony", against your ISP's NTP server, when you've got a permanent
+internet connection, or to run "ntpd -g -q -x" or "ntpdate" right after
+your dialup connection goes online. Chrony and Ntpd are third-party
+packages that do not ship with leafnode and the documentation of which
+are beyond the scope of this manual.
 
 .SH "FILES AND CONFIGURATION"
 .BR leafnode (8)
