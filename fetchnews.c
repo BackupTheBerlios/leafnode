@@ -557,25 +557,29 @@ getmarked(struct newsgroup *group)
     }
     str = mastr_new(256);
     while ((l = getaline(f))) {
-	char *p, *q;
+	char *p, *q, *sep;
 	unsigned long artno;
 	FILE *g;
 
+	mastr_cpy(str, l);
+
 	/* silently drop article with non existent pseudo head or bad formatted line */
-	if (!(p = strchr(l, ' ')))
+	if (!(sep = strchr(mastr_str(str), ' ')))
 	    continue;
-	*p++ = '\0';
+	*sep = '\0';
+	p = sep + 1;
 	if (!*p)
 	    continue;
-	mastr_cpy(str, l);
 	artno = strtoul(p, &q, 10);
 
 	if (*q || !(g = fopen(p, "r")))
 	    continue;
 	fclose(g);
 
-	if (!getbymsgid(mastr_str(str), 2))
+	if (!getbymsgid(mastr_str(str), 2)) {
+	    *sep = ' ';			/* ugly, get original line back */
 	    appendtolist(&failed, &ptr, mastr_str(str));
+	}
     }
     fclose(f);
     mastr_delete(str);
@@ -1269,7 +1273,7 @@ nntpactive(void)
 	    return;
 	mergegroups();		/* merge groups into active */
 	helpptr = groups;
-	if (count) {
+	if (count && current_server->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		   "%s: getting new newsgroup descriptions",
 		   current_server->name);
@@ -1547,13 +1551,19 @@ get_old_watermark(const char *group, struct rbtree *upstream)
 
 
 static void
-remove_watermark(const char *group, struct rbtree *upstream)
+remove_watermark(const char *group, struct rbtree *upstream,
+	int dontcomplain)
 {
+    const char *k;
 
-    const char *k = rbfind(group, upstream);
+    if (upstream == NULL)
+	return;
+    k  = rbdelete(group, upstream);
     if (k) {
-	rbdelete(group, upstream);
 	free((char *)k);		/* ugly but true */
+    } else {
+	if (!dontcomplain)
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "no watermark for group %s", group);
     }
 }
 
@@ -1571,8 +1581,8 @@ processupstream(const char *const server, const unsigned short port,
     FILE *f;
     const char *ng;			/* current group name */
     char *newfile, *oldfile;		/* temp/permanent server info files */
-    RBLIST *r;				/* interesting groups pointer */
-    struct rbtree *upstream = NULL;	/* upstream water marks */
+    RBLIST *r = NULL;			/* interesting groups pointer */
+    struct rbtree *upstream;		/* upstream water marks */
     int rc = 0;				/* return value */
 
     /* read info */
@@ -1580,15 +1590,16 @@ processupstream(const char *const server, const unsigned short port,
     newfile = server_info(spooldir, server, port, "~");
 
     /* read old watermarks in rbtree */
-    if ((f = fopen(oldfile, "r")) == NULL) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", oldfile);
-	goto out;
-    }
-    upstream = initfilelist(f, NULL, cmp_upstream);
-    fclose(f);
-    if (upstream == NULL) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read %s", oldfile);
-	goto out;
+    if ((f = fopen(oldfile, "r")) != NULL) {
+	upstream = initfilelist(f, NULL, cmp_upstream);
+	fclose(f);
+	if (upstream == NULL) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read %s", oldfile);
+	    goto out;
+	}
+    } else {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m - new server?", oldfile);
+	upstream = NULL;
     }
 
     /* read interesting.groups */
@@ -1607,7 +1618,6 @@ processupstream(const char *const server, const unsigned short port,
     if ((f = fopen(newfile, "w")) == NULL) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 	       "Could not open %s for writing: %m", newfile);
-	closeinteresting(r);
 	goto out;
     }
 
@@ -1642,8 +1652,6 @@ processupstream(const char *const server, const unsigned short port,
 	    newserver = getgroup(g, from);
 	    if (newserver == (unsigned long)-2) { /* fatal */
 		/* FIXME: write back all other upstream entries, return */
-		closeinteresting(r);
-		freeinteresting();
 		goto out;
 	    }
 	    /* write back as good info as we have, drop if no real info */
@@ -1653,7 +1661,7 @@ processupstream(const char *const server, const unsigned short port,
 		fprintf(f, "%s %lu\n", ng, from);
 	    }
 	    /* remove from upstream tree */
-	    remove_watermark(ng, upstream);
+	    remove_watermark(ng, upstream, from == 1);
 
 	    if (newserver != 0) { /* group successfully fetched */
 		if (only_fetch_once) {
@@ -1668,16 +1676,18 @@ processupstream(const char *const server, const unsigned short port,
 		fprintf(f, "%s %lu\n", ng, from);
 	}
     }
-    closeinteresting(r);
-    freeinteresting();
-
     if (log_fclose(f) == 0 &&
 	log_rename(newfile, oldfile) == 0)
         rc = 1;
 out:
+    if (r)
+	closeinteresting(r);
+    freeinteresting();
+    if (upstream)
+	freegrouplist(upstream);
+
     free(newfile);
     free(oldfile);
-    freegrouplist(upstream);
     return rc;
 }
 
