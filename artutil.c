@@ -47,6 +47,8 @@ mgetheader(
     char *value = NULL;
 
     assert(hdr);
+    if (NULL == buf) return NULL;
+
     if (!strchr(hdr, ':')) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "mgetheader called without : in header tag \"%s\"", hdr);
