@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.92 2004/01/05 13:56:05 emma Exp $ */
+/* $Id: leafnode.h,v 1.93 2004/01/16 18:29:44 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -157,6 +157,8 @@ extern "C" {
 
 /* initialize global variables */
     int initvars(const char *const progname, int logtostdout);
+    int init_post(void);
+    void init_failed(const char *) /*@noreturn@*/;
 
 /* get configuration file */
 /*@null@*//*@observer@*/ char *
@@ -165,7 +167,7 @@ extern "C" {
 
 /* conffile is malloced */
 int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
-#define GLOBALOPTS ":VveD:F:"
+#define GLOBALOPTS ":VveD:F:d:"
 
 /* handling of misc. lines */
     /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);
@@ -400,11 +402,12 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 /*
  * the strings in config.c
  */
-    extern const char *spooldir;
+    extern char *spooldir;
+    extern const char *def_spooldir;
     extern const char *sysconfdir;
     extern const char *bindir;
     extern const char *version;
-    extern const char *lockfile;
+    extern char *lockfile;
     extern const char *compileinfo;
     extern const char *GZIP;
     extern const char *BZIP2;
@@ -504,6 +507,7 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 #define FM_HEAD  2
 #define FM_BOTH  FM_XOVER|FM_HEAD
     extern /*@null@*/ char *filterfile;	/* filename where filter resides */
+    extern /*@null@*/ char *localgroups; /* filename for local groups file */
     extern /*@null@*/ char *pseudofile;	/* filename of pseudoarticle body */
     extern /*@null@*/ char *owndn;	/* own domain name, if you can't set one */
     extern /*@null@*/ struct serverlist *servers;
@@ -533,7 +537,7 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 /*
  * misc prototypes
  */
-    int lockfile_exists(unsigned long timeout);
+    int attempt_lock(unsigned long timeout);
     int handover_lock(pid_t pid);
     void putaline(FILE *, const char *fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));
