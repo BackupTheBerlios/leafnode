@@ -11,6 +11,8 @@
 #include "critmem.h"
 #include "mastring.h"
 #include "ln_log.h"
+#include "msgid.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ctype.h>

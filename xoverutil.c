@@ -10,6 +10,7 @@
 #include "get.h"
 #include "mastring.h"
 #include "bsearch_range.h"
+#include "msgid.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

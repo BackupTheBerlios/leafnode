@@ -10,6 +10,8 @@
 #include "critmem.h"
 #include "ln_log.h"
 #include "mastring.h"
+#include "msgid.h"
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

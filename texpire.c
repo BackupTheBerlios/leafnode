@@ -37,6 +37,7 @@ See README for restrictions on the use of this software.
 #include "ln_log.h"
 #include "format.h"
 #include "mastring.h"
+#include "msgid.h"
 
 #ifdef SOCKS
 #include <socks.h>
