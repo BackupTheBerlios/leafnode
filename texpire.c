@@ -860,8 +860,8 @@ dogroup(struct newsgroup *g, time_t expire)
      */
     if (chdirgroup(g->name, FALSE)) {
 	getxover(1);
-	freexover();
     }
+    freexover();
 }
 
 static void
@@ -995,8 +995,6 @@ main(int argc, char **argv)
 		break;
 	    case 'n':
 		dryrun = 1;
-		break;
-	    case 'F':
 		break;
 	    default:
 		usage();
