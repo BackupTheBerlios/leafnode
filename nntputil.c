@@ -41,7 +41,6 @@
 
 int stat_is_evil;
 long sendbuf;
-extern struct serverlist *current_server;
 char last_command[1025];
 /*@dependent@*/ FILE *nntpin  = NULL;
 /*@dependent@*/ FILE *nntpout = NULL;
@@ -52,7 +51,7 @@ int authenticated;
  * Returns TRUE if authentication succeeds, FALSE if it does not.
  */
 bool
-authenticate(void)
+authenticate(const struct serverlist *current_server)
 {
     int reply;
 

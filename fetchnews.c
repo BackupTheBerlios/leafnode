@@ -47,7 +47,6 @@ static unsigned long groupfetched;
 static unsigned long groupkilled;
 static sigjmp_buf jmpbuffer;
 static volatile sig_atomic_t canjump;
-struct serverlist *current_server;
 time_t now;
 
 /* Variables set by command-line options which are specific for fetchnews */
@@ -71,9 +70,9 @@ static struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
 
 /* function declarations */
 static void usage(void);
-static int isgrouponserver(char *newsgroups);
+static int isgrouponserver(const struct serverlist *, char *newsgroups);
 static int ismsgidonserver(char *msgid);
-static unsigned long getgroup(struct newsgroup *g, unsigned long server);
+static unsigned long getgroup(struct serverlist *, struct newsgroup *g, unsigned long server);
 static int postarticles(const struct serverlist *);
 static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *, int);
 static int getbymsgid(const char *msgid, int delayflg);
@@ -368,28 +367,25 @@ usage(void)
  * - FALSE otherwise
  */
 static int
-isgrouponserver(char *newsgroups)
+isgrouponserver(const struct serverlist *cursrv, char *newsgroups)
 {
     char *p, *q;
-    int retval;
+    int retval = FALSE;
 
-    if (!newsgroups)
-	return FALSE;
-
-    retval = FALSE;
-    p = newsgroups;
-    do {
-	SKIPLWS(p);
-	q = strchr(p, ',');
-	if (q)
-	    *q++ = '\0';
-	if (gs_match(current_server -> group_pcre, p)) {
-	    putaline(nntpout, "GROUP %s", p);
-	    if (nntpreply(current_server) == 211)
-		retval = TRUE;
-	}
-	p = q;
-    } while (q && !retval);
+    if ((p = newsgroups)) {
+	do {
+	    SKIPLWS(p);
+	    q = strchr(p, ',');
+	    if (q)
+		*q++ = '\0';
+	    if (gs_match(cursrv -> group_pcre, p)) {
+		putaline(nntpout, "GROUP %s", p);
+		if (nntpreply(cursrv) == 211)
+		    retval = TRUE;
+	    }
+	    p = q;
+	} while (q && !retval);
+    }
     return retval;
 }
 
@@ -660,14 +656,14 @@ parsegroupreply(const char **s, unsigned long *code, unsigned long *number,
  * - -1 if group is not available at all
  */
 static int
-getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
-    int delaybody_this_group)
+getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
+	long *first, unsigned long *last, int delaybody_this_group)
 {
     unsigned long h, window, u;
     long n;
     const char *l, *t;
 
-    if (!gs_match(current_server -> group_pcre, g->name))
+    if (!gs_match(cursrv -> group_pcre, g->name))
 	return 0;
 
     putaline(nntpout, "GROUP %s", g->name);
@@ -1140,7 +1136,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
  * - otherwise last article number in that group
  */
 static unsigned long
-getgroup(struct newsgroup *g, unsigned long first)
+getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 {
     struct stringlist *stufftoget = NULL;
     struct filterlist *f = NULL;
@@ -1188,7 +1184,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     if (g->first > g->last)
 	g->first = g->last+1;
 
-    x = getfirstlast(g, &first, &last, delaybody_this_group);
+    x = getfirstlast(cursrv, g, &first, &last, delaybody_this_group);
 
     switch (x) {
     case 0:
@@ -1206,7 +1202,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     /* use XOVER since it is often faster than XHDR. User may prefer
        XHDR if they know what they are doing and no additional information
        is requested */
-    if (!current_server->usexhdr || f || delaybody_this_group) {
+    if (!cursrv->usexhdr || f || delaybody_this_group) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: considering %ld %s %lu - %lu, using XOVER", g->name,
 		(last - first + 1),
@@ -1230,7 +1226,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 
     switch (outstanding) {
     case -2:
-	current_server->usexhdr = 0;	/* disable XHDR */
+	cursrv->usexhdr = 0;	/* disable XHDR */
 	/*@fallthrough@*/ /* fall through to -1 */
     case -1:
 	freefilter(f);
@@ -1310,10 +1306,10 @@ splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
 }
 
 /**
- * get active file from current_server
+ * get active file from cursrv
  */
 static void
-nntpactive(int fa)
+nntpactive(struct serverlist *cursrv, int fa)
 {
     struct stat st;
     char *l, *p, *q;
@@ -1334,7 +1330,7 @@ nntpactive(int fa)
      */
 
     /* figure last update */
-    p = server_info(spooldir, current_server->name, current_server->port, "");
+    p = server_info(spooldir, cursrv->name, cursrv->port, "");
     if (0 == stat(p, &st))
 	last_update = st.st_mtime;
     else
@@ -1342,16 +1338,16 @@ nntpactive(int fa)
 	forceact = 1;
     free(p);
 
-    str_ulong(portstr, current_server->port);
-    mastr_vcat(s, spooldir, "/leaf.node/last:", current_server->name, ":", portstr, NULL);
+    str_ulong(portstr, cursrv->port);
+    mastr_vcat(s, spooldir, "/leaf.node/last:", cursrv->name, ":", portstr, NULL);
 
     if (!forceact && (0 == stat(mastr_str(s), &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
-		"%s: checking for new newsgroups", current_server->name);
+		"%s: checking for new newsgroups", cursrv->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
 	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&last_update));
 	putaline(nntpout, "NEWGROUPS %s GMT", timestr + 2);
-	if (nntpreply(current_server) != 231) {
+	if (nntpreply(cursrv) != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
 	    mastr_delete(s);
 	    return;
@@ -1362,14 +1358,14 @@ nntpactive(int fa)
 	    if (!splitLISTline(l, &p, &r))
 		continue;
 	    *p = '\0';
-	    if (gs_match(current_server->group_pcre, l)) {
+	    if (gs_match(cursrv->group_pcre, l)) {
 		insertgroup(l, *r, 0, 0, time(NULL), NULL);
 		appendtolist(&groups, &helpptr, l);
 		count++;
 	    }
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
-		"%s: found %lu new newsgroups", current_server->name, count);
+		"%s: found %lu new newsgroups", cursrv->name, count);
 	if (!l) {
 	    /* timeout */
 	    mastr_delete(s);
@@ -1377,15 +1373,15 @@ nntpactive(int fa)
 	}
 	mergegroups();		/* merge groups into active */
 	helpptr = groups;
-	if (count && current_server->descriptions) {
+	if (count && cursrv->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		    "%s: getting new newsgroup descriptions",
-		    current_server->name);
+		    cursrv->name);
 	}
-	while (count && helpptr != NULL && current_server->descriptions) {
+	while (count && helpptr != NULL && cursrv->descriptions) {
 	    error = 0;
 	    putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
-	    reply = nntpreply(current_server);
+	    reply = nntpreply(cursrv);
 	    if (reply == 215) {
 		l = getaline(nntpin);
 		if (l && *l != '.') {
@@ -1397,11 +1393,11 @@ nntpactive(int fa)
 			error++;
 		    } while (l && *l && strcmp(l, "."));
 		    if (error > 1) {
-			current_server->descriptions = 0;
+			cursrv->descriptions = 0;
 			ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
 				"%s: warning: server does not process "
 				"LIST NEWSGROUPS %s correctly: use nodesc",
-				current_server->name, helpptr->string);
+				cursrv->name, helpptr->string);
 		    }
 		}
 	    }
@@ -1410,11 +1406,11 @@ nntpactive(int fa)
 	freelist(groups);
     } else {    /* read new active */
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-		"%s: getting newsgroups list", current_server->name);
+		"%s: getting newsgroups list", cursrv->name);
 	putaline(nntpout, "LIST");
-	if (nntpreply(current_server) != 215) {
+	if (nntpreply(cursrv) != 215) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		    "%s: reading all newsgroups failed", current_server->name);
+		    "%s: reading all newsgroups failed", cursrv->name);
 	    mastr_delete(s);
 	    return;
 	}
@@ -1439,13 +1435,13 @@ nntpactive(int fa)
 		    first = last = 0;
 		}
 	    }
-	    if (gs_match(current_server->group_pcre, l)) {
+	    if (gs_match(cursrv->group_pcre, l)) {
 		insertgroup(l, p[0], first, last, 0, NULL);
 		count++;
 	    }
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-		"%s: read %lu newsgroups", current_server->name, count);
+		"%s: read %lu newsgroups", cursrv->name, count);
 
 	mergegroups();
 	/*		if (!l)
@@ -1453,9 +1449,9 @@ nntpactive(int fa)
 			mastr_delete(namelast);
 			return; */
 
-	if (current_server->descriptions) {
+	if (cursrv->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-		    "%s: getting newsgroup descriptions", current_server->name);
+		    "%s: getting newsgroup descriptions", cursrv->name);
 	    putaline(nntpout, "LIST NEWSGROUPS");
 	    l = getaline(nntpin);
 	    /* correct reply starts with "215". However, INN 1.5.1 is broken
@@ -1472,14 +1468,14 @@ nntpactive(int fa)
 		} else {
 		    ln_log(LNLOG_SERR, LNLOG_CSERVER,
 			    "%s: reading newsgroups descriptions failed: %s",
-			    current_server->name, l);
+			    cursrv->name, l);
 		    mastr_delete(s);
 		    return;
 		}
 	    } else {
 		ln_log(LNLOG_SERR, LNLOG_CSERVER,
 			"%s: reading newsgroups descriptions failed",
-			current_server->name);
+			cursrv->name);
 		mastr_delete(s);
 		return;
 	    }
@@ -1507,14 +1503,14 @@ nntpactive(int fa)
 /* post article in open file f, return FALSE if problem, return TRUE if ok */
 /* FIXME: add IHAVE */
 static int
-post_FILE(FILE * f, char **line)
+post_FILE(const struct serverlist *cursrv, FILE * f, char **line)
 {
     int r;
     char *l;
 
     rewind(f);
     putaline(nntpout, "POST");
-    r = newnntpreply(current_server, line);
+    r = newnntpreply(cursrv, line);
     if (r != 340)
 	return 0;
     while ((l = getaline(f))) {
@@ -1573,7 +1569,7 @@ postarticles(const struct serverlist *cursrv)
 
 	    f1 = fgetheader(f, "Newsgroups:", 1);
 	    if (f1) {
-		if (cursrv->post_anygroup || isgrouponserver(f1)) {
+		if (cursrv->post_anygroup || isgrouponserver(cursrv, f1)) {
 		    char *f2;
 
 		    f2 = fgetheader(f, "Message-ID:", 1);
@@ -1592,7 +1588,7 @@ postarticles(const struct serverlist *cursrv)
 			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				   "Posting %s", *y);
 			    
-			    if (post_FILE(f, &line) || (xdup = strncmp(line, "441 435 ", 8) == 0)) {
+			    if (post_FILE(cursrv, f, &line) || (xdup = strncmp(line, "441 435 ", 8) == 0)) {
 				char *mod;
 				char *app;
 
@@ -1701,8 +1697,8 @@ remove_watermark(const char *group, struct rbtree *upstream,
  * -  0 otherwise
  */
 static int
-processupstream(const char *const server, const unsigned short port,
-		int forceactive)
+processupstream(struct serverlist *cursrv, const char *const server,
+	const unsigned short port, int forceactive)
 {
     FILE *f;
     const char *ng;			/* current group name */
@@ -1775,7 +1771,7 @@ processupstream(const char *const server, const unsigned short port,
                             "%s not found in groupinfo file", ng);
             }
 
-	    newserver = getgroup(g, from);
+	    newserver = getgroup(cursrv, g, from);
 	    if (newserver == (unsigned long)-2) { /* fatal */
 		/* FIXME: write back all other upstream entries, return */
 		goto out;
@@ -1826,7 +1822,7 @@ out:
  * - -1 for non fatal errors (go to next server)
  */
 static int
-do_server(int forceactive)
+do_server(struct serverlist *cursrv, int forceactive)
 {
     char *e = NULL;
     int rc = -1;	/* assume non fatal errors */
@@ -1841,15 +1837,15 @@ do_server(int forceactive)
 
     /* do not try to connect if we don't want to post here in -P mode */
     if (action_method == FETCH_POST
-	    && current_server -> feedtype != CPFT_NNTP) {
+	    && cursrv -> feedtype != CPFT_NNTP) {
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "skipping %s:%hu",
-		current_server -> name, current_server -> port);
+		cursrv -> name, cursrv -> port);
 	return 1;
     }
 
     /* establish connection to server */
     fflush(stdout);
-    reply = nntpconnect(current_server);
+    reply = nntpconnect(cursrv);
     if (reply == 0)
 	return -1;	/* no connection */
     if (reply != 200 && reply != 201) {
@@ -1857,33 +1853,34 @@ do_server(int forceactive)
     }
 
     /* authenticate */
-    if (current_server->username && !authenticate()) {
+    if (cursrv->username && !authenticate(cursrv)) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER, "%s: error, cannot authenticate",
-		current_server->name);
+		cursrv->name);
 	goto out;
     }
 
     /* get the nnrpd on the phone */
     putaline(nntpout, "MODE READER");
-    reply = newnntpreply(current_server, &e);
+    reply = newnntpreply(cursrv, &e);
     if (reply != 200 && reply != 201) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 		"%s: error: \"%s\"",
-		current_server->name, e != NULL ? e : "");
+		cursrv->name, e != NULL ? e : "");
 	goto out;
     }
 
-    check_date(current_server);
+    check_date(cursrv);
 
-    nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
+    /* get list of newsgroups or new newsgroups */
+    nntpactive(cursrv, forceactive);
 
     /* post articles */
     if (action_method & FETCH_POST) {
 	flag |= f_mustnotshort;
-	switch(current_server->feedtype) {
+	switch(cursrv->feedtype) {
 	    case CPFT_NNTP:
 		if (reply == 200) {
-		    res = postarticles(current_server);
+		    res = postarticles(cursrv);
 		    if (res == 0 && rc >= 0)
 			flag |= f_error;
 		}
@@ -1893,7 +1890,7 @@ do_server(int forceactive)
 	    default:
 		ln_log(LNLOG_SCRIT, LNLOG_CTOP,
 			"fatal: feedtype %s not implemented",
-			get_feedtype(current_server->feedtype));
+			get_feedtype(cursrv->feedtype));
 		exit(1);
 	}
     }
@@ -1908,8 +1905,8 @@ do_server(int forceactive)
 
     /* do regular fetching of articles, headers, delayed bodies */
     if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
-	res = processupstream(current_server->name, current_server->port,
-			forceactive);
+	res = processupstream(cursrv, cursrv->name,
+		cursrv->port, forceactive);
 	if (res != 1)
 	    flag |= f_error;
     }
@@ -2009,6 +2006,7 @@ main(int argc, char **argv)
     static const char myname[] = "fetchnews";
     struct sigaction sa;
     int forceactive = 0;	/* if 1, reread complete active file */
+    struct serverlist *current_server;
 
     verbose = 0;
     ln_log_open("fetchnews");
@@ -2131,7 +2129,7 @@ main(int argc, char **argv)
 
 	current_server = servers;
 	if (current_server->active) {
-	    err = do_server(forceactive);
+	    err = do_server(current_server, forceactive);
 	    if (err == -2) {
 		rc = 1;
 		break; 
