@@ -2016,11 +2016,12 @@ main(int argc, char **argv)
     volatile time_t starttime;	/* keep state across setjmp */
     static const char myname[] = "fetchnews";
     struct sigaction sa;
-    volatile int forceactive = 0;	/* if 1, reread complete active file */
+    static int forceactive;	/* if 1, reread complete active file */
     struct serverlist *current_server;
     unsigned long articles;
     char **x;
 
+    forceactive = 0;
     verbose = 0;
     ln_log_open(myname);
     if (!initvars(argv[0], 0))
