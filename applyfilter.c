@@ -178,7 +178,7 @@ main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
     }
 
-    if (lockfile_exists(TRUE, LOCKWAIT)) {
+    if (lockfile_exists(LOCKWAIT)) {
 	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }

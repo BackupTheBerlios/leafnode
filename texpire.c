@@ -1022,7 +1022,7 @@ main(int argc, char **argv)
 	exit(2);
     }
 
-    if (lockfile_exists(TRUE, LOCKWAIT)) {
+    if (lockfile_exists(LOCKWAIT)) {
 	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
