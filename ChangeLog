@@ -52,7 +52,7 @@
 
 2002-01-02  Matthias Andree  <matthias.andree@gmx.de>
 
-	* filterutil.c: Respect DEBUG_FILTER. Found by Olaf Titz, fixed by
+	* filterutil.c: Respect DEBUG_FILTER. Found by Oliver Titz, fixed by
 	Raymond Scholz.
 
 2001-12-29  Matthias Andree  <matthias.andree@gmx.de>
