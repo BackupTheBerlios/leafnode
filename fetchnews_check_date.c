@@ -18,7 +18,7 @@ check_date(const char *servername)
     const int debugmask = DEBUG_NNTP|DEBUG_LOGGING;
     char *lastline;
 
-    putaline(nntpout, "DATE\r\n");
+    putaline(nntpout, "DATE");
     reply = newnntpreply(&lastline);
     if (reply != 111) {
 	/* upstream does not support the DATE command, so ignore */
