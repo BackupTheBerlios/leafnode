@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "ln_log.h"
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 
@@ -16,7 +16,7 @@ mycritmalloc(const char *f, long l, size_t size, const char *message)
 {
     void *a;
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
     a = _malloc_leap(f, l, size);
 #else
     (void)f;

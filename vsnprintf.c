@@ -49,7 +49,7 @@
 #define roundup(x, y) ((((x)+((y)-1))/(y))*(y))
 #endif
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

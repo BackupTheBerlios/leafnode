@@ -27,7 +27,7 @@
 #include "ln_log.h"
 #include "leafnode.h"
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

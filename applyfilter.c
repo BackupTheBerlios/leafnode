@@ -21,7 +21,7 @@
 #include <utime.h>
 #include <fcntl.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

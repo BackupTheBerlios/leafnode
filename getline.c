@@ -19,7 +19,7 @@
 #include "leafnode.h"
 #include "getline.h"
 #include "critmem.h"
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

@@ -51,7 +51,7 @@ See README for restrictions on the use of this software.
 #include <unistd.h>
 #include <errno.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

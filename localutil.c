@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

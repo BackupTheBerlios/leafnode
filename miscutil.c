@@ -35,7 +35,7 @@
 #include <stdarg.h>
 #endif
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 
@@ -333,7 +333,8 @@ initinteresting(void)
 	return FALSE;
     }
     while ((de = readdir(d)) != NULL) {
-	char *k, *k2;
+	char *k;
+	const char *k2;
 
 	if (de->d_name[0] == '.')
 	    continue;
@@ -347,6 +348,7 @@ initinteresting(void)
 	}
 	if (k != k2) {
 	    /* key was already present in tree */
+	    free(k);
 	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
 		   "directory lists same file \"%s\" more than once!? "
 		   "Confused, aborting.", k);

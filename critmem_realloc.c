@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "ln_log.h"
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 
@@ -15,7 +15,7 @@ void *
 mycritrealloc(const char *f, long l, void *a, size_t size, const char *message)
 {
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
     a = _realloc_leap(f, l, a, size);
 #else
     (void)f;

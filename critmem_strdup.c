@@ -2,7 +2,7 @@
 #include <string.h>
 #include "ln_log.h"
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

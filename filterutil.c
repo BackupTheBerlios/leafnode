@@ -17,7 +17,7 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 

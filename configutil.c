@@ -21,7 +21,7 @@
 #include <time.h>
 #include <sys/resource.h>
 
-#ifdef DEBUG_DMALLOC
+#ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 
