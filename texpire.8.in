@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.4 2001/11/29 17:48:30 emma Exp $
+.\" $Id: texpire.8.in,v 1.5 2002/01/11 00:04:13 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -14,8 +14,8 @@ texpire \- delete old news article threads
 
 .SH SYNOPSIS
 .B texpire -V
-br
-.B texpire [-Dv] [-F configfile] [-f]
+.br
+.B texpire [-fnr] [-D debugmode] [-F configfile] [-v[v[v[v]]]]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -29,15 +29,18 @@ is intended to repair any problems itself, to detect what newsgroups
 the users read, and to require no manual manual maitenance.
 .PP
 .B Texpire
-is the program which deletes old articles from the local news spool.
+is the program which deletes old articles from the local news spool,
+rehashes the spool after updates of leafnode.
 
 .SH OPTIONS
 .TP
-.I -D
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems with your upstream server(s). If debug mode has already been
-set in the config file, increase verbosity.
+set in the config file, increase verbosity. See
+.I config.example
+for details on how to set the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
@@ -47,6 +50,16 @@ Read configuration from an alternate config file instead of
 Force expire. Expire will be made regardless of the access time of the file.
 Especially useful if you regularly backup your news spool or do other things
 to it where you open files in there.
+.TP
+.I -n
+Dry run mode. In this mode, texpire will not delete anything, it will
+just write what it would do without -n.
+.TP
+.I -r
+Repair and migrate mode. In this mode, texpire tries to save as much of the news
+spool as it can. This mode MUST be used when upgrading to a leafnode
+version which has a different hash function for message.id than the
+version previously installed. If in doubt, use -r after an update.
 .TP
 .I -v
 Be verbose.  A maximum of four
@@ -58,9 +71,12 @@ to make sense.
 Print texpire version information and exit.
 
 .SH FILES
+.I @sysconfdir@/config.example
+documents the debug modes.
+
 See
 .BR leafnode (8)
-for the list of files affected.
+for the list of other files affected.
 
 .SH NOTES
 .B Texpire
@@ -109,6 +125,11 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 .PP
 Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
 Copyright of the modifications 1997-1999.
+.PP
+Modified by Matthias Andree <matthias.andree@gmx.de>. Copyright of the
+modifications 1999-2002.
+.PP
+Parts written by Stefan Wiens <s.wi@gmx.de>. Copyright 2001.
 
 .SH SEE ALSO
 .BR tcpd (8),
