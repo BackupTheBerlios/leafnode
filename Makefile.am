@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.11 2002/02/09 23:56:38 emma Exp $
+# $Id: Makefile.am,v 1.12 2002/02/11 02:27:03 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -113,6 +113,7 @@ liblnutil_a_SOURCES	= \
 	sync_link.c \
 	tab2spc.c \
 	timeout_getaline.c \
+	touch.c \
 	ugid.h \
 	ugid_gensure.c \
 	ugid_gget.c \
