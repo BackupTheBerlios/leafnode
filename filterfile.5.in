@@ -24,11 +24,13 @@ The
 .I filterfile
 stores a number of entries in the following format.
 .RS
-newsgroups = [wildmat]
+
+newsgroups = [!]\fIPCRE\fR
 .br
-pattern = [pattern to recognize]
+pattern = [!]\fIPCRE\fR
 .br
-action = kill|select|[score]
+action = {kill|select|\fIscore\fR}
+
 .RE
 Based on these entries,
 .BR fetchnews
@@ -37,13 +39,18 @@ The entries are considered from the top down.
 
 .PP
 The
-.BR newsgroups
+.BR [!]\fInewsgroups\fR
 parameter determines which newsgroup(s) the following patterns should be
 applied to. You can use
-.BR wildmat (3)
-expressions as explained below. A newsgroups parameter can be set for
-more than one pattern/action pair. It is valid until the next newsgroups
-parameter turns up.
+.B PCRE
+expressions as explained in the 
+.B pcre
+manual page. When prefixed with an exclamation point, the match result
+is inverted, i. e. the rule applies if the newsgroup name is \fBnot\fR
+matched by the PCRE, useful for "for all newsgroups except... do"-style
+filters. The newsgroup rule is memorized and can be used for more than
+one pattern/action pair. It is valid until the next newsgroups parameter
+turns up.
 
 .PP
 The
@@ -52,13 +59,19 @@ The
 .BR recognize
 can be one of the following:
 .TP
-pattern = [pcre]
+pattern = [!]\fIpcre\fR
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
 a separate manual page (
 .BR pcre (7)
 or, on newer systems,
 .BR pcre (3)).
+You can prefix the pattern with an exclamation point to invert its
+meaning, but this is usually not what you want. You USUALLY mean to use
+an inverted assertion, such as
+
+pattern = ^Subject:(?!.*bad weather)
+
 Be very careful when using the | operator. Make sure you use parentheses
 to tell PCRE which part you want matched. "^Subject: Jens|Jan" is
 different from "^Subject: (Jens|Jan)" -- the former matches either

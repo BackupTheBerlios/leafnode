@@ -9,7 +9,7 @@
 
 ### the next lines will kill descrambler spam in all groups
 ### d-e-s-c-r-a-m-b-l-e-r or d.e.s.c.r.a.m.b.l.e.r are detected
-newsgroups = *
+newsgroups = .*
 pattern = ^Subject:.*D.*E.S.C.R.A.M.B.L.E.R
 action = kill
 
@@ -35,8 +35,26 @@ maxcrosspost = 5
 action = kill
 
 ### this limits traffic for a high-traffic group
-newsgroups = de.rec.fotografie
+newsgroups = de\.rec\.fotografie
 maxage = 7
+action = kill
+
+### this pattern ignores "weather" posts in all but one group
+newsgroups = !your\.newsgroup
+pattern = ^Subject:.*weather
+action = kill
+
+### this pattern ignores all articles that haven't been posted
+### by the Sylpheed software (BEWARE, READ THE NEXT EXAMPLE!)
+newsgroups = .*
+pattern = !^X-Newsreader: Sylpheed
+action = kill
+
+### As the previous pattern is not generally useful, here's one
+### that only applies to the Subject: header:
+### This ignores all postings about bad weather:
+newsgroups = .*
+pattern = ^Subject:(?!.*bad weather)
 action = kill
 
 ### this gets you rid of German Outlook national oddities
@@ -46,12 +64,12 @@ action = kill
 ### match, so "^Subject: Jens|Jan" will kill all articles posted in
 ### January because it means "^Subject: Jens" or "Jan". Use "^Subject:
 ### (Jens|Jan)" instead (don't type the quote marks!)
-newsgroups = *
+newsgroups = .*
 pattern = ^Subject: (AW|WG|Re^\d+):
 action = kill
 
 ### Do not fetch articles that GMANE considered spam (only effective in
 ### groups of the gmane hierarchy):
-newsgroups = *
+newsgroups = .*
 pattern = ^Xref:.* gmane\.spam\.detected:
 action = kill

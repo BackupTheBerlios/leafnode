@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20030621b])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.55 $)
+AC_REVISION($Revision: 1.56 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -201,18 +201,18 @@ dnl Check for libcrypt
 AC_CHECK_LIB(crypt, crypt)
 
 dnl Check for PCRE library.
-AC_PATH_PROG(PCRECONFIG,pcre-config,no)
-if test "$PCRECONFIG" != "no" ; then
-  CF=`$PCRECONFIG --cflags`
-  if echo "$CFLAGS" | grep >/dev/null 2>&1 "$CF" 
-  then :
-  else AC_MSG_NOTICE(adding $CF to CFLAGS) ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
-  fi
-  LF=`$PCRECONFIG --libs`
-  if echo "$LDFLAGS" | grep >/dev/null 2>&1 "$LF" 
-  then :
-  else AC_MSG_NOTICE(adding $LF to LDFLAGS) ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
-  fi
+AC_PATH_PROG(PCRECONFIG,pcre-config,AC_MSG_ERROR(pcre-config not found, make sure you have the pcre and pcre-devel packages installed))
+
+CF=`$PCRECONFIG --cflags`
+if echo "$CFLAGS" | grep >/dev/null 2>&1 "$CF" 
+then :
+else AC_MSG_NOTICE(adding $CF to CFLAGS) ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
+fi
+
+LF=`$PCRECONFIG --libs`
+if echo "$LDFLAGS" | grep >/dev/null 2>&1 "$LF" 
+then :
+else AC_MSG_NOTICE(adding $LF to LDFLAGS) ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
 fi
 
 AC_CACHE_CHECK(for pcre.h,ac_cv_header_pcre_h,[
@@ -227,40 +227,7 @@ fi
 if test "$ac_cv_lib_pcre_pcre_compile" = yes
 then
   AC_DEFINE(HAVE_LIBPCRE)
-  AC_CACHE_CHECK(for new pcre_compile API,cf_cv_new_pcre_compile,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <pcre.h>]], [[
-	char * pattern;
-	int options;
-	const char **errptr;
-	int *erroffset;
-	const unsigned char *tableptr;
-	pcre_compile(pattern, options, errptr, erroffset, tableptr);]])],[cf_cv_new_pcre_compile="yes"],[cf_cv_new_pcre_compile="no"])
-  ])
-  if test $cf_cv_new_pcre_compile = "yes"
-  then
-    AC_DEFINE(NEW_PCRE_COMPILE, 1,
-	      [define if your PCRE is >= v2.01])
-  fi
-  AC_CACHE_CHECK(for new pcre_exec API,cf_cv_new_pcre_exec,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <pcre.h>]], [[
-	const pcre *pattern;
-	const pcre_extra *extra;
-	const char *subject;
-	int length;
-	int options;
-	int *ovec;
-	int ovecsize;
-	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize);]])],[cf_cv_new_pcre_exec="no"],[ cf_cv_new_pcre_exec="yes" ])
- ])
-  if test $cf_cv_new_pcre_exec = "yes"
-  then
-    AC_DEFINE(NEW_PCRE_EXEC, 1,
-	      [define if your PCRE is >= v2.06])
-  fi
-fi
-
-if test "$ac_cv_lib_pcre_pcre_compile" != "yes"
-then
+else
     echo "*** I cannot find PCRE. leafnode depends on it."
     echo "***"
     echo "*** If you have PCRE installed, pcre-config was not found."
@@ -274,6 +241,7 @@ then
     echo "*** Just download, unpack, then cd to pcre-3.7, then"
     echo "*** ./configure && make, then as root: make install"
     echo "*** Then, reconfigure leafnode."
+    AC_MSG_ERROR(PCRE library not found)
     exit 1
 fi
 

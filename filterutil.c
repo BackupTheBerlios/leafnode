@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "pcrewrap.h"
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -181,11 +182,14 @@ newfilter(void)
     fe = (struct filterentry *)critmalloc(sizeof(struct filterentry),
 					  "Allocating filterentry space");
 
-    fe->newsgroup = NULL;
+    fe->newsgroups = NULL;
+    fe->ngpcretext = NULL;
     fe->cleartext = NULL;
     fe->expr = NULL;
     fe->action = NULL;
     fe->limit = -1;
+    fe->invertngs = 0;
+    fe->invertpat = 0;
     fl = (struct filterlist *)critmalloc(sizeof(struct filterlist),
 					 "Allocating filterlist space");
 
@@ -197,9 +201,12 @@ newfilter(void)
 static struct filterlist *oldf = NULL;
 
 static void
-insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ char *ng)
+insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ pcre *ng, /*@only@*/ char *ngpcretext, int invertngs, int invertpat)
 {
-    (f->entry)->newsgroup = ng;
+    (f->entry)->invertngs = invertngs;
+    (f->entry)->invertpat = invertpat;
+    (f->entry)->newsgroups = ng;
+    (f->entry)->ngpcretext = ngpcretext;
     if (!filter)
 	filter = f;
     else
@@ -241,12 +248,10 @@ readfilter(/*@null@*/ const char *filterfilename)
 {
     FILE *ff;
     char *l;
-    char *ng = NULL;
-    char *param, *value;
-    const char *regex_errmsg;
-    int regex_errpos;
+    pcre *ng = NULL;
+    char *param, *value, *ngt = NULL;
     struct filterlist *f;
-    int rv = TRUE;
+    int rv = TRUE, invertngs = 0, invertpat = 0;
     unsigned long line = 0;
 
     filter = NULL;
@@ -281,18 +286,25 @@ readfilter(/*@null@*/ const char *filterfilename)
 	if (!*l || *l == '#') continue;
 	if (parse_line(l, param, value)) {
 	    if ((state == RF_WANTNG || state == RF_WANTNGORPAT) &&
-		(!strcasecmp("newsgroup", param)
-		 || !strcasecmp("newsgroups", param))) {
-		if (ng) free(ng);
-		ng = critstrdup(value, "readfilter");
-		state = RF_WANTPAT;
+		    (!strcasecmp("newsgroup", param)
+		     || !strcasecmp("newsgroups", param))) {
+		if (ngt) free(ngt);
+		ngt = critstrdup(value, "readfilter");
+		if (*value == '!') {
+		    value ++;
+		    invertngs = 1;
+		} else
+		    invertngs = 0;
+		ng = ln_pcre_compile(value, 0, NULL, filterfilename, line);
+		if (ng) state = RF_WANTPAT;
+		else rv = FALSE;
 	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) &&
-		!strcasecmp("pattern", param)) {
+		    !strcasecmp("pattern", param)) {
 		pcre *re;
 		if (!ng) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
-			   "No newsgroup for pattern = %s (line %lu) found",
-			   value, line);
+			    "No newsgroup for pattern = %s (line %lu) found",
+			    value, line);
 		    rv = FALSE;
 		    /* strictly speaking, the following "continue"
 		     * statement is not needed. We will never be in this
@@ -302,49 +314,39 @@ readfilter(/*@null@*/ const char *filterfilename)
 		     */
 		    continue;
 		}
-		re = pcre_compile(value, PCRE_MULTILINE,
-				  &regex_errmsg, &regex_errpos,
-#ifdef NEW_PCRE_COMPILE
-				  NULL
-#endif
-		    );
+		if (*value == '!') {
+		    value ++;
+		    invertpat = 1;
+		} else
+		    invertpat = 0;
+		re = ln_pcre_compile(value, PCRE_MULTILINE, NULL,
+			filterfilename, line);
 		if (re) {
 		    f = newfilter();
-		    insertfilter(f, critstrdup(ng, "readfilter"));
+		    insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs, invertpat);
 		    (f->entry)->expr = re;
 		    (f->entry)->cleartext = critstrdup(value, "readfilter");
 		} else {
-		    /* could not compile */
-		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-			   "%s: invalid pattern at line %lu: %s",
-			   filterfilename, line,
-			   regex_errmsg);
-		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-			   "%s: \"%s\"", filterfilename, value);
-		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-			   "%s:  %*s",
-			   filterfilename,
-			   regex_errpos + 1, "^");
 		    rv = FALSE;
 		}
 		state = RF_WANTACTION;
 	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) && (
-			   (!strcasecmp("maxage", param)) ||
-			   (!strcasecmp("minlines", param)) ||
-			   (!strcasecmp("maxlines", param)) ||
-			   (!strcasecmp("maxbytes", param)) ||
-			   (!strcasecmp("maxcrosspost", param)))) {
+			(!strcasecmp("maxage", param)) ||
+			(!strcasecmp("minlines", param)) ||
+			(!strcasecmp("maxlines", param)) ||
+			(!strcasecmp("maxbytes", param)) ||
+			(!strcasecmp("maxcrosspost", param)))) {
 		f = newfilter();
-		insertfilter(f, critstrdup(ng, "readfilter"));
+		insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs, invertpat);
 		(f->entry)->cleartext = critstrdup(param, "readfilter");
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
 		state = RF_WANTACTION;
 	    } else if (state == RF_WANTACTION
-		       && !strcasecmp("action", param)) {
+		    && !strcasecmp("action", param)) {
 		if (!f || !f->entry || !(f->entry)->cleartext) {
 		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-			   "%s: No pattern found for action %s",
-			   filterfilename, value);
+			    "%s: No pattern found for action %s",
+			    filterfilename, value);
 		    rv = FALSE;
 		} else {
 		    (f->entry)->action = critstrdup(value, "readfilter");
@@ -352,19 +354,19 @@ readfilter(/*@null@*/ const char *filterfilename)
 		state = RF_WANTNGORPAT;
 	    } else {
 		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-		       "%s: line %lu: expected %s, saw \"%s = %s\"",
-		       filterfilename, line, whatexpected(state),
-		       param, value);
+			"%s: line %lu: expected %s, saw \"%s = %s\"",
+			filterfilename, line, whatexpected(state),
+			param, value);
 		if (state != RF_WANTNG) state = RF_WANTNGORPAT;
 		rv = FALSE;
 	    }
 	} else {
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-		   "%s: Cannot parse line %lu: \"%s\"", filterfilename,
-		   line, l);
+		    "%s: Cannot parse line %lu: \"%s\"", filterfilename,
+		    line, l);
 	    rv = FALSE;
 	}
-    }
+    } /* while */
     (void)fclose(ff);
     if (ng)
 	free(ng);
@@ -372,8 +374,8 @@ readfilter(/*@null@*/ const char *filterfilename)
     free(value);
     if (state != RF_WANTNG && state != RF_WANTNGORPAT) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "%s: premature end of file, expected %s",
-	       filterfilename, whatexpected(state));
+	       "%s:%lu: premature end of file, expected %s",
+	       filterfilename, line, whatexpected(state));
 	rv = FALSE;
     }
 
@@ -398,7 +400,8 @@ selectfilter(const char *groupname)
     fold = NULL;
     master = filter;
     while (master) {
-	if (ngmatch((master->entry)->newsgroup, groupname) == 0) {
+	if ((master->entry)->invertngs ^ (pcre_exec((master->entry)->newsgroups, NULL, groupname,
+		    strlen(groupname), 0, /* options */ 0, NULL, 0) >= 0)) {
 	    f = (struct filterlist *)critmalloc(sizeof(struct filterlist),
 						"Allocating groupfilter space");
 
@@ -426,12 +429,9 @@ regexp_addinfo(const struct filterentry *g, const char *hdr) {
     const char *x = hdr;
     while (*x) {
 	int len = strcspn(x, "\n");
-	int match = pcre_exec(g->expr, NULL, x, (int)strcspn(x, "\n"),
-#ifdef NEW_PCRE_EXEC
-		0,
-#endif
-		0, NULL, 0);
-	if (match >= 0) {
+	int match = g->invertpat ^ (pcre_exec(g->expr, NULL, x, (int)strcspn(x, "\n"),
+		0, 0, NULL, 0) >= 0);
+	if (match) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CALL, "regexp filter: detail: \"%-.*s\""
 		    " =~ /%s/ matched", len, x, g->cleartext);
 	}
@@ -463,18 +463,16 @@ killfilter(const struct filterlist *f, const char *hdr)
 	g = f->entry;
 	if (debugmode & DEBUG_FILTER) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: trying filter for %s",
-	           g->newsgroup);
+	           g->ngpcretext);
 	}
 	if ((g->limit == -1) && (g->expr)) {
-	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
-#ifdef NEW_PCRE_EXEC
-			      0,
-#endif
-			      0, NULL, 0);
+	    match = g->invertpat ^ (pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
+			      0, 0, NULL, 0) >= 0);
 	    if (debugmode & DEBUG_FILTER) {
 	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-	               "regexp filter: /%s/ returned %d", g->cleartext, match);
-		if (match >= 0) regexp_addinfo(g, hdr);
+	               "regexp filter: /%s/ %s", g->cleartext, match ? "matched" : "did not match");
+		if (match) regexp_addinfo(g, hdr);
+		match = !match;
 	    }
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
@@ -603,8 +601,10 @@ free_entry(/*@null@*/ /*@only@*/ struct filterentry *e)
 	    free(e->action);
 	if (e->cleartext)
 	    free(e->cleartext);
-	if (e->newsgroup)
-	    free(e->newsgroup);
+	if (e->newsgroups)
+	    pcre_free(e->newsgroups);
+	if (e->ngpcretext)
+	    free(e->ngpcretext);
 	free(e);
     }
 }

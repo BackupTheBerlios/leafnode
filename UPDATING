@@ -1,3 +1,12 @@
+NOTE: the filterfile syntax has changed, newsgroups are now specified as
+regexp rather than wildmat. Most importantly, you must change "?" to
+".", change "*" to ".*" and "." to "\". The newsgroups and pattern
+parameters also support negation, but for the pattern this isn't nearly
+as useful as it looks -- use negative lookbehind assertions, see the
+PCRE manual page.
+
+
+
 NOTE: the local.groups and groupinfo files have changed from any former
 version to 2.0b8_ma8pre. Also, the hash function has changed from any
 former releases Cornelius did.

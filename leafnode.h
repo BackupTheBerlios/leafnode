@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.84 2003/05/05 21:02:18 emma Exp $ */
+/* $Id: leafnode.h,v 1.85 2003/07/06 21:21:13 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -297,15 +297,18 @@ extern "C" {
  * 		the score, further tests are performed
  */
     struct filterentry {
-	char *newsgroup;
+	char *ngpcretext;
+	pcre *newsgroups;
+	int invertngs;
 	long limit;
 	char *cleartext;
 	pcre *expr;
+	int invertpat;
 	char *action;
     };
     struct filterlist {
-	struct filterentry *entry;
 	struct filterlist *next;
+	struct filterentry *entry;
     };
     extern /*@null@*/ /*@owned@*/ struct filterlist *filter;
 	/* all expressions precompiled */

@@ -136,6 +136,7 @@ readconfig(/*@null@*/ const char *configfile)
     int err;
     time_t i;
     mastr *s = mastr_new(LN_PATH_MAX);
+    unsigned long line = 0;
 
     artlimit = 0;
     param = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
@@ -156,6 +157,7 @@ readconfig(/*@null@*/ const char *configfile)
     mastr_delete(s);
     while ((l = getaline(f))) {
 	const struct configparam *cp;
+	line ++;
 
 	if (parse_line(l, param, value)) {
 	    if ((cp = find_configparam(param))) {
@@ -445,7 +447,7 @@ readconfig(/*@null@*/ const char *configfile)
 		    break;
 		case CP_ONLYGROUPSPCRE:
 		    {
-			pcre *r = gs_compile(value);
+			pcre *r = gs_compile(value, configfile, line);
 
 			if (!r)
 			    exit(2);

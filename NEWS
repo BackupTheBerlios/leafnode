@@ -1,3 +1,8 @@
+Changes since 20030621:
+- Support for PCRE before version 2.08 is gone, additionally,
+  a version that installs "pcre-config" is required, which means you'll
+  need to use PCRE 3.0 or newer.
+
 2.0b-snapshot:
 incompatible changes:
 - backup.moderated is gone.
