@@ -151,9 +151,35 @@ All configuration is done using the file
 .B All global parameters must be mentioned before server and
 server-specific parameters.
 .PP
-The file has a rather standard Unix format: one line per argument, comments
-are introduced by a hash mark (#) and last until the end of the line. Below
-are examples on how the various parameters are specified.
+For the purposes of this section, whitespace shall be defined as an
+arbitrary sequence consisting of one or more SPACE or HTAB characters,
+ASCII positions 32 and 9, respectively.
+.PP
+The configuration file is strictly line-oriented with LF or CRLF as line
+terminator.
+.PP
+Empty lines and lines consisting of only whitespace, possibly followed
+by a comment (introduced by a hash mark (#) and extending through the
+end of the line), are skipped.
+.PP
+All other lines have exactly three mandatory fields, a plain text
+parameter, an assignment character (=) optionally surrounded by
+whitespace and a value.  The value is either plain text or - new since
+leafnode v1.11 - a string in double quotes with trivial backslash escape
+(see below).
+.PP
+Plain text starts at the first non-whitespace character and extends
+through the last non-whitespace character on the line that is not a
+comment. A trailing comment on a line is skipped.
+.PP
+Quoted strings are enclosed in double quote characters (").
+The backslash character (\\) is skipped, but it copies the immediately
+following character verbatim, so that you can specify the backslash
+itself by doubling it (\\\\) or a double quote character as part of the
+string by preceding it with a backslash (\\"); the hash mark has no
+special meaning as command introducer inside quoted strings. Text after
+the end of the string is silently ignored (this may change in future
+versions).  Comments after quoted strings are ignored.
 .PP
 .B MANDATORY PARAMETERS
 .TP

@@ -81,43 +81,58 @@ get_feedtype(enum feedtype t)
 int
 parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
 {
-    char *p, *q;
+    char *p;
+    size_t le, len;
+    enum modes { plain, quoted } mode = plain;
 
     p = l;
-    /* skip comments */
-    q = strchr(p, '#');
-    if (q)
-	*q = '\0';
-    if (*p == '\0')
-	return 0;
-    if ((q = strchr(p, '=')) == NULL)
-	return 0;
-    else
-	*q++ = '\0';
-    /* skipping leading blanks or tabs */
+    /* skip leading spaces, read parameter */
     SKIPLWS(p);
-    SKIPLWS(q);
-    if ((p = mastrncpy(param, p, TOKENSIZE)) == NULL ||
-	(q = mastrncpy(value, q, TOKENSIZE)) == NULL) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "config: line too long near \"%s=%s\"",
-	       param, value);
+    le = strcspn(p, "=#");
+    /* strip trailing space */
+    while(le && strchr(" \t", p[le-1])) le--;
+    len = min(le, TOKENSIZE - 1);
+    if (!len) return 0;
+    memcpy(param, p, len);
+    param[len] = '\0';
+    p += le;
+
+    SKIPLWS(p);
+    if (*p++ != '=')
 	return 0;
+    SKIPLWS(p);
+
+    /* strip trailing blanks from input */
+    le = strlen(p);
+    while (le--) {
+	if (p[le] == ' ' || p[le] == '\t')
+	    p[le] = '\0';
+	else
+	    break;
     }
-    /* now param contains the stuff before '=' and value the stuff behind it */
-    if (!(*param) || !(*value))
-	return 0;
-    /* skipping trailing blanks or tabs */
-    p--;
-    q--;
-    while (isspace((unsigned char)*p) && (p > param)) {
-	*p = '\0';
-	p--;
+
+    /* read value */
+    for (le = 0 ; le < TOKENSIZE - 1 ; le ++) {
+	char c = *p++;
+	if (mode == plain) {
+	    if (c == '#' || c == '\0') { break; }
+	    if (c == '"') { mode = quoted; continue; }
+	    *value++ = c;
+	} else if (mode == quoted) {
+	    if (c == '\\') {
+		if (*p) {
+		    *value++ = *p++; continue; 
+		} else
+		    return 0;
+	    }
+	    if (c == '\0') return 0;
+	    if (c == '"') break;
+	    *value++ = c;
+	} else {
+	    abort();
+	}
     }
-    while (isspace((unsigned char)*q) && (q > value)) {
-	*q = '\0';
-	q--;
-    }
+    *value = '\0';
     return 1;
 }
 

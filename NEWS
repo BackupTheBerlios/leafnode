@@ -3,6 +3,9 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20050215a:
+- Change: forward port configuration parser fix from leafnode-1.11,
+  to allow the right hand side of configuration or filter file to be
+  quoted, useful when the NUMBER SIGN character needs to be specified.
 - Documentation: some parts of README* had been out of date and have
   been revised. Documentation flaws reported by Jens Kutilek.
 

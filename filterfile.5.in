@@ -32,6 +32,12 @@ pattern = [!]\fIPCRE\fR
 action = {kill|select|\fIscore\fR}
 
 .RE
+The right hand sides of the \fIfilterfile\fR follow the same quoting
+conventions as the main configuration file does. See the
+\fBCONFIGURATION\fR section of the
+.BR leafnode (8)
+manual page for details.
+.PP
 Based on these entries,
 .BR fetchnews
 decides whether to retrieve an article from the upstream server or not.
