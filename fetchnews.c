@@ -1046,9 +1046,6 @@ getgroup(struct newsgroup *g, unsigned long first)
 	return first;
     if (!is_interesting(g->name))
 	return 0;
-    groupfetched = 0;
-    groupkilled = 0;
-
     if (!chdirgroup(g->name, TRUE))	/* also creates the directory */
 	return 0;
 
@@ -1058,14 +1055,14 @@ getgroup(struct newsgroup *g, unsigned long first)
     /* get marked articles first */
     if (delaybody_this_group) {
         if (action_method & FETCH_BODY) {
+	    groupfetched = 0;
+	    groupkilled = 0;
 	    getmarked(g);
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
 		    "%s: %lu marked bodies fetched, %lu killed",
 		    g->name, groupfetched, groupkilled);
 	    globalfetched += groupfetched;
 	    globalkilled += groupkilled;
-	    groupfetched = 0;
-	    groupkilled = 0;
 	}
 	if ((action_method & FETCH_HEADER) == 0) {
 	    /* get only marked bodies, nothing else */
@@ -1151,18 +1148,19 @@ getgroup(struct newsgroup *g, unsigned long first)
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	   "%s: will fetch %ld articles", g->name, outstanding);
 
+    groupfetched = 0;
+    groupkilled = 0;
     if (getarticles(stufftoget, outstanding, f) == 0) {
 	/* handle error */
     }
-
-    freefilter(f);
-    freelist(stufftoget);
-
     ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
 	   "%s: %lu articles fetched (to %lu), %lu killed",
 	   g->name, groupfetched, g->last, groupkilled);
     globalfetched += groupfetched;
     globalkilled += groupkilled;
+
+    freefilter(f);
+    freelist(stufftoget);
     return last + 1;
 }
 
