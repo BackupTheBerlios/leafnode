@@ -15,7 +15,9 @@
 int
 main(void)
 {
-    puts(compileinfo);
+/*    puts(compileinfo); */
+    fputs("version: leafnode-", stdout);
+    puts(version);
     fputs("current machine: ", stdout);
     fflush(stdout);
     if (system("/bin/uname -a"))
@@ -33,5 +35,7 @@ main(void)
 #else
     puts("IPv6: no");
 #endif
+    fputs("default MTA: ", stdout);
+    puts(DEFAULTMTA);
     exit(0);
 }
