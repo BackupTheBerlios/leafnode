@@ -91,6 +91,13 @@ expire = 20
 ## a client is forcibly disconnected. The default is 300s. Optional.
 # timeout_client = 300
 
+## timeout_delaybody determines how many hours after marking an article
+## for download leafnode will discard the mark. Default: use groupexpire
+## or expire. Optional.
+## Make sure that fetchnews runs at least once before that period is
+## over, if you run fetchnews only daily, set at least 25 here!
+# timeout_delaybody = 49
+
 ## If you want leafnode to log the poster IP address in custom header
 ## X-Leafnode-NNTP-Posting-Host, uncomment this.
 # log_poster_ip = 1

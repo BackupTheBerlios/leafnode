@@ -319,6 +319,13 @@ readconfig(/*@null@*/ const char *configfile)
 				   "config: timeout_client is %d secs",
 				   timeout_client);
 		    break;
+		case CP_TODELAYBODY:
+		    timeout_delaybody = strtol(value, NULL, 10);
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: timeout_delaybody is %d hours",
+				   timeout_delaybody);
+		    break;
 		case CP_WINDOW:
 		    windowsize = strtol(value, NULL, 10);
 		    if (windowsize < 1)

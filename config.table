@@ -35,6 +35,7 @@ server,CP_SERVER,CS_SERVERDECL
 timeout,CP_TIMEOUT,CS_SERVER
 timeout_active,CP_TOACTIVE,CS_GLOBAL
 timeout_client,CP_TOCLIENT,CS_GLOBAL
+timeout_delaybody,CP_TODELAYBODY,CS_GLOBAL
 timeout_long,CP_TOLONG,CS_GLOBAL
 timeout_short,CP_TOSHORT,CS_GLOBAL
 username,CP_USER,CS_SERVER

@@ -556,7 +556,7 @@ getmarked(struct newsgroup *group)
     while ((l = getaline(f))) {
 	char *fi[4];
 	struct stat dummy1;
-	time_t ts, expire;
+	time_t ts, expire, limit;
 
 	if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2) {
 	    /* skip malformatted line */
@@ -573,11 +573,25 @@ getmarked(struct newsgroup *group)
 	    /* compatibility with 20040818a that wrote a retry counter */
 	    ts = time(NULL);
 
+	/* interesting.group article expire:
+	 * - if timeout_delaybody is set, use this (in hours)
+	 * - if unset, but groupexpire is set, use this
+	 * - if unset, use expire
+	 * timeout_delaybody will be limited to expire
+	 */
 	expire = lookup_expire(group->name);
 	if (expire <= 0)
 	    expire = default_expire;
 
-	if (ts < expire) {
+	if (timeout_delaybody > 0)
+	    limit = time(NULL) - 3600 * timeout_delaybody;
+	else
+	    limit = expire;
+
+	if (expire > limit)
+	    limit = expire;
+
+	if (ts < limit) {
 	    /* expired */
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
 		    "interesting.groups/%s: mark for %s %s has expired",

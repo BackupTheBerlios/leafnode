@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.104 2004/08/19 01:48:46 emma Exp $ */
+/* $Id: leafnode.h,v 1.105 2004/08/23 09:50:48 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -501,11 +501,13 @@ extern int create_all_links;
 
 /* store articles even in uninteresting groups */
 extern int timeout_short;	/* don't fetch groups that have been
-
 				   accidentally accessed after that many days */
 extern int timeout_long;	/* don't fetch groups that have been accessed
-
 				   that many days */
+
+extern int timeout_delaybody;	/* how many hours to retry fetching bodies of
+				   marked articles */
+
 extern int authentication;	/* authentication method to use. Methods are: */
 
 #define AM_FILE 1		/* authenticate password via

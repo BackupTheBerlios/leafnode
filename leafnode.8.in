@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.28 2004/08/23 09:48:26 emma Exp $
+.\" $Id: leafnode.8.in,v 1.29 2004/08/23 09:50:48 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -340,6 +340,14 @@ is described in
 timeout_client = 300
 Wait timeout_client seconds for a command from the client (newsreader)
 before exiting.
+.TP
+timeout_delaybody = HOURS
+Retry at fetchnews runs in the next timeout_delaybody hours after an
+article has been marked for download to download it (only applies to
+delaybody mode). Be sure to run fetchnews at least once within that
+interval, so set 25 here if you run fetchnews once daily. Default:
+use the same value as group expiry, either from groupexpire or, if that
+is unset, from the global expire.
 .TP
 timeout_short = 2
 By default, a group that has been accidentally touched is being fetched
