@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.36 2002/09/10 00:18:48 emma Exp $
+# $Id: Makefile.am,v 1.37 2002/09/10 00:23:26 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -83,6 +83,7 @@ liblnutil_a_SOURCES	= \
 	lclint_fixes.h \
 	leafnode.h \
 	link_force.c \
+	link_force.h \
 	ln_dir.h \
 	ln_log.c \
 	ln_log.h \
@@ -168,6 +169,7 @@ EXTRA_DIST = \
 	aclocal.m4 \
 	arc4random.3 \
 	arc4random.c \
+	arc4random.h \
 	config_defs.h \
 	config.table \
 	config.h.in \
