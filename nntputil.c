@@ -173,17 +173,25 @@ nntpreply(const struct serverlist *s)
     return newnntpreply(s, 0);
 }
 
+static int caught_alrm;
+static RETSIGTYPE catch_alrm(int sig) {
+    (void)sig;
+    caught_alrm = 1;
+}
+
 /** Create a socket and connect it to a remote address.
  * \returns -1 for trouble, socket descriptor if successful. 
  */
 static int
 any_connect(const int family, const int socktype, const int protocol,
 	    const struct sockaddr *sa, socklen_t addrlen,
-	    /*@exposed@*/ const char ** const errcause)
+	    /*@exposed@*/ const char ** const errcause,
+	    unsigned int timeout)
 /*@modifies errcause@*/
 {
     char *as;
     int sock;
+    struct sigaction sact;
 
     as = masock_sa2addr(sa);
     ln_log(LNLOG_SINFO, LNLOG_CSERVER,
@@ -195,9 +203,25 @@ any_connect(const int family, const int socktype, const int protocol,
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot create socket: %m");
 	*errcause = "cannot create socket";
     } else {
-	if (connect(sock, sa, addrlen) < 0) {
-	    int e = errno;
-	    ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot connect: %m");
+	int r, e;
+	sact.sa_handler = catch_alrm;
+	sact.sa_flags = SA_NOCLDSTOP;
+	sigemptyset(&sact.sa_mask);
+	(void)sigaction(SIGALRM, &sact, NULL);
+	caught_alrm = 0;
+	alarm(timeout);
+	r = connect(sock, sa, addrlen);
+	e = errno;
+	alarm(0);
+	sact.sa_handler = SIG_DFL;
+	sact.sa_flags = 0;
+	(void)sigaction(SIGALRM, &sact, NULL);
+	errno = e;
+	if (r < 0) {
+	    if (errno == EINTR && caught_alrm)
+		ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot connect: timeout");
+	    else
+		ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot connect: %m");
 	    (void)close(sock);
 	    *errcause = "cannot connect";
 	    errno = e;
@@ -225,7 +249,9 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     /** service name or port number */
     const char *const service,
     /** address family, 0 means "don't care" */
-    int address_family)
+    int address_family,
+    /** timeout in seconds */
+    unsigned int timeout)
 {
     const char *errcause;
     int sock;
@@ -254,7 +280,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     errno = 0;
     for (aii = ai; aii != NULL; aii = aii->ai_next) {
 	sock = any_connect(aii->ai_family, aii->ai_socktype, aii->ai_protocol,
-			   aii->ai_addr, aii->ai_addrlen, &errcause);
+			   aii->ai_addr, aii->ai_addrlen, &errcause, timeout);
 	if (sock >= 0)
 	    break;
     }
@@ -317,7 +343,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
 	memcpy(&s_in.sin_addr, *ha, he->h_length);
 	sock = any_connect(AF_INET, SOCK_STREAM, IPPROTO_TCP,
 			   (struct sockaddr *)&s_in, sizeof(s_in),
-			   &errcause);
+			   &errcause, timeout);
 	if (sock >= 0)
 	    break;
     }
@@ -343,7 +369,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
 int
 nntpconnect(const struct serverlist *upstream)
 {
-    int sock, reply, infd, e;
+    int sock, reply, infd;
     socklen_t optlen = sizeof(sendbuf);
     char *line;
     char service[20];
@@ -356,11 +382,7 @@ nntpconnect(const struct serverlist *upstream)
 
     ln_log(LNLOG_SINFO, LNLOG_CSERVER, "%s: connecting to port %s",
 	   upstream->name, service);
-    alarm(upstream->timeout);
-    sock = tcp_connect(upstream->name, service, PF_UNSPEC);
-    e = errno;
-    alarm(0);
-    errno = e;
+    sock = tcp_connect(upstream->name, service, PF_UNSPEC, upstream->timeout);
     if (sock < 0)
 	return 0;
 

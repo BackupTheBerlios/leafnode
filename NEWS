@@ -3,6 +3,11 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20040823b:
+- Bugfix: A timeout while connecting to a server (default 30 seconds)
+  caused fetchnews to abort and print "Alarm clock."
+  Reported by Michael Rulov.
+- Change: the fetchnews connect timeout now applies to each of the
+  server's addresses.
 - Documentation: The texpire manual page was revised and updated.
 
 20040823b: Changes since 20040823a:

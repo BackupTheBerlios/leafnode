@@ -212,7 +212,9 @@ server = news.hiof.no
 
 ## Here we have another news server which has a very slow connection. For
 ## that reason, we wait a full minute before we give up trying to connect.
-## The default is 10 seconds.
+## The default is 30 seconds and is applies for each of the addresses of
+## the server, so if the server has three IPs, the timeout will be
+## three times this value!
 # server = really.slow.snail
 # timeout = 60
 

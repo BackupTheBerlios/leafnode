@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.29 2004/08/23 09:50:48 emma Exp $
+.\" $Id: leafnode.8.in,v 1.30 2004/09/15 10:44:16 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -192,11 +192,12 @@ feedtype = TYPE
 Determine how to send postings to the upstream server. Can be any of
 NNTP (default), UUCP or NONE. Case does not matter.
 .TP
-timeout = 30
-By default, leafnode tries to connect for 10 seconds to a server and then
+timeout = 90
+By default, leafnode tries to connect for 30 seconds to a server and then
 gives up. If you have a slow server, you can try for a longer time by
-setting the timeout higher (in this example, 30 seconds). The timeout
-can be tuned individually for each server.
+setting the timeout higher (in this example, 90 seconds). The timeout
+can be tuned individually for each server and applies to each of the
+server's addresses if it has multiple addresses anew.
 .TP
 noactive = 1
 In some configurations, the user does not want to download the list of
