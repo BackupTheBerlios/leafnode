@@ -74,12 +74,6 @@ Ralfs TODO:
     failed.postings. suggested by Jeff Grossman.
 
 10pre5
-2.2 Leopold Tötsch: offer 1.9-style posting: do not store a posted
-    article locally, but wait for its download from the upstream, to
-    make sure if it's posted or not. (2002-04-10T15:50, "Small posting
-    problem with leafnode-2.0b8_ma8rc5", leafnode-list)
-
-10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
     (Not in leafnode). Reported by Ralf Wildenhues. Bug report
@@ -274,6 +268,13 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-06-14 Matthias Andree
+	   Leopold Tötsch: offer 1.9-style posting: do not store a
+	   posted article locally, but wait for its download from the
+	   upstream, to make sure if it's posted or not.
+	   (2002-04-10T15:50, "Small posting problem with
+	   leafnode-2.0b8_ma8rc5", leafnode-list)
 
 2002-05-05 Matthias Andree
            refuse postings with unqualified or local message ID domain part.
