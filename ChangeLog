@@ -2,7 +2,8 @@
 
 	* configure.ac: Bump version 
 	* midutil.c: msgid_allocate: create message.id/xxx/ directory
-	before trying to link.  
+	before trying to link.  Reported by Werner Partner
+	<kairos@t-online.de>.
 	* nntpd.c: Add missing 441 error message when the Message-ID link
 	cannot be created locally 
 	* activutil.c: Fix crash-on-exit when no active file is present and
