@@ -1629,13 +1629,12 @@ dopost(void)
 			log_unlink(mastr_str(outgoingname), 0);
 		goto unlink_cleanup;
 	    }
-	}
-	
-	if (no_direct_spool) {
+	} else {
 	    /* remove message.id link so fetchnews can download the
 	     * posting */
 	    log_unlink(lookup(mid), 0);
 	}
+	log_unlink(inname, 0);
 
 	switch (fork()) {
 	case -1:
@@ -2432,5 +2431,7 @@ main(int argc, char **argv)
     /* Ralf Wildenhues: close stdout before freeing its buffer */
     (void)fclose(stdout);
     free(buf);
+    sleep(3); /* defer program exit to avoid recycling process IDs
+		 from colling file names */
     exit(0);
 }
