@@ -1,3 +1,42 @@
+2002-07-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am: add missing version.h 
+	* mastring.c, mastring.h, version.h: Synchronize leafnode-1 and
+	leafnode-2 mastring.* 
+	* Makefile.am, rnews.c: Bugfix and revive rnews.c 
+	* fetchnews.c: Fix some excess LF in ln_log.  
+	* store.c: Fix tons of bugs with maxbytes, found by implementing
+	rnews. Drop getaline in maxbytes modes. Use new mastr_len rather
+	than directly accessing ...->len.  
+	* leafnode.h: Fix C++ clashes.  
+	* rnews.8.in: update 
+	* mastring.c, mastring.h: Add mastr_len(), hide structure members
+	to impair direct access. It's not strict data hiding, but close
+	enough.  
+	* mastring.c, mastring.h: Forward port leafnode-1 mastr_size.
+	Forward port leafnode-1 C++ fix. mastr_getln: use maxbytes+1 because
+	_getline gets the buffer size, not the amount of characters to read;
+	bump buffer to 4k; write NUL at the right position now.  
+	* lsort.c: Drop debug variable. Use debugmode instead. Drop verbose
+	variable, it's in the library.  
+	* configutil.c: Drop debug variable. Use debugmode instead. Don't
+	override debugmode (may be set by command line), but OR into it.  
+	* applyfilter.c, artutil.c, checkgroups.c, dirutil.c, fetchnews.c,
+	getaline.c, getfoldedline.c, leafnode.h, localutil.c, miscutil.c,
+	newsq.c, nntpd.c, nntputil.c, parserange.c, strutil.c, texpire.c,
+	xoverutil.c: Drop debug variable. Use debugmode instead.  
+	* config.example, leafnode.h: New DEBUG_STORE 
+	* mastring.c: avoid passing 0 size to _getline. Bug introduced with
+	last commit.  
+	* mastring.c: NUL-terminate string in mastr_getln for C string
+	compatibility.  
+
+2002-06-30  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Do not write 400 message down the socket when the client
+	disconnects. It's not out failure either when the client kicks the
+	bucket while posting, so exit(0).  
+
 2002-06-30  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* miscutil.c: rfctime: use portable part of strftime for Date:
