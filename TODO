@@ -184,7 +184,6 @@ Matthias:
     Cancel-Lock? Plausibility checks?
 
 3.3 authentication interface:
-    make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt?
     Use Bruce Günter's credential validation module?
     Use Courier's authdaemon?
 
@@ -264,6 +263,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2004-02-27 Hynek Schlawack
+	   make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt
 
 2004-02-06 Hynek Schlawack
 	   get rid of _all_ sscanf
