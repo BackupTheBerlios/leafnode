@@ -1,6 +1,11 @@
-Changes since 20030710:
+20030713a: Changes since 20030712a:
+- Bugfix: fix double free() in filter handling. Reported by Robert J. Clark.
+- Bugfix: fix some memory leaks.
+
+20030712a: Changes since 20030710a:
 - Bugfix: Filtering by regexp was broken (inverse logic) unless
   DEBUG_FILTER was set (debugmode included the 32 flag).
+  Regression introduced into 20030706a.
 
 Changes since 20030706:
 - Bugfix: LISTGROUP bugfixed, LISTGROUP - XOVER now works; no longer
