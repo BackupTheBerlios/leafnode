@@ -1,3 +1,20 @@
+2002-05-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* miscutil.c: Use validatefqdn.c and validatefqdn.h from
+	leafnode-1.
+
+	* applyfilter.c, checkgroups.c, fetchnews.c, nntpd.c, texpire.c:
+	Move whoami() call to initvars.
+
+	* leafnode.h: Drop whoami() prototype.
+	* ENVIRONMENT: Add documentation on LN_DEBUG_QUALIFICATION.
+	* Makefile.am, validatefqdn.c, validatefqdn.h: Use validatefqdn.c
+	and validatefqdn.h from leafnode-1.
+
+	* artutil.c: When canceling or superseding, make ENOENT a DEBUG
+	message. It may be that the original article has not been
+	downloaded at all.
+
 2002-05-03  Matthias Andree  <matthias.andree@gmx.de>
 
 	* filterutil.c: When checking against maxcrosspost, do not free a
