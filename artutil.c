@@ -2,7 +2,7 @@
  * stuff dealing with articles.
  * Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
  * Copyright 1998, 1999.
- * Modifications (C) 2001 by Matthias Andree <matthias.andree@gmx.de>
+ * Modifications (C) 2001 - 2002 by Matthias Andree <matthias.andree@gmx.de>
  * See README for restrictions on the use of this software.
  */
 
@@ -255,7 +255,7 @@ supersede_cancel(
 	    if (q)
 		*q++ = '\0';
 	    if (unlink(p)) {
-		ln_log(errno == ENOENT ? LNLOG_SNOTICE : LNLOG_SERR,
+		ln_log(errno == ENOENT ? LNLOG_SDEBUG : LNLOG_SERR,
 		       LNLOG_CARTICLE,
 		       "%s: failed to unlink %s:%s: %m", action, r, p);
 	    } else {
