@@ -536,11 +536,12 @@ readactive(void)
 	if (g->last == 0 && !is_localgroup(g->name))
 	    g->last = 1;
 	if (g->last == (unsigned long)-1) {
-	    /* corrupt by older leafnode-2 version */
-	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
-		       "bogus last value, trying to fix: %s", p);
+	    /* corrupted by older leafnode-2 version */
 	    if (chdirgroup(g->name, FALSE))
 		(void)getwatermarks(&g->first, &g->last, NULL);
+	    ln_log_sys(LNLOG_SNOTICE, LNLOG_CTOP,
+		    "bogus last value for group %s, fixed to %lu",
+		    g->name, g->last);
 	}
 	g->count = 0;
 	p = r;
