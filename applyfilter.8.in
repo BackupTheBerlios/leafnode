@@ -23,7 +23,7 @@ desired.
 is the program to apply filter settings to your newsspool. It is used
 if you want to remove postings from your spool matching a certain filter
 pattern (see FILES below). If the headers of an article match any of
-the filtering rules, the article is being deleted from the newsgroup.
+the filtering rules, the article is deleted from the newsgroup.
 .PP
 .B Applyfilter
 sets its real and effective uid to "news".
@@ -39,7 +39,7 @@ for details on how to set the debugmode.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@sysconfdir@/config.
+@sysconfdir@/leafnode/config.
 .TP
 .I -n
 Dry run.  Do not actually delete anything.  Use in combination with
@@ -57,27 +57,16 @@ is the newsgroup you want to apply the filter to.
 
 .SH FILES
 .PP
-.I @sysconfdir@/filters
+.I @sysconfdir@/leafnode/filters
 contains the set of filtering rules that are applied to the newsspool.
-Each rule must be on a separate line. Empty lines and comments (marked
-by a # at the beginning of the line) are allowed.
-.PP
-Each rule is a regular expression. For example, the following set of
-rulings will delete all crosspostings to alt.flame.
-.PP
-^Newsgroups:.*[,]alt.flame$
-.br
-^Newsgroups:.*[,]alt.flame,
-.PP
-^Newsgroups: indicates that the pattern should only be applied to the
-Newsgroups: header. After the header, an arbitrary number of characters
-may follow, ending in either a comma or a space. After that, alt.flame
-must be in the line, either at the end of the line (first entry) or in
-the middle of the line, followed by other newsgroups (second entry).
+The file format is described in the
+.BR filterfile (5)
+manual.
 
 .SH AUTHOR
 Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright 1999.
+Copyright 1999. Updated by Matthias Andree <matthias.andree@gmx.de>.
+Copyright 2002.
 .PP
 Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
 and is copyright 1995-96 
@@ -85,6 +74,7 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
 
 .SH SEE ALSO
+.BR filterfile (5),
+.BR fetchnews (8),
 .BR leafnode (8),
-.BR fetchnews (8)
 .BR texpire (8)
