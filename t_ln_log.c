@@ -1,4 +1,9 @@
 #include "ln_log.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <errno.h>
 int verbose = 9;
 

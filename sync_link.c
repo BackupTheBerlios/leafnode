@@ -5,6 +5,10 @@
 
 #include "leafnode.h"
 
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 int
 sync_link(const char *from, const char *newfile)
 {

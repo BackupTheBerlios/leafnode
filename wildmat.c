@@ -1,5 +1,9 @@
 #include "leafnode.h"
 
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 /**************************************************************************/
 /*
  * The following routines comprise the wildmat routine. Written by

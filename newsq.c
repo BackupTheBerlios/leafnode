@@ -13,6 +13,11 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <unistd.h>
 
 int debug = 0;

@@ -1,3 +1,4 @@
+#include "config.h"
 #include "critmem.h"
 #include <string.h>
 #include "ln_log.h"

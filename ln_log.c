@@ -6,6 +6,11 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>		/* for getenv */
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <signal.h>		/* for raise */
 /* add LOG_NEWS where it doesn't exist */
 #if !defined(LOG_NEWS)

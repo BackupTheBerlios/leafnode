@@ -3,6 +3,11 @@
 
 #include <signal.h>
 #include <setjmp.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <unistd.h>
 
 static jmp_buf to;

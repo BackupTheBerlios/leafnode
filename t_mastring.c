@@ -1,4 +1,9 @@
 #include "mastring.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdio.h>
 
 #define testcpy(a,b) { char *tmp; \

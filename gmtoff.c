@@ -4,6 +4,11 @@
 
 #include "leafnode.h"
 
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <time.h>
 
 /** Returns number of seconds the local time zone is ahead (east) of UTC */

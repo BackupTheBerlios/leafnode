@@ -10,6 +10,11 @@
 
 #include <stdio.h>
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "config.h"
 
 int

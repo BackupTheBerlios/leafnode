@@ -33,6 +33,11 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <dirent.h>
 
 int stat_is_evil;

@@ -1,3 +1,4 @@
+#include "config.h"
 #include "critmem.h"
 #include <stdio.h>
 #include <stdlib.h>

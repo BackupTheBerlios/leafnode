@@ -6,6 +6,11 @@
 #include <string.h>
 
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "mastring.h"
 
 int

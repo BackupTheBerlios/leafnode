@@ -1,6 +1,15 @@
 #include <unistd.h>
 #include <sys/types.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
 
 /* returns number < 0 for trouble, count otherwise */
 ssize_t

@@ -8,6 +8,11 @@
 #include <sysexits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <unistd.h>
 
 /** mailto - mail a file to address. Expects fd to be a readable file

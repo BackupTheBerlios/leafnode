@@ -3,6 +3,11 @@
 #include "mastring.h"
 
 #include <stdarg.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdio.h>
 
 /*

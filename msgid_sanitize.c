@@ -1,5 +1,10 @@
 /* ripped of miscutil.c */
 
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "msgid.h"
 
 void

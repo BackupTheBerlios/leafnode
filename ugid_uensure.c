@@ -1,3 +1,8 @@
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "ugid.h"
 /* ensure that the current user IDs are uid
    return  0 for success

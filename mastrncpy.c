@@ -4,6 +4,11 @@
  * (C) 2001 by Matthias Andree
  */
 
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "mastring.h"
 
 /* this function is a strncpy reimplementation that always NUL

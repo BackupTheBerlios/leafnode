@@ -16,6 +16,11 @@
 #include <netdb.h>
 
 #include <string.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <errno.h>
 
 /** Look up the host name belonging to the socket address. If compiled

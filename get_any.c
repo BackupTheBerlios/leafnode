@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "get.h"
 
 /** Reads a signed long integer from \p in and stores it into the long

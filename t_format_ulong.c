@@ -1,5 +1,10 @@
 #include "format.h"
 #include <stdio.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <limits.h>
 int
 main()

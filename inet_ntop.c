@@ -13,6 +13,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <string.h>
 
 const char *

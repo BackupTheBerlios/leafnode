@@ -1,4 +1,9 @@
 #include "h_error.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <netdb.h>
 
 const char *

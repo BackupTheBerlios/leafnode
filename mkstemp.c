@@ -12,6 +12,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdlib.h>
 #define ATTEMPTS 5
 

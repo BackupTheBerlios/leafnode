@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: redblack.c,v 1.4 2002/01/07 21:48:08 emma Exp $";
+static char rcsid[] = "$Id: redblack.c,v 1.5 2002/01/19 02:12:02 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -27,6 +27,11 @@ static char rcsid[] = "$Id: redblack.c,v 1.4 2002/01/07 21:48:08 emma Exp $";
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "redblack.h"
 
 #define assert(expr)
@@ -924,6 +929,9 @@ dumptree(struct rbnode * x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.5  2002/01/19 02:12:02  emma
+ * support dmalloc
+ *
  * Revision 1.4  2002/01/07 21:48:08  emma
  * Handle OOM in rb_openlist. Found by Ralf Wildenhues.  Bug filed on
  * https://sourceforge.net/project/libredblack, Bug-ID #500600.

@@ -12,6 +12,11 @@
 
 #include "mastring.h"
 #include "attributes.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "getline.h"
 
 static __inline__ /*@exits@*/ void

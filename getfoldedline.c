@@ -1,6 +1,11 @@
 #include "leafnode.h"
 #include "attributes.h"
 #include "critmem.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <string.h>
 
 char *

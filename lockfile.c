@@ -34,6 +34,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <signal.h>		/* for kill */
 
 /** get hard link count of open file pointed to by filedes.  

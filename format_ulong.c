@@ -1,3 +1,8 @@
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "format.h"
 
 void

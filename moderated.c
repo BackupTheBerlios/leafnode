@@ -5,6 +5,11 @@
 
 #include <assert.h>
 #include <ctype.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <string.h>
 
 /**

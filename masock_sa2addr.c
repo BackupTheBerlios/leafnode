@@ -9,6 +9,11 @@
 #endif /* not __LCLINT__ */
 
 #include <string.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <errno.h>
 
 /**  */

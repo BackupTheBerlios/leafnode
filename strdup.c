@@ -3,6 +3,11 @@
 #ifndef HAVE_STRDUP
 
 #include <string.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdlib.h>
 
 char *

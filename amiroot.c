@@ -5,6 +5,11 @@
  */
 
 #include <unistd.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <sys/types.h>
 
 int main(void) { return geteuid() ? 1 : 0; }

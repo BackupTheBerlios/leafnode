@@ -3,6 +3,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "ln_log.h"
 
 int

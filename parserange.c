@@ -8,6 +8,11 @@
 #include <ctype.h>
 
 #include "leafnode.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "get.h"
 
 /** extract lower and upper bounds from string if given. Do not modify

@@ -59,6 +59,11 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 
 #include <errno.h>
 #include <stdlib.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <string.h>
 
 #undef __P

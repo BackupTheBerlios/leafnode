@@ -12,6 +12,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdio.h>
 
 int verbose = 0;

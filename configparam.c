@@ -1,6 +1,11 @@
 #include "config_defs.h"
 #include "configparam.h"
 #include <stdlib.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <string.h>
 
 static int

@@ -9,6 +9,11 @@
 #endif /* not __LCLINT__ */
 
 #include <string.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <errno.h>
 
 /** Extracts a port number from a sockaddr structure. Supports AF_INET

@@ -11,6 +11,11 @@
 #include <sys/types.h>
 #define LINELEN 160
 
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "leafnode.h"
 
 static int

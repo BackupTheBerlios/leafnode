@@ -1,4 +1,9 @@
 #include "configparam.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include <stdio.h>
 int
 main(int argc, char *argv[])

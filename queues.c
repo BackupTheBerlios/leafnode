@@ -10,6 +10,11 @@
 #include "ln_log.h"
 #include "leafnode.h"
 #include "redblack.h"
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "critmem.h"
 
 /**

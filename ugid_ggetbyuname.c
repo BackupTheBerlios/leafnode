@@ -1,4 +1,9 @@
 #include <pwd.h>
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "ugid.h"
 int
 gid_getbyuname(const char *name, /*@out@*/ gid_t * p_gid)

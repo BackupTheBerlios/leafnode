@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
+
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #include "ln_dir.h"
 
 /** mkdir -p like function, but we only treat parents,
