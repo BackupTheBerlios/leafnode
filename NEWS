@@ -2,6 +2,11 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20041113a:
+- Bugfix: get rid of cosmetic "Groupinfo file damaged, ignoring line: 18"
+- Change: when complaining about damaged groupinfo file, print the line
+  number and encapsulate the line in double quotes.
+
 20041113a: Changes since 20041007a:
 - Speedup: the active file now has a header line that contains the number
   of lines. leafnode can read both the old format (requires two passes)

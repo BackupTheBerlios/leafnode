@@ -455,7 +455,7 @@ readactive(void)
     size_t filesize;
     size_t file_index;
     mastr *s = mastr_new(LN_PATH_MAX);
-    
+
     freeactive(active);
     active = 0;
     mastr_vcat(s, spooldir, GROUPINFO, NULL);
@@ -498,7 +498,7 @@ readactive(void)
 	 * with line count and X is a version letter */
 	get_long(mmap_ptr + 3, &t);
 	activesize = t;
-	file_index = strcspn(mmap_ptr + 3, "\n") + 1;
+	file_index = strcspn(mmap_ptr, "\n") + 1;
     } else {
 	/* old format; count lines = newsgroups */
 	activesize = 0;
@@ -513,9 +513,11 @@ readactive(void)
 					    sizeof(struct newsgroup),
 					    "allocating active");
     g = active;
+    n = 0;
     while ( (p = getabufferedline(mmap_ptr, &file_index, filesize)) != NULL ) {
         unsigned long temp;
 
+	n++;
 	r = strchr(p, '\t');
 	if (!r && check_old_format(p)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
@@ -529,7 +531,7 @@ readactive(void)
 		!read_group_parameters(r,g, &temp))
 	    || !strchr("ymn", g->status)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
-		       "Groupinfo file damaged, ignoring line: %s", p);
+		       "Groupinfo file damaged, ignoring line #%d: \"%s\"", n, p);
 	    /* skip over malformatted line */
 	    continue;
 	}
