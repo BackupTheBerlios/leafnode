@@ -2369,8 +2369,16 @@ main(int argc, char **argv)
 		  "503 Exiting, unable to read user list: %m");
 	exit(EXIT_FAILURE);
     }
-    signal(SIGCHLD, dummy);	/* SIG_IGN would cause ECHILD on wait, so we use
-				   our own no-op dummy */
+
+    /* SIG_IGN would cause ECHILD on wait, so we use our own no-op dummy */
+    {
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler=dummy;
+	sa.sa_flags=SA_RESTART | SA_NOCLDSTOP;
+	sigaction(SIGCHLD, &sa, NULL);
+    }
+
     {
 	int allow = allowposting();
 	printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",

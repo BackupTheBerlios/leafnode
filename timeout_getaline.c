@@ -25,12 +25,16 @@ char *
 timeout_getaline(FILE * f, unsigned int timeout)
 {
     char *l;
+    struct sigaction sa;
 
     if (setjmp(to)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "timeout reading.");
 	return NULL;
     }
-    (void)signal(SIGALRM, timer);
+    sa.sa_handler = timer;
+    sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+    sigemptyset(&sa.sa_mask);
+    (void)sigaction(SIGALRM, &sa, NULL);
     (void)alarm(timeout);
     l = getaline(f);
     (void)alarm(0U);

@@ -1782,6 +1782,17 @@ out:
     return rc;
 }
 
+/* this is like sigaction, but it will not change a handler that is set
+ * to SIG_IGN, and it does not allow queries. */
+static int mysigaction(int signum, const  struct  sigaction  *act) {
+    struct sigaction oa;
+    sigaction(signum, NULL, &oa);
+    if (oa.sa_handler != SIG_IGN) {
+	return sigaction(signum, act, NULL);
+    }
+    return 0;
+}
+
 /**
  * main program
  */
@@ -1796,6 +1807,7 @@ main(int argc, char **argv)
     volatile int postonly;
     volatile time_t starttime;	/* keep state across setjmp */
     static const char myname[] = "fetchnews";
+    struct sigaction sa;
 
     verbose = 0;
     if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
@@ -1862,12 +1874,15 @@ main(int argc, char **argv)
 	if (!checkforpostings())
 	    exit(EXIT_SUCCESS);
     } else {
+	sa.sa_handler = sigcatch;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
 	/* Since the nntpd can create a lockfile for a short time, we
 	 * attempt to create a lockfile during a five second time period,
 	 * hoping that the nntpd will release the lock file during that
 	 * time (which it should).
 	 */
-	if (signal(SIGALRM, sigcatch) == SIG_ERR)
+	if (sigaction(SIGALRM, &sa, NULL))
 	    fprintf(stderr, "Cannot catch SIGALARM.\n");
 	else if (setjmp(jmpbuffer) != 0) {
 	    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
@@ -1895,13 +1910,17 @@ main(int argc, char **argv)
 	    done_groups = rbinit(cmp_upstream, NULL);
 	}
     }
-    if (signal(SIGTERM, sigcatch) == SIG_ERR)
+    signal(SIGHUP, SIG_IGN);
+    sa.sa_handler = sigcatch;
+    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sigemptyset(&sa.sa_mask);
+    if (mysigaction(SIGTERM, &sa))
 	fprintf(stderr, "Cannot catch SIGTERM.\n");
-    else if (signal(SIGINT, sigcatch) == SIG_ERR)
+    else if (mysigaction(SIGINT, &sa))
 	fprintf(stderr, "Cannot catch SIGINT.\n");
-    else if (signal(SIGUSR1, sigcatch) == SIG_ERR)
+    else if (mysigaction(SIGUSR1, &sa))
 	fprintf(stderr, "Cannot catch SIGUSR1.\n");
-    else if (signal(SIGUSR2, sigcatch) == SIG_ERR)
+    else if (mysigaction(SIGUSR2, &sa))
 	fprintf(stderr, "Cannot catch SIGUSR2.\n");
     else if (setjmp(jmpbuffer) != 0) {
 	servers = NULL;		/* in this case, jump the while ... loop */
@@ -1930,8 +1949,8 @@ main(int argc, char **argv)
     }
 
     signal(SIGINT, SIG_IGN);
-    signal(SIGTERM, SIG_DFL);	/* FIXME */
-    signal(SIGALRM, SIG_DFL);	/* FIXME */
+    signal(SIGTERM, SIG_IGN);	/* FIXME */
+    signal(SIGALRM, SIG_IGN);	/* FIXME */
 
     if (!postonly) {
 	writeactive();
