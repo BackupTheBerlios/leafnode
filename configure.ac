@@ -2,10 +2,11 @@ dnl autoconf script for leafnode -*- m4 -*-
 dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre4])
-AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.15 $)
+AC_INIT
+AC_CONFIG_SRCDIR([leafnode.h])
+AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre3.1])
+AC_PREREQ(2.53)
+AC_REVISION($Revision: 1.16 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -84,7 +85,8 @@ AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_TRY_COMPILE([
 )
 if test "$cf_cv_socklen_t" = "yes"
 then
-  AC_DEFINE(HAVE_SOCKLEN_T)
+  AC_DEFINE(HAVE_SOCKLEN_T, 1,
+	    [Define if your system defines a socklen_t type.])
 fi
 
 dnl check whether to use dmalloc
@@ -198,7 +200,8 @@ then
   ])
   if test $cf_cv_new_pcre_compile = "yes"
   then
-    AC_DEFINE(NEW_PCRE_COMPILE)
+    AC_DEFINE(NEW_PCRE_COMPILE, 1,
+	      [define if your PCRE is >= v2.01])
   fi
   AC_CACHE_CHECK(for new pcre_exec API,cf_cv_new_pcre_exec,[AC_TRY_COMPILE([
 #include <pcre.h>],[
@@ -214,7 +217,8 @@ then
  ])
   if test $cf_cv_new_pcre_exec = "yes"
   then
-    AC_DEFINE(NEW_PCRE_EXEC)
+    AC_DEFINE(NEW_PCRE_EXEC, 1,
+	      [define if your PCRE is >= v2.06])
   fi
 fi
 
@@ -248,11 +252,12 @@ AC_CACHE_CHECK(for gmtoff in struct tm,cf_cv_have_gmtoff,[AC_TRY_COMPILE([
 	now = time(0);
 	gmt = *(gmtime(&now));
 	gmtoff = gmt.tm_gmtoff;],
-   [cf_cv_have_gmtoff="yes"], 
+   [cf_cv_have_gmtoff="yes"],
    [cf_cv_have_gmtoff="no"])
 ])
 if test $cf_cv_have_gmtoff = "yes" ; then
-  AC_DEFINE(HAVE_GMTOFF)
+  AC_DEFINE(HAVE_GMTOFF, 1,
+  [define if your struct tm has a tm_gmtoff member])
 fi
 
 dnl Checks for library functions.
@@ -300,7 +305,7 @@ if test "$cf_cv_ipv6" = "yes"
 then
   AC_MSG_NOTICE([------------------------------------------------------])
   AC_MSG_NOTICE([Enabling IPv6.])
-  AC_DEFINE(HAVE_IPV6)
+  AC_DEFINE(HAVE_IPV6, 1, [If set, enable IPv6.])
 else
   AC_MSG_NOTICE([------------------------------------------------------])
   AC_MSG_NOTICE([Disabling IPv6, sticking with IPv4.])
@@ -331,5 +336,6 @@ printf "spooldir:   " ; eval echo "$SPOOLDIR"
 printf "lockfile:   " ; eval echo "$LOCKFILE"
 echo
 
-AC_OUTPUT(Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8
-filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)
+AC_CONFIG_FILES([Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8
+filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
+AC_OUTPUT
