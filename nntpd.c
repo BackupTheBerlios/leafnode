@@ -541,12 +541,15 @@ allowposting(void)
 static void
 doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	  unsigned long *artno)
+/* what & 1: show body
+   what & 2: show header */
 {
     FILE *f;
     char *p = NULL;
     unsigned long localartno;
     char *localmsgid = NULL;
-    char s[PATH_MAX + 1];	/* FIXME */
+    char *l;
+    const char *t;
 
     f = fopenart(group, arg, artno);
     if (!f) {
@@ -570,29 +573,27 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	localmsgid = fgetheader(f, "Message-ID:", 1);
     }
 
-    sprintf(s, "%3d %lu %s article retrieved - ", 223 - what,
-	    localartno, localmsgid);
-
     if (what == 0)
-	strcat(s, "request text separately");
+	t = "request text separately";
     else if (what == 1)
-	strcat(s, "body follows");
+	t = "body follows";
     else if (what == 2)
-	strcat(s, "head follows");
+	t = "head follows";
     else
-	strcat(s, "text follows");
+	t = "text follows";
 
-    nntpprintf("%s", s);
+    nntpprintf("%3d %lu %s article retrieved - %s", 223 - what,
+	    localartno, localmsgid, t);
 
-    /* FIXME: own function */
-    while (fgets(s, 1024, f) && *s && (*s != '\n')) {
+    /* FIXME: put this into a separate function on its own? */
+    while ((l = getaline(f)) && *l) {
 	if (what & 2) {
-	    p = s;
+	    p = l;
 	    if ((p = strchr(p, '\n')))
 		*p = '\0';
-	    if (*s == '.')
+ 	    if (*l == '.')
 		putc('.', stdout);	/* escape . */
-	    fputs(s, stdout);
+	    fputs(l, stdout);
 	    fputs("\r\n", stdout);
 	}
     }
@@ -601,7 +602,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	fputs("\r\n", stdout);		/* empty separator line */
 
     if (what & 1) {
-	if (delaybody && *s != '\n') {
+	if (delaybody && *l != '\n') {
 	    switch (markdownload(group, localmsgid)) {
 	    case 0:
 		fputs("\r\n\r\n"
@@ -626,13 +627,11 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 		       localartno, group->name);
 	    }
 	} else {
-	    while (fgets(s, 1024, f) && *s) {
-		p = s;
-		if ((p = strchr(p, '\n')))
-		    *p = '\0';
-		if (*s == '.')
+	    while ((l = getaline(f)) && *l) {
+		p = l;
+		if (*l == '.')
 		  putc('.', stdout);	/* escape . */
-		fputs(s, stdout);
+		fputs(l, stdout);
 		fputs("\r\n", stdout);
 	    }
 	}
@@ -1578,7 +1577,7 @@ dopost(void)
 	    fclose(stdout);
 	    fclose(stderr);
 
-	    if (lockfile_exists(FALSE, 0UL)) {
+	    if (lockfile_exists(2UL)) {
 		ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		       "Cannot obtain lock file to store article %s. "
 		       "It will be posted later.", inname);
