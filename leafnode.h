@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.63 2002/07/06 13:06:29 emma Exp $ */
+/* $Id: leafnode.h,v 1.64 2002/07/06 13:16:37 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -430,7 +430,6 @@ extern "C" {
 	char *name;		/* Servername */
 	char *username;
 	char *password;
-	int dontpost;		/* bool: this server is never fed articles */
 	unsigned short port;	/* port, if 0, look up nntp/tcp */
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
