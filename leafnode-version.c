@@ -20,12 +20,13 @@
 int
 main(void)
 {
+    static char env_path[] = "PATH=/bin:/usr/bin";
 /*    puts(compileinfo); */
     fputs("version: leafnode-", stdout);
     puts(version);
     fputs("current machine: ", stdout);
     fflush(stdout);
-    putenv("PATH=/bin:/usr/bin");
+    putenv(env_path);
     if (system("uname -a"))
 	puts(" (error)");
     fputs("bindir: ", stdout);

@@ -14,7 +14,7 @@ mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
     /* what characters are considered whitespace that marks the beginning of
        continuation lines.
        WARNING: NEVER EVER list \n here! */
-    const char white[] = " \t";
+    static const char white[] = " \t";
     char *l1, *l2;
     int c, len, oldlen;
 

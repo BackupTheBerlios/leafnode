@@ -116,7 +116,7 @@ int
 main(int argc, char *argv[])
 {
     struct filterlist *myfilter;
-    const char c[] = "-\\|/";
+    static const char c[] = "-\\|/";
     int i, score, option, deleted, kept;
     unsigned long n;
     char *l;

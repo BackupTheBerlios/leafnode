@@ -55,7 +55,7 @@ fprocessbatch(FILE * f)
     long bytes;
 
     while ((l = getaline(f))) {
-	const char tomatch[] = "#! rnews ";
+	static const char tomatch[] = "#! rnews ";
 
 	if (!strisprefix(l, tomatch)) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
