@@ -677,11 +677,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	    markgroup = getmarkgroup(group ? group->name : NULL, f, &markartno);
 	    switch (markdownload(markgroup, localmsgid, markartno)) {
 	    case 0:
-		fputs("\r\n\r\n"
-			"\t[Leafnode:]\r\n"
-			"\t[This message has already been "
-			"marked for download.]\r\n", stdout);
-		break;
 	    case 1:
 		printf("\r\n\r\n"
 			"\t[Leafnode:]\r\n"
@@ -690,6 +685,7 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 			markartno, markgroup);
 		break;
 	    default:
+		/* XXX FIXME: is the text correct? */
 		printf("\r\n\r\n"
 			"\t[ Leafnode: ]\r\n"
 			"\t[ Body of message %s ]\r\n"
@@ -1621,7 +1617,8 @@ dopost(void)
 	    }
 	}
 
-	if (0 == no_direct_spool /* means: may spool directly */ || is_anylocal(groups)) {
+	if (!(modgroup && !approved) && /* don't store unapproved moderated posts */
+		(0 == no_direct_spool /* may spool directly */ || is_anylocal(groups))) {
 	    /* at least one internal group is given, store into in.coming */
 	    if (sync_link(inname, mastr_str(incomingname))) {
 		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
