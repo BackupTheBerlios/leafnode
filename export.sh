@@ -9,6 +9,7 @@ rsync -a ./ "$repo" \
     --exclude dox \
     --exclude 'autom4te.cache' \
     --delete --delete-excluded
+cd $repo
 darcs whatsnew --boring -ls \
 | awk '/^a / { printf "%s\0", $2; }' \
-| ( cd $repo && xargs -0 rm -f )
+| xargs -0 rm -f
