@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.8 2002/02/20 03:59:49 emma Exp $
+.\" $Id: leafnode.8.in,v 1.9 2002/04/03 21:57:02 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -212,6 +212,9 @@ use XHDR instead. This line will try to enforce XHDR, but fetchnews will
 still fall back to XOVER if you also want to use filters in a group or
 if you work with "delaybody" set (because in these cases it will always
 be faster to use XOVER).
+.TP
+dontpost = 1
+Set this if you do not want postings to be sent to this server.
 
 .PP
 .B GENERAL OPTIONAL PARAMETERS

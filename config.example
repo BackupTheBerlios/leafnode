@@ -97,6 +97,10 @@ expire = 20
 ## by the server name, leafnode version and group name respectively.
 # pseudoarticle = /etc/leafnode/pseudoarticle
 
+## You can provide a different MTA for sending mails.  Beware of changing
+## the default '/usr/sbin/sendmail', the replacement has to offer the
+## same interface!
+# mta = /usr/sbin/sendmail
 
 ## If your newsreader does not supply a Message-ID for your postings
 ## Leafnode will supply one, using the hostname of the machine it is
@@ -145,6 +149,12 @@ server = news.hiof.no
 ## The default is 10 seconds.
 # server = really.slow.snail
 # timeout = 60
+
+## Yet another server which either does not understand the XOVER commands
+## correctly or performs better on XHDR.   fetchnews will still fall back
+## to using XOVER if you use delaybody mode or filtering.
+# server = dont.like.xover
+# usexhdr = 1
 
 ## Finally, we show a server which is never fed upstream posts from
 ## local users. It may have a misconfigured moderators file, may have
