@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.9 2003/02/17 14:02:18 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.10 2003/04/04 09:09:12 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -15,7 +15,7 @@ fetchnews \- fetch news via NNTP
 .SH SYNOPSIS
 .B fetchnews -V
 .br
-.B fetchnews [-D debugmode] [-v] [-F configfile] -M message-id
+.B fetchnews [-D debugmode] [-v] [-F configfile] [-M message-id]
 .br
 .B fetchnews [-BDfHnPv] [-F configfile] [-x number] [-S server[:port]] [-N newsgroup] [-t #]
 
@@ -60,7 +60,12 @@ Get only article headers. Works only if "delaybody" option is set in the
 configuration file (see below).
 .TP
 .I -M message-id
-Get only article with this message-id.
+Get only article with this message-id. NOTE: The message-id MUST be
+surrounded by angle brackets. Use single quotes to protect the
+message-ID angle brackets, dollar signs and other meta characters from
+shell interpretation. EXAMPLE:
+
+fetchnews -M '<1234$5678@example.org>'
 .TP
 .I -n
 Don't unlink files in the
