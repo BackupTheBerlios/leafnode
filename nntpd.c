@@ -2012,12 +2012,17 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
     }
 }
 
+static int str_comp(const void *p1, const void *p2) {
+    char *const *s1 = p1;
+    char *const *s2 = p2;
+    return strcmp(*s1, *s2);
+}
+
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
     int emptygroup = FALSE;
-    unsigned long idx;
     int pseudogroup;
 
     if (arg && strlen(arg)) {
@@ -2052,18 +2057,21 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     markinterest(group->name);
     if (pseudogroup) {
 	nntpprintf_as("211 Article list for %s follows (pseudo)", g->name);
-	printf("%lu\r\n", g->first ? g->first : 1);
+	nntpprintf_as("%lu", g->first ? g->first : 1);
     } else if (emptygroup) {
 	nntpprintf("211 No articles in %s", g->name);
     } else {
-	nntpprintf_as("211 Article list for %s (%lu-%lu) follows",
-		   g->name, xfirst, xlast);
-	for (idx = 0; idx < xcount; idx++) {
-	    if (xoverinfo[idx].text)
-		printf("%lu\r\n", xoverinfo[idx].artno);
+	unsigned long ul;
+	char **t = dirlist(".", DIRLIST_ALLNUM, &ul), **i;
+	nntpprintf_as("211 Article list for %s follows", g->name);
+	if (t) {
+	    qsort(t, ul, sizeof(char *), str_comp);
+	    for (i = t; *i; i++)
+		nntpprintf_as("%s", *i);
+	    free_dirlist(t);
 	}
     }
-    fputs(".\r\n", stdout);
+    nntpprintf(".");
     return group;
 }
 

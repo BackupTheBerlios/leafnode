@@ -2,6 +2,11 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050102a:
+- Change: obtain LISTGROUP article numbers directly from the directory
+  rather than from the overview, to let cancel/supersedes take effect
+  before the next texpire run. Suggested by Frank Wein.
+
 20050102a: Changes since 20041227a:
 - Bugfix: fetchnews will only try to obtain low/high marks for a group
   if it matches the only_group_pcre, to avoid wasting time on data that
