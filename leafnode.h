@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.65 2002/07/06 13:37:48 ralf Exp $ */
+/* $Id: leafnode.h,v 1.66 2002/07/07 11:35:28 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -520,6 +520,9 @@ extern "C" {
     void freegrouplist(/*@only@*/ struct rbtree *rb);
     /*@null@*/ /*@only@*/ struct rbtree * initgrouplistdir(const char *dir);
 
+    /*@null@*/ /*@only@*/ struct rbtree *
+    initfilelist(FILE *f, const void *config,
+	         int (*comparison_function)(const void *, const void *, const void *));
 
 /*
  * misc prototypes

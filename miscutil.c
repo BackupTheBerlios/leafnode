@@ -289,6 +289,45 @@ initgrouplistdir(const char *dir)
     return rb;
 }
 
+/** Read lines of a file into rbtree, ignore duplicates and empty lines.
+ *  \return rbtree, NULL in case of trouble.
+ */
+/*@null@*/ /*@only@*/ struct rbtree *
+initfilelist(FILE *f, const void *config,
+	int (*comparison_function)(const void *, const void *, const void *))
+{
+    static const char myname[] = "initfilelist";
+    struct rbtree *rb;
+    char *l;
+
+    rb = rbinit(comparison_function, config);
+    if (!rb) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "cannot init red-black-tree, out of memory.");
+	return NULL;
+    }
+
+    while ((l = getaline(f)) && *l) {
+	char *k1;
+	const char *k2;
+
+	k1 = critstrdup(l, myname);
+	k2 = rbsearch(k1, rb);
+
+	if (k2 == NULL) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
+		   "%s, cannot build rbtree", myname);
+	    free(k1);
+	    freegrouplist(rb);
+	    return NULL;
+	}
+
+	if (k2 != k1)	/* dupe */
+	    free(k1);
+    }
+    return rb;
+}
+
 void
 freegrouplist(/*@only@*/ struct rbtree *rb)
 {
