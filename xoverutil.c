@@ -131,6 +131,7 @@ getxoverline(
     if ((f = fopen(filename, "r"))) {
 	char *from, *subject, *date, *msgid, *references, *xref;
 	long bytes, linecount;
+	long hbytes = -1, hlines = -1; /* from header */
 
 	from = NULL;
 	subject = NULL;
@@ -187,6 +188,12 @@ getxoverline(
 		    tab2spc(references);
 		}
 		break;
+	    case XO_BYTES: /* for delaybody */
+		if (!get_long(l, &hbytes)) hbytes=-1;
+		break;
+	    case XO_LINES: /* for delaybody */
+		if (!get_long(l, &hlines)) hlines=-1;
+		break;
 	    case XO_XREF:
 		if (!xref && *l) {
 		    xref = critstrdup(l, "getxoverline");
@@ -215,7 +222,7 @@ getxoverline(
 					    "computing overview line");
 		p = result + sprintf(result, "%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",
 			filename, subject, from, date, msgid,
-			references ? references : "", bytes, linecount);
+			references ? references : "", max(hbytes,bytes), max(hlines,linecount));
 		if (xref) {
 		    p = mastrcpy(p, "\tXref: ");
 		    (void)mastrcpy(p, xref);
