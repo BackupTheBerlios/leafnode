@@ -6,12 +6,13 @@ Use Valgrind 2.0.
 - Bugfix: only_group_pcre now also applies to delaybody groups. Reported
   by Cory C. Albrecht.
 - Bugfix: diagnose errors when getting articles marked for download
+- Feature: new option timeout_delaybody. Suggested by Cory C. Albrecht.
 - Change: delaybody article numbers are now stored with a time stamp
-  rather than a retry count and subjected to group or global expiry.
+  rather than a retry count and subjected to timeout_delaybody,
+  groupexpire or global expire timeouts.
 - Cleanup: Make debug output of configuration parser consistent.
 - Documentation: revise hostname documentation
 - Documentation: revise filterfile manual page
-- Feature: new option timeout_delaybody. Suggested by Cory C. Albrecht.
 
 20040818a: Changes since 20040813a:
 - Feature: forward ported the "noread" feature from leafnode-1,
