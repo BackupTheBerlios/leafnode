@@ -82,16 +82,13 @@ getxoverline(
     if ((f = fopen(filename, "r"))) {
 	char *from, *subject, *date, *msgid, *references, *xref;
 	long bytes, linecount;
-	int body;
 
 	from = subject = date = msgid = references = xref = NULL;
-	body = 0;
 	linecount = 0;
 	bytes = st.st_size;
 
 	while ((l = block = getfoldedline(f))) {
 	    if (!*l) {
-		body = 1;
 		free(block);
 		break;
 	    } else if (!from && !strncasecmp("From:", l, 5)) {
