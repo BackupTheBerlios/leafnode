@@ -4,6 +4,7 @@
 
 #include "leafnode.h"
 #include "ln_log.h"
+#include "mailto.h"
 
 #include <sysexits.h>
 #include <sys/types.h>
@@ -15,42 +16,88 @@
 
 #include <unistd.h>
 
+static void log_status(int status) {
+    if (WIFSIGNALED(status)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+		"mailto: program %s died of unhandled signal %d",
+		mta, WTERMSIG(status));
+    } else if (WIFEXITED(status)) {
+	ln_log(WEXITSTATUS(status) ? LNLOG_SERR : LNLOG_SDEBUG,
+		LNLOG_CTOP,
+		"mailto: program %s exited with status %d",
+		mta, WEXITSTATUS(status));
+    } else {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, 
+		"mailto: cannot make sense of wait status %d", status);
+    }
+}
+
 /** mailto - mail a file to address. Expects fd to be a readable file
  * descriptor. \return 0 for success, -1 for error
  * WARNING: This function expects that SIGCHLD is _NOT_ set to SIG_IGN,
  * it will mail away the file but report it failed otherwise!
- * FIXME: add To: line if missing (reported by Jörg Dietrich 2002-02-12)
  */
 int
 mailto(const char *address, int fd)
 {
-    int status;
+    int status, rc;
     int pfd[2];
+    int mailpipe[2];
     char buf[1024];
     pid_t pid;
+    FILE *in, *out;
+    struct sigaction oldaction;
+    struct sigaction newaction;
+
+    in = fdopen(fd, "r");
+    if (in == NULL)
+	return -1;
 
     if (pipe(pfd))
-	return -1;
+	return -2;
+
+    if (pipe(mailpipe)) {
+	close(pfd[0]);
+	close(pfd[1]);
+	return -3;
+    }
+
+    out = fdopen(mailpipe[1], "w");
+    if (out == NULL) {
+	close(pfd[0]);
+	close(pfd[1]);
+	close(mailpipe[0]);
+	close(mailpipe[1]);
+	return -4;
+    }
+
+    newaction.sa_handler=SIG_IGN;
+    newaction.sa_flags=SA_RESTART;
+    sigemptyset(&newaction.sa_mask);
+    sigaction(SIGPIPE, &newaction, &oldaction);
 
     pid = fork();
     if (pid < 0) {
+	close(mailpipe[0]);
+	close(mailpipe[1]);
 	close(pfd[0]);
 	close(pfd[1]);
-	return -1;
+	return -5;
     }
 
     switch (pid) {
     case 0:			/* child */
 	{
-	    log_close(pfd[0]);
-	    if (dup2(fd, 0) < 0)
+	    if (dup2(mailpipe[0], 0) < 0)
 		goto err;
-	    log_close(fd);
+	    close(mailpipe[0]);
+	    close(mailpipe[1]);
 	    if (dup2(pfd[1], 1) < 0)
 		goto err;
 	    if (dup2(pfd[1], 2) < 0)
 		goto err;
-	    log_close(pfd[1]);
+	    close(pfd[0]);
+	    close(pfd[1]);
 	    execl(mta, mta, "-oi", address, 0);
 	    _exit(EX_OSERR);
 	  err:
@@ -60,29 +107,101 @@ mailto(const char *address, int fd)
     default:			/* parent */
 	{
 	    ssize_t s;
-	    (void)close(pfd[1]);
+	    char *l;
+	    int haveto = 0;
 
+	    log_close(pfd[1]);
+	    log_close(mailpipe[0]);
+
+	    /* copy news from fd to pipe */
+	    /* - header */
+	    while((l = getaline(in)) && *l) {
+		if (str_isprefix(l, "To:")) haveto = 1;
+		if (fputs(l, out) == EOF) goto killmta;
+		if (fputs("\n", out) == EOF) goto killmta;
+	    }
+	    if (ferror(in)) goto killmta;
+	    if (!haveto) {
+		if (fputs("To: ", out) == EOF) goto killmta;
+		if (fputs(address, out) == EOF) goto killmta;
+		if (fputs("\n", out) == EOF) goto killmta;
+	    }
+	    if (fputs("\n", out) == EOF) goto killmta;
+	    /* - body */
+	    while((l = getaline(in))) {
+		if (fputs(l, out) == EOF) goto killmta;
+		if (fputs("\n", out) == EOF) goto killmta;
+	    }
+	    if (fflush(out)) goto killmta;
+	    if (ferror(in)) goto killmta;
+	    goto pipe_ok;
+killmta:
+	    (void)usleep(1); /* schedule to let the MTA exit */
+	    if (waitpid(pid, &status, WNOHANG) <= 0) {
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE, "error while mailing article, killing MTA %s", mta);
+		kill(pid, SIGTERM);
+		sleep(5);
+		if (waitpid(pid, NULL, WNOHANG) != pid) {
+		    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "MTA did not respond to SIGTERM, sending SIGKILL");
+		    kill (pid, SIGKILL);
+		    waitpid(pid, &status, 0); /* reap zombie */
+		}
+	    } else {
+		/* MTA died */
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE, "MTA %s exited prematurely", mta);
+		log_status(status);
+	    }
+	    rc = -6;
+	    goto bye;
+
+pipe_ok:
+	    if (fclose(out)) goto killmta;
 	    while ((s = read(pfd[0], buf, sizeof(buf) - 1)) > 0) {
 		buf[s] = '\0';
 		ln_log(LNLOG_SNOTICE, LNLOG_CTOP, "mailto: output of mta: %s",
 		       buf);
 	    }
-	    if (wait(&status) < 0) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP, "mailto: wait error: %m");
-		return -1;
+
+	    if (waitpid(pid, &status, 0) < 0) {
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "mailto: waitpid error: %m");
+		rc = -7; goto bye;
 	    }
 
-	    if (WIFSIGNALED(status)) {
-		ln_log(LNLOG_SERR, LNLOG_CTOP,
-		       "mailto: program %s died of unhandled signal %d",
-		       mta, WTERMSIG(status));
-	    } else if (WIFEXITED(status)) {
-		ln_log(WEXITSTATUS(status) ? LNLOG_SERR : LNLOG_SDEBUG,
-		       LNLOG_CTOP,
-		       "mailto: program %s exited with status %d",
-		       mta, WEXITSTATUS(status));
+	    if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status))) {
+		log_status(status);
+		rc = -8; goto bye;
 	    }
-	    return 0;
+	    rc = 0;
+	    goto bye;
 	}
     }
+bye:
+	    log_close(pfd[0]);
+	    sigaction(SIGPIPE, &oldaction, NULL);
+	    return rc;
 }
+
+#ifdef TEST
+#include <fcntl.h>
+
+int main(int argc, char **argv) {
+    int fd, rc;
+
+    ln_log_open("mailto");
+
+    if (argc != 4) {
+	fprintf(stderr, "Usage: %s file mta address\n", argv[0]);
+	exit(2);
+    }
+
+    if ((fd = open(argv[1], O_RDONLY)) < 0) {
+	perror("open");
+	exit(1);
+    }
+
+    mta = argv[2];
+    rc = mailto(argv[3], fd);
+    fprintf(stderr, "mailto(%s,%d) returned %d\n", argv[3], fd, rc);
+    return rc != 0;
+}
+#endif
