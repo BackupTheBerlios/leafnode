@@ -543,7 +543,8 @@ getmarked(struct newsgroup *group)
  * returns 0 for error, 1 for success, -1 if group is not available at all
  */
 static int
-getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
+getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
+    int delaybody_this_group)
 {
     unsigned long h, window;
     long n;
@@ -586,8 +587,9 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
 
     if (*first > *last + 1) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: last seen article was %lu, server now has %lu - %lu",
-	       g->name, *first, window, *last);
+	       "%s: last seen %s was %lu, server now has %lu - %lu",
+	       g->name, delaybody_this_group ? "header" : "article",
+	       *first, window, *last);
 	if (*first > (*last + 5)) {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		   "%s: switched upstream servers? %lu > %lu",
@@ -602,14 +604,16 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
     }
     if (initiallimit && (*first == 1) && (*last - *first > initiallimit)) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: skipping articles %lu-%lu inclusive (initial limit)",
-	       g->name, *first, *last - initiallimit);
+	       "%s: skipping %s %lu-%lu inclusive (initial limit)",
+	       g->name, delaybody_this_group ? "headers" : "articles",
+	       *first, *last - initiallimit);
 	*first = *last - initiallimit + 1;
     }
     if (artlimit && (*last + 1 - *first > artlimit)) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: skipping articles %lu-%lu inclusive (article limit)",
-	       g->name, *first, *last - artlimit);
+	       "%s: skipping %s %lu-%lu inclusive (article limit)",
+	       g->name, delaybody_this_group ? "headers" : "articles",
+	       *first, *last - artlimit);
 	*first = *last + 1 - artlimit;
     }
     if (window < *first)
@@ -618,7 +622,8 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last)
 	window = 1;
     *first = window;
     if (*first > *last) {
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: no new articles", g->name);
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: no new %s", g->name,
+	       delaybody_this_group ? "headers" : "articles");
 	return 0;
     }
     return 1;
@@ -1011,7 +1016,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     if (g->first > g->last)
 	g->last = g->first;
 
-    x = getfirstlast(g, &first, &last);
+    x = getfirstlast(g, &first, &last, delaybody_this_group);
 
     switch (x) {
     case 0:
@@ -1035,15 +1040,11 @@ getgroup(struct newsgroup *g, unsigned long first)
 	       (last - first + 1), first, last);
 	outstanding = doxhdr(&stufftoget, first, last);
     } else {
-	if (delaybody_this_group) {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		    "%s: fetching %ld headers %lu - %lu, using XOVER", g->name,
-		    (last - first + 1), first, last);
-	} else {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		    "%s: considering %ld articles %lu - %lu, using XOVER", g->name,
-		    (last - first + 1), first, last);
-	}
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: considering %ld %s %lu - %lu, using XOVER", g->name,
+		(last - first + 1),
+		delaybody_this_group ? "headers" : "articles",
+		first, last);
 	outstanding = doxover(&stufftoget, first, last, f, g->name);
     }
 
@@ -1059,7 +1060,8 @@ getgroup(struct newsgroup *g, unsigned long first)
 	freefilter(f);
 	freelist(stufftoget);
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		"%s: all articles already there", g->name);
+		"%s: all %s already there", g->name,
+		delaybody_this_group ? "headers" : "articles");
 	return last + 1;	/* all articles already here */
     default:
 	if (delaybody_this_group) {
