@@ -552,36 +552,37 @@ getmarked(struct newsgroup *group)
 	mastr_delete(fname);
 	return;
     }
-    str = mastr_new(256);
     while ((l = getaline(f))) {
-	char *p, *q, *sep;
-	FILE *g;
+	size_t len;
+	int retry;
+	char *fi[4];
+	struct stat dummy1;
 
-	mastr_cpy(str, l);
-
-	/* silently drop article with non existent pseudo head or bad formatted line */
-	if (!(sep = strchr(mastr_str(str), ' ')))
-	    continue;
-	*sep = '\0';
-	p = sep + 1;
-	if (!*p)
+	if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2)
+	    /* skip malformatted line */
 	    continue;
 
-	/* skip article number */
-	(void)strtoul(p, &q, 10);
-
-	if (*q || !(g = fopen(p, "r")))
+	retry = atoi(fi[2]);
+	if (++retry >= 5)
+	    /* XXX FIXME: make this configurable
+	     * too many retries */
 	    continue;
-	fclose(g);
 
-	if (!getbymsgid(mastr_str(str), 2)) {
-	    *sep = ' ';			/* ugly, get original line back */
+	if (stat(fi[1], &dummy1))
+	    /* file not existent -> skip */
+	    continue;
+
+	if (!getbymsgid(fi[0], 2)) {
+	    char tmp[30];
+	    str = mastr_new(256);
+	    str_ulong(tmp, retry);
+	    mastr_vcat(str, fi[0], " ", fi[1], " ", tmp, NULL);
 	    initlist(&failed);
 	    appendtolist(failed, mastr_str(str));
+	    mastr_delete(str);
 	}
     }
     fclose(f);
-    mastr_delete(str);
     truncate(mastr_str(fname), (off_t) 0);	/* kill file contents */
     if (!failed) {
 	mastr_delete(fname);
