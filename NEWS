@@ -1,4 +1,4 @@
-Changes since 20040119a:
+20040122a: Changes since 20040119a:
 - Feature: applyfilter -C message-ID [...] now cancels articles
   with given Message-ID.
 

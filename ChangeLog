@@ -1,4 +1,15 @@
+2004-01-22  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040122a =
+	* NEWS, applyfilter.8.in, applyfilter.c: Add applyfilter -C option
+	to cancel message-IDs on command line.
+	* artutil.c: document angle brackets requirement for message-id
+	passed to delete_article.
+	* nntputil.c: Do not log TCP send buffer size. Useless.
+
 2004-01-19  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: Snapshot 20040119a.
 
 	= snapshot 20040119a =
 	* leafnode-version.c: Fix up the spooldir/lockfile changes that
