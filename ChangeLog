@@ -1,4 +1,22 @@
+2002-09-04  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release snapshot-20020904a ---
+
+2002-09-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, TODO, store.c: snapshot 20020904a 
+	* configure.ac: bump version 
+	* store.c: Fix storing crossposted articles. Bug reported by Jörg
+	Dietrich <joerg@dietrich.net>. To fix broken .overview files, just
+	remove them all, they will be recreated as they are needed. Command: 
+	find /var/spool/news -name .overview -exec rm '{}' ';' CVSTrac: #4.  
+
 2002-09-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* activutil.c: Fix crash when inserting a group that was already
+	present but had no description.  
+	* leafnode.spec.in: update somewhat. not quite there.  
+	* ChangeLog: update 
 
 	--- release snapshot-20020902a ---
 	* NEWS: Explain new single-pass store scheme (without fixxover).  
