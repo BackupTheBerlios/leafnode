@@ -186,9 +186,9 @@ mergegroups(void)
     while (l) {
 	la = l;
 	newsgroup_copy(active + count, l->entry);
+	free(l->entry);
 	l = l->next;
 	count++;
-	free(l->entry);
 	free(la);		/* clean up */
     }
     newgroup = NULL;
