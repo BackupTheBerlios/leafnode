@@ -21,6 +21,8 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
+1.1 put conditional #include <dmalloc.h> into each file
+
 1.1 fix posting issues, introduce per-server queues?
 
 1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
