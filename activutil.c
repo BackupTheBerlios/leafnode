@@ -56,7 +56,7 @@ struct nglist *newgroup;
  * it will not be inserted again or changed.
  */
 void
-insertgroup(const char *name, long unsigned first,
+insertgroup(const char *name, const char status, long unsigned first,
 	    long unsigned last, int age, const char *desc)
 {
     struct nglist *l;
@@ -77,6 +77,7 @@ insertgroup(const char *name, long unsigned first,
     g->count = 0;
     g->age = age;
     g->desc = desc ? critstrdup(desc, "insertgroup") : NULL;
+    g->status = status;
     l = (struct nglist *)critmalloc(sizeof(struct nglist),
 				    "Allocating space for newsgroup list");
 
@@ -136,6 +137,7 @@ mergegroups(void)
 	active[count].last = (l->entry)->last;
 	active[count].age = (l->entry)->age;
 	active[count].desc = (l->entry)->desc;
+	active[count].status = (l->entry)->status;
 	l = l->next;
 	count++;
 	free(la);		/* clean up */
@@ -179,29 +181,23 @@ writeactive(void)
     FILE *a;
     struct newsgroup *g;
     struct stat st;
-    char c[PATH_MAX];
-    char s[PATH_MAX];		/* FIXME: possible overrun below */
+    mastr *c = mastr_new(PATH_MAX);
+    mastr *s = mastr_new(PATH_MAX);
     size_t count;
     int err, fd;
-    char *t;
 
-    t = mastrcpy(s, spooldir);
-    mastrcpy(t, GROUPINFO ".new");
-    fd = open(s, O_WRONLY | O_CREAT | O_EXCL, 0664);
+    mastr_vcat(s, spooldir, GROUPINFO ".new", 0);
+    fd = open(mastr_str(s), O_WRONLY | O_CREAT | O_EXCL, 0664);
     if (fd < 0) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", s);
-	return;
-    }
-
-    if (fstat(fd, &st)) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot fstat %d: %m", fd);
-	return;
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m",
+		   mastr_str(s));
+	goto bye;
     }
 
     a = fdopen(fd, "w");
     if (!a) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot fdopen(%d): %m", fd);
-	return;
+	goto bye;
     }
 
     /* count members in array and sort it */
@@ -220,17 +216,11 @@ writeactive(void)
 	if (*(g->name)) {
 	    char num[30];
 	    /* do error checking at end of loop */
-	    fputs(g->name, a);
-	    fputc(' ', a);
-	    str_ulong(num, g->last);
-	    fputs(num, a);
-	    fputc(' ', a);
-	    str_ulong(num, g->first);
-	    fputs(num, a);
-	    fputc(' ', a);
-	    str_ulong(num, g->age);
-	    fputs(num, a);
-	    fputc(' ', a);
+ 	    fputs(g->name, a); fputc('\t', a);
+ 	    fputc(g->status, a); fputc('\t', a);
+ 	    str_ulong(num, g->last); fputs(num, a); fputc('\t', a);
+ 	    str_ulong(num, g->first); fputs(num, a); fputc('\t', a);
+ 	    str_ulong(num, g->age); fputs(num, a); fputc('\t', a);
 	    fputs(g->desc && *(g->desc) ? g->desc : "-x-", a);
 	    fputc('\n', a);
 	    if ((err = ferror(a)))
@@ -238,16 +228,23 @@ writeactive(void)
 	}
 	g++;
     }
-    log_fclose(a);
-    if (err) {
+
+    if (err || fflush(a) || fsync(fd)) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		   "failed writing new groupinfo file: %m");
-	log_unlink(s);
-	return;
+	log_fclose(a);
+	log_unlink(mastr_str(s));
+	goto bye;
     }
-    t = mastrcpy(c, spooldir);
-    mastrcpy(t, GROUPINFO);
-    if (rename(s, c)) {
+
+    if (fstat(fd, &st)) {
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "cannot fstat %d: %m", fd);
+	goto bye;
+    }
+
+    log_fclose(a);
+    mastr_vcat(c, spooldir, GROUPINFO, 0);
+    if (rename(mastr_str(s), mastr_str(c))) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		   "failed to rename new groupinfo file into place: %m");
     } else {
@@ -257,6 +254,9 @@ writeactive(void)
 	ln_log_sys(LNLOG_SINFO, LNLOG_CTOP,
 		   "wrote groupinfo with %lu lines.", (unsigned long)count);
     }
+ bye:
+    mastr_delete(c);
+    mastr_delete(s);
 }
 
 /*
@@ -289,7 +289,7 @@ static void readactive(void);
 static void
 readactive(void)
 {
-    char *p, *r;
+    char *p, *r = 0;
     int n;
     FILE *f;
     struct newsgroup *g;
@@ -317,10 +317,17 @@ readactive(void)
 					    "allocating active");
     g = active;
     while ((p = getaline(f))) {
-	r = strchr(p, ' ');
+	r = strchr(p, '\t');
+	if (!r && sscanf(p, "%*[^ ] %*u %*u %*u %*s")) {
+	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
+		       "groupinfo in old format. You MUST run "
+		       "fetchnews -f in order to fix this.");
+	    abort();
+	    /* old format groupinfo, must refresh */
+	}
 	if (!r || (*r++ = '\0',
-		   sscanf(r, "%lu %lu %lu",
-			  &g->last, &g->first, &g->age) != 3)) {
+ 		   sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
+ 			  &g->first, &g->age) != 4)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "Groupinfo file possibly truncated or damaged: %s", p);
 	    break;
@@ -332,8 +339,8 @@ readactive(void)
 	    g->last = 1;
 	g->count = 0;
 	p = r;
-	for (n = 0; n < 3; n++) {	/* Skip the numbers */
-	    p = strchr(r, ' ');
+	for (n = 0; n < 4; n++) {	/* Skip the numbers */
+	    p = strchr(r, '\t');
 	    r = p + 1;
 	}
 	if (!strcmp(r, "-x-"))
@@ -348,6 +355,7 @@ readactive(void)
     g->last = 0;
     g->age = 0;
     g->desc = NULL;
+    g->status = '\0';
     /* count member in the array - maybe there were some empty lines */
     g = active;
     activesize = 0;
@@ -406,120 +414,4 @@ rereadactive(void)
     }
     free(s2);
     free(s1);
-}
-
-/*
- * fake active file if it cannot be retrieved from the server
- */
-void
-fakeactive(void)
-{
-    DIR *d;
-    struct dirent *de;
-    DIR *ng;
-    struct dirent *nga;
-    FILE *f;
-    long unsigned int i;
-    long unsigned first, last;
-    char *p, *q, *r;
-    mastr *s = mastr_new(1024);
-
-    mastr_vcat(s, spooldir, "/interesting.groups", 0);
-    d = opendir(mastr_str(s));
-    if (!d) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open directory %s: %m",
-	       mastr_str(s));
-	mastr_delete(s);
-	return;
-    }
-    while ((de = readdir(d))) {
-	if (isalnum((unsigned char)*(de->d_name)) &&
-	    chdirgroup(de->d_name, FALSE)) {
-	    /* get first and last article from the directory. This is
-	     * the most secure way to get to that information since the
-	     * .overview files may be corrupt as well
-	     * If the group doesn't exist, just ignore the active entry.
-	     */
-	    first = ULONG_MAX;
-	    last = 0;
-	    ng = opendir(".");
-	    while ((nga = readdir(ng)) != NULL) {
-		if (isdigit((unsigned char)*(nga->d_name))) {
-		    p = NULL;
-		    i = strtoul(nga->d_name, &p, 10);
-		    if (*p == '\0') {
-			if (i < first)
-			    first = i;
-			if (i > last)
-			    last = i;
-		    }
-		}
-	    }
-	    if (first > last) {
-		first = 1;
-		last = 1;
-	    }
-	    closedir(ng);
-	    if (debugmode & DEBUG_ACTIVE)
-		ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-			   "parsed directory %s: first %lu, last %lu",
-			   de->d_name, first, last);
-	    insertgroup(de->d_name, first, last, 0, NULL);
-	}
-    }
-    closedir(d);
-
-    /* FIXME: Repeat for local groups. Writing a wrapper might be more
-       elegant */
-    mastr_clear(s);
-    mastr_vcat(s, libdir, "/local.groups", 0);
-    f = fopen(mastr_str(s), "r");
-    if (!f) {
-	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
-		   mastr_str(s));
-	mastr_delete(s);
-	return;
-    }
-    while ((r = getaline(f)) && r && *r) {
-	q = r;
-	while (q && *q && !isspace((unsigned int)*q))
-	    q++;
-	while (q && *q && isspace((unsigned int)*q))
-	    *q++ = '\0';
-	/* Now r points to group name, q to description */
-	if (chdirgroup(r, FALSE)) {
-	    first = INT_MAX;
-	    last = 0;
-	    ng = opendir(".");
-	    while ((nga = readdir(ng)) != NULL) {
-		if (isdigit((unsigned char)*(nga->d_name))) {
-		    p = NULL;
-		    i = strtoul(nga->d_name, &p, 10);
-		    if (*p == '\0') {
-			if (i < first)
-			    first = i;
-			if (i > last)
-			    last = i;
-		    }
-		}
-	    }
-	    if (first > last) {
-		first = 1;
-		last = 1;
-	    }
-	    closedir(ng);
-	    if (debugmode & DEBUG_ACTIVE)
-		ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-			   "parsed directory %s: first %lu, last %lu",
-			   r, first, last);
-	    if (*r) {
-		if (*q)
-		    insertgroup(r, first, last, 0, r);
-		else
-		    insertgroup(r, first, last, 0, "local group");
-	    }
-	}
-    }
-    mastr_delete(s);
-    mergegroups();
 }
