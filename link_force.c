@@ -48,7 +48,11 @@ int link_force(const char *from, const char *to) {
 	if (0 == link(from, x)) {
 	    int f = rename(x, to);
 	    int e = errno;
-	    if (f) (void)unlink(x);
+	    (void)unlink(x); /* we don't care for errors here */
+	    /* NOTE: SUSv2 says that if oldpath and newpath point to the
+	     * same file, then rename will complete successfully without
+	     * doing anything.
+	     */
 	    free(x);
 	    errno = e;
 	    return f;
