@@ -1,3 +1,23 @@
+2002-04-28  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* fetchnews.c, leafnode.h, miscutil.c: cleanup handling of
+	interesting.groups and dormant.groups (could still be improved).
+	Remove critinit* functions, let the caller decide to die.
+
+	* store.c: store_stream now copes with folded Newsgroups: header.
+	Use switch to speed up header parsing.
+	Note: dopost still rejects Newsgroups: header with spaces or folds
+	between the first group name and the end of the last fold
+	continuation line (folding before the first group is not rejected).
+
+	* applyfilter.c, getfoldedline.c, leafnode-version.c, rnews.c: make
+	const strings static, fix compiler warning.
+	* activutil.c, newsq.c, nntpd.c: fix some 'char s[PATH_MAX]' bugs.
+	* getline.h: unconditionally declare getline.
+	* doc_german/man/man8/checkgroups.8: fix typo.
+
+	* nntpd.c: reject POSTs with empty Newsgroups header.
+
 2002-04-27  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* Makefile.am, fetchnews.c, leafnode.h, log_moveto.c, queues.c:
