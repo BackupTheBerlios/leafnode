@@ -1,4 +1,61 @@
+2002-09-10  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c, store.c: Fix CVSTrac #6: bogus 'duplicate article' when
+	an article is posted while fetchnews is running and querying
+	multiple upstream servers with fast interconnection. Tracked down by
+	Jörg Dietrich.  
+	* queues.c: feedincoming: tell store that the message.id link is
+	already there.  
+	* miscutil.c: moved lookup and ihave into separate midutil.c 
+	* fetchnews.c: Include msgid.h. Consider 'duplicate' return from
+	store as killed article.  
+	* applyfilter.c, artutil.c, texpire.c, xoverutil.c: Include
+	msgid.h.  
+	* link_force.c, link_force.h: New file link_force.h 
+	* Makefile.am: Add arc4random.h and link_force.h 
+	* Makefile.am, link_force.c: Add new link_force function. It's like
+	rename(oldpath, newpath), except that it does not remove oldpath.
+	GPL.  
+
+2002-09-09  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, arc4random.3, arc4random.c, configure.ac: Took and
+	protoized arc4random.c from OpenBSD.  Took arc4random.3 from
+	OpenBSD. Auto-replace missing system arc4random.  
+	* leafnode.h: lookup and ihave now declared in msgid.h 
+	* msgid.h: Rescue splint annotations.  
+	* Makefile.am, midutil.c, msgid.h: Split some functions into
+	separate file. Add msgid_allocate().  
+	* queues.c: Drop unused q_compare function.  
+	* queues.c: Clean up incomplete "Drop [g]fixxover()" checkin.  
+	* filterutil.c: Make regexp filter debugging even more verbose, in
+	case of a match, go fetch the matched header line and log it in
+	DEBUG_FILTER mode.  
+	
+	To quickly test newly added filters, use: 
+	    applyfilter -n -D 33 some.news.group 
+	* b_sortnl.c, fetchnews.c, lsort.c, queues.c, texpire.c: Rename
+	some symbols to avoid ctags name clashes. (Emacs ctags 21.1) 
+	* fetchnews.c: 
+	(do_server): do not try to connect to server if action_method == 
+	FETCH_POST (i. e. postonly) and the current server has a feed type
+	other than NNTP.  
+	
+	New BUG: UUCP may now be broken (but it has never worked for
+	posting, so there).  
+	* TODO: Update TODO. Note almost-complete in Ben Holmes' 'read
+	newsgroups immediately' (Stefan Fleiter).  
+
+2002-09-08  Joerg Dietrich <joerg@dietrich.net>
+
+	* nntpd.c: change argument of markinterest from struct newsgroup to
+	char *. NEWNEWS explicit.group.name marks groups now as interesting.
+	CVSTrack ticket #3 
+
 2002-09-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Mark "let killfilter apply maxcrosspost to Xref" header as
+	done.  Ralf committed the changes on 2002-07-06.  
 
 	--- release snapshot-20020908a ---
 	* miscutil.c: Change into spooldir on start-up.  
