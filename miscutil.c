@@ -306,8 +306,8 @@ initgrouplistdir(const char *dir)
 	if (k != k2) {
 	    /* key was already present in tree */
 	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
-		   "directory lists same file \"%s\" more than once!? "
-		   "Confused, aborting.", k);
+		   "directory file name conflict \"%s\" ./. \"%s\" "
+		   "Confused, aborting.", k, k2);
 	    abort();
 	}
 	/* NOTE: rbsearch does NOT make a copy of k, so you must not
