@@ -89,7 +89,7 @@ mastr_newstr(const char *s)
     n = mastr_new((l = strlen(s)));
     if (!n)
 	return NULL;
-    strcpy(n->dat, s);
+    strcpy(n->dat, s); /* RATS: ignore */
     n->len = l;
     return n;
 }
@@ -97,18 +97,17 @@ mastr_newstr(const char *s)
 int
 mastr_cpy(mastr * m, const char *s)
 {
-    size_t l = strlen(s);
+    size_t l;
 
-    if (!m)
+    if (!m || !s)
 	return 0;
-    if (!s)
-	return 0;
-    if (l >= m->bufsize)
+
+    if ((l = strlen(s)) >= m->bufsize)
 	if (0 == mastr_resizekill(m, l)) {
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
-    strcpy(m->dat, s);
+    strcpy(m->dat, s); /* RATS: ignore */
     m->len = l;
     return 1;
 }
@@ -116,18 +115,17 @@ mastr_cpy(mastr * m, const char *s)
 int
 mastr_cat(mastr * m, /*@unique@*/ /*@observer@*/ const char *const s)
 {
-    size_t li = strlen(s);
+    size_t li;
 
-    if (!m)
+    if (!m || !s)
 	return 0;
-    if (!s)
-	return 0;
-    if (li + m->len >= m->bufsize)
+
+    if ((li = strlen(s)) + m->len >= m->bufsize)
 	if (0 == mastr_resizekeep(m, li + m->len)) {
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
-    strcpy(m->dat + m->len, s);
+    strcpy(m->dat + m->len, s); /* RATS: ignore */
     m->len += li;
     return 1;
 }
@@ -275,6 +273,8 @@ mastr_getln(mastr * m, FILE * f,
 		     f);
 	if (r < 0)
 	    return r;
+	if (r == 0)
+	    break;
 	if (r + m->len >= m->bufsize)
 	    if (!mastr_resizekeep(m, r + m->len)) {
 		mastr_oom();
@@ -285,7 +285,7 @@ mastr_getln(mastr * m, FILE * f,
 	    maxbytes -= r;
 	m->len += r;
 	m->dat[m->len] = '\0';
-	if (r == 0 || memchr(buf, '\n', (size_t)r) != NULL)
+	if (memchr(buf, '\n', (size_t)r) != NULL)
 	    break;
     }
     return (ssize_t)(m->len);

@@ -215,12 +215,10 @@ getxoverline(
 		char *p;
 		/* only generate message ID if article has a link in
 		   message.id */
-		result = (char *)critmalloc(strlen(from) + strlen(date) +
-					    strlen(subject) + strlen(msgid) +
-					    (references
-					     ? strlen(references) : 0)
-					    + 100
-					    + (xref ? strlen(xref) : 0),
+		result = (char *)critmalloc(strlen(filename) + strlen(subject) + strlen(from) +
+					    strlen(date) + strlen(msgid) +
+					    (references ? strlen(references) : 0)
+					    + 100 + (xref ? strlen(xref) : 0),
 					    "computing overview line");
 		p = result + sprintf(result, "%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",
 			filename, subject, from, date, msgid,

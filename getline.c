@@ -32,16 +32,13 @@ _getline(char *to, size_t size, FILE * stream)
 
     if (1 > size)
 	return -1;
-    size--;
-    while (size > 0 && ((c = getc(stream)) != EOF)) {
-	*to = (unsigned char)c;
-	to++;
-	i++;
-	if (c == (int)'\n')
+
+    while (--size > 0 && ((c = getc(stream)) != EOF)) {
+	to[i++] = c;
+	if (c == '\n')
 	    break;
-	size--;
     }
-    *to = '\0';
+    to[i] = '\0';
     if (ferror(stream))
 	return -1;
     return i;
