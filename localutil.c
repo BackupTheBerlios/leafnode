@@ -13,6 +13,7 @@
 #include "critmem.h"
 #include "ln_log.h"
 #include "mastring.h"
+#include "activutil.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -44,6 +45,8 @@ insertlocal(const char *name)
 {
     struct localgroup **a;
     int c;
+
+    if (!validate_groupname(name)) return;
 
     a = &local;
     while (a) {
@@ -122,17 +125,21 @@ readlocalgroups(void)
 	while (*p && *p != '\t')
 	    p++;
 	*p++ = '\0';
+	while (*p == '\t')
+	    p++;
 	u = p;
 	while (*p && *p != '\t')
 	    p++;
 	*p++ = '\0';
+	while (*p == '\t')
+	    p++;
 	/* l points to group name, u to status, p to description */
 	if (strcmp(u, "y") && strcmp(u, "n") && strcmp(u, "m")) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "malformatted %s: status is not one of y, n, m", s);
 	    abort();
 	}
-	if (*l) {
+	if (*l && validate_groupname(l)) {
 	    insertgroup(l, u[0], 1, 0, time(NULL), *p ? p : "local group");
 	    insertlocal(l);
 	}
