@@ -49,6 +49,7 @@ Ralfs TODO:
 	* Leftover link in temp.files for each (successfully?) posted article.
 	* :active.read must not be updated on NEWGROUPS, or the active will
 	  never be refetched as a whole.
+	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
 
 10pre5
 0.0 forward port bug fixes from 1.9.19rc*
