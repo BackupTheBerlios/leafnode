@@ -715,7 +715,7 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
 static /*@only@*/ mastr *
 create_pseudo_header(const char *subject, const char *from,
 	const char *date, const char *messageid, const char *references,
-	char **newsgroups_list, int num_groups, const char *bytes, const char *lines)
+	char **newsgroups_list, int num_groups, const char *bytes, const char *lines, const char *xref)
 {
     int n;
     mastr *s = mastr_new(2048);
@@ -734,6 +734,9 @@ create_pseudo_header(const char *subject, const char *from,
 	mastr_vcat(s, "Lines: ", lines, "\n", NULL);
     if (bytes)
 	mastr_vcat(s, "Bytes: ", bytes, "\n", NULL);
+    if (xref)
+	mastr_vcat(s, xref, "\n", NULL); /* Xref headers usually come
+					    with their name in XOVER */
     return s;
 }
 
@@ -806,7 +809,7 @@ fn_doxover(struct stringlist **stufftoget,
     while ((l = getaline(nntpin)) && strcmp(l, ".")) {
 	char *xover[20];	/* RATS: ignore */
 	char *artno, *subject, *from, *date, *messageid;
-	char *references, *lines, *bytes;
+	char *references, *lines, *bytes, *xref;
 	char **newsgroups_list = NULL;
 	int num_groups;
 
@@ -830,6 +833,7 @@ fn_doxover(struct stringlist **stufftoget,
 	references = xover[5];
 	bytes = xover[6];
 	lines = xover[7];
+	xref = xover[8];
 
 	/* is there an Xref: header present as well? */
 	if (xover[8] == NULL ||
@@ -844,12 +848,17 @@ fn_doxover(struct stringlist **stufftoget,
 	    mastr *s;
 
 	    s = create_pseudo_header(subject, from, date, messageid,
-		    references, newsgroups_list, num_groups, bytes, lines);
+		    references, newsgroups_list, num_groups, bytes, lines,
+		    xref);
 
 	    if (filtlst && killfilter(filtlst, mastr_str(s))) {
 		groupkilled++;
 		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 			"filtered out article %s", artno);
+		if (debugmode & DEBUG_FILTER)
+		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			    "Headers: %s", mastr_str(s));
+
 		/* filter pseudoheaders */
 		mastr_delete(s);
 		goto next_over;
