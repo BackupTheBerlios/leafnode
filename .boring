@@ -15,3 +15,7 @@ Makefile\.in$
 ^leafnode\.spec$
 ^stamp-h
 ^tools/sendbatch\.bash$
+cscope\.out$
+~$
+#.*#
+\..*\.swp$
