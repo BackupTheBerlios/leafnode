@@ -2,6 +2,10 @@ KNOWN BUG:
 Valgrind-2.1.X will interfere with writeactive, break fchmod.
 Use Valgrind 2.0.
 |
+Changes since 20040818a:
+- Change: delaybody article numbers are now stored with a time stamp
+  rather than a retry count and subjected to group or global expiry.
+
 20040818a: Changes since 20040813a:
 - Feature: forward ported the "noread" feature from leafnode-1,
   suggested by Cory C. Albrecht.

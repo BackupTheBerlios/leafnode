@@ -161,7 +161,8 @@ usage(void)
 	    "    -M message-id     get article by Message-ID\n"
 	    "    -N newsgroup      get only articles in \"newsgroup\"\n"
 	    "    -N group.pattern  get articles from all interesting groups\n"
-	    "                      matching the wildcard \"group.pattern\"\n"
+	    "                      matching the wildcard \"group.pattern\"\n");
+    fprintf(stderr,
 	    "    -R                get articles in non delaybody groups\n"
 	    "    -S server         only get articles from \"server\"\n"
 	    "    -t delay          wait \"delay\" seconds between articles\n"
@@ -541,7 +542,6 @@ getmarked(struct newsgroup *group)
     struct stringlisthead *failed = NULL;
     struct stringlistnode *ptr = NULL;
     mastr *fname = mastr_new(LN_PATH_MAX);
-    mastr *str;
 
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	   "Getting bodies of marked messages for group %s ...", group->name);
@@ -553,20 +553,24 @@ getmarked(struct newsgroup *group)
 	return;
     }
     while ((l = getaline(f))) {
-	size_t len;
-	int retry;
 	char *fi[4];
 	struct stat dummy1;
+	time_t ts, expire;
 
 	if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2)
 	    /* skip malformatted line */
 	    continue;
 
-	retry = fi[2] ? atoi(fi[2]) : 0;
+	ts = fi[2] ? strtoul(fi[2], NULL, 10) : 0;
+	if (ts < 10)
+	    /* compatibility with 20040818a that wrote a retry counter */
+	    ts = time(NULL);
 
-	if (++retry >= 5)
-	    /* XXX FIXME: make this configurable
-	     * too many retries */
+	expire = lookup_expire(group->name);
+	if (expire <= 0)
+	    expire = default_expire;
+	if (ts < expire)
+	    /* expired */
 	    continue;
 
 	if (stat(fi[1], &dummy1))
@@ -574,13 +578,8 @@ getmarked(struct newsgroup *group)
 	    continue;
 
 	if (!getbymsgid(fi[0], 2)) {
-	    char tmp[30];
-	    str = mastr_new(256);
-	    str_ulong(tmp, retry);
-	    mastr_vcat(str, fi[0], " ", fi[1], " ", tmp, NULL);
 	    initlist(&failed);
-	    appendtolist(failed, mastr_str(str));
-	    mastr_delete(str);
+	    appendtolist(failed, l);
 	}
     }
     fclose(f);
@@ -589,6 +588,7 @@ getmarked(struct newsgroup *group)
 	mastr_delete(fname);
 	return;
     }
+    /* XXX FIXME: don't overwrite directly but use TMP file */
     /* write back ids of all articles which could not be retrieved */
     if (!(f = fopen(mastr_str(fname), "w")))
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
