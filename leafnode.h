@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.72 2002/08/19 16:17:48 emma Exp $ */
+/* $Id: leafnode.h,v 1.73 2002/09/02 00:23:59 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -378,7 +378,7 @@ extern "C" {
     extern enum xoverfields matchxoverfield(const char *header);
     /*@null@*/ /*@dependent@*/
     char *getxoverfield(char *xoverline, enum xoverfields);
-
+    /*@null@*/ /*@only@*/ char * getxoverline(const int, const char *const);
 
     extern struct xoverinfo *xoverinfo;
     extern unsigned long xfirst;

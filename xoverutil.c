@@ -44,9 +44,7 @@ unsigned long xcount = 0;
 struct xoverinfo *xoverinfo = NULL;
 
 /* declarations */
-static
-				    /*@null@*/
- /*@only@*/
+/*@null@*/ /*@only@*/
 char *getxoverline(const int, const char *filename);
 int writexover(void);
 
@@ -101,7 +99,6 @@ getxoverfield(char *xoverline, enum xoverfields f)
 
 /** Extract information from given file to construct an .overview line.
  *  \return a malloc()ed string .overview */
-static
 				    /*@null@*/
  /*@only@*/
 char *
