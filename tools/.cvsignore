@@ -1,3 +1,5 @@
 Makefile
 Makefile.in
 .cvsignore
+lsmac.1
+sendbatch.bash
