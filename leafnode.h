@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.28 2002/01/31 18:02:27 emma Exp $ */
+/* $Id: leafnode.h,v 1.29 2002/02/04 20:54:48 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -591,11 +591,14 @@ extern "C" {
     int mailto(const char *address, int fd);
 
 /* gmtoff.c */
-    time_t gmtoff(void);
+    time_t gmtoff(const time_t);
 
 /* moderated.c */
     char *getmoderator(const char *group);
     char *checkstatus(const char *groups, const char status);
+
+/* getwatermarks.c */
+    int getwatermarks(unsigned long *, unsigned long *, unsigned long * /*@null@*/);
 
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
 
