@@ -1,0 +1,26 @@
+### the next lines will kill descrambler spam in all groups
+newsgroups = *
+pattern = ^Subject:.*D.*E.S.C.R.A.M.B.L.E.R
+action = kill
+
+### this inherits the last newsgroups line and also kills cable box
+### descrambler spam
+pattern = ^Subject:.*CABLE.*BOX.*DESCRAMBLER
+action = kill
+
+### do not accept articles older than 20 days
+maxage = 20
+action = kill
+
+### do not fetch articles beyond 100,000 bytes
+maxbytes = 100000
+action = kill
+
+### do not fetch articles posted to more than five groups
+maxcrosspost = 5
+action = kill
+
+### this limits traffic for a high-traffic group
+newsgroups = de.rec.fotografie
+maxage = 7
+action = kill
