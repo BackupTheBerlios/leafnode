@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.94 2004/01/29 11:09:37 emma Exp $ */
+/* $Id: leafnode.h,v 1.95 2004/01/31 03:25:31 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -398,6 +398,7 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
     int getxover(const int);	/* set xoverinfo, return 0 on error, nonzero else */
     void freexover(void);	/* free xoverinfo structure */
+    extern int writexover(void);    /* write overview info */
 
 /*
  * the strings in config.c
@@ -703,11 +704,7 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 
     /* cmp_firstcolumn.c */
     int cmp_firstcolumn(const void *a, const void *b,
-		    /*@unused@*/ const void *c
-#ifndef __cplusplus
-	    __attribute__((unused))
-#endif
-	    );
+		    /*@unused@*/ const void *c);
 
 /* debugutil.c */
 /* set this to 1 for debugging */
