@@ -49,3 +49,9 @@ action = kill
 newsgroups = *
 pattern = ^Subject: (AW|WG|Re^\d+):
 action = kill
+
+### Do not fetch articles that GMANE considered spam (only effective in
+### groups of the gmane hierarchy):
+newsgroups = *
+pattern = ^Xref:.* gmane\.spam\.detected:
+action = kill
