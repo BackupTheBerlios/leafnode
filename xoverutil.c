@@ -365,6 +365,9 @@ xgetxover(
     long i;
 
     freexover();
+    xfirst = ULONG_MAX; /* will be lowered accordingly */
+    xlast = 0;		/* will be raised accordingly */
+    xcount = 0;
 
     fd = open(".overview", O_RDONLY);
     if (fd < 0) {
@@ -416,9 +419,6 @@ xgetxover(
 	/* find article range on disk, store into xcount */
 	/* FIXME: don't choke on numeric subgroups */
 	/* FIXME: get this under the same roof as nntpd's dogroup */
-	xcount = 0;
-	xlast = 0;
-	xfirst = ULONG_MAX;
 	for (t = dl; *t; t++) {
 	    if (!get_ulong(*t, &art))
 		abort();		/* FIXME: must not happen */
@@ -428,8 +428,6 @@ xgetxover(
 	    if (art > xlast)
 		xlast = art;
 	}
-    } else {
-	xcount = 0;
     }
 
     /* parse .overview file */
@@ -458,6 +456,8 @@ xgetxover(
 		xoverinfo[current].exists = 0;
 		xoverinfo[current].artno = art;
 		current++;
+		if (art < xfirst) xfirst = art;
+		if (art > xlast) xlast = art;
 	    }
 	}
 	p = q;
