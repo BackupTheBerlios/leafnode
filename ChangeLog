@@ -1,3 +1,35 @@
+2003-03-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Bugfix: don't suppress pseudo article when the group is
+	        interesting, to fix "No articles in range" in XOVER.  Bugfix: allow
+	        opening pseudo article by Message-ID (Mew requests by Message-ID).  
+	Bugfix: If upper bound not given in XOVER command for pseudo groups, 
+	        assume to be same as lower bound.  
+
+2003-03-13  Matthias Andree <matthias.andree@gmx.de>
+
+	* README.html: Minor update.  
+	* leafnode.h: Add /*@null@*/ annotations for mvactive.  
+	* sort.c: Don't try to sort if fewer than 2 elements. Works around
+	potential Darwin mergesort bug.  
+	* activutil.c: Handle NULL input in mvactive().  
+	* fetchnews.c: Log article number of filtered article.  
+
+2003-02-17  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.8.in: Reword -x description.  
+	* applyfilter.8.in, fetchnews.8.in, filterfile.5.in, leafnode.8.in: 
+	Fix remaining SEE ALSO references to fetchnews(5) to point to
+	filterfile(5) instead, and add pointer to
+	@sysconfdir@/leafnode/filters.example.  Reported by Clemens Fischer
+	<ino-qc@spotteswoode.de.eu.org>.  
+
+2003-02-12  Matthias Andree <matthias.andree@gmx.de>
+
+	* moderated.c: Degrade 'Could not open .../moderators' message from
+	ERR to NOTICE. The caller will complain if required moderators are
+	missing.  
+
 2003-02-09  Matthias Andree <matthias.andree@gmx.de>
 
 	* configure.ac: Bump version 
