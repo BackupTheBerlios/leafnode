@@ -1,3 +1,8 @@
+Changes since 20040108a:
+- Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group
+  argument was given that was not a pattern. Patch by Hans-Jürgen
+  Ficker.
+
 20040108a: Changes since 20031221a:
 - Change: Log username and upstream server for authentication failures.
   Patches by Samuel Tardieu.
@@ -57,10 +62,11 @@
 - Change: Improve error reporting when a server disconnects.
 
 20031019a: Changes since 20031009a:
-- Revamp applyfilter, now more robust.
-- Reply 440 rather than 500 if user tries to POST in NOPOSTING mode.
-- GROUP article number fixes, to avoid bogus new article "offering" in
-  newsreader, reported by Reiner Steib.
+- Robustness: Revamped applyfilter.
+- Conformance: Reply 440 rather than 500 if user tries to POST in
+  NOPOSTING mode.
+- Bugfix: GROUP article number fixes, to avoid bogus new article
+  "offering" in newsreader, reported by Reiner Steib.
 
 20031009a: Changes since 20031001a:
 - Bugfix: applyfilter no longer chokes on 0-sized articles and will
