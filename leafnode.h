@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.96 2004/02/17 02:02:35 emma Exp $ */
+/* $Id: leafnode.h,v 1.97 2004/02/27 01:23:49 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -242,7 +242,7 @@ void freelocal(void);
 struct stringlistnode {
     struct stringlistnode *next;
     struct stringlistnode *prev;
-    char string[];
+    char string[1];
 };
 
 /* list header for stringlistnode - contains the merged dummy elements */
@@ -503,6 +503,8 @@ extern int authentication;	/* authentication method to use. Methods are: */
 #define AM_FILE 1		/* authenticate password via
 				   /etc/leafnode/users (needed for password
 				   authentication) */
+#define AM_PAM 2                /* authenticate using pam */
+#define AM_MAX AM_PAM
 extern int ln_log_posterip; /* log poster ip in
 			       X-Leafnode-NNTP-Posting-Host header */
 extern int timeout_active;	/* reread active file after that many days */
