@@ -482,10 +482,19 @@ xgetxover(
 	    }
 	}
     }
+
     if (dl)
 	free_dirlist(dl);
     if (overview)
 	free(overview);
+
+    /* count removed articles */
+    for (art = xfirst; art <= xlast; art++) {
+	if (xoverinfo[art - xfirst].text
+	    && !xoverinfo[art - xfirst].exists) {
+	    update = 1;
+	}
+    }
 
     /* crunch xover, delete nonexistent articles */
     current = crunchxover(xoverinfo, current);
