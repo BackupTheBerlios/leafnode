@@ -7,6 +7,7 @@
 #include "leafnode.h"
 
 #include <unistd.h>
+#include <assert.h>
 
 #include "critmem.h"
 #include "ln_log.h"
@@ -57,6 +58,8 @@
 #define P_CONTINUE	381
 #define P_ACCEPTED	281
 
+static char *getmoderator(const char *group);
+static char *checkstatus(const char *groups, const char status);
 static char *generateMessageID(void);
 static FILE *fopenart(const struct newsgroup *group, const char *,
 		      unsigned long *);
@@ -137,6 +140,101 @@ gmtoff(void)
     free(oldzone);
 #endif
     return (localsec - gmtsec);
+}
+
+/**
+ * Takes a group name as argument, returns the moderator's address,
+ * NULL in case of error. The returned pointer must be free()ed by
+ * the caller. (c) 2001 Joerg Dietrich.
+ */
+char
+*getmoderator(const char *group)
+{
+    char *line, *p;
+    char address[512];
+    mastr *modpath = mastr_new(PATH_MAX);
+    FILE *f;
+
+    mastr_vcat(modpath, libdir, "/moderators", 0);
+    f = fopen(mastr_str(modpath), "r");
+    if (!f) {
+        ln_log(LNLOG_SERR, LNLOG_CTOP, "Could not open %s: %m",
+               mastr_str(modpath));
+	mastr_delete(modpath);
+        return NULL;
+    }
+    while ((line = getaline(f))) {
+	if (!*line || line[0] == '#')
+	    continue;
+        if (!(p = strchr(line, ':'))) {
+            /* invalid line */
+	    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+		   "warning: moderator line \"%s\" malformatted, skipping",
+		   line);
+            continue;
+	}
+        *p++ = '\0';
+        if (wildmat(group, line)) {
+	    char *x;
+	    if ((x = strstr(p, "%s"))) {
+		char *g = critstrdup(group, "getmoderator");
+		char *t;
+		for(t=g; *t; t++)
+		    if (*t == '.')
+			*t = '-';
+
+		*x = '\0';
+		snprintf(address, sizeof address, "%s%s%s",
+			 p, g, x+2);
+		free(g);
+	    } else {
+		mastrncpy(address, p, sizeof address);
+	    }
+            fclose(f);
+	    mastr_delete(modpath);
+            return strdup(address);
+        }
+    }
+    fclose(f);
+    mastr_delete(modpath);
+    return NULL;
+}
+
+/**
+ * Takes a comma seperated list of newsgroups and returns the
+ * the first group on which status matches, NULL otherwise.
+ * Caller must free returned pointer. (c) 2001 Joerg Dietrich.
+ */
+char
+*checkstatus(const char *groups, const char status)
+{
+    char *grp;
+    char *p, *q;
+    struct newsgroup *g;
+
+    assert(groups);
+    grp = p = critstrdup(groups, "checkstatus");
+
+    SKIPLWS(grp);
+    while (grp && *grp) {
+        q = strchr(grp, ',');
+        if (q) {
+            *q++ = '\0';
+	    SKIPLWS(q);
+	}
+
+        g = findgroup(grp);
+        if (g) {
+            if (g->status == status) {
+                free(p);
+                return strdup(g->name);
+            }
+        }
+        grp = q;
+	if (grp) SKIPLWS(grp);
+    }
+    free(p);
+    return NULL;
 }
 
 /*
@@ -869,10 +967,9 @@ list(struct newsgroup *g, int what, char *pattern)
 	    else if (ngmatch(pattern, ng->name) == 0)
 		printf("%s\t%s\r\n", ng->name, ng->desc ? ng->desc : "-x-");
 	} else {
-	    if (!pattern)
-		printf("%s %010lu %010lu y\r\n", ng->name, ng->last, ng->first);
-	    else if (ngmatch(pattern, ng->name) == 0)
-		printf("%s %010lu %010lu y\r\n", ng->name, ng->last, ng->first);
+	    if (!pattern || (ngmatch(pattern, ng->name) == 0))
+		printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,
+		       ng->first, ng->status);
 	}
 	ng++;
     }
@@ -1198,8 +1295,9 @@ dopost(void)
     static int postingno;	/* starts at 0 */
 
     do {
-	sprintf(inname, "%s/in.coming/%d-%ld-%d",
-		spooldir, (int)getpid(), (long)time(NULL), ++postingno);
+	sprintf(inname, "%s/in.coming/%d-%lu-%d",
+		spooldir, (int)getpid(), (unsigned long)time(NULL),
+		++postingno);
 	out = open(inname, O_WRONLY | O_EXCL | O_CREAT, (mode_t) 0444);
     } while (out < 0 && errno == EEXIST);
 
@@ -1224,8 +1322,10 @@ dopost(void)
 	}
 
 	/* premature end (no body) */
-	if (!strcmp(line, "."))
+	if (!strcmp(line, ".")) {
+	    err = TRUE;
 	    break;
+	}
 
 	if (strisprefix(line, "From:")) {
 	    if (havefrom)
@@ -1373,6 +1473,10 @@ dopost(void)
 	char *mid = 0;
 	char *groups = 0;
 	char *outbasename;
+	char *forbidden = 0;
+        char *modgroup = 0;
+        char *moderator = 0;
+        char *approved = 0;
 
 	f = fopen(inname, "r");
 	if (f) {
@@ -1394,8 +1498,40 @@ dopost(void)
 	    return;
 	}
 
-	if (!islocal(groups)) {
-	    /* also posted to external groups, store into out.going */
+        if ((forbidden = checkstatus(groups, 'n'))) {
+            /* Newsgroups: contains a group to which posting is not allowed */
+            ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+                   "Article was posted to non-writable group %s", forbidden);
+            nntpprintf("441 Posting to %s not allowed", forbidden);
+            free(forbidden);
+            log_unlink(inname);
+            free(mid);
+            free(groups);
+            return;
+        }
+
+        if ((modgroup = checkstatus(groups, 'm'))) {
+            /* Post to a moderated group */
+            moderator = getmoderator(modgroup);
+            if (!moderator && islocal(modgroup)) {
+                ln_log(LNLOG_SERR, LNLOG_CTOP,
+                       "Did not find moderator address for local moderated "
+                       "group %s", modgroup);
+                nntpprintf("503 Configuration error: No moderator for %s",
+                           modgroup);
+                free(mid);
+                free(groups);
+                free(modgroup);
+                log_unlink(inname);
+                return;
+            }
+            approved = getheader(inname, "Approved:");
+            free(modgroup);
+        }
+	
+        if (!moderator && !islocal(groups)) {
+            /* also posted to external groups or moderated group with
+               unknown moderator, store into out.going */
 	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
 	    outbasename = strrchr(inname, '/');
 	    outbasename++;
@@ -1410,6 +1546,33 @@ dopost(void)
 		return;
 	    }
 	}
+
+        if (moderator && !approved) {
+            /* Mail the article to the moderator */
+	    int fd;
+
+	    fd = open(inname, O_RDONLY);
+	    if (fd < 0) {
+		ln_log(LNLOG_SERR, LNLOG_CTOP, "Couldn't open article %s: %m",
+		       inname);
+	    } else if (mailto(moderator, fd)) {
+		nntpprintf("503 Posting to moderator %s failed: %m",
+			   moderator);
+	    } else {
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		       "Message %s mailed to moderator %s", inname, moderator);
+		nntpprintf("240 Article mailed to moderator");
+	    }
+
+	    if (fd >= 0) log_close(fd);
+            free(moderator);
+            free(mid);
+            free(groups);
+            log_unlink(inname);
+            return;
+        }
+        if (approved)
+            free(approved);
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
 	       islocal(groups) ? "LOCAL" : "UPSTREAM", mid, groups);
@@ -1450,6 +1613,7 @@ dopost(void)
 	return;
     }
 
+    log_unlink(inname);
     if (!havefrom)
 	nntpprintf("441 From: header missing, article not posted");
     else if (!havesubject)
@@ -2050,6 +2214,12 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
     free(a);			/* a == NULL caught above */
 }
 
+/* this dummy function is used so we can define a no-op for SIGCHLD */
+static void dummy(int unused);
+static void dummy(int unused) {
+    (void)unused;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -2142,7 +2312,8 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
     rereadactive();
-    signal(SIGCHLD, SIG_IGN);
+    signal(SIGCHLD, dummy); /* SIG_IGN would cause ECHILD on wait, so we use
+			       our own no-op dummy */
     gmt_off = gmtoff();		/* get difference between local time and GMT */
     printf("200 Leafnode NNTP Daemon, version %s running at %s\r\n",
 	   version, owndn ? owndn : fqdn);
