@@ -227,27 +227,30 @@ parseopt(const char *progname, int option,
 	 /*@null@*/ const char *opta, /*@null@*/ char **conffile)
 {
     switch (option) {
-    case 'V':
-	printf("%s %s\n", progname, version);
-	exit(0);
-    case 'v':
-	verbose++;
-	return TRUE;
-    case 'e':
-	ln_log_stderronly ^= 1;
-	return TRUE;
-    case 'D':
-	if (opta && *opta)
-	    debugmode = atoi(opta);
-	else
-	    debugmode = ~0;
-	return TRUE;
-    case 'F':
-	if (opta != NULL && *opta) {
-	    if (conffile)
-		*conffile = critstrdup(opta, "parseopt");
+	case ':':
+	    fprintf(stderr, "FATAL: Option %c requires argument.\n", optopt);
+	    return FALSE;
+	case 'V':
+	    printf("%s %s\n", progname, version);
+	    exit(0);
+	case 'v':
+	    verbose++;
 	    return TRUE;
-	}
+	case 'e':
+	    ln_log_stderronly ^= 1;
+	    return TRUE;
+	case 'D':
+	    if (opta && *opta)
+		debugmode = atoi(opta);
+	    else
+		debugmode = ~0;
+	    return TRUE;
+	case 'F':
+	    if (opta != NULL && *opta) {
+		if (conffile)
+		    *conffile = critstrdup(opta, "parseopt");
+		return TRUE;
+	    }
     }
     return FALSE;
 }
