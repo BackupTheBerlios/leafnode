@@ -1,4 +1,4 @@
-.TH rnews 8 @VERSION@ leafnode Leafnode \" -*- nroff -*-
+.TH rnews 8 2.0b8_ma10post3.3-CVS leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written and copyright 1999 by Cornelius Krasel
 .\" <krasel@wpxx02.toxi.uni-wuerzburg.de>
@@ -11,7 +11,7 @@ rnews \- sort batch files into spool
 .SH SYNOPSIS
 .B rnews -V
 .br
-.B rnews [-v|D] [file|directory]
+.B rnews [-F configuration] [-v[v[v[v[v]]]]] [-D [level]] [file|directory]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -20,10 +20,13 @@ users and little disk space, but where a large number of groups is
 desired.
 .PP
 .B Rnews
-is the program that sorts files into your newsspool.
+is the program that sorts files (possibly received with UUCP) into your newsspool.
 .B Rnews
-can currently sort compressed and uncompressed news batches as well as news
+can currently take compressed and uncompressed news batches as well as news
 articles.
+.B Rnews will avoid copying the file around and is able to read from a
+stream. To achieve this, it may fork() twice and spawn an external
+decompressor.
 .B Rnews
 expects the news batch either in a file, directory or on stdin. If provided
 with the name of a directory, it will open the directory and sort all files
@@ -35,18 +38,22 @@ sets its real and effective uid to "news".
 
 .SH OPTIONS
 .TP
-.I -D debugmode
+.I -D [debugmode]
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems. See
 .I @sysconfdir@/config.example
-for details on how to configure the debug mode.
+for details on how to configure the debug mode. If the mode is omitted,
+assume maximum debug level.
+.TP
+.I -F configfile
+If set, use configfile instead of the default configuration.
 .TP
 .I -V
 Show version information and exit.
 .TP
 .I -v
-Be verbose. A maximum of four -v can be used.
+Be verbose. A maximum of five -v can be used.
 .TP
 .I file
 Sort this file into the newsspool. The file can also be a rnews batch,
@@ -55,20 +62,14 @@ optionally compressed.
 .I directory
 Sort the contents of this directory into the newsspool.
 
-.SH FILES
-.PP
+.SH BUGS
 .B Rnews
-makes some use of the /tmp directory.
+leaks some bytes of memory (the command line arguments to the
+external compressor program.)
 
 .SH AUTHOR
-Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
+Originally written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
 Copyright 1999.
 .PP
-Leafnode was originally written by Arnt Gulbrandsen <agulbra@troll.no>
-and is copyright 1995-96 
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-
-.SH SEE ALSO
-.BR leafnode (8),
-.BR gzip (1)
+Major rewrite by Matthias Andree <matthias.andree@gmx.de>. Copyright
+2001 - 2002.
