@@ -44,6 +44,11 @@ Ralfs TODO:
 	  only killed if removed from _all_ other groups
 	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
 	  "%d articles deleted' message not correct.
+	* delaybody mode: Cancels for marked bodies lead to marks not being
+	  removed (supersedes are handled ok) until expiry of the pseudo header.
+	* Leftover link in temp.files for each (successfully?) posted article.
+	* :active.read must not be updated on NEWGROUPS, or the active will
+	  never be refetched as a whole.
 
 10pre5
 0.0 forward port bug fixes from 1.9.19rc*
