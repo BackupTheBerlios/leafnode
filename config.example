@@ -119,7 +119,7 @@ expire = 20
 ## immediately, even though the upstream may not yet have received or
 ## may later reject the post. Uncomment this line to only store articles
 ## locally that a remote server has received.
-# no_direct_post = 1
+# no_direct_spool = 1
 
 ############################################
 ##                                        ##

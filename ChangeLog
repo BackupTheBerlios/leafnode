@@ -25,7 +25,7 @@
 
 2002-06-14  Matthias Andree <matthias.andree@gmx.de>
 
-	* nntpd.c: New feature: no_direct_post, to store local posts into
+	* nntpd.c: New feature: no_direct_spool, to store local posts into
 	the local spool only after it has been received from the upstream.
 	(1.9 behaviour).  Robustness: only schedule article for local
 	posting if it has been received and validated (store into temp.files
