@@ -86,7 +86,7 @@ mastr_cpy(mastr * m, const char *s)
     if (!s)
 	return 0;
     if (l >= m->bufsize)
-	if (NULL == mastr_resizekill(m, l)) {
+	if (0 == mastr_resizekill(m, l)) {
 	    mastr_oom();
 	    /*@notreached@*/ return 0;
 	}
@@ -105,9 +105,9 @@ mastr_cat(mastr * m, /*@observer@*/ const char *const s)
     if (!s)
 	return 0;
     if (li + m->len >= m->bufsize)
-	if (NULL == mastr_resizekeep(m, li + m->len)) {
+	if (0 == mastr_resizekeep(m, li + m->len)) {
 	    mastr_oom();
-	    /*@notreached@*/ return NULL;
+	    /*@notreached@*/ return 0;
 	}
     strcpy(m->dat + m->len, s);
     m->len += li;
