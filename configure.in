@@ -1,9 +1,9 @@
 nl autoconf script for leafnode -*- m4 -*-
 dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([leafnode],[2.0b8_ma7.7pre],[matthias.andree@gmx.de])
+AC_INIT([leafnode],[2.0b8_ma8rc1],[matthias.andree@gmx.de])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.13 $)
+AC_REVISION($Revision: 1.14 $)
 AC_CONFIG_SRCDIR([leafnode.h])
 AC_CONFIG_HEADER(config.h)
 
@@ -55,26 +55,6 @@ AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_TRY_COMPILE([
 if test "$cf_cv_sysheaders" = "no"
 then
   AC_MSG_ERROR(Kernel sources not installed - unable to continue)
-fi
-
-dnl Check whether putenv uses a copy of the string
-AC_CACHE_CHECK(if putenv copies the string, cf_cv_putenv_copies, AC_TRY_RUN([
-#define __USE_XOPEN
-#include <stdlib.h>
-int main(void) {
- 	char string[]="PUTENV_COPIES=1";
-	char *e;
-	if (putenv(string)) { exit(2); }
-	string[strlen(string)-1] = '0';
-	e = getenv("PUTENV_COPIES");
-	if (!e) { exit(2); }
-	exit (e[strlen(e)-1] == '0' ? 1 : 0);
-}
-],[cf_cv_putenv_copies="yes"],[cf_cv_putenv_copies="no"],[ : ])
-)
-if test "$cf_cv_putenv_copies" = "yes"
-then
-  AC_DEFINE(PUTENV_COPIES)
 fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
