@@ -25,4 +25,8 @@ typedef unsigned char uint8_t;
 #error "I cannot figure how to define uint32_t and uint8_t."
 #endif
 
+#if !defined(HAVE_STRCASESTR)
+extern char *strcasestr(const char *haystack, const char *needle);
+#endif
+
 #endif /* SYSTEM_H */
