@@ -1,3 +1,31 @@
+2003-07-07  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Properly initialize newsgroup data in LISTGROUP, to fix
+	bogus pseudo status of groups that actually have articles in them.
+	Unify opening code in dogroup and dolistgroup. Reported by Michael
+	Mauch against tin 1.5.19.  
+
+2003-07-06  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030706b =
+	* configure.ac: Bump version.  
+	* UPDATING: Fix typo.  
+	* filterfile.5.in, filters.example, filterutil.c, leafnode.h: Drop
+	inverting the pattern, this is just too dangerous and has too little
+	use.  
+	= snapshot 20030706a =
+	* configure.ac: Bump version.  
+	* NEWS, UPDATING, configure.ac, configutil.c, filterfile.5.in,
+	filters.example, filterutil.c, groupselect.c, groupselect.h,
+	leafnode.h: Filters change: newsgroups now PCRE, allow inverting
+	newsgroups and pattern, PCRE before 3.0 not supported.  
+	* Makefile.am, pcrewrap.c, pcrewrap.h: Add pcre_compile wrapper.  
+
+2003-06-25  Matthias Andree <matthias.andree@gmx.de>
+
+	* texpire.c: Write "lockfile exists" message to syslog as well.
+	Suggested by John Carlyle-Clarke.  
+
 2003-06-21  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20030621b =
