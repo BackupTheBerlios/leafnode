@@ -1,8 +1,11 @@
-Changes since 20031028a:
+20031122a: Changes since 20031028a:
 - Feature: applyfilter -c checks in -n mode if filters would match the
   files (rather than newsgroups) given on the command line.
   Suggested by Reiner Steib.
 - Feature: applyfilter can now handle more than one newsgroup argument.
+- Bugfix: Do not post unless we have an active file. Avoids a crash
+  reported by Robert Marshall.
+- Cleanup: Fetch active file before trying to post.
 
 20031028a: Changes since 20031026a:
 - Bugfix: Change "ulong" to "unsigned long" to make the package compile

@@ -1,4 +1,43 @@
+2003-11-22  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031122a =
+	* fetchnews.c: Clean up postarticles, fetch active file
+	unconditionally (we need it for posting as well) and refuse to post
+	without active file (avoid crash reported by Robert Marshall).
+
+2003-11-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Make GROUP return proper count again. List extensions
+	without leading space. (IETF NNTP draft #20)
+	* xoverutil.c: Clear xcount to avoid LISTGROUP segfault when
+	entering empty groups.
+
+2003-11-03  =?ISO-8859-1?Q?J=F6rg?= Dietrich <joerg@dietrich.net>
+
+	* texpire.c: Fix segfault on non-empty group that is no longer in
+	groupinfo
+
+2003-10-31  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO, nntpd.c, texpire.c, xoverutil.c: Group low/high article
+	number cleanups.
+
+2003-10-30  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO, store.c: Do not store crossposts into dormant.groups.
+	Reported by Ralf Wildenhues.
+	* TODO, nntpd.c: Add moderator address for local moderated groups
+	in LIST NEWSGROUPS.  Suggested by Ralf Wildenhues.
+	* moderated.c: Ugly reformatting patch.
+	* NEWS, TODO, applyfilter.8.in, applyfilter.c: Implement
+	applyfilter -c and allow multiple newsgroup names to applyfilter.
+	Suggested by Reiner Steib.
+	* leafnode.h, miscutil.c: Handle missing mandatory argument
+	ourselves.
+
 2003-10-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, NEWS, configure.ac: snapshot 20031028a
 
 	= snapshot 20031028a =
 	* localutil.c: Use rbtree for local groups.
