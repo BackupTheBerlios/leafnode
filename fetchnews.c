@@ -1248,7 +1248,7 @@ nntpactive(void)
 
     if (!forceactive && (0 == stat(s, &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
-	       "%s: checking for new newsgroups", current_server->name);
+		"%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
 	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&st.st_mtime));
 	putaline(nntpout, "NEWGROUPS %s GMT", timestr + 2);
@@ -1267,7 +1267,7 @@ nntpactive(void)
 	    appendtolist(&groups, &helpptr, l);
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
-	       "%s: found %lu new newsgroups", current_server->name, count);
+		"%s: found %lu new newsgroups", current_server->name, count);
 	if (!l)
 	    /* timeout */
 	    return;
@@ -1275,8 +1275,8 @@ nntpactive(void)
 	helpptr = groups;
 	if (count && current_server->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-		   "%s: getting new newsgroup descriptions",
-		   current_server->name);
+		    "%s: getting new newsgroup descriptions",
+		    current_server->name);
 	}
 	while (count && helpptr != NULL && current_server->descriptions) {
 	    error = 0;
@@ -1295,9 +1295,9 @@ nntpactive(void)
 		    if (error > 1) {
 			current_server->descriptions = 0;
 			ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
-			       "%s: warning: server does not process "
-			       "LIST NEWSGROUPS %s correctly: use nodesc",
-			       current_server->name, helpptr->string);
+				"%s: warning: server does not process "
+				"LIST NEWSGROUPS %s correctly: use nodesc",
+				current_server->name, helpptr->string);
 		    }
 		}
 	    }
@@ -1306,11 +1306,11 @@ nntpactive(void)
 	freelist(groups);
     } else {    /* read new active */
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	       "%s: getting newsgroups list", current_server->name);
+		"%s: getting newsgroups list", current_server->name);
 	putaline(nntpout, "LIST");
 	if (nntpreply() != 215) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		   "%s: reading all newsgroups failed", current_server->name);
+		    "%s: reading all newsgroups failed", current_server->name);
 	    return;
 	}
 	oldactive = cpactive(active);
@@ -1326,8 +1326,8 @@ nntpactive(void)
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
 	    if (is_interesting(l)
-		&& (forceactive || !(active && findgroup(l, active, -1)))
-		&& chdirgroup(l, FALSE)) {
+		    && (forceactive || !(active && findgroup(l, active, -1)))
+		    && chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
 		if (getwatermarks(&first, &last, 0)) {
@@ -1338,51 +1338,53 @@ nntpactive(void)
 	    insertgroup(l, p[0], first, last, 0, NULL);
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	       "%s: read %lu newsgroups", current_server->name, count);
+		"%s: read %lu newsgroups", current_server->name, count);
 
 	mergegroups();
 	/*		if (!l)
-		timeout 
-		return; */
+			timeout 
+			return; */
 
-	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	       "%s: getting newsgroup descriptions", current_server->name);
-	putaline(nntpout, "LIST NEWSGROUPS");
-	l = getaline(nntpin);
-	/* correct reply starts with "215". However, INN 1.5.1 is broken
-	   and immediately returns the list of groups */
-	if (l) {
-	    char *tmp;
+	if (current_server->descriptions) {
+	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
+		    "%s: getting newsgroup descriptions", current_server->name);
+	    putaline(nntpout, "LIST NEWSGROUPS");
+	    l = getaline(nntpin);
+	    /* correct reply starts with "215". However, INN 1.5.1 is broken
+	       and immediately returns the list of groups */
+	    if (l) {
+		char *tmp;
 
-	    reply = strtol(l, &tmp, 10);
-	    if ((reply == 215) && (*tmp == ' ' || *tmp == '\0')) {
-		l = getaline(nntpin);	/* get first description */
-	    } else if (*tmp != ' ' && *tmp != '\0') {
-		/* FIXME: INN 1.5.1: line already contains description */
-		/* do nothing here */
+		reply = strtol(l, &tmp, 10);
+		if ((reply == 215) && (*tmp == ' ' || *tmp == '\0')) {
+		    l = getaline(nntpin);	/* get first description */
+		} else if (*tmp != ' ' && *tmp != '\0') {
+		    /* FIXME: INN 1.5.1: line already contains description */
+		    /* do nothing here */
+		} else {
+		    ln_log(LNLOG_SERR, LNLOG_CSERVER,
+			    "%s: reading newsgroups descriptions failed: %s",
+			    current_server->name, l);
+		    free(oldactive);
+		    return;
+		}
 	    } else {
 		ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		       "%s: reading newsgroups descriptions failed: %s",
-		       current_server->name, l);
+			"%s: reading newsgroups descriptions failed",
+			current_server->name);
 		free(oldactive);
 		return;
 	    }
-	} else {
-	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
-		   "%s: reading newsgroups descriptions failed",
-		   current_server->name);
-	    free(oldactive);
-	    return;
-	}
-	while (l && (strcmp(l, "."))) {
-	    p = l;
-	    CUTSKIPWORD(p);
-	    changegroupdesc(l, *p ? p : NULL);
-	    l = getaline(nntpin);
-	}
-	if (!l) {
-	    free(oldactive);
-	    return;		/* timeout */
+	    while (l && (strcmp(l, "."))) {
+		p = l;
+		CUTSKIPWORD(p);
+		changegroupdesc(l, *p ? p : NULL);
+		l = getaline(nntpin);
+	    }
+	    if (!l) {
+		free(oldactive);
+		return;		/* timeout */
+	    }
 	}
 	mergeactives(oldactive, active);
 	free(oldactive); /* Do not call freeactive(). The pointers in 
@@ -1391,9 +1393,9 @@ nntpactive(void)
     }
     /* touch file */
     {
-        int e = touch_truncate(s);
-        if (e < 0)
-	ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
+	int e = touch_truncate(s);
+	if (e < 0)
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
     }
 }
 
