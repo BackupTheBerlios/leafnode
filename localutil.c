@@ -86,6 +86,7 @@ readlocalgroups(void)
     char *l, *p;
     FILE *f;
     char *u;
+    unsigned int line = 0;
 
     if (!(f = fopen(localgroups, "r"))) {
 	/* still reject this to make sure the configuration is complete */
@@ -94,6 +95,7 @@ readlocalgroups(void)
     }
 
     while ((l = getaline(f))) {
+	line++;
 	/* skip comments */
 	if (l[0] == '#') continue;
 	p = l;
@@ -111,7 +113,8 @@ readlocalgroups(void)
 	/* l points to group name, u to status, p to description */
 	if (strcmp(u, "y") && strcmp(u, "n") && strcmp(u, "m")) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "malformatted %s: status is not one of y, n, m", localgroups);
+		   "malformatted %s line #%u: status is not one of y, n, m",
+		   localgroups, line);
 	    abort();
 	}
 	if (*l && validate_groupname(l)) {
