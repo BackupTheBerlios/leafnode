@@ -1,4 +1,95 @@
+2005-01-10  Matthias Andree <matthias.andree@gmx.de>
+  * fix texpire abort with DEBUG_EXPIRE set
+
+    M ./NEWS +1
+    M ./xoverutil.c -1 +1
+
+2005-01-09  Matthias Andree <matthias.andree@gmx.de>
+  * Bugfix: even if groupexpire is < 0 to mean "no expire", fix overview and check consistency.
+
+    M ./NEWS +2
+    M ./texpire.c -9 +8
+
+  * make "kept" a local variable
+
+    M ./texpire.c -5 +7
+
+  * minor cleanup, move pointer up front
+
+    M ./leafnode.h -1 +1
+
+  * fix groupexpire with negative value to "no expire"
+
+    M ./NEWS +2
+    M ./configutil.c -1 +1
+
+2005-01-09  matthias.andree@gmx.de
+  * time_t vs long int fixes.
+
+    M ./fetchnews.c -1 +1
+    M ./fetchnews_check_date.c -1 +1
+    M ./nntpd.c -2 +2
+
+2005-01-08  Matthias Andree <matthias.andree@gmx.de>
+  * GROUP and LIST ACTIVE without pattern keep an interesting group interesting.
+
+    M ./nntpd.c -1 +4
+
+  * Unbreak compile, remove dead rcsid reference.
+
+    M ./redblack.c -2
+
 2005-01-05  Matthias Andree <matthias.andree@gmx.de>
+  * Get rid of RCS/CVS keywords and their expansions.
+
+    M ./Makefile.am -1
+    M ./README.html -3
+    M ./checkgroups.8.in -2
+    M ./configure.ac -1
+    M ./fetchnews.8.in -2
+    M ./leafnode.8.in -2
+    M ./leafnode.h -1
+    M ./redblack.c -62
+    M ./redblack.h -59
+    M ./texpire.8.in -2
+
+  * document negative groupexpires mean no expire
+
+    M ./leafnode.8.in -1 +2
+
+  * move $(GENERATED_MANS) to DISTCLEANFILES
+
+    M ./Makefile.am -3 +1
+
+  * compatibility fix for older pod2man tools
+
+    M ./Makefile.am -1 +1
+
+  * Cleanup: Only use top-level Makefile.am, drop recursion.
+
+    M ./Makefile.am -4 +20
+    M ./NEWS +3
+    M ./configure.ac -1 +1
+    R ./tools/Makefile.am
+
+  * Update rpm builder for RPM 4.
+
+    M ./Makefile.am -1 +1
+
+  * Drop newsq.pl.
+
+    M ./tools/Makefile.am -1
+    R ./tools/newsq.pl
+
+  tagged leafnode-2-0-0-alpha20050105a
+
+
+  * snapshot leafnode-2.0.0.alpha20050105a
+
+    M ./ChangeLog +77
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
   * do not export unrecorded changes
 
     M ./export.sh +2
