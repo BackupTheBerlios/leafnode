@@ -1,0 +1,12 @@
+2.0b8_ma10pre3.3:
+- fix: texpire crashes (Ralf Wildenhues)
+- fix: garbage from host name resolver (Raymond Scholz)
+- fix: off-by-one error in FQDN validator (Matthias Andree)
+- feature: "no_direct_post=1": can now post in leafnode-1.9 style: only
+  show locally posted articles after they have been fetched from the
+  upstream. (Matthias Andree)
+- feature: newsq prints now Date: and Message-ID: (Matthias Andree)
+- docs: NEWS file (Matthias Andree)
+- build: enable gcc warnings (Ralf Wildenhues)
+- internal: getfoldedline does not try to read the continuation of a
+  line that starts with a dot. (Matthias Andree)
