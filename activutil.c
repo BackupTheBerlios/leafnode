@@ -56,12 +56,16 @@ struct nglist *newgroup;
  * it will not be inserted again or changed.
  */
 void
-insertgroup(const char *name, const char status, long unsigned first,
+insertgroup(const char *name, char status, long unsigned first,
 	    long unsigned last, int age, const char *desc)
 {
     struct nglist *l;
     static struct nglist *lold;
     struct newsgroup *g;
+
+    /* interpret INN status characters */
+    if (status == 'x') status = 'n';
+    if (strchr("j=", status)) status = 'y';
 
     if (active) {
 	g = findgroup(name);
@@ -361,7 +365,7 @@ readactive(void)
 	    || (*r++ = '\0',
 		sscanf(r, "%c\t%lu\t%lu\t%lu\t", &g->status, &g->last,
 		       &g->first, &g->age) != 4)
-	    || !strchr("yYmMnN", g->status)) {
+	    || !strchr("ymn", g->status)) {
 	    ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		       "Groupinfo file damaged, ignoring line: %s", p);
 	    /* skip over malformatted line */
