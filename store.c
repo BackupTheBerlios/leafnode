@@ -68,7 +68,7 @@ touch(const char *name)
     }
 }
 
-const char *
+/*@observer@*/ const char *
 store_err(int i)
 {
     switch (i) {
@@ -105,7 +105,7 @@ store_stream(FILE * in /** input file */ ,
 	     long maxbytes /** maximum byte count, -1 == unlimited */ )
 {
     int rc = -1;		/* first, assume something went wrong */
-    mastr *tmpfn = mastr_new(4095);
+    mastr *tmpfn = mastr_new(4095l);
     const char *line = 0;
     char *mid = 0, *m;
     char *ngs = 0;
@@ -122,14 +122,15 @@ store_stream(FILE * in /** input file */ ,
     mastr *xref = 0;
     char nb[40] = "";		/* buffer for numbers */
     FILE *tmpstream = 0;
-    mastr *head = mastr_new(4095);	/* full header for killing */
+    mastr *head = mastr_new(4095l);	/* full header for killing */
     ssize_t s;
-    mastr *ln = mastr_new(4095);	/* line buffer */
+    mastr *ln = mastr_new(4095l);	/* line buffer */
 
     mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", 0);
 
     /* check for OOM */
     if (!head) {
+	mastr_delete(ln);
 	mastr_delete(tmpfn);
 	return -1;
     }
@@ -140,6 +141,8 @@ store_stream(FILE * in /** input file */ ,
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "error in mkstemp(\"%s\"): %m",
 	       mastr_str(tmpfn));
 	mastr_delete(tmpfn);
+	mastr_delete(head);
+	mastr_delete(ln);
 	return -1;
     }
 
@@ -149,6 +152,8 @@ store_stream(FILE * in /** input file */ ,
 	log_close(tmpfd);
 	log_unlink(mastr_str(tmpfn));
 	mastr_delete(tmpfn);
+	mastr_delete(head);
+	mastr_delete(ln);
 	return -1;
     }
 
@@ -217,8 +222,10 @@ store_stream(FILE * in /** input file */ ,
 		supersede_cancel(p + 7, "Cancel", "Cancelled");
 	}
 
-	fputs(line, tmpstream);
-	fputs(LLS, tmpstream);
+	if (fputs(line, tmpstream) == EOF)
+	    BAIL(-1, "write error");
+	if (fputs(LLS, tmpstream) == EOF)
+	    BAIL(-1, "write error");
     }
 
     /* check if mandatory headers present exactly once */
@@ -271,7 +278,7 @@ store_stream(FILE * in /** input file */ ,
 	nglistlen += nglistlen;
     }
 
-    xref = mastr_new(1024);
+    xref = mastr_new(1024l);
     /* store */
     for (t = nglist; *t; t++) {
 	struct newsgroup *g = 0;
@@ -299,7 +306,7 @@ store_stream(FILE * in /** input file */ ,
 		    /* ls = !sync_link(tmpfn, nb); */
 		    ls = !link(mastr_str(tmpfn), nb);
 		    if (ls)
-			break;
+			/*@innerbreak@*/ break;
 		    if (errno == EEXIST)
 			continue;	/* try again */
 		    /* FIXME: if EEXIST happens, obtain water marks anew
@@ -307,7 +314,7 @@ store_stream(FILE * in /** input file */ ,
 		    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 			   "error linking %s into %s for %s: %m",
 			   mastr_str(tmpfn), nb, name);
-		    break;
+		    /*@innerbreak@*/ break;
 		}
 		if (!ls) {
 		    rc = -1;
@@ -315,15 +322,20 @@ store_stream(FILE * in /** input file */ ,
 		}
 	    }
 	}
-	mastr_vcat(xref, " ", name, ":", nb, 0);
+	(void)mastr_vcat(xref, " ", name, ":", nb, 0);
     }
-    fputs("XRef: ", tmpstream);
-    fputs(fqdn, tmpstream);
-    fputs(mastr_str(xref), tmpstream);
-    fputs(LLS, tmpstream);
+    if (fputs("XRef: ", tmpstream) == EOF)
+	BAIL(-1, "write error");
+    if (fputs(fqdn, tmpstream) == EOF)
+	BAIL(-1, "write error");
+    if (fputs(mastr_str(xref), tmpstream) == EOF)
+	BAIL(-1, "write error");
+    if (fputs(LLS, tmpstream) == EOF)
+	BAIL(-1, "write error");
 
     /* write separator between header and body */
-    fputs(LLS, tmpstream);
+    if (fputs(LLS, tmpstream) == EOF)
+	BAIL(-1, "write error");
 
     /* copy body */
     while ((line = getaline(in))) {
@@ -359,7 +371,7 @@ store_stream(FILE * in /** input file */ ,
   cont:
     if (log_fsync(fileno(tmpstream))) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "store: cannot fsync: %m");
-	log_unlink(m);
+	(void)log_unlink(m);
 	rc = -1;
 	goto bail;
     }
@@ -370,7 +382,7 @@ store_stream(FILE * in /** input file */ ,
 	rc = -1;
 	goto bail;
     }
-    tmpstream = 0;
+    tmpstream = NULL;
     rc = 0;
 
   bail:
@@ -397,27 +409,27 @@ store_stream(FILE * in /** input file */ ,
     if (ngs)
 	free(ngs);
     if (tmpstream) {
-	fflush(tmpstream);
+	(void)fflush(tmpstream);
 	if (rc) {
 	    /* kill the beast */
 	    (void)ftruncate(fileno(tmpstream), 0);
 	    (void)fsync(fileno(tmpstream));
 	}
-	fclose(tmpstream);
+	(void)fclose(tmpstream);
     }
-    log_unlink(mastr_str(tmpfn));
+    (void)log_unlink(mastr_str(tmpfn));
     mastr_delete(tmpfn);
     return rc;
 }
 
 int
 store(const char *name, int nntpmode,
-      const struct filterlist *f /** filters or NULL */ )
+      /*@null@*/ const struct filterlist *f /** filters or NULL */ )
 {
     FILE *i = fopen(name, "r");
     if (i) {
-	int rc = store_stream(i, nntpmode, f, -1);
-	fclose(i);
+	int rc = store_stream(i, nntpmode, f, -1l);
+	(void)fclose(i);
 	return rc;
     } else {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s for storing: %m",

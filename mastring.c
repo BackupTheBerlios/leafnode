@@ -14,14 +14,14 @@
 #include "attributes.h"
 #include "getline.h"
 
-__inline__ void
+static __inline__ /*@exits@*/ void
 mastr_oom(void)
 #ifdef MASTR_OOM_ABORT
     __attribute__ ((noreturn))
 #endif
     ;
 
-__inline__ void
+static __inline__ void
 mastr_oom(void)
 {
 #ifdef MASTR_OOM_ABORT
@@ -40,13 +40,13 @@ mastr_new(long size)
     assert(size >= 0);
     if (!n) {
 	mastr_oom();
-	return 0;
+	/*@notreached@*/ return 0;
     }
     n->bufsize = size + 1;
     if (!(n->dat = malloc(n->bufsize))) {
 	free(n);
 	mastr_oom();
-	return 0;
+	/*@notreached@*/ return 0;
     }
     n->dat[0] = '\0';
     n->len = 0;
@@ -82,7 +82,7 @@ mastr_cpy(mastr * m, const char *s)
     if (l >= m->bufsize)
 	if (!mastr_resizekill(m, l)) {
 	    mastr_oom();
-	    return 0;
+	    /*@notreached@*/ return 0;
 	}
     strcpy(m->dat, s);
     m->len = l;
@@ -90,7 +90,7 @@ mastr_cpy(mastr * m, const char *s)
 }
 
 int
-mastr_cat(mastr * m, const char *s)
+mastr_cat(mastr * m, /*@unique@*/ const char *s)
 {
     long li = strlen(s);
 
@@ -101,7 +101,7 @@ mastr_cat(mastr * m, const char *s)
     if (li + m->len >= m->bufsize)
 	if (!mastr_resizekeep(m, li + m->len)) {
 	    mastr_oom();
-	    return 0;
+	    /*@notreached@*/ return 0;
 	}
     strcpy(m->dat + m->len, s);
     m->len += li;
@@ -138,7 +138,7 @@ mastr_vcat(mastr * m, ...)
     if (m->len + addlen >= m->bufsize) {
 	if (!mastr_resizekeep(m, addlen + m->len)) {
 	    mastr_oom();
-	    return 0;
+	    /*@notreached@*/ return 0;
 	}
     }
     va_start(v, m);
@@ -162,7 +162,7 @@ mastr_resizekill(mastr * m, long l)
     n = malloc(l + 1);
     if (!n) {
 	mastr_oom();
-	return 0;
+	/*@notreached@*/ return 0;
     }
     free(m->dat);
     m->dat = n;
@@ -182,7 +182,7 @@ mastr_resizekeep(mastr * m, long l)
     n = realloc(m->dat, l + 1);
     if (!n) {
 	mastr_oom();
-	return 0;
+	/*@notreached@*/ return 0;
     }
     m->dat = n;
     m->bufsize = l + 1;
@@ -193,7 +193,7 @@ mastr_resizekeep(mastr * m, long l)
 }
 
 void
-mastr_delete(mastr * m)
+mastr_delete(/*@only@*/ mastr * m)
 {
     if (m) {
 	free(m->dat);
@@ -211,7 +211,9 @@ mastr_triml(mastr * m)
     while (*p && isspace((unsigned char)*p))
 	p++;
     if (p != q) {
+	/*@-whileempty@*/
 	while ((*q++ = *p++));
+	/*@=whileempty@*/
 	m->len -= p - q;
     }
 }
@@ -223,7 +225,9 @@ mastr_trimr(mastr * m)
     if (!m)
 	return;
     p = m->dat + m->len;
+    /*@-whileempty@*/
     while (--p >= m->dat && *p && isspace((unsigned char)*p));
+    /*@=whileempty@*/
     *++p = '\0';
     m->len = p - m->dat;
 }
@@ -246,7 +250,7 @@ mastr_getln(mastr * m, FILE * f,
 	if (r + m->len >= m->bufsize)
 	    if (!mastr_resizekeep(m, r + m->len)) {
 		mastr_oom();
-		return 0;
+		/*@notreached@*/ return 0;
 	    }
 	memcpy(m->dat + m->len, buf, r);
 	if (maxbytes > 0)
