@@ -5,6 +5,8 @@ KNOWN BUGS:
 Changes since 20050321a:
 - Documentation: manual pages have been revised, with help from
   Dietrich Schaffer.
+- Bugfix: the deleted-articles journal was always empty. Reported by
+  Jörg Lüders.
 
 20050321a: Changes since 20050215a:
 - Change: when deleting articles (supersedes, cancel, ...) and we don't

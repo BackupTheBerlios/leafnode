@@ -289,22 +289,25 @@ static unsigned int delete_mid_from_dir(const char *dir, const char *msgid,
  * group, so that the overview reader code can skip it
  * \returns 0 for success, negative for error */
 static int mark_deleted(unsigned long artno) {
-    int fd = open(".overview.deleted", O_APPEND|O_CREAT, 0664);
+    int fd = open(".overview.deleted", O_WRONLY|O_APPEND|O_CREAT, 0664);
     char buf[64];
 
-    if (fd < 0) {
+    if (fd == -1) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open .overview.deleted file: %m");
 	return fd;
     }
 
     snprintf(buf, sizeof(buf), "%lu\n", artno);
     if (writes(fd,buf) < 0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot write to .overview.deleted file: %m");
 	close(fd);
 	return -1;
     }
 
-    if (close(fd) < 0)
+    if (close(fd) < 0) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot close .overview.deleted file: %m");
 	return -1;
+    }
 
     return 0;
 }
