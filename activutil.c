@@ -164,7 +164,7 @@ mergegroups(void)
 
 /*
  * find a newsgroup in the active file a, active must already be read.
- * The size of the active file can be passed to asize. If asize == -1 
+ * The size of the active file can be passed to asize. If asize == -1
  * activesize will be used.
  */
 struct newsgroup *
@@ -472,7 +472,7 @@ rereadactive(void)
  * Merge newly read active with old active. Do not reset watermarks and
  * timestamps. (c) 2002 Joerg Dietrich
  */
-void mergeactives(struct newsgroup *old, struct newsgroup *new) 
+void mergeactives(struct newsgroup *old, struct newsgroup *new)
 {
     size_t oldsize;
     struct newsgroup *g;
@@ -503,7 +503,7 @@ void mergeactives(struct newsgroup *old, struct newsgroup *new)
     }
 }
 
-/* 
+/*
  * Duplicate active file. Return pointer to copy. Does not duplicate the
  * pointers in the newsgroup structure!
  * (c) 2002 Joerg Dietrich
@@ -518,4 +518,3 @@ struct newsgroup *cpactive(struct newsgroup *a)
     b = memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
     return b;
 }
-
