@@ -17,7 +17,7 @@
  * NULL in case of error. The returned pointer must be free()ed by
  * the caller. (c) 2001 Joerg Dietrich.
  */
-char
+/*@null@*/ /*@only@*/ char
 *
 getmoderator(const char *group)
 {
@@ -58,7 +58,7 @@ getmoderator(const char *group)
 		snprintf(address, sizeof address, "%s%s%s", p, g, x + 2);
 		free(g);
 	    } else {
-		mastrncpy(address, p, sizeof address);
+		(void)mastrncpy(address, p, sizeof address);
 	    }
 	    fclose(f);
 	    mastr_delete(modpath);
@@ -75,15 +75,16 @@ getmoderator(const char *group)
  * the first group on which status matches, NULL otherwise.
  * Caller must free returned pointer. (c) 2001 Joerg Dietrich.
  */
-char
+/*@null@*/ /*@only@*/ char
 *
 checkstatus(const char *groups, const char status)
 {
-    char *grp;
-    char *p, *q;
+    char *p;
+    /*@dependent@*/ char *q;
+    /*@dependent@*/ char *grp;
     struct newsgroup *g;
 
-    assert(groups);
+    assert(groups != NULL);
     grp = p = critstrdup(groups, "checkstatus");
 
     SKIPLWS(grp);
