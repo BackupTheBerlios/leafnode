@@ -75,6 +75,15 @@ Matthias:
 * when server supports DATE, compensate for offset when sending
   NEWGROUPS et al.? See report of John Carlyle-Clarke of 2004-01-27
 
+* supersedes handling: keep track of _upstream_ Message-IDs that need to
+  be superseded?
+
+  Supposed user posts MID #1, fetchnews runs,
+  user posts a supersedes for #1 with MID #2 then a supersedes for #2
+  with MID #3. Next time fetchnews runs, MID #3 has no Supersedes for
+  #2, failing to remove #1 upstream.
+
+
 * store group lists (active file) per server and merge them into a DB?
 
 * separate audit logging (who subscribes, who downloads) from debug
