@@ -64,7 +64,11 @@ stuff?
   remote control messages (christophe Raverdy <craverdy@teaser.fr>
   2002-12-05 leafnode-list)
 
-fix TOKENSIZE in filters.
+Matthias:
+
+* fix TOKENSIZE in filters.
+
+* use NEWSGROUPS file possibly obtained via ftp instead of downloading?
 
 10pre5
 0.0 if group is empty, low water mark is not bumped up to high water mark
