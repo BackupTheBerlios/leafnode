@@ -16,7 +16,6 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>

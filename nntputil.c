@@ -25,7 +25,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <stdio.h>

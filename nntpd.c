@@ -37,7 +37,6 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <netdb.h>
-#include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -1168,6 +1167,26 @@ validate_newsgroups(const char *n)
     return 1;
 }
 
+/* check for correct Message-ID, feed with n pointing to first MID char */
+/* this version is pedantic: no whitespace, no weird characters */
+static int
+validate_messageid(const char *n)
+{
+    if (*n != '<')
+	return 0;
+    while (*++n != '\0' && *n != '>') {
+	if (isspace(*n) || iscntrl(*n))
+	    return 0;
+    }
+    if (*n++ != '>')
+	return 0;
+    SKIPLWS(n);
+    if (*n != '\0')
+	return 0;
+    return 1;
+}
+
+
 static void
 dopost(void)
 {
@@ -1178,10 +1197,8 @@ dopost(void)
     int havebody = 0;
     int havenewsgroups = 0;
     int havemessageid = 0;
-    int ngmalformatted = 0;
     int havesubject = 0;
     int err = 0;
-    int duplicate = FALSE;
     int hdrtoolong = FALSE;
     size_t len;
     int out;
@@ -1239,15 +1256,7 @@ dopost(void)
 	    if (havemessageid)
 		err = TRUE;
 	    else {
-		struct stat st;
-
 		havemessageid = TRUE;
-		free(msgid);
-		msgid = mgetheader("Message-ID:", line);
-		if (stat(lookup(msgid), &st) == 0) {
-		    err = TRUE;
-		    duplicate = TRUE;
-		}
 	    }
 	}
 
@@ -1261,12 +1270,8 @@ dopost(void)
 	if (str_isprefix(line, "Newsgroups:")) {
 	    if (havenewsgroups)
 		err = TRUE;
-	    else {
-		if (validate_newsgroups(line))
-		    havenewsgroups = TRUE;
-		else
-		    err = ngmalformatted = TRUE;
-	    }
+	    else
+		havenewsgroups = TRUE;
 	}
 
 	if (str_isprefix(line, "Date:")) {
@@ -1386,16 +1391,37 @@ dopost(void)
 	    return;
 	}
 
+	if (!validate_newsgroups(groups))
+	{
+	    nntpprintf
+		("441 Spurious whitespace in Newsgroups: header, fix your news reader");
+	    log_unlink(inname);
+	    goto cleanup;
+	}
+
+	if (havemessageid) {
+	    struct stat st;
+
+	    if (!validate_messageid(mid)) {
+		nntpprintf("441 Invalid Message-ID: header, article not posted");
+		log_unlink(inname);
+		goto cleanup;
+	    }
+
+	    if (stat(lookup(mid), &st) == 0) {
+		nntpprintf("441 435 Duplicate, article not posted");
+		log_unlink(inname);
+		goto cleanup;
+	    }
+	}
+
 	if ((forbidden = checkstatus(groups, 'n'))) {
 	    /* Newsgroups: contains a group to which posting is not allowed */
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to non-writable group %s", forbidden);
 	    nntpprintf("441 Posting to %s not allowed", forbidden);
-	    free(forbidden);
 	    log_unlink(inname);
-	    free(mid);
-	    free(groups);
-	    return;
+	    goto cleanup;
 	}
 
 	if ((modgroup = checkstatus(groups, 'm'))) {
@@ -1407,11 +1433,8 @@ dopost(void)
 		       "group %s", modgroup);
 		nntpprintf("503 Configuration error: No moderator for %s",
 			   modgroup);
-		free(mid);
-		free(groups);
-		free(modgroup);
 		log_unlink(inname);
-		return;
+		goto cleanup;
 	    }
 	    approved = getheader(inname, "Approved:");
 	}
@@ -1429,21 +1452,14 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, s);
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
-		free(mid);
-		free(groups);
-		if (modgroup) free(modgroup);
-		if (approved) free(approved);
 		log_unlink(inname);
-		return;
+		goto cleanup;
 	    }
 	    if (modgroup && !approved) {
 		nntpprintf("240 Posting scheduled for posting to "
 			   "upstream, be patient");
 		log_unlink(inname);
-		free(modgroup);
-		free(mid);
-		free(groups);
-		return;
+		goto cleanup;
 	    }
 	}
 
@@ -1465,15 +1481,9 @@ dopost(void)
 
 	    if (fd >= 0)
 		log_close(fd);
-	    free(moderator);
-	    free(mid);
-	    free(groups);
-	    if (modgroup) free(modgroup);
 	    log_unlink(inname);
-	    return;
+	    goto cleanup;
 	}
-	if (approved)
-	    free(approved);
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
 	       is_alllocal(groups) ? "LOCAL" : "UPSTREAM", mid, groups);
@@ -1509,9 +1519,14 @@ dopost(void)
 	    nntpprintf("240 Article posted, now be patient");
 	    break;
 	}			/* switch(fork()) */
-	free(mid);
-	free(groups);
+
+cleanup:
+	if (mid) free(mid);
+	if (groups) free(groups);
 	if (modgroup) free(modgroup);
+	if (moderator) free(moderator);
+	if (forbidden) free(forbidden);
+	if (approved) free(approved);
 	return;
     }
 
@@ -1520,19 +1535,15 @@ dopost(void)
 	nntpprintf("441 From: header missing, article not posted");
     else if (!havesubject)
 	nntpprintf("441 Subject: header missing, article not posted");
-    else if (ngmalformatted)
-	nntpprintf
-	    ("441 Spurious whitespace in Newsgroups: header, fix your news reader");
     else if (!havenewsgroups)
 	nntpprintf("441 Newsgroups: header missing, article not posted");
     else if (hdrtoolong)
 	nntpprintf("441 Header too long, article not posted");
-    else if (duplicate)
-	nntpprintf("441 435 Duplicate, article not posted");
     else if (!havebody)
 	nntpprintf("441 Article has no body, not posted");
     else
 	nntpprintf("441 Error, article not posted, see syslog.");
+
 }
 
 void
