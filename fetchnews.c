@@ -977,10 +977,8 @@ nntpactive(void)
     char s[PATH_MAX];		/* FIXME: possible overrun below */
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
     int reply = 0, error;
-    DIR *ng;
-    struct dirent *nga;
-    unsigned long last, first, i;
     unsigned long count = 0;
+    unsigned long first, last;
 
     sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
 	    current_server->port);
@@ -1068,24 +1066,10 @@ nntpactive(void)
 		&& chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;
 		last = 0;
-		ng = opendir(".");
-		while ((nga = readdir(ng))) {
-		    if (isdigit((unsigned char)*(nga->d_name))) {
-			q = NULL;
-			i = strtoul(nga->d_name, &q, 10);
-			if (*q == '\0') {
-			    if (i < first)
-				first = i;
-			    if (i > last)
-				last = i;
-			}
-		    }
+		if (getwatermarks(&first, &last, 0)) {
+		    /* trouble */
+		    first = last = 0;
 		}
-		if (first > last) {
-		    first = 1;
-		    last = 1;
-		}
-		closedir(ng);
 	    }
 	    insertgroup(l, p[0], first, last, 0, NULL);
 	}
