@@ -2096,6 +2096,7 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
     int h_e;
     char *s = masock_sa2name(sa, &h_e);
     char *a = masock_sa2addr(sa);
+    long port = masock_sa2port(sa);
 
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot convert address to string");
@@ -2104,7 +2105,8 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
     if (!s)
 	ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 	       "cannot get hostname: %s (h_errno=%d)", my_h_strerror(h_e), h_e);
-    ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s: %s (%s)", tag, s ? s : a, a);
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s: %s:%ld (%s)", tag, s ? s : a,
+	   port, a);
     if (s)
 	free(s);
     free(a);			/* a == NULL caught above */
