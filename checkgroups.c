@@ -29,8 +29,7 @@
 
 #include <unistd.h>
 
-static void process_input(char *s);
-void
+static void
 process_input(char *s)
 {
     FILE *f;
@@ -38,7 +37,7 @@ process_input(char *s)
 
     f = fopen(s, "r");
     if (!f) {
-	fprintf(stderr, "%s deleted (shouldn't happen)\n", s);
+	fprintf(stderr, "cannot open %s: %s\n", s, strerror(errno));
 	return;
     }
     while ((l = getaline(f))) {
@@ -78,14 +77,15 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    int option;
-    FILE *f;
+    int option, reply;
+    const char *const myname = "checkgroups";
+    char *conffile = NULL;
 
-    ln_log_open("checkgroups");
+    ln_log_open(myname);
     if (!initvars(argv[0], 0))
-	exit(EXIT_FAILURE);
-    while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
-	if (!parseopt("checkgroups", option, NULL, NULL)) {
+	init_failed(myname);
+    while ((option = getopt(argc, argv, GLOBALOPTS)) != -1) {
+	if (!parseopt(myname, option, optarg, &conffile)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
@@ -94,27 +94,29 @@ main(int argc, char *argv[])
 	usage();
 	exit(EXIT_FAILURE);
     }
-    /* Check whether input file exists */
-    if (!(f = fopen(argv[optind], "r"))) {
-	if (errno == EACCES)
-	    fprintf(stderr, "%s: not permitted to open %s\n", argv[0], argv[1]);
-	else
-	    fprintf(stderr, "%s: checkgroups file %s doesn't exist\n",
-		    argv[0], argv[1]);
-	exit(EXIT_FAILURE);
-    } else {
-	fclose(f);
+
+    if ((reply = readconfig(conffile)) != 0) {
+	printf("Reading configuration failed (%s).\n", strerror(reply));
+	exit(2);
     }
+    if (conffile)
+	free(conffile);
+
+    if (!init_post())
+	init_failed(myname);
 
     umask((mode_t)2);
 
     /* lock */
-    if (lockfile_exists(LOCKWAIT)) {
+    if (attempt_lock(LOCKWAIT)) {
 	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
     rereadactive();		/* read groupinfo file */
-    process_input(argv[1]);
+    while(optind < argc) {
+	process_input(argv[optind]);
+	optind++;
+    }
     writeactive();		/* write groupinfo file */
     freeactive(active);
     (void)log_unlink(lockfile, 0);	/* unlock */
