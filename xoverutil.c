@@ -545,9 +545,7 @@ writexover(void)
 	}
     }
 
-    if (fchmod(wfd, (mode_t) 0660)) {
-	ln_log(LNLOG_SERR, LNLOG_CGROUP,
-	       "Cannot chmod new .overview file to 0664: %m");
+    if (log_fchmod(wfd, (mode_t) 0660)) {
 	err = 1;
     }
 
