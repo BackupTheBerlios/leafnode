@@ -17,6 +17,10 @@ maxbytes = 100000
 action = kill
 
 ### do not fetch articles posted to more than five groups
+### Note: this will in many cases only work after the article
+### has been downloaded, so it's not too efficient for your
+### bandwidth, but it keeps your newsgroups tidy unless your
+### newsreader tracks crossposts -- not many do :-(
 maxcrosspost = 5
 action = kill
 
