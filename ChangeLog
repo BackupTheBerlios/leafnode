@@ -1,5 +1,6 @@
 2004-02-06  Matthias Andree <matthias.andree@gmx.de>
 
+	= snapshot 20040206a =
 	* newsq.c: Print whether an article has successfully been posted.
 	* fetchnews.c:
 	* Mark successfully posted articles with S_IXUSR mode to suppress
