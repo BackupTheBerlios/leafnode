@@ -562,7 +562,8 @@ getmarked(struct newsgroup *group)
 	    /* skip malformatted line */
 	    continue;
 
-	retry = atoi(fi[2]);
+	retry = fi[2] ? atoi(fi[2]) : 0;
+
 	if (++retry >= 5)
 	    /* XXX FIXME: make this configurable
 	     * too many retries */
