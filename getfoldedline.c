@@ -24,14 +24,15 @@ mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
     l2 = (char *)mycritmalloc(fi, ln, (len = strlen(l1)) + 1, "getfoldedline");
     strcpy(l2, l1);
 
-    /* only try to read continuation if the line is not empty */
-    if (*l2) {
+    /* only try to read continuation if the line is not empty 
+     * and not a lone dot */
+    if (*l2 && strcmp(l2, ".")) {
 	for (;;) {
 	    c = fgetc(f);
 	    if (c != EOF) {
+		ungetc(c, f);
 		if (strchr(white, c)) {
 		    /* join */
-		    ungetc(c, f);
 		    l1 = getaline(f);
 		    if (l1) {
 			oldlen = len;
@@ -41,7 +42,6 @@ mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
 			strcpy(l2 + oldlen, l1);
 		    }
 		} else {
-		    ungetc(c, f);
 		    break;
 		}
 	    } else {
