@@ -6,6 +6,7 @@ Changes since 20040818a:
 - Bugfix: diagnose errors when getting articles marked for download
 - Change: delaybody article numbers are now stored with a time stamp
   rather than a retry count and subjected to group or global expiry.
+- Cleanup: Make debug output of configuration parser consistent.
 - Documentation: revise hostname documentation
 - Documentation: revise filterfile manual page
 

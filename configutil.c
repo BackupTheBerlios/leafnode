@@ -473,7 +473,7 @@ readconfig(/*@null@*/ const char *configfile)
 				value);
 			abort();
 		    }
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: feedtype is %s", get_feedtype(p->feedtype));
 		    break;
 		case CP_ONLYGROUPSPCRE:
@@ -483,23 +483,23 @@ readconfig(/*@null@*/ const char *configfile)
 			if (!r)
 			    exit(2);
 			p->group_pcre = r;
-			ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				"config: only_groups_pcre = %s", value);
 		    }
 		    break;
 		case CP_POSTANY:
 		    p->post_anygroup = atoi(value);
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: post_anygroup = %d", p->post_anygroup);
 		    break;
 		case CP_LOGSTDERR:
 		    ln_log_stderronly = atoi(value);
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: ln_log_stderronly = %d", ln_log_stderronly);
 		    break;
 		case CP_LOGPOSTERIP:
 		    ln_log_posterip = atoi(value);
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+		    ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 			   "config: ln_log_posterip = %d", ln_log_posterip);
 		    break;
 		default:
