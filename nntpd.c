@@ -1184,6 +1184,8 @@ validate_newsgroups(const char *n)
 	/* skip separating whitespace */
 	n += strspn(n, WHITESPACE);
     }
+    if (!*n)
+	return 0;	/* do not tolerate empty Newsgroups: header */
 
     /* find other whitespace */
     t = strpbrk(n, WHITESPACE);
