@@ -143,7 +143,6 @@ main(int argc, char *argv[])
     unsigned long n;
     char *l, *conffile = NULL;
     size_t lsize;
-    const char *msgidpath = "";
     int fd;
     DIR *d;
     struct dirent *de;
@@ -239,15 +238,34 @@ main(int argc, char *argv[])
 		printf("%s\n", de->d_name);
 	    }
 	}
-	if (stat(de->d_name, &st))
+
+	if (stat(de->d_name, &st)) {
+	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+		    "cannot stat file \"%s\" in newsgroup %s: %m",
+		    g->name, de->d_name);
 	    continue;
+	}
+
+	/* remove truncated files */
 	if (st.st_size == 0)
 	    score = TRUE;
-	if (S_ISREG(st.st_mode)
-	    && (fd = open(de->d_name, O_RDONLY)) >= 0)
+
+	if (!S_ISREG(st.st_mode)) {
+	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+		    "not a regular file in newsgroup %s: %s",
+		    g->name, de->d_name);
+	    continue;
+	}
+
+	if((fd = open(de->d_name, O_RDONLY)) >= 0)
 	{
-	    int ret = readheaders(fd, de->d_name, &l, &lsize);
-	    if (ret != -1) { unfold(l); }
+	    int ret;
+
+	    /* read and unfold headers */
+	    ret = readheaders(fd, de->d_name, &l, &lsize);
+	    if (ret != -1)
+		unfold(l);
+
 	    switch (ret) {
 	    case 0:
 		score = killfilter(myfilter, l);
@@ -267,42 +285,38 @@ main(int argc, char *argv[])
 	    }
 	    close(fd);
 
-	    if (score && !dryrun) {
-		char *msgid = NULL;
-	        if (strlen(l))
-		    msgid = mgetheader("Message-ID:", l);
-		unlink(de->d_name);
-		/* delete stuff in message.id directory as well */
-		if (msgid) {
-		    msgidpath = lookup(msgid);
-		    if (stat(msgidpath, &st) == 0) {
-			if (truncate(msgidpath, (off_t)0) == 0 && unlink(msgidpath) == 0)
-			    deleted++;
-			else
-			    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot truncate or unlink \"%s\": %m", msgidpath);
+	    if (score) {
+		if (!dryrun) {
+		    char *msgid = NULL;
+		    if (strlen(l)) {
+			msgid = mgetheader("Message-ID:", l);
+			delete_article(msgid, "applyfilter", "filtered");
+		    } else {
+			unlink(de->d_name);
 		    }
-		    free(msgid);
-		}
-		if (verbose)
-		    printf("%s %s deleted\n", de->d_name, msgidpath);
+		} else { /* !dryrun */
+		   if (verbose) {
+		       printf("%s would be deleted\n", de->d_name);
+		   }
+	       }
 	    } else {
-		if (score && dryrun && verbose) {
-		    printf("%s would be deleted\n", de->d_name);
-		}
-		n = strtoul(de->d_name, NULL, 10);
-		if (n) {
-		    if (n < g->first)
-			g->first = n;
-		    if (n > g->last)
-			g->last = n;
-		}
+		/* restore atime and mtime to keep texpire
+		 * functionality intact */
 		u.actime = st.st_atime;
 		u.modtime = st.st_mtime;
 		utime(de->d_name, &u);
 		kept++;
 	    }
-	} else
-	    printf("could not open %s\n", de->d_name);
+
+	    n = strtoul(de->d_name, NULL, 10);
+	    if (n) {
+		if (n < g->first)
+		    g->first = n;
+		if (n > g->last)
+		    g->last = n;
+	    }
+	} else /* if (fd = open) >= 0 */
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "could not open file \"%s\" in newsgroup %s\n", de->d_name, g->name);
     } /* while readdir */
     closedir(d);
     free(l);
