@@ -95,7 +95,7 @@ expire = 20
 ## If you want to filter out certain regular expressions in the header,
 ## create a "filterfile" (how this is done is explained in the README)
 ## and set (optional):
-# filterfile = /etc/leafnode/filterfile
+# filterfile = /etc/leafnode/filters
 
 ## If you want to provide a customized pseudo article, create a file
 ## containing the article body (preferably using ASCII chars only).
