@@ -18,7 +18,7 @@
 
 extern int verbose;
 
-static void vln_log_core(int slg, FILE /*@null@ */  * console,
+static void vln_log_core(int slg, FILE /*@null@*/ * console,
 			 int severity,
 			 int context, const char *format, va_list ap);
 
@@ -119,6 +119,6 @@ ln_log_sys(int sev, int ctx, const char *format, ...)
     va_list ap;
 
     va_start(ap, format);
-    vln_log_core(1, 0, sev, ctx, format, ap);
+    vln_log_core(1, NULL, sev, ctx, format, ap);
     va_end(ap);
 }
