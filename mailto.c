@@ -99,7 +99,7 @@ mailto(const char *address, int fd)
 		goto err;
 	    close(pfd[0]);
 	    close(pfd[1]);
-	    execl(mta, mta, "-oi", address, 0);
+	    execl(mta, mta, "-oi", address, NULL);
 	    _exit(EX_OSERR);
 	  err:
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "mailto: cannot dup2: %m");

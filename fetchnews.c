@@ -2021,7 +2021,7 @@ main(int argc, char **argv)
     volatile time_t starttime;	/* keep state across setjmp */
     static const char myname[] = "fetchnews";
     struct sigaction sa;
-    int forceactive = 0;	/* if 1, reread complete active file */
+    volatile int forceactive = 0;	/* if 1, reread complete active file */
     struct serverlist *current_server;
     unsigned long articles;
     char **x;
