@@ -119,6 +119,8 @@ sigcatch(int signo)
 	if (canjump == 0)
 	    return;
 	canjump = 0;
+	signal(SIGALRM, SIG_IGN);	/* do not let mgetaline timeout interfere! */
+	alarm(0);
 	siglongjmp(jmpbuffer, signo);
     } else if (signo == SIGUSR1)
 	verbose++;
@@ -1830,7 +1832,8 @@ out:
 
 /* this is like sigaction, but it will not change a handler that is set
  * to SIG_IGN, and it does not allow queries. */
-static int mysigaction(int signum, const  struct  sigaction  *act) {
+static int mysigaction(int signum, const struct sigaction *act)
+{
     struct sigaction oa;
     sigaction(signum, NULL, &oa);
     if (oa.sa_handler != SIG_IGN) {
@@ -2007,6 +2010,7 @@ main(int argc, char **argv)
     sa.sa_handler = sigcatch;
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGALRM);
     if (mysigaction(SIGTERM, &sa))
 	fprintf(stderr, "Cannot catch SIGTERM.\n");
     else if (mysigaction(SIGINT, &sa))
