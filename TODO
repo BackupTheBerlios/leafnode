@@ -119,7 +119,8 @@ Ralfs TODO:
 
 2.2 cancelwatch (send mail to user if a posting he sent is cancelled)
 
-
+2.2 New .overview strategy can cause corruption when $spooldir is on an
+    NFS volume.
 
 2.2 Check RPM build
 
@@ -154,6 +155,8 @@ Ralfs TODO:
 3.3 Ben Holmes: enable clients to read newsgroups immediately after
     completion of their download, rather than only after fetchnews
     completed.
+    -- Stefan Fleiter: should be "mostly there" with the new .overview
+    strategy, but how about groupinfo?
 
 3.3 add support for stderr logging so that multilog can be used
     (clemensF <rabat@web.de>).
@@ -165,6 +168,7 @@ Ralfs TODO:
 3.3 authentication interface:
     make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt?
     Use Bruce Günter's credential validation module?
+    Use Courier's authdaemon?
 
 3.3 ACLs (possibly including identd) or regexp to prevent groups from
     being shown (mind ARTICLE <message@id> and check against Xref or
