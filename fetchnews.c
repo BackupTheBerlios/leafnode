@@ -848,6 +848,8 @@ fn_doxover(struct stringlist **stufftoget,
 
 	    if (filtlst && killfilter(filtlst, mastr_str(s))) {
 		groupkilled++;
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			"filtered out article %s", artno);
 		/* filter pseudoheaders */
 		mastr_delete(s);
 		goto next_over;
