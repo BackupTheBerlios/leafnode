@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.38 2002/04/27 08:47:30 ralf Exp $ */
+/* $Id: leafnode.h,v 1.39 2002/04/28 10:40:31 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -489,7 +489,6 @@ extern "C" {
     int copyfile(FILE * infile, FILE * outfile, long n);
 
     int initinteresting(void);
-    void critinitinteresting(void);
     /*@null@*/ /*@only@*/ RBLIST *openinteresting(void);
     /*@null@*/ /*@owned@*/ const char *readinteresting(/*@null@*/ RBLIST *);
     void closeinteresting(/*@null@*/ /*@only@*/ RBLIST *);
@@ -497,7 +496,6 @@ extern "C" {
 
 
     int init_dormant(void);
-    void critinit_dormant(void);
     RBLIST *open_dormant(void);
     const char *read_dormant(RBLIST *);
     void close_dormant(RBLIST *);

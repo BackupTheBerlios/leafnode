@@ -1350,10 +1350,8 @@ processupstream(const char *const server, const unsigned short port,
     }
 
     if (!newsgrp) {
-	critinitinteresting();
-
-	r = openinteresting();
-	if (!r) {
+	if (!initinteresting() ||
+	    (r = openinteresting()) == NULL) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
 	    free(s);
 	    free(oldfile);
