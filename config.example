@@ -8,6 +8,12 @@
 ## you don't define special expire times. Mandatory.
 expire = 20
 
+## If you want your users to authenticate themselves, you can uncomment
+## the following line. See README for information on how to define users
+## and passwords. Currently, leafnode uses its own crypt(3)-encrypted
+## password file.
+# authenticate = internal
+
 ## To aid in debugging, here is a switch. Sum up the debug info you
 ## want, or just use 2047 for "all". Optional.
 # MISC (unused): 1
