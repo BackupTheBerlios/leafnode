@@ -1,3 +1,20 @@
+2003-01-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: Bump version.  
+	* activutil.c: Use the prettier fix.  
+	* config.example: Change path to filterfile to read .../filters.  
+	* activutil.c: Fix regression of recent commits, reordering free
+	vs. increasing pointer was not sane.  
+	* Makefile.am, leafnode.spec.in: Update RPM packaging.  
+	* midutil.c: Fix format string.  
+	* nntpd.c: Kill temp.files/a-b-c file after posting (really,
+	tested.) Defer program exit by 3 seconds to avoid process ID reuse
+	in the same second, which would cause a collision of temp.files file
+	names.  
+	* store.c: Only write overview line if we have one, fixing segfault
+	on store.c:504 strchr with ov == NULL.  
+	* xoverutil.c: Accept empty Date: and From: headers.  
+
 2003-01-27  Matthias Andree <matthias.andree@gmx.de>
 
 	* Makefile.am, activutil.c, activutil.h, activutil_resolve.c,
