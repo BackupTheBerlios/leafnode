@@ -158,9 +158,6 @@ Matthias:
     -- Stefan Fleiter: should be "mostly there" with the new .overview
     strategy, but how about groupinfo?
 
-3.3 add support for stderr logging so that multilog can be used
-    (clemensF <rabat@web.de>).
-
 3.3 don't supersede() articles unconditionally
     ACTION: figure criteria for allowing/denying supersede
     Cancel-Lock? Plausibility checks?
@@ -248,6 +245,10 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2003-07-28 Matthias Andree
+	   add support for stderr logging so that multilog can be used
+	   (clemensF <rabat@web.de>).
 
 2003-02-03 Matthias Andree
 	   Leftover link in temp.files for posted articles. Reported by

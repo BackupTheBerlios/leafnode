@@ -24,6 +24,7 @@
 #endif
 
 extern int verbose;
+int ln_log_stderronly;
 
 /* log to syslog if slg != 0
  * log to stream console if console != 0
@@ -67,7 +68,11 @@ vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
     vsnprintf(buf, sizeof(buf), fmt, ap);
 #ifndef TESTMODE
     if (slg != 0 && (severity < LNLOG_SDEBUG || debugmode & DEBUG_LOGGING)) {
-	syslog(severity, "%s", buf);
+	if (ln_log_stderronly) {
+	    fprintf(stderr, "%s\n", buf);
+	} else {
+	    syslog(severity, "%s", buf);
+	}
     }
 #endif /* not TESTMODE */
 
@@ -78,7 +83,7 @@ vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
 	    abort();
     }
 
-    if (console) {
+    if (console && (!ln_log_stderronly || console != stderr)) {
 	/* always log LNLOG_SERR and more severe,
 	   regardless of verbosity */
 	if ((context <= verbose || severity <= LNLOG_SERR)

@@ -233,6 +233,9 @@ parseopt(const char *progname, int option,
     case 'v':
 	verbose++;
 	return TRUE;
+    case 'e':
+	ln_log_stderronly ^= 1;
+	return TRUE;
     case 'D':
 	if (opta && *opta)
 	    debugmode = atoi(opta);

@@ -9,6 +9,7 @@ groupdelaybody,CP_GROUPDELAY,CS_GLOBAL
 groupexpire,CP_GROUPEXP,CS_GLOBAL
 hostname,CP_HOST,CS_GLOBAL
 initialfetch,CP_INITIAL,CS_GLOBAL
+logstderr,CP_LOGSTDERR,CS_GLOBAL
 maxage,CP_MAXAGE,CS_GLOBAL
 maxbytes,CP_MAXBYT,CS_GLOBAL
 maxcrosspost,CP_MAXXP,CS_GLOBAL

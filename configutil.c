@@ -461,6 +461,11 @@ readconfig(/*@null@*/ const char *configfile)
 		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: post_anygroup = %d", p->post_anygroup);
 		    break;
+		case CP_LOGSTDERR:
+		    ln_log_stderronly = atoi(value);
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			    "config: ln_log_stderronly = %d", ln_log_stderronly);
+		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			   "Config line \"%s=%s\" unhandled, abort.",

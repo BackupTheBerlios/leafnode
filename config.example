@@ -135,6 +135,11 @@ expire = 20
 ## "maxfetch" to limit the impact of a failure of the 'first' server.
 # only_fetch_once = 1
 
+## This option allows to redirect all logging away from syslog and into
+## stderr. It is useful if you're running leafnode from daemontools and
+## want to log into multilog, for example.
+# ln_log_stderronly = 1
+
 ############################################
 ##                                        ##
 ## SERVER declarations go below this line ##
