@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.28 2002/07/08 10:36:54 emma Exp $
+# $Id: Makefile.am,v 1.29 2002/07/08 11:42:43 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -13,7 +13,7 @@ LYNX		= @LYNX@
 # external variables
 BINDIR		= @bindir@
 SBINDIR		= @sbindir@
-LIBDIR		= @sysconfdir@
+LIBDIR		= @sysconfdir@/leafnode
 VERSION		= @VERSION@
 
 CFLAGS		= @CFLAGS@ @GCC_FLAGS@
@@ -222,7 +222,6 @@ config.c: Makefile
 	@echo >>.$@ "const char *BZIP2 = \"$(BZIP2)\";"
 	@echo >>.$@ "const char *DEFAULTMTA = \"$(DEFAULTMTA)\";"
 	@echo >>.$@ "const char *RUNAS_USER = \"$(RUNAS_USER)\";"
-	@echo >>.$@ "const char *RUNAS_GROUP = \"$(RUNAS_GROUP)\";"
 #	@echo >>.$@ 'const char *compileinfo = "*** leafnode @PACKAGE_VERSION@ ***\ncompile date:' "`env - PATH=/bin:/usr/bin TZ=GMT date`" '\ncompile machine: ' "`uname -a`" '\\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)";'
 	if test -f $@ && cmp >/dev/null .$@ $@ && rm -f .$@ ; then touch $@ ; else rm -f $@ ; mv .$@ $@ ; fi
 

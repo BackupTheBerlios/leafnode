@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre4])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.25 $)
+AC_REVISION($Revision: 1.26 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -42,6 +42,44 @@ fi])
 rm -f configure-dummy.c configure-dummy.o
 GCC_FLAGS=$ac_cv_prog_gcc_flags
 AC_SUBST(GCC_FLAGS)
+
+dnl check which user to use
+AC_MSG_CHECKING(runas-user)
+AC_ARG_WITH(runas-user,
+[  --with-runas-user       user (news)],
+  ,
+  withval=news
+)
+RUNAS_USER=$withval
+AC_MSG_RESULT($RUNAS_USER)
+AC_MSG_CHECKING(runas-user uid)
+if test x$RUNAS_USER = xroot -o x$RUNAS_USER = xtoor ; then
+    AC_ERROR(user $RUNAS_USER cannot be used to run leafnode for security reasons.)
+fi
+a=`id -u $RUNAS_USER`
+if test -z "$a" ; then
+    AC_ERROR([user $RUNAS_USER does not exist. Please add this user before building leafnode.
+                  Most systems have man adduser or man useradd to tell you how to do this.])
+else
+    AC_MSG_RESULT($a)
+    if test "$a" -eq 0 ; then
+	AC_ERROR(user $RUNAS_USER cannot be used to run leafnode for security reasons.)
+    fi
+fi
+AC_SUBST(RUNAS_USER)
+
+dnl check which group that user belongs to
+AC_MSG_CHECKING(the primary group of $RUNAS_USER)
+RUNAS_GROUP=`id -g $RUNAS_USER`
+AC_MSG_RESULT($RUNAS_GROUP)
+if test -z "$a" ; then
+    AC_WARN([cannot determine primary group of ${RUNAS_USER}.])
+else
+    if test "$a" -eq 0 ; then
+	AC_ERROR([user $RUNAS_USER is in the root or wheel group and cannot be used to run leafnode for security reasons.])
+    fi
+fi
+AC_SUBST(RUNAS_GROUP)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -116,14 +154,14 @@ AC_SUBST(SPOOLDIR)
 dnl check where to put the confdir
 if test "$sysconfdir" = '${prefix}/etc' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
-  CONFDIR='/etc/leafnode'
+  CONFDIR='/etc'
 else
   CONFDIR="$sysconfdir"
 fi
 if test "$CONFDIR" != "$sysconfdir"; then
-  AC_MSG_WARN([overriding sysconfdir to $CONFDIR])
+  AC_MSG_WARN([overriding sysconfdir to $CONFDIR (old: $sysconfdir)])
   AC_MSG_WARN([use --sysconfdir to fix])
-  AC_MSG_WARN([use --sysconfdir='\$prefix/etc' to get])
+  AC_MSG_WARN([use --sysconfdir='\${prefix}/etc' to get])
   AC_MSG_WARN([the default autoconf behaviour])
 fi
 sysconfdir=$CONFDIR
@@ -142,28 +180,6 @@ AC_ARG_WITH(lockfile,
 LOCKFILE=$withval
 AC_MSG_RESULT($LOCKFILE)
 AC_SUBST(LOCKFILE)
-
-dnl check which user to use
-AC_MSG_CHECKING(runas-user)
-AC_ARG_WITH(runas-user,
-[  --with-runas-user       user (news)],
-  ,
-  withval=news
-)
-RUNAS_USER=$withval
-AC_MSG_RESULT($RUNAS_USER)
-AC_SUBST(RUNAS_USER)
-
-dnl check which user to use
-AC_MSG_CHECKING(runas-group)
-AC_ARG_WITH(runas-group,
-[  --with-runas-group      group (news)],
-  ,
-  withval=news
-)
-RUNAS_GROUP=$withval
-AC_MSG_RESULT($RUNAS_GROUP)
-AC_SUBST(RUNAS_GROUP)
 
 dnl check for rpm build dir
 dnl Check for rpm build dir
@@ -184,12 +200,12 @@ if test "$PCRECONFIG" != "no" ; then
   CF=`$PCRECONFIG --cflags`
   if echo "$CFLAGS" | grep >/dev/null 2>&1 "$CF" 
   then :
-  else echo "adding $CF to CFLAGS" ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
+  else AC_MSG_NOTICE(adding $CF to CFLAGS) ; CFLAGS="$CFLAGS $CF" ; export CFLAGS
   fi
   LF=`$PCRECONFIG --libs`
   if echo "$LDFLAGS" | grep >/dev/null 2>&1 "$LF" 
   then :
-  else echo "adding $LF to LDFLAGS" ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
+  else AC_MSG_NOTICE(adding $LF to LDFLAGS) ; LDFLAGS="$LDFLAGS $LF" ; export LDFLAGS
   fi
 fi
 
@@ -332,15 +348,17 @@ test ".$cf_cv_good_bcopy" = ".yes" && \
 
 AC_SUBST(PCRE_DEFINES)
 
-echo
-echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
-printf "prefix:      " ; eval echo "$prefix"
-printf "sysconfdir:  " ; eval echo "$sysconfdir"
-printf "spooldir:    " ; eval echo "$SPOOLDIR"
-printf "lockfile:    " ; eval echo "$LOCKFILE"
-printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
-printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
-echo
+if test x$silent != xyes ; then
+    echo
+    echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
+    printf "prefix:      " ; eval echo "$prefix"
+    printf "sysconfdir:  " ; eval echo "$sysconfdir"
+    printf "spooldir:    " ; eval echo "$SPOOLDIR"
+    printf "lockfile:    " ; eval echo "$LOCKFILE"
+    printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
+    printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
+    echo
+fi
 
 AC_CONFIG_FILES([Makefile tools/Makefile leafnode.spec leafnode.8 newsq.1
 applyfilter.8 filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
