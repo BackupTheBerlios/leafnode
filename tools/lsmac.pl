@@ -6,15 +6,16 @@ lsmac.pl - List directories with file mtimes, atimes and ctimes.
 
 =head1 SYNOPSIS
 
- lsmac.pl [options] [directory [...]]
+ lsmac.pl [options] [{file|directory} [...]]
  lsmac.pl --help   or   lsmac.pl -h
  lsmac.pl --man
 
 =head1 OPTIONS
 
- -h, --help	print this short help
- -l, --local	print times in local time zone rather than GMT
- --man		print the manual page
+ -h, --help      print this short help
+ -l, --local     print times in local time zone rather than GMT
+ -d, --directory print directories' times rather than descending into them
+ --man           print the manual page
 
 =head1 DESCRIPTION
 
@@ -32,7 +33,7 @@ If no directory is given, lsmac.pl will process the current directory.
 
 =head1 LICENSE
 
-lsmac.pl C<$Revision: 1.4 $>, Copyright (C) 2001,2003 Matthias Andree.
+lsmac.pl C<$Revision: 1.5 $>, Copyright (C) 2001,2003 Matthias Andree.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -46,7 +47,6 @@ General Public License for more details.
 =back
 
 =cut
-
 
 use strict;
 use File::stat; # for symbolic stat names
@@ -69,7 +69,7 @@ my $myname = $2;
 $myname =~ tr/0-9a-zA-Z.-_//cd;
 
 my %opt = ();
-GetOptions(\%opt, 'help|h|?', 'local|l', 'man')
+GetOptions(\%opt, 'help|h|?', 'local|l', 'directory|d', 'man')
     or pod2usage(-verbose => 0);
 pod2usage(-verbose => 1) if $opt{help};
 pod2usage(-verbose => 2) if $opt{man};
@@ -84,30 +84,40 @@ if (not $opt{local}) {
 
 unshift (@ARGV, '.') if @ARGV == 0;
 
+sub lsf($ ) {
+    my $name = shift;
+    my $st;
+
+
+    if(($st = lstat($name))) {
+	print 
+	&$cvt($st->ctime), " ",
+	&$cvt($st->mtime), " ",
+	&$cvt($st->atime), " ",
+	sprintf("%3d %8d", $st->nlink, $st->size), " ", $name, "\n";
+    } else {
+	warn "$name: $!";
+    }
+}
+
 sub ls($ ) {
     my $f;
     my $dir = shift;
 
-    opendir (D, $dir) or do {
-	warn "cannot read $dir: $!";
-	return;
-    };
-    
-    while ($f = readdir(D)) {
-	my $st;
+    if (-d $dir and not $opt{directory}) {
+	opendir (D, $dir) or do {
+	    warn "cannot read $dir: $!";
+	    return;
+	};
 
-	if(($st = lstat($dir . "/" . $f))) {
-	    print 
-	      &$cvt($st->ctime), " ",
-	      &$cvt($st->mtime), " ",
-	      &$cvt($st->atime), " ",
-		sprintf("%3d %8d", $st->nlink, $st->size), " ", $f, "\n";
-	} else {
-	    warn "$f: $!";
+	while ($f = readdir(D)) {
+	    lsf($dir . "/" . $f);
 	}
-    }
 
-    closedir D or warn "$dir: $!";
+	closedir D or warn "$dir: $!";
+    } else {
+	lsf($dir);
+    }
 }
 
 while(my $d = shift @ARGV) {
