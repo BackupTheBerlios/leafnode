@@ -179,6 +179,10 @@ changegroupdesc(const char *groupname, char *description)
 	    if (ng->desc)
 		free(ng->desc);
 	    ng->desc = critstrdup(description, "changegroupdesc");
+	    /* Backup: mark the group as moderated if the description
+	     * contains the moderated tag. */
+	    if (ng->status == 'y' && strstr(description, " (Moderated)"))
+		ng->status = 'm';
 	}
     }
 }
