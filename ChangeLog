@@ -1,10 +1,24 @@
 2002-05-05  Matthias Andree <matthias.andree@gmx.de>
 
-	* miscutil.c: Use validatefqdn.c and validatefqdn.h from
-	leafnode-1.
+	* TODO: stricter Message-ID checking is now in place.  Done: "add
+	COPYING".
+	* autobootstrap.sh: Note that this file is public domain.
+	* nntpd.c: More anal Message-ID domain part checking: reject posts
+	without domain part, with unqualified domain part or with domain
+	part that looks local.
 
+	* COPYING: New file, mostly extracted from README.
+	* applyfilter.c, checkgroups.c, fetchnews.c, leafnode.h,
+	lockfile.c, nntpd.c, rnews.c, texpire.c: Change lockfile timeout
+	handling. lockfile_exists() now takes care of timing out itself, to
+	fix left-behind temporary files.
+
+	* .cvsignore: Add ChangeLog.emma.
 	* applyfilter.c, checkgroups.c, fetchnews.c, nntpd.c, texpire.c:
 	Move whoami() call to initvars.
+
+	* miscutil.c: Use validatefqdn.c and validatefqdn.h from
+	leafnode-1.
 
 	* leafnode.h: Drop whoami() prototype.
 	* ENVIRONMENT: Add documentation on LN_DEBUG_QUALIFICATION.
