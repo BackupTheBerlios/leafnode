@@ -79,6 +79,7 @@ store_err(int i)
  * - -1 for OS error
  * - -2 if duplicate
  * - -3 if required header missing or duplicate
+ * - -4 if short read or data leftover (with maxbytes)
  * -  1 if article killed by filter
  */
 int
@@ -93,6 +94,7 @@ store_stream(FILE * in /** input file */ ,
     char *mid = 0, *m;
     mastr *ngs = mastr_new(80l);
     int ngs_just_seen = 0;
+    int found_body = 0;
     int c_date = 0;
     int c_from = 0;
     int c_subject = 0;
@@ -112,6 +114,11 @@ store_stream(FILE * in /** input file */ ,
 
     (void)mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", NULL);
 
+    if (nntpmode && maxbytes != -1) {
+	ln_log(LNLOG_SCRIT, LNLOG_CTOP, "store: nntpmode and maxbytes are mutually exclusive for now.");
+	abort();
+    }
+    
     /* check for OOM */
     if (!head) {
 	mastr_delete(ln);
@@ -147,11 +154,17 @@ store_stream(FILE * in /** input file */ ,
      *  - check count of each mandatory header
      */
     while ((s = mastr_getln(ln, in, maxbytes)) > 0) {
-	if (maxbytes > 0)
-	    maxbytes -= s;
+	if (maxbytes != -1) maxbytes -= s;
 	mastr_chop(ln);
-	if (!ln->len)
+	if (debugmode & DEBUG_STORE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "store: read %ld bytes: \"%s\", to go: %ld", 
+		    (long)mastr_len(ln),
+		    mastr_str(ln), (long)maxbytes);
+	if (!mastr_len(ln)) {
+	    found_body = 1;
 	    break;		/* end of headers */
+	}
 	line = mastr_str(ln);
 	if (nntpmode && line[0] == '.') {
 	    ++line;
@@ -210,7 +223,7 @@ store_stream(FILE * in /** input file */ ,
 	case 'N':
 	    if (str_isprefix(line, "Newsgroups:")) {
 		const char *p = line + 11;
-		if (ngs->len > 0) {
+		if (mastr_len(ngs) > 0) {
 		    BAIL(-3, "more than one Newsgroups header found");
 		}
 		SKIPLWS(p);
@@ -247,8 +260,11 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-3, "More or less than one Path header found");
     if (NULL == mid)
 	BAIL(-3, "No Message-ID header found");
-    if (ngs->len == 0)
+    if (mastr_len(ngs) == 0)
 	BAIL(-3, "No Newsgroups header found");
+
+    if (maxbytes == 0 && !found_body)
+	BAIL(-4, "Headers extend beyond allowed read range");
 
     /* check if we already have the article */
     if (ihave(mid)) {
@@ -362,7 +378,15 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-1, "write error");
 
     /* copy body */
-    while ((line = getaline(in))) {
+    while ((s = mastr_getln(ln, in, maxbytes)) > 0) {
+	if (maxbytes != -1) maxbytes -= s;
+	mastr_chop(ln);
+#if 0
+	if (debugmode & DEBUG_STORE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "store: read %s", mastr_str(ln));
+#endif
+	line = mastr_str(ln);
 	if (nntpmode && line[0] == '.') {
 	    ++line;
 	    if (!*line) {
@@ -374,6 +398,11 @@ store_stream(FILE * in /** input file */ ,
 	    BAIL(-1, "write error");
 	if (fputs(LLS, tmpstream) == EOF)
 	    BAIL(-1, "write error");
+    }
+
+    if (maxbytes > 0) {
+	    ignore = 0;
+	    BAIL(-4, "short read while copying body");
     }
 
     if (fflush(tmpstream))
@@ -412,10 +441,28 @@ store_stream(FILE * in /** input file */ ,
   bail:
     if (head)
 	mastr_delete(head);
-    if (nntpmode && ignore && rc)
-	while ((line = getaline(in)))
-	    if (0 == strcmp(line, "."))
-		break;
+    if (ignore && rc) {
+	if (nntpmode) {
+	    while ((line = getaline(in)))
+		if (0 == strcmp(line, "."))
+		    break;
+	} else {
+	    /* drain bytes */
+	    if (debugmode & DEBUG_STORE)
+		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			"store: ignoring %ld bytes",
+			(long)maxbytes); 
+	    while (maxbytes > 0 && (s = mastr_getln(ln, in, maxbytes)) >= 0) {
+		mastr_chop(ln);
+		maxbytes -= s;
+		if (debugmode & DEBUG_STORE)
+		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			    "store: ignored %ld: %s, "
+			    "to go: %ld", (long)s, mastr_str(ln), 
+			    (long)maxbytes); 
+	    }
+	}
+    }
     if (olddirfd >= 0) {
 	(void)fchdir(olddirfd);
 	(void)close(olddirfd);
@@ -455,8 +502,8 @@ store(const char *name, int nntpmode,
 	(void)fclose(i);
 	return rc;
     } else {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "store: cannot open %s for storing: %m",
-	       name);
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		"store: cannot open %s for storing: %m", name);
 	return -1;
     }
 }
