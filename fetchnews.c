@@ -762,7 +762,7 @@ getarticles(struct stringlist *stufftoget, long n, struct filterlist *f)
 	    p = p->next;
 	    advance++;
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE, "sent ARTICLE %s command, "
-		   "advance: %ld", c, advance);
+		   "in pipe: %ld", c, advance);
 	    if (throttling)
 		sleep(throttling);
 	}
@@ -779,14 +779,14 @@ getarticles(struct stringlist *stufftoget, long n, struct filterlist *f)
 		fflush(nntpout);
 		p = p->next;
 		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		       "received article, sent ARTICLE %s command, advance: %ld",
-		       c, advance);
+		       "received article, sent ARTICLE %s command, "
+		       "in pipe: %ld", c, advance);
 		if (throttling)
 		    sleep(throttling);
 	    } else {
 		advance--;
 		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		       "received article, advance: %ld", advance);
+		       "received article, in pipe: %ld", advance);
 	    }
 	}
     }
@@ -1277,18 +1277,28 @@ postarticles(void)
     return 1;
 }
 
+/* FIXME: this is U-G-L-Y */
 static int
-do_group(const char *ng, char **const s,
-	     struct stringlist *ngs, FILE *const f) {
+do_group(const char *ng, /** which group to operate on */
+	 struct stringlist *ngs /** upstream high water mark */, 
+	 /*@null@*/ /** where to write the new upstream 
+          high water mark */ FILE *const f) {
     struct newsgroup *g;
     unsigned long newserver = 0;
     char *l;
     int from;
+    mastr *s;
 
     g = findgroup(ng);
     if (g) {
-	sprintf(*s, "%s ", g->name);
-	l = ngs ? findinlist(ngs, *s) : NULL;
+	/* get server high water mark */
+	s = mastr_new(1024);
+	mastr_vcat(s, g->name, " ", 0);
+	l = ngs ? findinlist(ngs, mastr_str(s)) : NULL;
+	mastr_delete(s);
+	/* l now contains a string (without quote marks): 
+	 * "group.name 12345" 
+	 */
 	if (l && *l) {
 	    char *t;
 	    unsigned long a;
@@ -1299,7 +1309,7 @@ do_group(const char *ng, char **const s,
 	    from = 1;
 	    if (t && *t)
 	    {
-		/* group is in groupinfo */
+		/* group fetch from upstream is established */
 		a = strtoul(t, NULL, 10);
 		if (a)
 		    from = a;
@@ -1379,20 +1389,22 @@ processupstream(const char *const server, const int port,
     if (!f) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 	       "Could not open %s for writing: %m", s);
+	free(s);
 	return 0;
     }
+    free(s);
 
     if (!newsgrp) {
 	while ((ng = readinteresting(r))) {
 	    if (isalnum((unsigned char)*ng)) {
-		newserver = do_group(ng, &s, havefile ? ngs : 0, f);
+		newserver = do_group(ng, havefile ? ngs : 0, f);
 	    }
 	}
 	closeinteresting(r);
+	freeinteresting();
     } else {
-	newserver = do_group(newsgrp, &s, havefile ? ngs : 0, f);
+	newserver = do_group(newsgrp, havefile ? ngs : 0, f);
     }
-    free(s);
 
     if (f) {
 	fclose(f);
@@ -1488,7 +1500,7 @@ main(int argc, char **argv)
 {
     int option, reply, flag;
     time_t starttime;
-    volatile time_t lastrun;
+    time_t lastrun = 0;
     char conffile[PATH_MAX + 1];
     static char *msgid = NULL;
     static char *newsgrp = NULL;
