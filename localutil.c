@@ -27,11 +27,11 @@
 
 struct localgroup {
     char *name;
-    struct localgroup *left;
-    struct localgroup *right;
+    /*@null@*/ struct localgroup *left;
+    /*@null@*/ struct localgroup *right;
 };
 
-struct localgroup *local = NULL;
+/*@null@*/ struct localgroup *local = NULL;
 
 /*
  * for searching purposes, local group names are sorted into a tree
@@ -98,7 +98,8 @@ readlocalgroups(void)
 {
     char *l, *p;
     FILE *f;
-    char *s, *t, *u;
+    char *s, *u;
+    /*@dependent@*/ char *t;
     const char *const append = "/local.groups";
 
     s = (char *)critmalloc(strlen(libdir) + strlen(append) + 1,
@@ -192,7 +193,7 @@ is_alllocal(const char *grouplist)
 }
 
 static void
-free_tree(struct localgroup *lg)
+free_tree(/*@only@*/ struct localgroup *lg)
 {
     if (!lg)
 	return;

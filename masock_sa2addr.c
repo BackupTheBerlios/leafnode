@@ -17,7 +17,7 @@
 #include <errno.h>
 
 /**  */
-char *
+/*@null@*/ /*@only@*/ char *
 masock_sa2addr(const struct sockaddr *sa)
 {
 #if defined(HAVE_IPV6) || defined(HAVE_INET_NTOP)

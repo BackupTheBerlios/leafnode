@@ -6,7 +6,7 @@
 
 #include <netdb.h>
 
-const char *
+/*@observer@*/ const char *
 my_h_strerror(int he)
 {
     switch (he) {
