@@ -807,7 +807,7 @@ opengroup(struct newsgroup *g)
     if (is_interesting(g->name))
 	markinterest(g->name);
     if (chdirgroup(g->name, FALSE)) {
-	maybegetxover(g);
+	xgetxover(0, g);
 #if 0
 	if (g->count == 0) {
 	    if (getwatermarks(&g->first, &g->last, &g->count)) {
@@ -979,7 +979,7 @@ dolist(char *oarg)
 
     if (!strcasecmp(arg, "extensions")) {
 	nntpprintf("202 extensions supported follow");
-	fputs(" HDR\r\n" " OVER\r\n" " PAT\r\n" " LISTGROUP\r\n", stdout);
+	fputs("HDR\r\n" "OVER\r\n" "XPAT\r\n" "LISTGROUP\r\n", stdout);
 	if (authentication)
 	    fputs(" AUTHINFO USER\r\n", stdout);
 	fputs(".\r\n", stdout);
