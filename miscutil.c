@@ -106,9 +106,7 @@ initvars(const char *const progname)
 		   x, (long)ui, (long)gi);
 	    return FALSE;
 	}
-	if (chmod(x, md->m)) {	/* Flawfinder: ignore */
-	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chmod(%s,%o): %m\n",
-		   x, (unsigned int)md->m);
+	if (log_chmod(x, md->m)) {	/* Flawfinder: ignore */
 	    return FALSE;
 	}
 	md++;
@@ -312,6 +310,7 @@ initinteresting(void)
     DIR *d;
     struct dirent *de;
     mastr *t;
+    const char *const myname = "initinteresting";
 
     if (rb)
 	return TRUE;
@@ -334,19 +333,27 @@ initinteresting(void)
 	return FALSE;
     }
     while ((de = readdir(d)) != NULL) {
-	char *k;
+	char *k, *k2;
 
 	if (de->d_name[0] == '.')
 	    continue;
-	k = critstrdup(de->d_name, "isinteresting");
-	if (!rbsearch(k, rb)) {
+	k = critstrdup(de->d_name, myname);
+	k2 = rbsearch(k, rb);
+	if (NULL == k2) {
+	    /* OOM */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
-		   "isinteresting, cannot build rbtree");
-	    mastr_delete(t);
-	    free(k);
+		   "%s, cannot build rbtree", myname);
 	    exit(EXIT_FAILURE);
 	}
-	free(k);
+	if (k != k2) {
+	    /* key was already present in tree */
+	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
+		   "directory lists same file \"%s\" more than once!? "
+		   "Confused, aborting.", k);
+	    abort();
+	}
+	/* NOTE: rbsearch does NOT make a copy of k, so you must not
+         * free k here! */
     }
     (void)closedir(d);
     mastr_delete(t);
@@ -405,6 +412,7 @@ lookup(/*@null@*/ const char *msgid)
     unsigned int r;
     unsigned int i;
     char *p, *q;
+    const char *const myname = "lookup";
 
     if (!msgid || !*msgid)
 	return NULL;
@@ -412,10 +420,10 @@ lookup(/*@null@*/ const char *msgid)
     i = strlen(msgid) + strlen(spooldir) + 30;
 
     if (!name) {
-	name = (char *)critmalloc(i, "lookup");
+	name = (char *)critmalloc(i, myname);
 	namelen = i;
     } else if (i > namelen) {
-	name = (char *)critrealloc(name, i, "lookup");
+	name = (char *)critrealloc(name, i, myname);
 	namelen = i;
     }
 
