@@ -158,6 +158,7 @@ mergegroups(void)
 	active[count].name = (l->entry)->name;
 	active[count].first = (l->entry)->first;
 	active[count].last = (l->entry)->last;
+	active[count].count = (l->entry)->count;
 	active[count].age = (l->entry)->age;
 	active[count].desc = (l->entry)->desc;
 	active[count].status = (l->entry)->status;
