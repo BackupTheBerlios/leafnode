@@ -134,7 +134,8 @@ static void texpire_log_unlink(const char *file, const char *logprefix)
 	if (errno != ENOENT)
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/%s: %m", logprefix, file);
     } else {
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/%s", logprefix, file);
     }
 }
 
@@ -763,6 +764,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
        * twice? */
     unsigned long first, last, i, totalthreads;
     struct thread *threadlist;
+    const char *appendlog = NULL;
 
     deleted = kept = 0;
 
@@ -835,21 +837,15 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 	    g->last = last;
 	}
     }
-    if (dryrun)
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: running without dry-run "
-	       "will delete %lu and keep %lu articles", n,
-	       deleted, kept - deleted);
-    else
-	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: %lu articles deleted, " "%lu kept", n, deleted, kept);
-    if (!kept) {
+
+    if (!dryrun && !kept) {
 	texpire_log_unlink(".overview", gdir);
 
 	if ((is_interesting(n) == 0)
             && (is_dormant(n) == 0))
 	{
 	    texpire_log_unlink(LASTPOSTING, gdir);
+	    appendlog = "removed directory";
 	    /* delete directory and empty parent directories */
 	    for (;;) {
 		struct stat st;
@@ -861,6 +857,9 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 				"rmdir(\"%s\") failed: %m", gdir);
 			break;
 		    }
+		} else {
+		    if (debugmode & DEBUG_EXPIRE)
+			ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "%s: removed directory %s", n, gdir);
 		}
 		if (0 == stat("leaf.node", &st))
 		    break;
@@ -871,9 +870,21 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 		}
 	    }
 	} else {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "not removing %s because it is interesting or dormant.", n);
+	    if (is_interesting(n)) appendlog = "interesting";
+	    if (is_dormant(n)) appendlog = "dormant";
 	}
     }
+
+    if (dryrun)
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: running without dry-run "
+	       "will delete %lu and keep %lu articles", n,
+	       deleted, kept - deleted);
+    else
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+	       "%s: %lu articles deleted, %lu kept%s%s", n, deleted, kept,
+	       appendlog == NULL ? "" : ", ",
+	       appendlog == NULL ? "" : appendlog);
 
     /* Once we're done and there's something left we have to update the
      * .overview file. Otherwise unsubscribed groups will never be
