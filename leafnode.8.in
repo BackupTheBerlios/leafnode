@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.16 2003/01/19 17:47:16 emma Exp $
+.\" $Id: leafnode.8.in,v 1.17 2003/02/17 14:00:57 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -475,10 +475,11 @@ has been paid for by Uninett AS (http://www.uninett.no/).
 .BR README ,
 .BR tcpd (8),
 .BR hosts.allow (5),
-.BR fetchnews (5),
+.BR filterfile (5),
 .BR fetchnews (8),
 .BR texpire (8),
 .BR checkgroups (8),
 .BR glob (7),
 .BR pcre (7),
+.BR @sysconfdir@/leafnode/filters.example ,
 .B "RFC 977"

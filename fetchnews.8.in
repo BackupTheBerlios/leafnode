@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.7 2002/08/20 00:17:09 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.8 2003/02/17 14:00:57 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -118,7 +118,7 @@ debugging purposes.
 for the list of files affected, and for information on configuring
 .B fetchnews.
 If you want to use filtering, see also
-.BR fetchnews (5)
+.BR filterfile (5)
 for the format of the filterfile and
 .BR pcre (7)
 on the format of perl-compatible regular expressions.
@@ -187,10 +187,11 @@ and Randolf Skerka <Randolf.Skerka@gmx.de>.
 Copyright of the modifications 1997-2000.
 
 .SH SEE ALSO
-.BR fetchnews (5),
+.BR filterfile (5),
 .BR tcpd (8),
 .BR hosts.allow (5),
 .BR leafnode (8),
 .BR texpire (8),
 .BR pcre (7),
+.BR @sysconfdir@/leafnode/filters.example ,
 .B "RFC 977"

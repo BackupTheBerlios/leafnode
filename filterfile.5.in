@@ -248,4 +248,5 @@ taken from draft-ietf-nntpext-imp-03.txt
 .SH SEE ALSO
 .BR leafnode (8),
 .BR fetchnews (8),
-.BR pcre (7).
+.BR pcre (7),
+.BR @sysconfdir@/leafnode/filters.example .

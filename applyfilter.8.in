@@ -77,4 +77,5 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 .BR filterfile (5),
 .BR fetchnews (8),
 .BR leafnode (8),
-.BR texpire (8)
+.BR texpire (8),
+.BR @sysconfdir@/leafnode/filters.example .
