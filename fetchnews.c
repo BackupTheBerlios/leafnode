@@ -903,6 +903,36 @@ getgroup(struct newsgroup *g, unsigned long first)
     return (last + 1);
 }
 
+/** Split a line which is assumed in RFC-977 LIST format.  Puts a
+ * pointer to the end of the newsgroup name into nameend (the caller
+ * should then set this to '\0'), and a pointer to the status character
+ * into status.
+ * \return - 1 if the status character is valid
+ *         - 0 if the status character is invalid
+ */
+static int
+splitLISTline(char *line, char **nameend, char **status) {
+    char *p = line;
+
+    while (*p && !isspace((unsigned char)*p)) p++;
+    *nameend = p;       /* end of the group name */
+    SKIPLWS(p);
+    SKIPWORD(p); /* last */
+    SKIPWORD(p); /* first */
+    /* p now points to the status char */
+    *status = p;
+    switch (*p) {
+	case 'y': case 'Y':
+	case 'n': case 'N':
+	case 'm': case 'M':
+	    return 1;
+	default:
+	    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
+		   "bad status character in \"%s\", skipping", line);
+	    return 0;
+    }
+}
+
 /*
  * get active file from current_server
  */
@@ -941,16 +971,12 @@ nntpactive(void)
 	    return;
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, ".") != 0)) {
+	    char *r;
 	    count++;
 	    p = l;
-	    while (!isspace((unsigned char)*p))
-		p++;
-	    if (*p) {
-		*p = '\0';
-		p++;
-		p += strlen(p) - 1;	/* p contains status char */
-	    }
-	    insertgroup(l, *p, 0, 0, time(NULL), NULL);
+	    if (!splitLISTline(l, &p, &r)) continue;
+	    *p = '\0';
+	    insertgroup(l, *r, 0, 0, time(NULL), NULL);
 	    appendtolist(&groups, &helpptr, l);
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
@@ -1004,13 +1030,9 @@ nntpactive(void)
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    count++;
 	    p = l;
-	    while (!isspace((unsigned char)*p))
-		p++;
-	    while (isspace((unsigned char)*p)) {
-		*p = '\0';
-		p++;
-		p += strlen(p) - 1;	/* p contains the status char */
-	    }
+	    if (!splitLISTline(l, &q, &p)) continue;
+	    *q = '\0'; /* cut out the group name */
+
 	    /* see if the newsgroup is interesting.  if it is, and we
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
