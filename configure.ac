@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040108a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.81 $)
+AC_REVISION($Revision: 1.82 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -36,7 +36,7 @@ if test "x$GCC" = xyes
 then
   echo "void dummy(void);" >configure-dummy.c
   echo "void dummy(void) {}" >>configure-dummy.c
-  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -ggdb -fno-common ; do
+  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -Wformat=2 -ggdb -fno-common ; do
     $CC $i $ac_cv_prog_gcc_flags -c configure-dummy.c >/dev/null 2>&1 && 
     ac_cv_prog_gcc_flags="$ac_cv_prog_gcc_flags $i"
   done
@@ -170,19 +170,6 @@ fi
 sysconfdir=$CONFDIR
 AC_SUBST(sysconfdir)
 AC_MSG_NOTICE(note that "leafnode" is automatically appended to $sysconfdir)
-
-dnl check where to put the lockfile
-AC_MSG_CHECKING(lockfile)
-AC_ARG_ENABLE(lockfile, AC_HELP_STRING([--enable-lockfile=FILE],[lockfile (/var/lock/news/fetchnews.lck)]),
-  if echo "$enableval" | egrep >/dev/null -v '^/' ; then
-    AC_MSG_ERROR(you must give an absolute path)
-  fi
-, 
-  enableval=/var/lock/news/fetchnews.lck
-)
-LOCKFILE=$enableval
-AC_MSG_RESULT($LOCKFILE)
-AC_SUBST(LOCKFILE)
 
 dnl check for rpm build dir
 AC_MSG_CHECKING(rpm build dir)
@@ -330,7 +317,6 @@ if test x$silent != xyes ; then
     printf "sysconfdir:  " ; eval echo "$sysconfdir"
     printf "             " ; echo 'note that "leafnode" is automatically appended to sysconfdir'
     printf "spooldir:    " ; eval echo "$SPOOLDIR"
-    printf "lockfile:    " ; eval echo "$LOCKFILE"
     printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
     printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
     echo
