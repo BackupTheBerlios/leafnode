@@ -452,6 +452,8 @@ store_stream(FILE * in /** input file */ ,
 
     /* now create link in message.id */
     m = lookup(mid);
+    if (!m)
+	BAIL(-3, "Message-ID header missing or malformatted");
     if (delayflg == 3 ? link_force(mastr_str(tmpfn), m)
 	    : link(mastr_str(tmpfn), m)) {
 	if (errno == ENOENT) {	/* message.id directory missing, create */
