@@ -289,7 +289,7 @@ writeactive(void)
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		   "failed writing new groupinfo file: %m");
 	log_fclose(a);
-	log_unlink(tmp);
+	log_unlink(tmp, 0);
 	goto bye;
     }
 

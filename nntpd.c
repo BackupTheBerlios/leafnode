@@ -1329,7 +1329,7 @@ dopost(void)
 
 	if (!line) {
 	    /* client died */
-	    log_unlink(inname);
+	    log_unlink(inname, 0);
 	    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 		    "Client disconnected while POSTing headers. Exit.");
 	    exit(0);
@@ -1443,7 +1443,7 @@ dopost(void)
 
 	    if (!line) {
 		/* client died */
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 			"Client disconnected while POSTing body. Exit.");
 		exit(0);
@@ -1494,7 +1494,7 @@ dopost(void)
 		ln_log(LNLOG_SERR, LNLOG_CTOP,
 		       "cannot read message-id or newsgroups from %s", inname);
 	    nntpprintf("503 Could not reopen article, see syslog");
-	    log_unlink(inname);
+	    log_unlink(inname, 0);
 	    return;
 	}
 
@@ -1502,7 +1502,7 @@ dopost(void)
 	{
 	    nntpprintf
 		("441 Spurious whitespace in Newsgroups: header, fix your news reader");
-	    log_unlink(inname);
+	    log_unlink(inname, 0);
 	    goto cleanup;
 	}
 
@@ -1511,13 +1511,13 @@ dopost(void)
 
 	    if (!validate_messageid(mid)) {
 		nntpprintf("441 Invalid Message-ID: header, article not posted");
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		goto cleanup;
 	    }
 
 	    if (stat(lookup(mid), &st) == 0) {
 		nntpprintf("441 435 Duplicate, article not posted");
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		goto cleanup;
 	    }
 	}
@@ -1527,7 +1527,7 @@ dopost(void)
 	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		   "Article was posted to non-writable group %s", forbidden);
 	    nntpprintf("441 Posting to %s not allowed", forbidden);
-	    log_unlink(inname);
+	    log_unlink(inname, 0);
 	    goto cleanup;
 	}
 
@@ -1540,7 +1540,7 @@ dopost(void)
 		       "group %s", modgroup);
 		nntpprintf("503 Configuration error: No moderator for %s",
 			   modgroup);
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		goto cleanup;
 	    }
 	    approved = getheader(inname, "Approved:");
@@ -1559,7 +1559,7 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, mastr_str(s));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to upstream, see syslog.");
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		mastr_delete(s);
 		goto cleanup;
 	    }
@@ -1567,7 +1567,7 @@ dopost(void)
 	    if (modgroup && !approved) {
 		nntpprintf("240 Posting scheduled for posting to "
 			   "upstream, be patient");
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		goto cleanup;
 	    }
 	}
@@ -1590,7 +1590,7 @@ dopost(void)
 
 	    if (fd >= 0)
 		log_close(fd);
-	    log_unlink(inname);
+	    log_unlink(inname, 0);
 	    goto cleanup;
 	}
 
@@ -1606,7 +1606,7 @@ dopost(void)
 		       "link %s -> %s failed: %m", inname, mastr_str(s));
 		nntpprintf("503 Could not schedule article for posting "
 			   "to local spool, see syslog.");
-		log_unlink(inname);
+		log_unlink(inname, 0);
 		/* error with spooling locally -> also drop from out.going (to avoid
 		 * that the user resends the article after the 503 code)
 		 */
@@ -1649,7 +1649,7 @@ dopost(void)
 	    rereadactive();
 	    feedincoming();
 	    writeactive();
-	    log_unlink(lockfile);
+	    log_unlink(lockfile, 0);
 	    _exit(0);
 
 	default:
@@ -1667,7 +1667,7 @@ cleanup:
 	return;
     }
 
-    log_unlink(inname);
+    log_unlink(inname, 0);
     if (!havefrom)
 	nntpprintf("441 From: header missing, article not posted");
     else if (!havesubject)

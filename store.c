@@ -145,7 +145,7 @@ store_stream(FILE * in /** input file */ ,
     if (!tmpstream) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "store: cannot fdopen(%d): %m", tmpfd);
 	(void)log_close(tmpfd);
-	(void)log_unlink(mastr_str(tmpfn));
+	(void)log_unlink(mastr_str(tmpfn), 0);
 	mastr_delete(tmpfn);
 	mastr_delete(head);
 	mastr_delete(ln);
@@ -441,7 +441,7 @@ store_stream(FILE * in /** input file */ ,
   cont:
     if (log_fsync(fileno(tmpstream))) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "store: cannot fsync: %m");
-	(void)log_unlink(m);
+	(void)log_unlink(m, 0);
 	rc = -1;
 	goto bail;
     }
@@ -504,7 +504,7 @@ store_stream(FILE * in /** input file */ ,
 	}
 	(void)fclose(tmpstream);
     }
-    (void)log_unlink(mastr_str(tmpfn));
+    (void)log_unlink(mastr_str(tmpfn), 0);
     mastr_delete(tmpfn);
     return rc;
 }

@@ -118,7 +118,7 @@ expireinteresting(void)
 		ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		       "skipping %s from now on: %s\n", de->d_name, reason);
 		killlastposting(de->d_name);
-		(void)log_unlink(de->d_name);
+		(void)log_unlink(de->d_name, 0);
 		/* don't reset group counts because if a group is
 		   resubscribed, new articles will not be shown */
 	    }

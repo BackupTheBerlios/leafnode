@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.70 2002/07/11 08:26:23 ralf Exp $ */
+/* $Id: leafnode.h,v 1.71 2002/07/15 02:58:54 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -625,7 +625,7 @@ extern "C" {
     void tab2spc(char *);
 
 /* from log_*.c */
-    int log_unlink(const char *);
+    int log_unlink(const char *, int);
     int log_fsync(int);
     int log_close(int);
     int log_fclose(FILE *);

@@ -355,7 +355,7 @@ supersede_cancel(
 	    char *x = getheader(*t, "Message-ID:");
 	    if (x) {
 		if (!strcmp(x, msgid)) {
-		    if (0 == log_unlink(*t))
+		    if (0 == log_unlink(*t, 0))
 			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 			       "%s %s", past_action, *t);
 /* break; *//* commented out to catch all */

@@ -10,10 +10,10 @@
 #include "ln_log.h"
 
 int
-log_unlink(const char *f)
+log_unlink(const char *f, int ignore_enoent)
 {
     int r = unlink(f);
-    if (r < 0)
+    if (r < 0 && !(errno == ENOENT && ignore_enoent))
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot unlink %s: %m", f);
     return r;
 }

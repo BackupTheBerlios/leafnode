@@ -124,7 +124,7 @@ feedincoming(void)
 	if (!ngs) {
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		   "Cannot read Newsgroups from %s, deleting", *dl);
-	    log_unlink(*di);
+	    log_unlink(*di, 0);
 	    log_fclose(f);
 	    continue;
 	}
@@ -151,7 +151,7 @@ feedincoming(void)
 			   ".overview files");
 		}
 	    }
-	    log_unlink(*di);
+	    log_unlink(*di, 0);
 	}
 	log_fclose(f);
 	free(ngs);

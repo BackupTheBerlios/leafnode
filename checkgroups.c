@@ -117,6 +117,6 @@ main(int argc, char *argv[])
     process_input(argv[1]);
     writeactive();		/* write groupinfo file */
     freeactive(active);
-    (void)log_unlink(lockfile);	/* unlock */
+    (void)log_unlink(lockfile, 0);	/* unlock */
     exit(0);
 }

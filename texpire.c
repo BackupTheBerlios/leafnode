@@ -928,7 +928,7 @@ expiremsgid(void)
 	       articles are deleted. */
 	    m = lookup(*di);
 	    if (strncmp(m, mastr_str(s), slen) && !dryrun) {	/* FIXME: why strncmp? */
-		if (0 == log_unlink(*di)) {
+		if (0 == log_unlink(*di, 0)) {
 		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 			   "%s/%s was bogus, removed", mastr_str(s), *di);
 		    deleted++;
@@ -1058,7 +1058,7 @@ main(int argc, char **argv)
     freexover();		/* throw away overview data */
     expiremsgid();
     /* do not release the lock earlier to prevent confusion of other daemons */
-    (void)log_unlink(lockfile);
+    (void)log_unlink(lockfile, 0);
     freeconfig();
     return 0;
 }

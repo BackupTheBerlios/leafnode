@@ -128,7 +128,7 @@ getxoverline(
 	/* empty article, probably truncated by store to mark it as broken */
 	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE, "removing empty article file %s",
 	       filename);
-	log_unlink(filename);
+	log_unlink(filename, 0);
 	return 0;
     }
 
@@ -657,7 +657,7 @@ writexover(void)
 	       "wrote %s/.overview", getcwd(s, LN_PATH_MAX));
 	return 0;
     } else {
-	(void)log_unlink(newfile);
+	(void)log_unlink(newfile, 0);
 	return -1;
     }
 }

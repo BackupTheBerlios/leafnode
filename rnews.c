@@ -314,7 +314,7 @@ main(int argc, char *argv[])
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 		"%s: Cannot read filterfile %s, aborting.",
 		argv[0], filterfile);
-	log_unlink(lockfile);
+	log_unlink(lockfile, 0);
 	exit(EXIT_FAILURE);
     }
 
@@ -337,6 +337,6 @@ main(int argc, char *argv[])
     }
     writeactive();		/* write groupinfo file */
     fixxover();			/* fix xoverview files */
-    log_unlink(lockfile);
+    log_unlink(lockfile, 0);
     exit(0);
 }
