@@ -1,5 +1,6 @@
 2002-04-26  Matthias Andree  <matthias.andree@gmx.de>
 
+	* TODO: "check for I/O errors in markdownload" is now fixed.
 	* autobootstrap.sh: New quick and dirty file to regenerate
 	Makefile.in and configure when the source has been checked out
 	from CVS.
