@@ -142,6 +142,21 @@ init_post(void) {
 	return FALSE;
     }
 
+    {
+	struct stat lnst;
+	mastr *x = mastr_new(LN_PATH_MAX);
+
+	mastr_vcat(x, spooldir, "/leaf.node", NULL);
+	if (lstat(mastr_str(x), &lnst)) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
+		    "cannot open %s - is your --enable-spooldir matching your installation?",
+		    mastr_str(x));
+	    mastr_delete(x);
+	    return FALSE;
+	}
+	mastr_delete(x);
+    }
+
     /* These directories should exist anyway */
     while (md->name) {
 	mastr *x = mastr_new(LN_PATH_MAX);
