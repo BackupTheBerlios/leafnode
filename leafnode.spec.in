@@ -34,23 +34,30 @@ Leafnode bezieht automatisch die Newsgroups, die der oder die Nutzer
 regelm‰ﬂig lesen, vom Newsserver des Providers.
 
 %prep
-%setup
+%setup -q
 CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix --mandir=%_mandir \
- --with-spooldir=%spooldir\
+ --with-spooldir=%spooldir --silent \
  --sysconfdir=%confdir --with-lockfile=%lockfile \
  --with-runas-user=%{runas_user} --with-runas-group=%{runas_group}
 
 %build
-make
+make -s
+make -s check
 
 %install
 # first clean out any prior aborted runs
 [ "$RPM_BUILD_ROOT" != "/" ] && [ "x$RPM_BUILD_ROOT" != "x" ] && rm -rf $RPM_BUILD_ROOT
 make  DESTDIR=$RPM_BUILD_ROOT install-strip
+cp $RPM_BUILD_ROOT/%confdir/filters.example $RPM_BUILD_ROOT/%confdir/filters
+cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 
 %files
 %defattr(-,root,root)
-%attr(640,root,root) %confdir/config.example
+%dir %attr(750,root,news) %confdir
+%config(noreplace) %attr(640,root,news) %confdir/config
+%config(noreplace) %attr(640,root,news) %confdir/filters
+%attr(640,root,news) %confdir/config.example
+%attr(640,root,news) %confdir/filters.example
 %attr(755,root,root) %{prefix}/bin/newsq
 %attr(755,root,root) %{prefix}/sbin/applyfilter
 %attr(755,root,root) %{prefix}/sbin/checkgroups

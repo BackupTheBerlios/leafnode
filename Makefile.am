@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.43 2003/01/27 23:32:21 emma Exp $
+# $Id: Makefile.am,v 1.44 2003/01/28 12:37:38 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -320,9 +320,9 @@ README:	README.html $(LYNX)
 	fi
 
 .PHONY:	rpm
-rpm: dist leafnode.spec
-	-ln -s `pwd`/leafnode-$(VERSION).tar.gz $(RPMSRC)/SOURCES
-	-ln -s `pwd`/leafnode.spec $(RPMSRC)/SPECS
-	unset IFS ; rpm -ba $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
+rpm: dist-bzip2 leafnode.spec
+	-ln -s -f `pwd`/leafnode-$(VERSION).tar.bz2 $(RPMSRC)/SOURCES
+	-ln -s -f `pwd`/leafnode.spec $(RPMSRC)/SPECS
+	unset IFS ; env LANG=C LC_MESSAGES=C rpm -ba --target=i486 $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
 	| grep '^Wrote:' | $(SED) -e 's/^Wrote: //' \
 	| while read r ; do mv -f "$$r" . || exit 1 ; done
