@@ -71,8 +71,8 @@ static int dryrun = 0;		/* do not delete articles */
 static int use_atime = 1;	/* look for atime on articles to expire */
 static int repair_spool = 0;
 
-char gdir[PATH_MAX];		/* name of current group directory */
-unsigned long deleted, kept;
+static char gdir[PATH_MAX];		/* name of current group directory */
+static unsigned long deleted, kept;
 
 extern unsigned long xcount;
 
@@ -100,8 +100,6 @@ extern unsigned long xcount;
  * (rnode) is also part of a list which contains all IDs with the same
  * hash value. These hash lists are pointed to by a hash table.
  */
-
-int use_middir = 0;		/* don't use message.id directory for stat() */
 
 struct rnode {
     struct rnode *nhash;	/* next rnode in this hash list */
@@ -147,7 +145,7 @@ hashval(const struct rnode *node)
     val = 0;
     p = node->mid;
     for (i = 0; i < 20 && p && *p; ++i) {
-	val += val ^ (i + *p++);
+	val += val ^ (i + (int)(unsigned char)*p++);
     }
     return (val % HASHSIZE);
 }
@@ -768,7 +766,12 @@ dogroup(struct newsgroup *g, time_t expire)
     if (!chdirgroup(g->name, FALSE))
 	return;
 
-    getcwd(gdir, PATH_MAX);
+    /* barf on getcwd problems */
+    if (!getcwd(gdir, PATH_MAX)) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		"getcwd(...,%d) returned error: %m", PATH_MAX);
+	return;
+    }
 
     /* read overview information */
     freexover();
@@ -839,7 +842,11 @@ dogroup(struct newsgroup *g, time_t expire)
 	if (!chdir("..") && (isinteresting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
-		getcwd(gdir, PATH_MAX);
+		if (!getcwd(gdir, PATH_MAX)) {
+		    ln_log(LNLOG_SERR, LNLOG_CGROUP,
+			   "getcwd(...,%d) returned error: %m", PATH_MAX);
+		    return;
+		}
 		chdir("..");
 	    }
 	}
@@ -880,7 +887,8 @@ expiremsgid(void)
     deleted = kept = 0;
 
     for (n = 0; n < 1000; n++) {
-	int slen;
+	size_t slen;
+
 	snprintf(s, sizeof(s), "%s/message.id/%03d", spooldir, n);
 	slen = strlen(s);	/* not all snprintf implementations have
 				 * reliable return values */
