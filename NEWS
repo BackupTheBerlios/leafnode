@@ -5,6 +5,9 @@ KNOWN BUGS:
 Changes since 20040920a:
 - Feature: texpire offers an "-a" option to expire article based
   (as leafnode-1 did) rather than thread-based.
+- Documentation: README* provided an invalid hosts.allow example that
+  used the prefix length rather than the netmask; tcpd only understands
+  the latter. Reported by Gundemarie Scholz.
 
 20040920a - Changes since 20040916a:
 - Bugfix: 20040916a broke article retrieval for many newsreaders.
