@@ -9,7 +9,6 @@
 #include <string.h>
 #include "ln_log.h"
 #include "leafnode.h"
-#include "redblack.h"
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -91,19 +90,10 @@ feedincoming(void)
     unsigned long articles;
     char **dl, **di;
     char *ni;
-    struct rbtree *rb;
-
-    rb = rbinit(compare, 0);
-    if (!rb) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "cannot init red-black-tree, out of memory.");
-	return 0;
-    }
 
     dl = spooldirlist_prefix("in.coming", DIRLIST_NONDOT, &articles);
     if (!dl) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read in.coming: %m");
-	rbdestroy(rb);
 	return 0;
     }
 
@@ -140,11 +130,6 @@ feedincoming(void)
 	    const char *j;
 	    for (j = strtok(ngs, "\t ,"); j && *j; j = strtok(NULL, "\t ,")) {
 		const char *k = critstrdup(j, "feedincoming");
-		if (!rbsearch(k, rb)) {
-		    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-			   "out of memory, run texpire to fix "
-			   ".overview files");
-		}
 	    }
 	    log_unlink(*di, 0);
 	}
@@ -153,17 +138,5 @@ feedincoming(void)
     }
 
     free_dirlist(dl);
-    {
-	RBLIST *rl = rbopenlist(rb);
-	if (rl) {
-	    while ((ni = (char *)rbreadlist(rl))) {
-		gfixxover(ni);
-		free(ni);
-	    }
-	    rbcloselist(rl);
-	}
-    }
-    rbdestroy(rb);
-
     return 0;
 }
