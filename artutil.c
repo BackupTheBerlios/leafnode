@@ -70,7 +70,7 @@ mgetheader(
     /* skip header tag */
     p += strlen(hdr);
     SKIPLWS(p);
-    q = p - 1;
+    --p;
 
     /* accomodate folded lines */
     do {
