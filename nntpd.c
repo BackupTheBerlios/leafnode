@@ -1478,6 +1478,7 @@ dopost(void)
 	char *modgroup = 0;
 	char *moderator = 0;
 	char *approved = 0;
+	char *legalgroup = 0;
 
 	f = fopen(inname, "r");
 	if (f) {
@@ -1595,11 +1596,28 @@ dopost(void)
 	    log_unlink(inname, 0);
 	    outbasename = strrchr(inname, '/');
 	    outbasename++;
-	    mastr_vcat(s, spooldir, "/in.coming/", outbasename, NULL);
+	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
 	    (void)unlink(mastr_str(s));
 	    mastr_delete(s);
 	    goto cleanup;
 	}
+
+	if (!(modgroup || (legalgroup = checkstatus(groups, 'y')))) {
+	    /* Article was only posted to unknown groups */
+	    mastr *s = mastr_new(LN_PATH_MAX);
+	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+		   "Article was posted to unknown groups %s", groups);
+	    nntpprintf("441 Posting to unknown groups: %s", groups);
+	    log_unlink(inname, 0);
+	    outbasename = strrchr(inname, '/');
+	    outbasename++;
+	    mastr_vcat(s, spooldir, "/out.going/", outbasename, NULL);
+	    (void)unlink(mastr_str(s));
+	    mastr_delete(s);
+	    goto cleanup;
+	}
+	if (legalgroup)	free(legalgroup);
+	    
 
 	if (0 == no_direct_spool /* means: may spool directly */ || is_anylocal(groups)) {
 	    /* at least one internal group is given, store into in.coming */
