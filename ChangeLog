@@ -1,3 +1,30 @@
+2002-06-29  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* fetchnews.c, lockfile.c, lsort.c, xoverutil.c: Replace all strcat.
+
+2002-06-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Let nntpprintf look at DEBUG_NNTP rather than DEBUG_IO.
+	Fix formatting of command log in main_loop.
+	* putaline.c: Look at debugmode, not at debug. Leafnode code that
+	changes debug levels should be dropped.
+
+2002-06-28  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* leafnode.h, nntpd.c, xoverutil.c: New function matchxoverfield
+	for mapping "Header:" to enum xoverfield, which has a new error
+	state.	Use mapping to clean up getxoverline and doselectedheader. 
+	doarticle micro optimization.
+	* Makefile.am, README.html, leafnode.spec.in, update.sh: Document
+	and consistently set user and group under which leafnode runs. 
+	manpages still need updating.
+
+2002-06-26  Matthias Andree <matthias.andree@gmx.de>
+
+	* filterutil.c: drop bogus static in findinheaders
+	* .indent.pro: drop double options
+	* xoverutil.c: reindent
+
 2002-06-24  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* leafnode.h, miscutil.c: Remove old 'struct msgidtree' stuff,
