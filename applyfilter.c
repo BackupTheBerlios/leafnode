@@ -42,11 +42,14 @@ usage(void)
     fprintf(stderr,
 	    "Usage:\n"
 	    "applyfilter -V: print version number and exit\n"
-	    "applyfilter [-Dv] [-F configfile] newsgroups\n"
+	    "applyfilter [-Dvcn] [-F configfile] object [...]\n"
+	    "applyfilter [-Dv] [-F configfile] -C message-id [...]\n"
 	    "    -D: switch on debug mode\n"
 	    "    -v: switch on verbose mode\n"
 	    "    -F: use \"configfile\" instead of %s/config\n"
 	    "    -n: dry run, do not actually delete anything\n"
+	    "    -c: check mode, print if filters match files on command line\n"
+	    "    -C: cancel mode, cancel message-IDs on command line\n"
 	    "See also the leafnode homepage at http://www.leafnode.org/\n",
 	    sysconfdir);
 }
@@ -255,8 +258,10 @@ main(int argc, char *argv[])
     struct newsgroup *g;
     int err, savedir;
     int dryrun = 0;
+    int needfilter = 1;
     int check = 0; /** if set, check if file given here would be filtered */
     const char *const myname = "applyfilter";
+    int cancel = 0;
 
     savedir=open(".", O_RDONLY);
 
@@ -266,7 +271,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "nc")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "ncC")) != -1) {
 	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
@@ -277,6 +282,10 @@ main(int argc, char *argv[])
 		dryrun = 1; /* imply -n */
 		check = 1;
 		break;
+	    case 'C':
+		cancel = 1;
+		needfilter = 0;
+		break;
 	    default:
 		usage();
 		/* fallthrough */
@@ -285,7 +294,8 @@ main(int argc, char *argv[])
 	}
     }
 
-    if (optind + 1 > argc) {
+    if (optind + 1 > argc
+	    || (cancel && dryrun)) {
 	usage();
 	exit(EXIT_FAILURE);
     }
@@ -298,7 +308,7 @@ main(int argc, char *argv[])
     if (conffile)
 	free(conffile);
 
-    if (!filterfile || !readfilter(filterfile)) {
+    if (needfilter && (!filterfile || !readfilter(filterfile))) {
 	printf("Nothing to filter -- no filterfile found.\n");
 	exit(EXIT_FAILURE);
     }
@@ -313,95 +323,103 @@ main(int argc, char *argv[])
 
     rereadactive();
 
-    if (check) {
-	kept = deleted = 0;
-	for(;optind<argc;optind++) {
-	    FILE *inf;
-	    char *ng;
-
-	    if (savedir >= 0) (void)fchdir(savedir);
-	    inf = fopen(argv[optind], "r");
-	    if (!inf) {
-		perror("applyfilter: fopen");
-		continue;
-	    }
-
-	    ng = fgetheader(inf, "Newsgroups:", 1);
-	    fclose(inf);
-	    if (!ng) {
-		printf("File %s does not look like a news article, skipping;\nNewsgroups: header is missing.\n", argv[optind]);
-		continue;
-	    }
-	    g = findgroup(ng, active, -1);
-	    if (!g) {
-		printf("Newsgroups %s not found in active file.\n", ng);
-		free(ng);
-		continue;
-	    }
-
-	    if (setupfilter(&myfilter, ng))
-		applyfilter(argv[optind], g, myfilter, dryrun, &kept, &deleted);
-	    free(ng);
-	}
-	printf("%lu articles %sdeleted, %lu kept.\n", deleted,
-		dryrun ? "would have been " : "",
-		kept);
-    } else {
+    if (cancel) {
 	for (;optind<argc;optind++) {
+	    if (verbose)
+		printf("trying to cancel %s\n", argv[optind]);
+	    delete_article(argv[optind], "manual remove", "manually removed");
+	}
+    } else {
+	if (check) {
 	    kept = deleted = 0;
-	    g = findgroup(argv[optind], active, -1);
-	    if (!g) {
-		printf("Newsgroups %s not found in active file.\n", argv[optind]);
-		continue;
-	    }
-	    g->first = ULONG_MAX;
-	    if (!chdirgroup(g->name, FALSE)) {
-		printf("No articles for newsgroup: %s\n", g->name);
-		continue;
-	    }
-	    if (setupfilter(&myfilter, g->name) == 0)
-		continue;
-	    if (!(d = opendir("."))) {
-		printf("Unable to open directory for newsgroup %s\n", g->name);
-		unlink(lockfile);
-		continue;
-	    }
-	    i = 0;
-	    deleted = 0;
-	    kept = 0;
-	    ln_log(LNLOG_SINFO, LNLOG_CTOP, "Applying filters to %s...", g->name);
-	    while ((de = readdir(d)) != NULL) {
-		if (!isdigit((unsigned char)de->d_name[0])) {
-		    /* no need to stat file */
+	    for(;optind<argc;optind++) {
+		FILE *inf;
+		char *ng;
+
+		if (savedir >= 0) (void)fchdir(savedir);
+		inf = fopen(argv[optind], "r");
+		if (!inf) {
+		    perror("applyfilter: fopen");
 		    continue;
 		}
-		switch (verbose) {
-		    case 1:{
-			       printf("%c", c[i % 4]);
-			       fflush(stdout);
-			       i++;
-			       break;
-			   }
-		    case 2:{
-			       printf("%s\n", de->d_name);
-			   }
+
+		ng = fgetheader(inf, "Newsgroups:", 1);
+		fclose(inf);
+		if (!ng) {
+		    printf("File %s does not look like a news article, skipping;\nNewsgroups: header is missing.\n", argv[optind]);
+		    continue;
+		}
+		g = findgroup(ng, active, -1);
+		if (!g) {
+		    printf("Newsgroups %s not found in active file.\n", ng);
+		    free(ng);
+		    continue;
 		}
 
-		applyfilter(de->d_name, g, myfilter, dryrun, &kept, &deleted);
-	    } /* while readdir */
-	    closedir(d);
-	    if (g->first > g->last) {
-		/* group is empty */
-		g->first = g->last + 1;
-	    }
-	    if (deleted) {
-		if (verbose)
-		    printf("Updating .overview file...");
-		getxover(1);
+		if (setupfilter(&myfilter, ng))
+		    applyfilter(argv[optind], g, myfilter, dryrun, &kept, &deleted);
+		free(ng);
 	    }
 	    printf("%lu articles %sdeleted, %lu kept.\n", deleted,
 		    dryrun ? "would have been " : "",
 		    kept);
+	} else {
+	    for (;optind<argc;optind++) {
+		kept = deleted = 0;
+		g = findgroup(argv[optind], active, -1);
+		if (!g) {
+		    printf("Newsgroups %s not found in active file.\n", argv[optind]);
+		    continue;
+		}
+		g->first = ULONG_MAX;
+		if (!chdirgroup(g->name, FALSE)) {
+		    printf("No articles for newsgroup: %s\n", g->name);
+		    continue;
+		}
+		if (setupfilter(&myfilter, g->name) == 0)
+		    continue;
+		if (!(d = opendir("."))) {
+		    printf("Unable to open directory for newsgroup %s\n", g->name);
+		    unlink(lockfile);
+		    continue;
+		}
+		i = 0;
+		deleted = 0;
+		kept = 0;
+		ln_log(LNLOG_SINFO, LNLOG_CTOP, "Applying filters to %s...", g->name);
+		while ((de = readdir(d)) != NULL) {
+		    if (!isdigit((unsigned char)de->d_name[0])) {
+			/* no need to stat file */
+			continue;
+		    }
+		    switch (verbose) {
+			case 1:{
+				   printf("%c", c[i % 4]);
+				   fflush(stdout);
+				   i++;
+				   break;
+			       }
+			case 2:{
+				   printf("%s\n", de->d_name);
+			       }
+		    }
+
+		    applyfilter(de->d_name, g, myfilter, dryrun, &kept, &deleted);
+		} /* while readdir */
+		closedir(d);
+		if (g->first > g->last) {
+		    /* group is empty */
+		    g->first = g->last + 1;
+		}
+		if (deleted) {
+		    if (verbose)
+			printf("Updating .overview file...");
+		    getxover(1);
+		}
+		printf("%lu articles %sdeleted, %lu kept.\n", deleted,
+			dryrun ? "would have been " : "",
+			kept);
+	    }
 	}
     }
     writeactive();

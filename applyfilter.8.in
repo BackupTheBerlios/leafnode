@@ -10,8 +10,10 @@ applyfilter \- apply filter settings to news spool
 
 .SH SYNOPSIS
 .B applyfilter -V
-.br
+.PP
 .B applyfilter [-vnc] [-D debugmode] [-F configfile] object [...]
+.PP
+.B applyfilter [-v] [-D debugmode] [-F configfile] -C Message-ID [...]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -57,11 +59,21 @@ The files are expected to contain one news article each.
 .I -v
 Be verbose.
 .TP
+.I -C
+Switch to cancel mode, manually remove articles with given Message-IDs.
+Note that the Message-IDs must be given in angle brackets, which means
+that you will need to protect them from the shell, example:
+applyfilter -C '<some.1234.id@killme.example.org>'
+.TP
 .I -V
 Print version number and exit.
 .TP
-.I newsgroup
+.I object
 is the newsgroup you want to apply the filter to.
+
+.SH BUGS
+.PP
+Cancel mode does not report success or failure properly.
 
 .SH FILES
 .PP
