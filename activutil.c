@@ -72,7 +72,7 @@ insertgroup(const char *name, char status, long unsigned first,
     if (strchr("j=", status)) status = 'y';
 
     if (oldactive) {
-	g = findgroup(name, oldactive, -1);
+	g = findgroup(name, oldactive, oldactivesize);
 	if (g) {
 	    last = g->last;
 	    first = g->first;
