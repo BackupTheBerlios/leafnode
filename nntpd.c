@@ -2138,13 +2138,19 @@ doauth_pam(char *const cmd, char *const val)
 
         retval = pam_start("leafnode", user, &conv, &pamh);
 
+	if (retval == PAM_SUCCESS)
+	    retval = pam_set_item(pamh, PAM_RUSER, user);
+
+	if (retval == PAM_SUCCESS)
+	    retval = pam_set_item(pamh, PAM_RHOST, "localhost");
+
         if (retval == PAM_SUCCESS) {
 	    retval = pam_authenticate(pamh, 0);
 
 	    if (retval == PAM_SUCCESS) {
 		retval = pam_acct_mgmt(pamh, 0);
 
-		if (pam_end(pamh, retval) != PAM_SUCCESS) { 
+		if (pam_end(pamh, retval) != PAM_SUCCESS) {
 		    pamh = NULL;
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			   "cannot release PAM-handle.");
