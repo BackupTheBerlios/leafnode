@@ -93,14 +93,13 @@ getxoverfield(char *xoverline, enum xoverfields f)
 
 /** Extract information from given file to construct an .overview line.
  *  \return a malloc()ed string .overview */
-				    /*@null@*/
- /*@only@*/
+/*@null@*/ /*@only@*/
 char *
 getxoverline(
-/** if set, delete articles with missing or improper hardlink to message.id */
-		const int require_messageidlink,
-    /** name of article file */
-		const char *const filename)
+	/** if set, delete articles with missing or improper hardlink to message.id */
+	const int require_messageidlink,
+	/** name of article file */
+	const char *const filename)
 {
     char *l, *block;
     FILE *f;
@@ -110,7 +109,7 @@ getxoverline(
 
     /* We have to preserve atime and mtime to correctly
        expire unsubscribed groups */
-    if (stat(filename, &st)) {
+    if (lstat(filename, &st)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot stat %s: %m", filename);
 	return NULL;
     }
@@ -120,7 +119,7 @@ getxoverline(
 	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE, "removing empty article file %s",
 	       filename);
 	log_unlink(filename, 0);
-	return 0;
+	return NULL;
     }
 
     buf.actime = st.st_atime;
@@ -537,10 +536,7 @@ xgetxover(
 	    /* FIXME: don't delete if it's nothing about the article */
 	    /* error getting xoverline from article - delete it */
 	    (void)getcwd(s, LN_PATH_MAX);
-	    if (lstat(*t, &st)) {
-		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		       "cannot lstat %s/%s: %m", s, *t);
-	    } else {
+	    if (0 == lstat(*t, &st)) {
 		if (S_ISREG(st.st_mode)) {
 		    if (unlink(*t)) {
 			ln_log(LNLOG_SWARNING, LNLOG_CARTICLE,
