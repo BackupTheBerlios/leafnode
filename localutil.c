@@ -15,6 +15,7 @@
 #include "mastring.h"
 
 #include <ctype.h>
+#include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -97,7 +98,7 @@ readlocalgroups(void)
 {
     char *l, *p;
     FILE *f;
-    char *s, *t;
+    char *s, *t, *u;
     const char *const append = "/local.groups";
 
     s = (char *)critmalloc(strlen(libdir) + strlen(append) + 1,
@@ -114,20 +115,25 @@ readlocalgroups(void)
     }
 
     debug = 0;
-    while ((l = getaline(f)) != NULL) {
+    while ((l = getaline(f))) {
 	p = l;
-	while (p && *p && !isspace((unsigned char)*p))
+	while (*p && *p != '\t')
 	    p++;
-	while (p && *p && isspace((unsigned char)*p))
-	    *p++ = '\0';
-	/* l points to group name, p to description */
-	if (*l) {
-	    if (*p)
-		insertgroup(l, 1, 0, time(NULL), p);
-	    else
-		insertgroup(l, 1, 0, time(NULL), "local group");
-	    insertlocal(l);
+	*p++ = '\0';
+	u = p;
+	while (*p && *p != '\t')
+	    p++;
+	*p++ = '\0';
+	/* l points to group name, u to status, p to description */
+	if (strcmp(u, "y") && strcmp(u, "n") && strcmp(u, "m")) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, 
+		   "malformatted %s: status is not one of y, n, m", s);
+	    abort();
 	}
+	if (*l) {
+	    insertgroup(l, u[0], 1, 0, time(NULL), *p ? p : "local group");
+	    insertlocal(l);
+  	}
     }
     log_fclose(f);
     mergegroups();
