@@ -52,4 +52,6 @@ sed '/^$/q;s/^- /+ /' NEWS >>$tmp
 gpg --clearsign $tmp
 
 nail -v -s "leafnode-$vers snapshot available" \
-    leafnode-list@dt.e-technik.uni-dortmund.de <$tmp.asc \
+    leafnode-list@dt.e-technik.uni-dortmund.de <$tmp.asc
+rm $tmp $tmp.asc
+trap - 0
