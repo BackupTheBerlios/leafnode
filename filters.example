@@ -1,4 +1,14 @@
+###
+### This is an example file to show the filter file syntax
+### and give a quick overview of what's possible. Do not expect
+### all examples to be useful.
+###
+### See man 5 filterfile (man -s 5 filterfile on some systems)
+### for details.
+###
+
 ### the next lines will kill descrambler spam in all groups
+### d-e-s-c-r-a-m-b-l-e-r or d.e.s.c.r.a.m.b.l.e.r are detected
 newsgroups = *
 pattern = ^Subject:.*D.*E.S.C.R.A.M.B.L.E.R
 action = kill
@@ -27,4 +37,15 @@ action = kill
 ### this limits traffic for a high-traffic group
 newsgroups = de.rec.fotografie
 maxage = 7
+action = kill
+
+### this gets you rid of German Outlook national oddities
+### and pre-threading Re^N style subjects
+###
+### Be very careful when using the | operator, either of the sides will
+### match, so "^Subject: Jens|Jan" will kill all articles posted in
+### January because it means "^Subject: Jens" or "Jan". Use "^Subject:
+### (Jens|Jan)" instead (don't type the quote marks!)
+newsgrops = *
+pattern = ^Subject: (AW|WG|Re^\d+):
 action = kill

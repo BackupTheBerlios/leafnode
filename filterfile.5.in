@@ -56,7 +56,14 @@ pattern = [pcre]
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
 a separate manual page (
-.BR pcre (7)).
+.BR pcre (7)
+or, on newer systems,
+.BR pcre (3)).
+Be very careful when using the | operator. Make sure you use parentheses
+to tell PCRE which part you want matched. "^Subject: Jens|Jan" is
+different from "^Subject: (Jens|Jan)" -- the former matches either
+"^Subject: Jens" or "Jan", and because these are applied to any header,
+the former PCRE would match on all articles posted in January.
 .TP
 maxage = [days]
 Filter on age of articles in days. Articles that are older are
