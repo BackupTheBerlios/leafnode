@@ -1,0 +1,107 @@
+Leafnode versions through 1.4 were written by Arnt Gulbrandsen
+<agulbra@troll.no> and are copyright 1995 Troll Tech AS, Postboks 6133
+Etterstad, 0602 Oslo, Norway, fax +47-22646949.
+
+Leafnode versions 1.5 and higher were written by Cornelius Krasel
+<krasel@wpxx02.toxi.uni-wuerzburg.de> and are copyright 1997-2001.
+
+Leafnode versions 1.9.N, with N being 20 and higher, have been written
+by Matthias Andree and Ralf Wildenhues and are copyright 2002.
+
+Leafnode versions 2.0bN, with N up to 8, were written by Cornelius Krasel
+and are copyright 1997-2001.
+
+Leafnode versions 2.0b8_ma* were written by Matthias Andree and Ralf
+Wildenhues and are copyright 2001-2002.
+
+Major modifications were made by
+  Randolf Skerka <Randolf.Skerka@gmx.de>
+  Kent Robotti <robotti@erols.com>
+  Markus Enzenberger <enz@cip.physik.uni-muenchen.de>
+  Matthias Andree <matthias.andree@gmx.de>
+  Jörg Dietrich <joerg@dietrich.net>
+  Stefan Wiens <s.wi@gmx.net>
+  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+------------------------------------------------------------------------------
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+##############################################################################
+
+The getaline() and getline() routines are Copyright (c) 2000 Matthias
+Andree <matthias.andree@gmx.de>. They are licensed under the GNU Lesser
+General Public License (GNU LGPL) 2.1. A copy of the LGPL is provided in
+the file COPYING.LGPL.
+
+##############################################################################
+
+The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
+<rsalz@osf.org>. The original copyright notice, taken from INN 2.2.2,
+follows:
+
+Redistribution and use in any form are permitted provided that the
+following restrictions are met:
+
+1. Source distributions must retain this entire copyright notice and
+   comment.
+
+2. Binary distributions must include the acknowledgement ``This product
+   includes software developed by Rich Salz'' in the documentation or
+   other materials provided with the distribution.  This must not be
+   represented as an endorsement or promotion without specific prior
+   written permission.
+
+3. The origin of this software must not be misrepresented, either by
+   explicit claim or by omission. Credits must appear in the source and
+   documentation.
+
+4. Altered versions must be plainly marked as such in the source and
+   documentation and must not be misrepresented as being the original
+   software.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+##############################################################################
+
+The replacement vsnprintf() function was written by Theo de Raadt and
+is Copyright (c) 1997 under the following restrictions:
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
