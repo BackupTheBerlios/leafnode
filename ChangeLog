@@ -1,7 +1,52 @@
+2002-01-30  Matthias Andree  <matthias.andree@gmx.de>
+
+	=== RELEASE 2.0b8_ma10pre1 ===
+	* xoverutil.c: Gracefully exit from fixxover when no active file
+	is read (can happen when fetchnews -f is run during network
+	outage).
+
+	* TODO: Update.
+	* timeout_getaline.c: Use RETSIGTYPE for signal functions.
+	* nntputil.c: Use mgetaline to read the banner (useful to abort
+	when the server is connected to through tunnels) to get timeout
+	handling at least here.
+
+	* Makefile.am: Bail out if b_sortnl cannot be run (should fix the
+	"does not recognize parameters in /etc/leafnode/config)
+	issue. Also circumvent Solaris mv failures by using rm -f before
+	mv.
+
+	* leafnode.h: Alias fork() to -1 on systems that stub out
+	fork. (AmigaOS)
+
+	* inet_ntop.c: Drop dmalloc.h, not needed.  Use strncpy for
+	portability, we do not want this function to rely on mastring.
+	* fetchnews.c: Use RETSIGTYPE for signal functions.  Fix connect
+	error handling.
+
+	* configure.ac: Drop AC_FUNC_ for LSTAT, MALLOC, STAT, UTIME_NULL
+	* config.example: Add note about groupexpire to archive groups.
+	* nntpd.c: Use RETSIGTYPE for signal functions.
+
+2002-01-29  Matthias Andree  <matthias.andree@gmx.de>
+
+	* redblack.h: Manually define the "VISIT" enum type unless
+	HAVE_SEARCH_H is defined.
+
+	* Makefile.am: Use @LIBOBJS@ in LDADD and drop mergesort.c from
+	liblnutil_a_SOURCES.
+
+	* configure.ac: portability: Add search.h to AC_CHECK_HEADERS
+	(MacOS X doesn't have it).  Drop getline from AC_REPLACE_FUNCS.
+	For now, drop AC_FUNC_MKTIME, we don't have mktime.c replacements.
+
+	* filterutil.c: Fix SIGSEGV when filter file cannot be opened.
+	Add some comments on the readfilter() state machine.
+
 2002-01-19  Matthias Andree  <matthias.andree@gmx.de>
 
         === RELEASE 2.0b8_ma9 ===
-	
+
 2002-01-16  Matthias Andree  <matthias.andree@gmx.de>
 
 	* texpire.c: Log when .overview has been unlinked.
