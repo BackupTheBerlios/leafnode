@@ -403,8 +403,10 @@ is_pseudogroup(const char *group)
     /* local is never pseudo */
     if (is_localgroup(group)) return FALSE;
 
+#if 0
     /* interesting is never pseudo */
     if (is_interesting(group)) return FALSE;
+#endif
 
     /* make sure that is_localgroup is FALSE here: */
     if (!chdirgroup(group, FALSE)) return TRUE;
@@ -448,7 +450,11 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	markinterest(group->name);	/* FIXME: check error */
 	/* else try message-id lookup */
     } else if (arg && *arg == '<') {
-	f = fopen(lookup(arg), "r");
+	if (!strncmp(arg, "<leafnode:placeholder:", 22)) {
+	    f = fopenpseudoart(group, arg, 0);
+	} else {
+	    f = fopen(lookup(arg), "r");
+	}
     } else if (group && *artno) {
 	char s[64];
 	(void)chdirgroup(group->name, FALSE);
@@ -2040,7 +2046,8 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	}
     } else {
 	/* _is_ pseudogroup */
-	if (arg && (b < group->first || a > group->last+1 || a > b)) {
+	if (!b) b = a;
+	if (arg && (b < group->first || a > b || a > group->last+1)) {
 	    nntpprintf("420 No articles in specified range.");
 	    return;
 	}
