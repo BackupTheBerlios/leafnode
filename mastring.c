@@ -257,6 +257,7 @@ mastr_trimr(mastr * m)
     m->len = (size_t)(p - m->dat);
 }
 
+#if LEAFNODE_VERSION > 1
 ssize_t
 mastr_getln(mastr * m, FILE * f,
 	    ssize_t maxbytes /** if negative: unlimited */ )
@@ -289,6 +290,7 @@ mastr_getln(mastr * m, FILE * f,
     }
     return (ssize_t)(m->len);
 }
+#endif
 
 /* chop off last character of string */
 static void

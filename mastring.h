@@ -20,6 +20,8 @@
 #ifndef MASTRING_H
 #define MASTRING_H
 
+#include "version.h"
+
 #include <sys/types.h>		/* for size_t */
 #include <stdio.h>
 
@@ -46,7 +48,9 @@ int mastr_vcat(mastr *, ...);
 int mastr_resizekeep(mastr *, size_t);
 int mastr_resizekill(mastr *, size_t);
 size_t mastr_size(mastr *);
+#if LEAFNODE_VERSION > 1
 ssize_t mastr_getln(mastr *, FILE *, ssize_t maxbytes);
+#endif
 #define mastr_autosize(m) do { (void)mastr_resizekeep(m, m->len); } while(0)
 void mastr_delete(/*@only@*/ mastr *);
 void mastr_clear(mastr *);
