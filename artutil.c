@@ -207,7 +207,8 @@ supersede_cancel(
 	return;
     r[1] = '\0';
 
-    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
+    if (debug & DEBUG_CANCEL)
+	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
 
     filename = lookup(msgid);
     if (!filename) {
@@ -231,8 +232,9 @@ supersede_cancel(
 
     /* unlink all the hardlinks in the various newsgroups directories */
     while (p && ((q = strchr(p, ':')))) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-	       "debug %s: xref: \"%s\"", action, p);
+	if (debug & DEBUG_CANCEL)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		   "debug %s: xref: \"%s\"", action, p);
 	*q++ = '\0';
 	/* p now points to the newsgroup, q to the article number */
 	if (chdirgroup(p, FALSE)) {
