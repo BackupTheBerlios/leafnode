@@ -619,3 +619,15 @@ freeallfilter(/*@null@*/ /*@only@*/ struct filterlist *f)
 	f = g;
     }
 }
+
+#ifdef TEST
+
+int main(int argc, char **argv) {
+    int i = 1;
+    while (i < argc) {
+	printf("age(\"%s\") = %ld\n", argv[i], age(argv[i]));
+	i++;
+    }
+    return 0;
+}
+#endif
