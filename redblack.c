@@ -1,4 +1,4 @@
-static char rcsid[]="$Id: redblack.c,v 1.9 2002/10/23 15:57:09 emma Exp $";
+static char rcsid[]="$Id: redblack.c,v 1.10 2003/10/28 00:02:40 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -39,47 +39,75 @@ static char rcsid[]="$Id: redblack.c,v 1.9 2002/10/23 15:57:09 emma Exp $";
 
 enum nodecolour { BLACK, RED };
 
-struct rbnode
+struct RB_ENTRY(node)
 {
-	struct rbnode *left;		/* Left down */
-	struct rbnode *right;		/* Right down */
-	struct rbnode *up;		/* Up */
+	struct RB_ENTRY(node) *left;		/* Left down */
+	struct RB_ENTRY(node) *right;		/* Right down */
+	struct RB_ENTRY(node) *up;		/* Up */
 	enum nodecolour colour;		/* Node colour */
-	const void *key;		/* Pointer to user's key (and data) */
+#ifdef RB_INLINE
+	RB_ENTRY(data_t) key;		/* User's key (and data) */
+#define RB_GET(x,y)		&x->y
+#define RB_SET(x,y,v)		x->y = *(v)
+#else
+	const RB_ENTRY(data_t) *key;	/* Pointer to user's key (and data) */
+#define RB_GET(x,y)		x->y
+#define RB_SET(x,y,v)		x->y = v
+#endif /* RB_INLINE */
 };
 
 /* Dummy (sentinel) node, so that we can make X->left->up = X
 ** We then use this instead of NULL to mean the top or bottom
 ** end of the rb tree. It is a black node.
+**
+** Initialization of the last field in this initializer is left implicit
+** because it could be of any type.  We count on the compiler to zero it.
 */
-struct rbnode rb_null={&rb_null, &rb_null, &rb_null, BLACK, NULL};
-#define RBNULL (&rb_null)
+struct RB_ENTRY(node) RB_ENTRY(_null)={&RB_ENTRY(_null), &RB_ENTRY(_null), &RB_ENTRY(_null), BLACK};
+#define RBNULL (&RB_ENTRY(_null))
 
 #if defined(USE_SBRK)
 
-static struct rbnode *rb_alloc();
-static void rb_free(struct rbnode *);
+static struct RB_ENTRY(node) *RB_ENTRY(_alloc)();
+static void RB_ENTRY(_free)(struct RB_ENTRY(node) *);
 
 #else
 
-#define rb_alloc() ((struct rbnode *) malloc(sizeof(struct rbnode)))
-#define rb_free(x) (free(x))
+static struct RB_ENTRY(node) *RB_ENTRY(_alloc)() {return (struct RB_ENTRY(node) *) malloc(sizeof(struct RB_ENTRY(node)));}
+static void RB_ENTRY(_free)(struct RB_ENTRY(node) *x) {free(x);}
 
 #endif
 
-static struct rbnode *rb_traverse(int, const void *, struct rbtree *);
-static struct rbnode *rb_lookup(int, const void *, struct rbtree *);
-static void rb_destroy(struct rbnode *);
-static void rb_left_rotate(struct rbnode **, struct rbnode *);
-static void rb_right_rotate(struct rbnode **, struct rbnode *);
-static void rb_delete(struct rbnode **, struct rbnode *);
-static void rb_delete_fix(struct rbnode **, struct rbnode *);
-static struct rbnode *rb_successor(const struct rbnode *);
-static struct rbnode *rb_preccessor(const struct rbnode *);
-static void rb_walk(const struct rbnode *, void (*)(const void *, const VISIT, const int, void *), void *, int);
-static RBLIST *rb_openlist(const struct rbnode *);
-static const void *rb_readlist(RBLIST *);
-static void rb_closelist(RBLIST *);
+/* These functions are always needed */
+static void RB_ENTRY(_left_rotate)(struct RB_ENTRY(node) **, struct RB_ENTRY(node) *);
+static void RB_ENTRY(_right_rotate)(struct RB_ENTRY(node) **, struct RB_ENTRY(node) *);
+static struct RB_ENTRY(node) *RB_ENTRY(_successor)(const struct RB_ENTRY(node) *);
+static struct RB_ENTRY(node) *RB_ENTRY(_predecessor)(const struct RB_ENTRY(node) *);
+static struct RB_ENTRY(node) *RB_ENTRY(_traverse)(int, const RB_ENTRY(data_t) * , struct RB_ENTRY(tree) *);
+
+/* These functions may not be needed */
+#ifndef no_lookup
+static struct RB_ENTRY(node) *RB_ENTRY(_lookup)(int, const RB_ENTRY(data_t) * , struct RB_ENTRY(tree) *);
+#endif
+
+#ifndef no_destroy
+static void RB_ENTRY(_destroy)(struct RB_ENTRY(node) *);
+#endif
+
+#ifndef no_delete
+static void RB_ENTRY(_delete)(struct RB_ENTRY(node) **, struct RB_ENTRY(node) *);
+static void RB_ENTRY(_delete_fix)(struct RB_ENTRY(node) **, struct RB_ENTRY(node) *);
+#endif
+
+#ifndef no_walk
+static void RB_ENTRY(_walk)(const struct RB_ENTRY(node) *, void (*)(const RB_ENTRY(data_t) *, const VISIT, const int, void *), void *, int);
+#endif
+
+#ifndef no_readlist
+static RBLIST *RB_ENTRY(_openlist)(const struct RB_ENTRY(node) *);
+static const RB_ENTRY(data_t) * RB_ENTRY(_readlist)(RBLIST *);
+static void RB_ENTRY(_closelist)(RBLIST *);
+#endif
 
 /*
 ** OK here we go, the balanced tree stuff. The algorithm is the
@@ -104,53 +132,64 @@ static void rb_closelist(RBLIST *);
  * data that must be sent to it when called.
  * Returns a pointer to the top of the tree.
  */
-struct rbtree *
+#ifndef RB_CUSTOMIZE
+RB_STATIC struct RB_ENTRY(tree) *
 rbinit(int (*cmp)(const void *, const void *, const void *), const void *config)
+#else
+RB_STATIC struct RB_ENTRY(tree) *RB_ENTRY(init)(void)
+#endif /* RB_CUSTOMIZE */
 {
-	struct rbtree *retval;
+	struct RB_ENTRY(tree) *retval;
 	char c;
 
 	c=rcsid[0]; /* This does nothing but shutup the -Wall */
 
-	if ((retval=(struct rbtree *) malloc(sizeof(struct rbtree)))==NULL)
+	if ((retval=(struct RB_ENTRY(tree) *) malloc(sizeof(struct RB_ENTRY(tree))))==NULL)
 		return(NULL);
 	
+#ifndef RB_CUSTOMIZE
 	retval->rb_cmp=cmp;
 	retval->rb_config=config;
+#endif /* RB_CUSTOMIZE */
 	retval->rb_root=RBNULL;
 
 	return(retval);
 }
-	
-void
-rbdestroy(struct rbtree *rbinfo)
+
+#ifndef no_destroy
+RB_STATIC void
+RB_ENTRY(destroy)(struct RB_ENTRY(tree) *rbinfo)
 {
 	if (rbinfo==NULL)
 		return;
 
 	if (rbinfo->rb_root!=RBNULL)
-		rb_destroy(rbinfo->rb_root);
+		RB_ENTRY(_destroy)(rbinfo->rb_root);
 	
 	free(rbinfo);
 }
+#endif /* no_destroy */
 
-const void *
-rbsearch(const void *key, struct rbtree *rbinfo)
+#ifndef no_search
+RB_STATIC const RB_ENTRY(data_t) *
+RB_ENTRY(search)(const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x;
+	struct RB_ENTRY(node) *x;
 
 	if (rbinfo==NULL)
 		return(NULL);
 
-	x=rb_traverse(1, key, rbinfo);
+	x=RB_ENTRY(_traverse)(1, key, rbinfo);
 
-	return((x==RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : RB_GET(x, key));
 }
+#endif /* no_search */
 
-const void *
-rbfind(const void *key, struct rbtree *rbinfo)
+#ifndef no_find
+RB_STATIC const RB_ENTRY(data_t) * 
+RB_ENTRY(find)(const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x;
+	struct RB_ENTRY(node) *x;
 
 	if (rbinfo==NULL)
 		return(NULL);
@@ -159,21 +198,23 @@ rbfind(const void *key, struct rbtree *rbinfo)
 	if (rbinfo->rb_root==RBNULL)
 		return(NULL);
 
-	x=rb_traverse(0, key, rbinfo);
+	x=RB_ENTRY(_traverse)(0, key, rbinfo);
 
-	return((x==RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : RB_GET(x, key));
 }
+#endif /* no_find */
 
-const void *
-rbdelete(const void *key, struct rbtree *rbinfo)
+#ifndef no_delete
+RB_STATIC const RB_ENTRY(data_t) * 
+RB_ENTRY(delete)(const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x;
-	const void *y;
+	struct RB_ENTRY(node) *x;
+	const RB_ENTRY(data_t) * y;
 
 	if (rbinfo==NULL)
 		return(NULL);
 
-	x=rb_traverse(0, key, rbinfo);
+	x=RB_ENTRY(_traverse)(0, key, rbinfo);
 
 	if (x==RBNULL)
 	{
@@ -181,74 +222,82 @@ rbdelete(const void *key, struct rbtree *rbinfo)
 	}
 	else
 	{
-		y=x->key;
-		rb_delete(&rbinfo->rb_root, x);
+		y=RB_GET(x, key);
+		RB_ENTRY(_delete)(&rbinfo->rb_root, x);
 
 		return(y);
 	}
 }
+#endif /* no_delete */
 
-void
-rbwalk(const struct rbtree *rbinfo, void (*action)(const void *, const VISIT, const int, void *), void *arg)
+#ifndef no_walk
+RB_STATIC void
+RB_ENTRY(walk)(const struct RB_ENTRY(tree) *rbinfo, void (*action)(const RB_ENTRY(data_t) *, const VISIT, const int, void *), void *arg)
 {
 	if (rbinfo==NULL)
 		return;
 
-	rb_walk(rbinfo->rb_root, action, arg, 0);
+	RB_ENTRY(_walk)(rbinfo->rb_root, action, arg, 0);
 }
+#endif /* no_walk */
 
-RBLIST *
-rbopenlist(const struct rbtree *rbinfo)
+#ifndef no_readlist
+RB_STATIC RBLIST *
+RB_ENTRY(openlist)(const struct RB_ENTRY(tree) *rbinfo)
 {
 	if (rbinfo==NULL)
 		return(NULL);
 
-	return(rb_openlist(rbinfo->rb_root));
+	return(RB_ENTRY(_openlist)(rbinfo->rb_root));
 }
 
-const void *
-rbreadlist(RBLIST *rblistp)
+RB_STATIC const RB_ENTRY(data_t) * 
+RB_ENTRY(readlist)(RBLIST *rblistp)
 {
 	if (rblistp==NULL)
 		return(NULL);
 
-	return(rb_readlist(rblistp));
+	return(RB_ENTRY(_readlist)(rblistp));
 }
 
-void
-rbcloselist(RBLIST *rblistp)
+RB_STATIC void
+RB_ENTRY(closelist)(RBLIST *rblistp)
 {
 	if (rblistp==NULL)
 		return;
 
-	rb_closelist(rblistp);
+	RB_ENTRY(_closelist)(rblistp);
 }
+#endif /* no_readlist */
 
-const void *
-rblookup(int mode, const void *key, struct rbtree *rbinfo)
+#ifndef no_lookup
+RB_STATIC const RB_ENTRY(data_t) * 
+RB_ENTRY(lookup)(int mode, const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x;
+	struct RB_ENTRY(node) *x;
 
 	/* If we have a NULL root (empty tree) then just return NULL */
 	if (rbinfo==NULL || rbinfo->rb_root==NULL)
 		return(NULL);
 
-	x=rb_lookup(mode, key, rbinfo);
+	x=RB_ENTRY(_lookup)(mode, key, rbinfo);
 
-	return((x==RBNULL) ? NULL : x->key);
+	return((x==RBNULL) ? NULL : RB_GET(x, key));
 }
+#endif /* no_lookup */
 
 /* --------------------------------------------------------------------- */
 
 /* Search for and if not found and insert is true, will add a new
 ** node in. Returns a pointer to the new node, or the node found
 */
-static struct rbnode *
-rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
+static struct RB_ENTRY(node) *
+RB_ENTRY(_traverse)(int insert, const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x,*y,*z;
+	struct RB_ENTRY(node) *x,*y,*z;
 	int cmp;
 	int found=0;
+	int cmpmods();
 
 	y=RBNULL; /* points to the parent of x */
 	x=rbinfo->rb_root;
@@ -257,8 +306,13 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 	while(x!=RBNULL && found==0)
 	{
 		y=x;
-		/* printf("key=%s, x->key=%s\n", key, x->key); */
-		cmp=(*rbinfo->rb_cmp)(key, x->key, rbinfo->rb_config);
+		/* printf("key=%s, RB_GET(x, key)=%s\n", key, RB_GET(x, key)); */
+#ifndef RB_CUSTOMIZE
+		cmp=RB_CMP(key, RB_GET(x, key), rbinfo->rb_config);
+#else
+		cmp=RB_CMP(key, RB_GET(x, key));
+#endif /* RB_CUSTOMIZE */
+
 		if (cmp<0)
 			x=x->left;
 		else if (cmp>0)
@@ -270,13 +324,13 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 	if (found || !insert)
 		return(x);
 
-	if ((z=rb_alloc())==NULL)
+	if ((z=RB_ENTRY(_alloc)())==NULL)
 	{
 		/* Whoops, no memory */
 		return(RBNULL);
 	}
 
-	z->key=key;
+	RB_SET(z, key, key);
 	z->up=y;
 	if (y==RBNULL)
 	{
@@ -284,7 +338,11 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 	}
 	else
 	{
-		cmp=(*rbinfo->rb_cmp)(z->key, y->key, rbinfo->rb_config);
+#ifndef RB_CUSTOMIZE
+		cmp=RB_CMP(RB_GET(z, key), RB_GET(y, key), rbinfo->rb_config);
+#else
+		cmp=RB_CMP(RB_GET(z, key), RB_GET(y, key));
+#endif /* RB_CUSTOMIZE */
 		if (cmp<0)
 			y->left=z;
 		else
@@ -333,7 +391,7 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 				{
 					/* Move up to our parent */
 					x=x->up;
-					rb_left_rotate(&rbinfo->rb_root, x);
+					RB_ENTRY(_left_rotate)(&rbinfo->rb_root, x);
 				}
 
 				/* make our parent black */
@@ -341,7 +399,7 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 				/* make our grandparent red */
 				x->up->up->colour = RED;
 				/* right rotate our grandparent */
-				rb_right_rotate(&rbinfo->rb_root, x->up->up);
+				RB_ENTRY(_right_rotate)(&rbinfo->rb_root, x->up->up);
 			}
 		}
 		else
@@ -364,12 +422,12 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 				if (x == x->up->left)
 				{
 					x=x->up;
-					rb_right_rotate(&rbinfo->rb_root, x);
+					RB_ENTRY(_right_rotate)(&rbinfo->rb_root, x);
 				}
 
 				x->up->colour = BLACK;
 				x->up->up->colour = RED;
-				rb_left_rotate(&rbinfo->rb_root, x->up->up);
+				RB_ENTRY(_left_rotate)(&rbinfo->rb_root, x->up->up);
 			}
 		}
 	}
@@ -380,13 +438,14 @@ rb_traverse(int insert, const void *key, struct rbtree *rbinfo)
 	return(z);
 }
 
+#ifndef no_lookup
 /* Search for a key according to mode (see redblack.h)
 */
-static struct rbnode *
-rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
+static struct RB_ENTRY(node) *
+RB_ENTRY(_lookup)(int mode, const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
-	struct rbnode *x,*y;
-	int cmp = 0;
+	struct RB_ENTRY(node) *x,*y;
+	int cmp;
 	int found=0;
 
 	y=RBNULL; /* points to the parent of x */
@@ -419,8 +478,14 @@ rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 	while(x!=RBNULL && found==0)
 	{
 		y=x;
-		/* printf("key=%s, x->key=%s\n", key, x->key); */
-		cmp=(*rbinfo->rb_cmp)(key, x->key, rbinfo->rb_config);
+		/* printf("key=%s, RB_GET(x, key)=%s\n", key, RB_GET(x, key)); */
+#ifndef RB_CUSTOMIZE
+		cmp=RB_CMP(key, RB_GET(x, key), rbinfo->rb_config);
+#else
+		cmp=RB_CMP(key, RB_GET(x, key));
+#endif /* RB_CUSTOMIZE */
+
+
 		if (cmp<0)
 			x=x->left;
 		else if (cmp>0)
@@ -438,7 +503,7 @@ rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 	if (mode==RB_LUGTEQ || (!found && mode==RB_LUGREAT))
 	{
 		if (cmp>0)
-			return(rb_successor(y));
+			return(RB_ENTRY(_successor)(y));
 		else
 			return(y);
 	}
@@ -446,37 +511,40 @@ rb_lookup(int mode, const void *key, struct rbtree *rbinfo)
 	if (mode==RB_LULTEQ || (!found && mode==RB_LULESS))
 	{
 		if (cmp<0)
-			return(rb_preccessor(y));
+			return(RB_ENTRY(_predecessor)(y));
 		else
 			return(y);
 	}
 
 	if (mode==RB_LUNEXT || (found && mode==RB_LUGREAT))
-		return(rb_successor(x));
+		return(RB_ENTRY(_successor)(x));
 
 	if (mode==RB_LUPREV || (found && mode==RB_LULESS))
-		return(rb_preccessor(x));
+		return(RB_ENTRY(_predecessor)(x));
 	
 	/* Shouldn't get here */
 	return(RBNULL);
 }
+#endif /* no_lookup */
 
+#ifndef no_destroy
 /*
  * Destroy all the elements blow us in the tree
  * only useful as part of a complete tree destroy.
  */
 static void
-rb_destroy(struct rbnode *x)
+RB_ENTRY(_destroy)(struct RB_ENTRY(node) *x)
 {
 	if (x!=RBNULL)
 	{
 		if (x->left!=RBNULL)
-			rb_destroy(x->left);
+			RB_ENTRY(_destroy)(x->left);
 		if (x->right!=RBNULL)
-			rb_destroy(x->right);
-		rb_free(x);
+			RB_ENTRY(_destroy)(x->right);
+		RB_ENTRY(_free)(x);
 	}
 }
+#endif /* no_destroy */
 
 /*
 ** Rotate our tree thus:-
@@ -493,9 +561,9 @@ rb_destroy(struct rbnode *x)
 */
 
 static void
-rb_left_rotate(struct rbnode **rootp, struct rbnode *x)
+RB_ENTRY(_left_rotate)(struct RB_ENTRY(node) **rootp, struct RB_ENTRY(node) *x)
 {
-	struct rbnode *y;
+	struct RB_ENTRY(node) *y;
 
 	assert(x!=RBNULL);
 	assert(x->right!=RBNULL);
@@ -538,9 +606,9 @@ rb_left_rotate(struct rbnode **rootp, struct rbnode *x)
 }
 
 static void
-rb_right_rotate(struct rbnode **rootp, struct rbnode *y)
+RB_ENTRY(_right_rotate)(struct RB_ENTRY(node) **rootp, struct RB_ENTRY(node) *y)
 {
-	struct rbnode *x;
+	struct RB_ENTRY(node) *x;
 
 	assert(y!=RBNULL);
 	assert(y->left!=RBNULL);
@@ -584,10 +652,10 @@ rb_right_rotate(struct rbnode **rootp, struct rbnode *y)
 
 /* Return a pointer to the smallest key greater than x
 */
-static struct rbnode *
-rb_successor(const struct rbnode *x)
+static struct RB_ENTRY(node) *
+RB_ENTRY(_successor)(const struct RB_ENTRY(node) *x)
 {
-	struct rbnode *y;
+	struct RB_ENTRY(node) *y;
 
 	if (x->right!=RBNULL)
 	{
@@ -615,10 +683,10 @@ rb_successor(const struct rbnode *x)
 
 /* Return a pointer to the largest key smaller than x
 */
-static struct rbnode *
-rb_preccessor(const struct rbnode *x)
+static struct RB_ENTRY(node) *
+RB_ENTRY(_predecessor)(const struct RB_ENTRY(node) *x)
 {
-	struct rbnode *y;
+	struct RB_ENTRY(node) *y;
 
 	if (x->left!=RBNULL)
 	{
@@ -644,17 +712,18 @@ rb_preccessor(const struct rbnode *x)
 	return(y);
 }
 
+#ifndef no_delete
 /* Delete the node z, and free up the space
 */
 static void
-rb_delete(struct rbnode **rootp, struct rbnode *z)
+RB_ENTRY(_delete)(struct RB_ENTRY(node) **rootp, struct RB_ENTRY(node) *z)
 {
-	struct rbnode *x, *y;
+	struct RB_ENTRY(node) *x, *y;
 
 	if (z->left == RBNULL || z->right == RBNULL)
 		y=z;
 	else
-		y=rb_successor(z);
+		y=RB_ENTRY(_successor)(z);
 
 	if (y->left != RBNULL)
 		x=y->left;
@@ -677,20 +746,20 @@ rb_delete(struct rbnode **rootp, struct rbnode *z)
 
 	if (y!=z)
 	{
-		z->key = y->key;
+		RB_SET(z, key, RB_GET(y, key));
 	}
 
 	if (y->colour == BLACK)
-		rb_delete_fix(rootp, x);
+		RB_ENTRY(_delete_fix)(rootp, x);
 
-	rb_free(y);
+	RB_ENTRY(_free)(y);
 }
 
 /* Restore the reb-black properties after a delete */
 static void
-rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
+RB_ENTRY(_delete_fix)(struct RB_ENTRY(node) **rootp, struct RB_ENTRY(node) *x)
 {
-	struct rbnode *w;
+	struct RB_ENTRY(node) *w;
 
 	while (x!=*rootp && x->colour==BLACK)
 	{
@@ -716,7 +785,7 @@ rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 				{
 					w->left->colour=BLACK;
 					w->colour=RED;
-					rb_right_rotate(rootp, w);
+					RB_ENTRY(_right_rotate)(rootp, w);
 					w=x->up->right;
 				}
 
@@ -724,7 +793,7 @@ rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 				w->colour=x->up->colour;
 				x->up->colour = BLACK;
 				w->right->colour = BLACK;
-				rb_left_rotate(rootp, x->up);
+				RB_ENTRY(_left_rotate)(rootp, x->up);
 				x=*rootp;
 			}
 		}
@@ -735,7 +804,7 @@ rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 			{
 				w->colour=BLACK;
 				x->up->colour=RED;
-				rb_right_rotate(rootp, x->up);
+				RB_ENTRY(_right_rotate)(rootp, x->up);
 				w=x->up->left;
 			}
 
@@ -750,14 +819,14 @@ rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 				{
 					w->right->colour=BLACK;
 					w->colour=RED;
-					rb_left_rotate(rootp, w);
+					RB_ENTRY(_left_rotate)(rootp, w);
 					w=x->up->left;
 				}
 
 				w->colour=x->up->colour;
 				x->up->colour = BLACK;
 				w->left->colour = BLACK;
-				rb_right_rotate(rootp, x->up);
+				RB_ENTRY(_right_rotate)(rootp, x->up);
 				x=*rootp;
 			}
 		}
@@ -765,9 +834,11 @@ rb_delete_fix(struct rbnode **rootp, struct rbnode *x)
 
 	x->colour=BLACK;
 }
+#endif /* no_delete */
 
+#ifndef no_walk
 static void
-rb_walk(const struct rbnode *x, void (*action)(const void *, const VISIT, const int, void *), void *arg, int level)
+RB_ENTRY(_walk)(const struct RB_ENTRY(node) *x, void (*action)(const RB_ENTRY(data_t) *, const VISIT, const int, void *), void *arg, int level)
 {
 	if (x==RBNULL)
 		return;
@@ -775,24 +846,26 @@ rb_walk(const struct rbnode *x, void (*action)(const void *, const VISIT, const 
 	if (x->left==RBNULL && x->right==RBNULL)
 	{
 		/* leaf */
-		(*action)(x->key, leaf, level, arg);
+		(*action)(RB_GET(x, key), leaf, level, arg);
 	}
 	else
 	{
-		(*action)(x->key, preorder, level, arg);
+		(*action)(RB_GET(x, key), preorder, level, arg);
 
-		rb_walk(x->left, action, arg, level+1);
+		RB_ENTRY(_walk)(x->left, action, arg, level+1);
 
-		(*action)(x->key, postorder, level, arg);
+		(*action)(RB_GET(x, key), postorder, level, arg);
 
-		rb_walk(x->right, action, arg, level+1);
+		RB_ENTRY(_walk)(x->right, action, arg, level+1);
 
-		(*action)(x->key, endorder, level, arg);
+		(*action)(RB_GET(x, key), endorder, level, arg);
 	}
 }
+#endif /* no_walk */
 
+#ifndef no_readlist
 static RBLIST *
-rb_openlist(const struct rbnode *rootp)
+RB_ENTRY(_openlist)(const struct RB_ENTRY(node) *rootp)
 {
 	RBLIST *rblistp;
 
@@ -814,15 +887,15 @@ rb_openlist(const struct rbnode *rootp)
 	return(rblistp);
 }
 
-static const void *
-rb_readlist(RBLIST *rblistp)
+static const RB_ENTRY(data_t) * 
+RB_ENTRY(_readlist)(RBLIST *rblistp)
 {
-	const void *key=NULL;
+	const RB_ENTRY(data_t) *key=NULL;
 
 	if (rblistp!=NULL && rblistp->nextp!=RBNULL)
 	{
-		key=rblistp->nextp->key;
-		rblistp->nextp=rb_successor(rblistp->nextp);
+		key=RB_GET(rblistp->nextp, key);
+		rblistp->nextp=RB_ENTRY(_successor)(rblistp->nextp);
 	}
 
 	return(key);
@@ -834,32 +907,33 @@ rb_closelist(RBLIST *rblistp)
 	if (rblistp)
 		free(rblistp);
 }
+#endif /* no_readlist */
 
-#if defined(USE_SBRK)
+#if defined(RB_USE_SBRK)
 /* Allocate space for our nodes, allowing us to get space from
 ** sbrk in larger chucks.
 */
-static struct rbnode *rbfreep=NULL;
+static struct RB_ENTRY(node) *rbfreep=NULL;
 
-#define RBNODEALLOC_CHUNK_SIZE 1000
-static struct rbnode *
-rb_alloc()
+#define RB_ENTRY(NODE)ALLOC_CHUNK_SIZE 1000
+static struct RB_ENTRY(node) *
+RB_ENTRY(_alloc)()
 {
-	struct rbnode *x;
+	struct RB_ENTRY(node) *x;
 	int i;
 
 	if (rbfreep==NULL)
 	{
 		/* must grab some more space */
-		rbfreep=(struct rbnode *) sbrk(sizeof(struct rbnode) * RBNODEALLOC_CHUNK_SIZE);
+		rbfreep=(struct RB_ENTRY(node) *) sbrk(sizeof(struct RB_ENTRY(node)) * RB_ENTRY(NODE)ALLOC_CHUNK_SIZE);
 
-		if (rbfreep==(struct rbnode *) -1)
+		if (rbfreep==(struct RB_ENTRY(node) *) -1)
 		{
 			return(NULL);
 		}
 
 		/* tie them together in a linked list (use the up pointer) */
-		for (i=0, x=rbfreep; i<RBNODEALLOC_CHUNK_SIZE-1; i++, x++)
+		for (i=0, x=rbfreep; i<RB_ENTRY(NODE)ALLOC_CHUNK_SIZE-1; i++, x++)
 		{
 			x->up = (x+1);
 		}
@@ -868,15 +942,21 @@ rb_alloc()
 
 	x=rbfreep;
 	rbfreep = rbfreep->up;
+#ifdef RB_ALLOC
+ 	RB_ALLOC(ACCESS(x, key));
+#endif /* RB_ALLOC */
 	return(x);
 }
 
-/* free (dealloc) an rbnode structure - add it onto the front of the list
-** N.B. rbnode need not have been allocated through rb_alloc()
+/* free (dealloc) an RB_ENTRY(node) structure - add it onto the front of the list
+** N.B. RB_ENTRY(node) need not have been allocated through rb_alloc()
 */
 static void
-rb_free(struct rbnode *x)
+RB_ENTRY(_free)(struct RB_ENTRY(node) *x)
 {
+#ifdef RB_FREE
+ 	RB_FREE(ACCESS(x, key));
+#endif /* RB_FREE */
 	x->up=rbfreep;
 	rbfreep=x;
 }
@@ -885,7 +965,7 @@ rb_free(struct rbnode *x)
 
 #if 0
 int
-rb_check(struct rbnode *rootp)
+RB_ENTRY(_check)(struct RB_ENTRY(node) *rootp)
 {
 	if (rootp==NULL || rootp==RBNULL)
 		return(0);
@@ -897,15 +977,15 @@ rb_check(struct rbnode *rootp)
 		return(1);
 	}
 
-	if (rb_check1(rootp))
+	if (RB_ENTRY(_check)1(rootp))
 	{
-		dumptree(rootp, 0);
+		RB_ENTRY(dumptree)(rootp, 0);
 		return(1);
 	}
 
-	if (count_black(rootp)==-1)
+	if (RB_ENTRY(count_black)(rootp)==-1)
 	{
-		dumptree(rootp, 0);
+		RB_ENTRY(dumptree)(rootp, 0);
 		return(-1);
 	}
 
@@ -913,7 +993,7 @@ rb_check(struct rbnode *rootp)
 }
 
 int
-rb_check1(struct rbnode *x)
+RB_ENTRY(_check1)(struct RB_ENTRY(node) *x)
 {
 	if (x->left==NULL || x->right==NULL)
 	{
@@ -956,15 +1036,15 @@ rb_check1(struct rbnode *x)
 	return(0);
 }
 
-count_black(struct rbnode *x)
+RB_ENTRY(count_black)(struct RB_ENTRY(node) *x)
 {
 	int nleft, nright;
 
 	if (x==RBNULL)
 		return(1);
 
-	nleft=count_black(x->left);
-	nright=count_black(x->right);
+	nleft=RB_ENTRY(count_black)(x->left);
+	nright=RB_ENTRY(count_black)(x->right);
 
 	if (nleft==-1 || nright==-1)
 		return(-1);
@@ -983,7 +1063,7 @@ count_black(struct rbnode *x)
 	return(nleft);
 }
 
-dumptree(struct rbnode *x, int n)
+RB_ENTRY(dumptree)(struct RB_ENTRY(node) *x, int n)
 {
 	char *prkey();
 
@@ -997,24 +1077,44 @@ dumptree(struct rbnode *x, int n)
 			x->left,
 			x->right,
 			(x->colour==BLACK) ? "BLACK" : "RED",
-			prkey(x->key));
+			prkey(RB_GET(x, key)));
 
-		dumptree(x->left, n);
-		dumptree(x->right, n);
+		RB_ENTRY(dumptree)(x->left, n);
+		RB_ENTRY(dumptree)(x->right, n);
 	}	
 }
 #endif
 
 /*
  * $Log: redblack.c,v $
- * Revision 1.9  2002/10/23 15:57:09  emma
- * Initialize cmp. Fixes compiler warning.
+ * Revision 1.10  2003/10/28 00:02:40  emma
+ * Update to libredblack 1.3.
  *
- * Revision 1.8  2002/08/13 18:12:39  ralf
- * Remove superfluous nested function decl.
+ * Revision 1.9  2003/10/24 01:31:21  damo
+ * Patches from Eric Raymond: %prefix is implemented.  Various other small
+ * changes avoid stepping on global namespaces and improve the documentation.
  *
- * Revision 1.7  2002/07/08 00:48:01  emma
- * Update libredblack to 1.2.
+ * Revision 1.8  2002/08/26 05:33:47  damo
+ * Some minor fixes:-
+ * Stopped ./configure warning about stuff being in the wrong order
+ * Fixed compiler warning about const (not sure about this)
+ * Changed directory of redblack.c in documentation
+ *
+ * Revision 1.7  2002/08/26 03:11:40  damo
+ * Fixed up a bunch of compiler warnings when compiling example4
+ *
+ * Tidies up the Makefile.am & Specfile.
+ *
+ * Renamed redblack to rbgen
+ *
+ * Revision 1.6  2002/08/26 01:03:35  damo
+ * Patch from Eric Raymond to change the way the library is used:-
+ *
+ * Eric's idea is to convert libredblack into a piece of in-line code
+ * generated by another program. This should be faster, smaller and easier
+ * to use.
+ *
+ * This is the first check-in of his code before I start futzing with it!
  *
  * Revision 1.5  2002/01/30 07:54:53  damo
  * Fixed up the libtool versioning stuff (finally)

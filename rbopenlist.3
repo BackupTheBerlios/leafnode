@@ -105,13 +105,13 @@ tree, then prints the numbers in order.
     
         if ((rblist=rbopenlist(rb))==NULL)
         {
-                fprintf(stderr, "insufficient memory from rbopenlist()\n");
+                fprintf(stderr, "insufficient memory from rbopenlist()\\n");
                 exit(1);
         }
 
         while((val=rbreadlist(rblist)))
         {
-                printf("%6d\n", *(int *)val);
+                printf("%6d\\n", *(int *)val);
         }
 
         rbcloselist(rblist);
@@ -122,5 +122,7 @@ tree, then prints the numbers in order.
     }
 .fi
 .SH "SEE ALSO"
-.BR rbinit "(3), " tsearch "(3)"
+.BR rbinit (3),
+.BR rbgen (1),
+.BR tsearch (3).
 
