@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.40 2002/05/01 09:04:39 ralf Exp $ */
+/* $Id: leafnode.h,v 1.41 2002/05/05 17:32:07 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -483,7 +483,6 @@ extern "C" {
     void readexpire(void);
     void free_expire(void);
     int readconfig(char *configfile);
-    void whoami(void);
     void lowercase(char *string);
     int ngmatch(const char *pattern, const char *string);
     int copyfile(FILE * infile, FILE * outfile, long n);
