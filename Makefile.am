@@ -21,7 +21,7 @@ man_MANS = \
 	$(GENERATED_MANS)
 
 lsmac.1: tools/lsmac.pl
-	pod2man $(srcdir)/tools/lsmac.pl $@
+	pod2man $(srcdir)/tools/lsmac.pl >$@ || { rm -f $@ ; false ; }
 
 dist_MANS = \
 	rbcloselist.3 \
