@@ -139,7 +139,7 @@ store_stream(FILE * in /** input file */ ,
     }
 
     /* copy header 
-     *  - stripping XRef:, and possibly copying Message-ID: and Newsgroups: 
+     *  - stripping Xref:, and possibly copying Message-ID: and Newsgroups: 
      *  - looking for Control: cancel and Supersedes:
      *  - check count of each mandatory header
      */
@@ -240,7 +240,7 @@ store_stream(FILE * in /** input file */ ,
     }
 
     /* We now have the header, we link this into the appropriate
-       newsgroup folders, generating the XRef: header, and writing
+       newsgroup folders, generating the Xref: header, and writing
        it. */
 
     /* save cwd */
@@ -249,6 +249,7 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-1, "cannot open current directory");
 
     /* parse ngs */
+    /*@+loopexec@*/
     for (;;) {
 	nglist = critmalloc(nglistlen * sizeof(char *), "store");
 	if (str_nsplit(nglist, ngs, ",", nglistlen) >= 0)
@@ -258,6 +259,7 @@ store_stream(FILE * in /** input file */ ,
 	free(nglist);
 	nglistlen += nglistlen;
     }
+    /*@=loopexec@*/
 
     xref = mastr_new(1024l);
     /* store */
@@ -312,10 +314,10 @@ store_stream(FILE * in /** input file */ ,
 		    goto bail;
 		}
 	    }
+	    (void)mastr_vcat(xref, " ", name, ":", nb, 0);
 	}
-	(void)mastr_vcat(xref, " ", name, ":", nb, 0);
     }
-    if (fputs("XRef: ", tmpstream) == EOF)
+    if (fputs("Xref: ", tmpstream) == EOF)
 	BAIL(-1, "write error");
     if (fputs(fqdn, tmpstream) == EOF)
 	BAIL(-1, "write error");
