@@ -667,20 +667,25 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
     }
 
     if (*first > *last + 1) {
+	const long maximum_decrease = 10;
+	
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: last seen %s was %lu, server now has %lu - %lu",
 	       g->name, delaybody_this_group ? "header" : "article",
 	       *first, window, *last);
-	if (*first > (*last + 5)) {
+	if (*first > (*last + maximum_decrease)) {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: switched upstream servers? %lu > %lu",
+		   "%s: switched upstream servers? upstream bug? %lu > %lu",
 		   g->name, *first, *last);
 	    *first = window;	/* check all upstream articles again */
+	    if ((initiallimit) && (*last - *first > initiallimit))
+		*first = *last - initiallimit + 1;
 	} else {
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s: rampant spam cancel? %lu > %lu",
+		   "%s: rampant spam cancel? upstream bug? %lu > %lu",
 		   g->name, *first - 1, *last);
-	    *first = *last - 5;	/* re-check last five upstream articles */
+	    *first = *last - maximum_decrease; /* re-check last N
+						  upstream articles */
 	}
     }
     if (initiallimit && (*first == 1) && (*last - *first > initiallimit)) {
