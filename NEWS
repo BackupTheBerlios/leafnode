@@ -3,6 +3,9 @@
   unconditionally deleted them. Reported by Reiner Steib.
 - Bugfix: leafnode was unable to retrieve pseudo articles with XOVER n
   or XOVER n- forms (XOVER n-m was fine).
+- Bugfix: does not crash on a fresh install. Reported by Jürgen Salk.
+- Documentation: fix typo (syslogd.pid) in README.html. Reported by
+  Jürgen Salk.
 
 20031001a: Changes since 20030814a:
 - Bugfix: stricter GROUP reply parsing to avoid accepting negative
