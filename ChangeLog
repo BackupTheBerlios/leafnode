@@ -1,3 +1,46 @@
+2002-09-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS: Explain new single-pass store scheme (without fixxover).  
+	* fetchnews.c: Drop [g]fixxover(), store creates .overview lines
+	for us.  Let go of fork(), no longer needed.  
+	* queues.c: Drop [g]fixxover(), store creates .overview lines for
+	us. Drop rbtree that tracks which groups were changed.  
+	* rnews.c, xoverutil.c, leafnode.h: Drop [g]fixxover(), store
+	creates .overview lines for us.  
+	* store.c: Write .overview lines ourselves.  
+	* README.html: Change PCRE version to 3.9 
+	* leafnode.h, xoverutil.c: Export getxoverline().  
+	* configure.ac: bump version.  
+
+2002-09-01  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac, nntputil.c: Don't try gai_strerror() unless it's
+	defined. Do not assume HAVE_GETADDRINFOimplies HAVE_GAI_STRERROR.
+	Reported by  Leopold Toetsch <lt@toetsch.at> 
+
+2002-09-01  Joerg Dietrich <joerg@dietrich.net>
+
+	* queues.c: Fix argument to log_moveto() passed from
+	feedincoming(). Report by Robert Marshall
+	(<3D708376.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>).  
+
+2002-08-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* mailto.c: Add FIXME: comment to mailto(): want To: header.  
+
+2002-08-27  Matthias Andree <matthias.andree@gmx.de>
+
+	* store.c: Add FIXME: comment 
+
+2002-08-24  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: bump version 
+
+2002-08-23  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: Fix XOVER reply for pseudo article:  inconsistent MID
+	given.  
+
 2002-08-22  Matthias Andree <matthias.andree@gmx.de>
 
 	--- release snapshot-20020823a ---
