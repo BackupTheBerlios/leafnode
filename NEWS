@@ -2,7 +2,7 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20041006a:
+20041007a: Changes since 20041006a:
 - Change: fetchnews will treat groups as moderated if the reported status
   flag is 'y' but the group has the tag ' (Moderated)'
 - Change: leafnode will no longer print the moderator of local groups in

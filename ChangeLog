@@ -1,3 +1,13 @@
+2004-10-07  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20041007a =
+	* NEWS, nntpd.c: leafnode will no longer print the moderator of
+	local groups in the newsgroup list.  leafnode will make sure that a
+	moderated group has the ' (Moderated)' tag in its description.
+	* activutil.c, NEWS: fetchnews will flag groups as moderated if the
+	reported status flag is 'y' but the group has the tag '
+	(Moderated)'.
+
 2004-10-06  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20041006a =
