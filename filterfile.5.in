@@ -63,8 +63,6 @@ pattern = [!]\fIpcre\fR
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
 a separate manual page (
-.BR pcre (7)
-or, on newer systems,
 .BR pcre (3)).
 If you want to negate a part of the pattern, use a negative assertion,
 try (untested):
@@ -139,8 +137,11 @@ satisfied from overview data. This means only filter on these headers
 with "pattern": Subject, From, Date, Message-ID, References, Bytes, Lines.
 
 Filtering maxage, minlines, maxlines, maxbytes is fine. maxcrosspost
-filtering currently is expensive, and will only apply after the whole
-article has been downloaded.
+filtering, due to a lack of Newsgroups: headers in overview data,
+resorts to checking the Xref: header and will therefore count how many
+of the groups the article was crossposted into are offered by the
+upstream server. This means that maxcrosspost filtering can be delayed
+until after the whole article has been downloaded.
 
 .SH LOGGING
 .PP
@@ -165,7 +166,7 @@ The first example shows how to avoid "fast money"-type postings in all
 newsgroups:
 
 .RS
-newsgroups = *
+newsgroups = .*
 .br
 pattern = ^Subject:.*fast.?money
 .br
@@ -173,21 +174,21 @@ action = kill
 .RE
 
 This pattern is applied to all newsgroups. Only the Subject:-line is matched
-(if the "^" was omitted, other headers containing "Subject:.*fast.?money"
+(if the "^" were omitted, other headers containing "Subject:.*fast.?money"
 would be matched as well). The amount of characters between the header
 name and the "fast" may be arbitrary ("." means "any char" and the "*"
 designates that an arbitrary number, including zero, of these characters
 may be there) while between "fast" and "money" there must be at least one
 other character (designated by the "?"). For further explanations of
 Perl-compatible regular expressions, see
-.BR pcre (7).
+.BR pcre (3).
 
 .PP
 The second example shows how to avoid articles in a specific newsgroup
 unless they deal with a certain subject:
 
 .RS
-newsgroups = alt.hippopotamus
+newsgroups = ^alt\.hippopotamus
 .br
 pattern = ^Subject:.*[Hh]ippo
 .br
@@ -208,7 +209,7 @@ Finally, the third example shows another way to select certain articles,
 using scoring.
 
 .RS
-newsgroups = alt.hippopotamus.*
+newsgroups = ^alt\.hippopotamus.*
 .br
 pattern = ^Subject:.*[Hh]ippo
 .br
@@ -227,34 +228,9 @@ course, there may be other ways to achieve the same result.)
 .PP
 While in these examples filtering was always done on the Subject: line,
 there is no reason not to apply filters to arbitrary headers, e.g.
-certain posters, MIME-encoded postings or whatever you can imagine.
-
-.SH WILDMATS
-The
-.I wildmat
-format was first developed by Rich Salz based on the format used in the
-UNIX "find" command to articulate file names. It was developed to provide
-a uniform mechanism for matching patterns in the same manner that the
-UNIX shell matches filenames. Patterns are implicitely anchored at the
-beginning and end of each string when testing for a match. There are
-five pattern matching operations other than a strict one-to-one match
-between the pattern and the source to be checked for a match. The first
-is an asterisk (*) to match any sequence of zero or more characters. The
-second is a question mark (?) to match any single character. The third
-specifies a specific set of characters. The set is specified as a list
-of characters, or as a range of characters where the beginning and end
-of the range are separated by a minus (or dash) character, or as any
-combination of lists and ranges. The dash can also be included in the
-set as a character if it is the beginning or end of the set. This set is
-enclosed in square brackets. The close square bracket (]) may be used in
-a set if it is the first character in the set. The fourth operation is
-the same as the logical not of the third operation and is specified the
-same way as the third with the addition of a caret character (^) at the
-beginning of the test string just inside the open square bracket. The
-final operation uses the backslash character to invalidate the special
-meaning of the open square bracket ([), the asterisk, backslash or the
-question mark. Two backslashes in sequence will result in the evaluation
-of the backslash as a character with no special meaning.
+certain posters (From:), MIME-encoded postings or whatever you can
+imagine. Just remember what was written in the EFFICIENCY section above
+if bandwidth is precious.
 
 .PP
 .BR Leafnode
@@ -270,11 +246,10 @@ Neither the newsgroups name nor the pattern may contain a hash mark (#).
 .SH AUTHOR
 This manual page was written by Cornelius Krasel
 <krasel@wpxx02.toxi.uni-wuerzburg.de> with some inspiration from Lloyd
-Zusman <ljz@asfast.com>. The section on wildmats was
-taken from draft-ietf-nntpext-imp-03.txt
+Zusman <ljz@asfast.com>. It was later revised by Matthias Andree.
 
 .SH SEE ALSO
 .BR leafnode (8),
 .BR fetchnews (8),
-.BR pcre (7),
+.BR pcre (3),
 .BR @sysconfdir@/filters.example .
