@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.60 2002/07/06 08:57:48 ralf Exp $ */
+/* $Id: leafnode.h,v 1.61 2002/07/06 09:01:17 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -358,8 +358,8 @@ extern "C" {
      * xoverentry in xoverutil.c as well!
      */
     enum xoverfields {
-        XO_ERR = 0,	/* error condition */
-	XO_ARTNO = 1,
+        XO_ERR = -1,	/* error condition */
+	XO_ARTNO = 0,
 	XO_SUBJECT,
 	XO_FROM,
 	XO_DATE,
@@ -371,6 +371,9 @@ extern "C" {
     };
 
     extern enum xoverfields matchxoverfield(const char *header);
+    /*@null@*/ /*@dependent@*/
+    char *getxoverfield(char *xoverline, enum xoverfields);
+
 
     extern struct xoverinfo *xoverinfo;
     extern unsigned long xfirst;

@@ -1116,7 +1116,7 @@ donewnews(char *arg)
 			long xo = findxover(artno);
 
 			if (xo >= 0) {
-			    char *x = cuttab(xoverinfo[xo].text, XO_MESSAGEID);
+			    char *x = getxoverfield(xoverinfo[xo].text, XO_MESSAGEID);
 			    if (x) {
 				fputs(x, stdout);
 				fputs("\r\n", stdout);
@@ -1872,7 +1872,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 
 	for (i = idxa; i <= idxb; i++) {
 	    char *t;
-	    l = cuttab(xoverinfo[i].text, OVfield);
+	    l = getxoverfield(xoverinfo[i].text, OVfield);
 	    if (!l)
 		continue;
 	    t = (OVfield == XO_XREF ? l+6 : l); /* cut out 'Xref: ' if necessary */

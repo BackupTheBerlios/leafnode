@@ -56,7 +56,6 @@ static struct {
     int len;
 } xoverentry[] = {
     { "", 1 },
-    { "", 1 },
     { "Subject:", 8 },
     { "From:", 5 },
     { "Date:", 5 },
@@ -87,6 +86,15 @@ enum xoverfields matchxoverfield(const char *header)
 	return f;
     else
 	return XO_ERR;
+}
+
+/*@null@*/ /*@only@*/ char *
+getxoverfield(char *xoverline, enum xoverfields f)
+{
+    if (f == XO_ERR || f == XO_ARTNO)
+	return NULL;
+    else
+	return cuttab(xoverline, f+1);
 }
 
 
