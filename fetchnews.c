@@ -1314,10 +1314,10 @@ do_group(const char *ng, char **const s,
 	if (f && newserver) {
 	    fprintf(f, "%s %lu\n", g->name,
 		    newserver > 0 ? newserver : from);
-	    return newserver;
 	}
+	return newserver;
     } else {		/* g != NULL */
-	if (!forceactive || (debug & DEBUG_ACTIVE))
+	if (!forceactive && (debug & DEBUG_ACTIVE))
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		   "%s not found in groupinfo file", ng);
     }
@@ -1519,7 +1519,7 @@ main(int argc, char **argv)
 	exit(2);
     }
     flag = FALSE;
-    while ((option = getopt(argc, argv, "VDHBPF:S:N:M:fnvx:p:t:")) != -1) {
+    while ((option = getopt(argc, argv, "VD:HBPF:S:N:M:fnvx:p:t:")) != -1) {
 	if (parseopt("fetchnews", option, optarg, conffile, sizeof(conffile))) {
 	    ;
 	} else if (option == 't') {
@@ -1735,7 +1735,7 @@ main(int argc, char **argv)
 	    unlink(lockfile);
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 		   "%s: Background process finished", myname);
-	    exit(0);
+	    _exit(0);
 	default:		/* parent */
 	    break;
 	}
