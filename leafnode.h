@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.23 2002/01/08 17:42:18 emma Exp $ */
+/* $Id: leafnode.h,v 1.24 2002/01/11 00:05:44 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -530,12 +530,14 @@ extern "C" {
 /* from tab2spc.c */
     void tab2spc(char *);
 
-/* from log_ */
+/* from log_*.c */
     int log_unlink(const char *);
     int log_fsync(int);
     int log_close(int);
     int log_fclose(FILE *);
     int log_rename(const char *, const char *);
+    int log_chmod(const char *, mode_t);
+    int log_fchmod(const int, mode_t);
 
 /* from wildmat.c */
     int wildmat(const char *text, const char *p);
