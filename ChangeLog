@@ -1,5 +1,7 @@
 2002-06-24  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
+	* leafnode.h, miscutil.c: Remove old 'struct msgidtree' stuff,
+	saves around 100 LoC.
 	* nntpd.c: doarticle: no need for \n removal any more -- done by
 	getaline.
 	* fetchnews.c: Cleanup of main() -- use volatile for setjmp
