@@ -85,7 +85,7 @@ server_info(const char *spool, const char *server,
 	str_ulong(portstr + 1, port);
     }
 
-    mastr_vcat(s, spool, "/leaf.node/", server, port, suffix, 0);
+    mastr_vcat(s, spool, "/leaf.node/", server, portstr, suffix, 0);
 
     res = critstrdup(mastr_str(s), "server_info");
     mastr_delete(s);
