@@ -1,3 +1,25 @@
+2003-08-14  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030814a =
+	* fetchnews.c: Fix up xref parsing when the xref header is missing.  
+	* fetchnews.c: Make Xref: based filtering work in XOVER phase
+	already.  Bug reported by Reiner Steib.  
+
+2003-08-13  Matthias Andree <matthias.andree@gmx.de>
+
+	* README.html: Mention syslog configuration. Feed through tidy to
+	reformat.  
+
+2003-08-12  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c, filterfile.5.in, filterutil.c, store.c: Enhance
+	filter logging.  
+
+2003-08-11  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, NEWS, grouplist.c, grouplist.h, texpire.c,
+	xoverutil.c: Bugfix: Expire groups that are no longer in "active".  
+
 2003-07-31  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20030731a =

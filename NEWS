@@ -1,5 +1,9 @@
 Changes since 20030731a:
 - Bugfix: Expire groups that are no longer in "active".
+- Bugfix: Make Xref: based filters work in the XOVER phase already, to
+  avoid downloading the article.
+- Logging: Make filter logging more consistent.
+- Documentation: Refine README*, mention syslog.conf edits.
 
 20030731a: Changes since 20030728a:
 - Bugfix: applyfilter removes filtered articles from the spool at large.
