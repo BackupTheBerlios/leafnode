@@ -1,3 +1,15 @@
+2002-09-20  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release 2.0.0.alpha20020921a ---
+	* configure.ac: bump version 
+	* nntpd.c: Fix CVSTrac #9: Own posts do not show up. Reported by
+	Jeff Grossman and Raymond Scholz.  We now remove the message.id link
+	unless we link the article into in.coming.  
+	* nntpd.c: Squeeze another 4 lines out of dopost() 
+	* nntpd.c: Cleanup dopost(), reducing it. Untested. No bugfixes
+	here.  
+	* midutil.c, msgid.h: New function msgid_deallocate.  
+
 2002-09-14  Matthias Andree <matthias.andree@gmx.de>
 
 	* fetchnews.c: Only delete postings from out.going on successful
