@@ -1,3 +1,6 @@
+/** \file configparam.c
+ * (C) 2001 - 2002 by Matthias Andree
+ */
 #include "config_defs.h"
 #include "configparam.h"
 #include <stdlib.h>
