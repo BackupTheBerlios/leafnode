@@ -360,9 +360,7 @@ readactive(void)
     t = mastrcpy(s, spooldir);
     t = mastrcpy(t, GROUPINFO);
 
-    if ((f = fopen(s, "r")) != NULL) {
-
-    } else {
+    if ((f = fopen(s, "r")) == NULL) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
 	return;
     }
@@ -428,6 +426,9 @@ readactive(void)
     activesize = (size_t)(g - active);	/* C magic */
     /* needed so that subsequent insertgroup can work properly */
     sort(active, activesize, sizeof(struct newsgroup), &_compactive);
+
+    /* don't check for errors, we opened the file for reading */
+    (void)fclose(f);
 }
 
 /* only read active if it has changed or not been loaded previously */
