@@ -247,7 +247,6 @@ mastr_getln(mastr * m, FILE * f,
     char buf[40];
     ssize_t bufsiz = (ssize_t)sizeof buf;
     ssize_t r;
-    char *c;
 
     mastr_clear(m);
 
@@ -262,11 +261,11 @@ mastr_getln(mastr * m, FILE * f,
 		mastr_oom();
 		/*@notreached@*/ return 0;
 	    }
-	memcpy(m->dat + m->len, buf, (size_t)r);
+	memcpy(m->dat + m->len, buf, (size_t)r); /* FIXME: avoid this copy */
 	if (maxbytes > 0)
 	    maxbytes -= r;
 	m->len += r;
-	if (r == 0 || (c = memchr(buf, '\n', (size_t)r)))
+	if (r == 0 || memchr(buf, '\n', (size_t)r) != NULL)
 	    break;
     }
     return (ssize_t)(m->len);
