@@ -1503,8 +1503,6 @@ postarticles(void)
 				   "Posting %s", *y);
 			    if (post_FILE(f, &line)) {
 				/* POST was OK */
-				if (checkstatus(f1, 'm'))
-				    (void)log_moveto(*y, "/backup.moderated/");
 				++n;
 			    } else {
 				/* POST failed */

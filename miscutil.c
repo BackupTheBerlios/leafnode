@@ -59,7 +59,6 @@ struct mydir {
 /*@+matchanyintegral@*/
 static const struct mydir dirs[] = {
     {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
-    {"backup.moderated", 0755},	/* carries articles to moderated upstream groups */
     {"interesting.groups", 0755},
     {"dormant.groups", 0755},
     {"leaf.node", 0755},

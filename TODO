@@ -46,8 +46,8 @@ Ralfs TODO:
 	  "%d articles deleted' message not correct.
 	* delaybody mode: Cancels for marked bodies lead to marks not being
 	  removed (supersedes are handled ok) until expiry of the pseudo header.
-	* Leftover link in temp.files for each (successfully?) posted article,
-	  as well as backup.moderated.  Reported by Robert Marshall in
+	* Leftover link in temp.files for each (successfully?) posted article.
+	  Reported by Robert Marshall in
 	  <3D39D38D.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>.
 	* :active.read must not be updated on NEWGROUPS, or the active will
 	  never be refetched as a whole.
@@ -268,6 +268,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2002-09-07 Matthias Andree
+	   no longer store articles in backup.moderated.
 
 2002-08-21 Jörg Dietrich
 	   dopost: Newsgroups: is not checked for valid groups
