@@ -1,8 +1,9 @@
 #include "config.h"
-#ifndef HAVE_MKSTEMP
+#if !HAVE_MKSTEMP
 /*
  * mkstemp(): create a unique temporary file
  * written by Cornelius Krasel - (c) 2000
+ * bugfixes by Matthias Andree - (c) 2002
  *
  * See README for restrictions on the use of this software.
  */
@@ -23,12 +24,12 @@
 int
 mkstemp(char *template)
 {
-    int i, j, l, fd;
+    int i, j, fd;
     char *c;
-    char[] use =		/* 62 chars to choose from */
+    char use[] =		/* 62 chars to choose from */
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    c = *(template + strlen(template) - 1);
+    c = (template + strlen(template) - 1);
     i = 0;
     while ((*c-- == 'X') && (*c != *template))
 	i++;
