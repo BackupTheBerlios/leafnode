@@ -101,7 +101,7 @@ __P((u_char *, size_t, size_t, int (*)(const void *, const void *)));
  * boundaries.
  */
 /* Assumption: PSIZE is a power of 2. */
-#define EVAL(p) ((u_char **)(void *)					\
+#define eval(p) ((u_char **)(void *)					\
 	((u_char *)0 +							\
 	    (((u_char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1))))
 
@@ -142,15 +142,15 @@ mergesort(void *base, size_t nmemb, register size_t size,
     setup(list1, list2, nmemb, size, cmp);
     last = list2 + nmemb * size;
     i = big = 0;
-    while (*EVAL(list2) != last) {
+    while (*eval(list2) != last) {
 	l2 = list1;
-	p1 = EVAL(list1);
-	for (tp2 = p2 = list2; p2 != last; p1 = EVAL(l2)) {
-	    p2 = *EVAL(p2);
+	p1 = eval(list1);
+	for (tp2 = p2 = list2; p2 != last; p1 = eval(l2)) {
+	    p2 = *eval(p2);
 	    f1 = l2;
 	    f2 = l1 = list1 + (p2 - list2);
 	    if (p2 != last)
-		p2 = *EVAL(p2);
+		p2 = *eval(p2);
 	    l2 = list1 + (p2 - list2);
 	    while (f1 < l1 && f2 < l2) {
 		if ((*cmp) (f1, f2) <= 0) {
@@ -164,8 +164,8 @@ mergesort(void *base, size_t nmemb, register size_t size,
 		}
 		if (!big) {	/* here i = 0 */
 		    while ((b += size) < t && cmp(q, b) > sense)
-			if (++i == 6) {
-			    big = 1;
+			if (++i == (size_t)6) {
+			    big = (size_t)1;
 			    goto EXPONENTIAL;
 			}
 		} else {
@@ -277,9 +277,9 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
     u_char *f1, *f2, *s, *l2, *last, *p2, tmp;
 
     size2 = size * 2;
-    if (n <= 5) {
+    if (n <= (size_t)5) {
 	insertionsort(list1, n, size, cmp);
-	*EVAL(list2) = (u_char *) list2 + n * size;
+	*eval(list2) = (u_char *) list2 + n * size;
 	return;
     }
     /*
@@ -289,7 +289,7 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
     i = 4 + (n & 1);
     insertionsort(list1 + (n - i) * size, i, size, cmp);
     last = list1 + size * (n - i);
-    *EVAL(list2 + (last - list1)) = list2 + n * size;
+    *eval(list2 + (last - list1)) = list2 + n * size;
 
 #ifdef NATURAL
     p2 = list2;
@@ -305,7 +305,7 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
 	}
 	if (length < THRESHOLD) {	/* Pairwise merge */
 	    do {
-		p2 = *EVAL(p2) = f1 + size2 - list1 + list2;
+		p2 = *eval(p2) = f1 + size2 - list1 + list2;
 		if (sense > 0)
 		    swap(f1, f1 + size);
 	    } while ((f1 += size2) < f2);
@@ -313,7 +313,7 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
 	    l2 = f2;
 	    for (f2 = f1 + size2; f2 < l2; f2 += size2) {
 		if ((cmp(f2 - size, f2) > 0) != sense) {
-		    p2 = *EVAL(p2) = f2 - list1 + list2;
+		    p2 = *eval(p2) = f2 - list1 + list2;
 		    if (sense > 0)
 			reverse(f1, f2 - size);
 		    f1 = f2;
@@ -323,14 +323,14 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
 		reverse(f1, f2 - size);
 	    f1 = f2;
 	    if (f2 < last || cmp(f2 - size, f2) > 0)
-		p2 = *EVAL(p2) = f2 - list1 + list2;
+		p2 = *eval(p2) = f2 - list1 + list2;
 	    else
-		p2 = *EVAL(p2) = list2 + n * size;
+		p2 = *eval(p2) = list2 + n * size;
 	}
     }
 #else				/* pairwise merge only. */
     for (f1 = list1, p2 = list2; f1 < last; f1 += size2) {
-	p2 = *EVAL(p2) = p2 + size2;
+	p2 = *eval(p2) = p2 + size2;
 	if (cmp(f1, f1 + size) > 0)
 	    swap(f1, f1 + size);
     }
