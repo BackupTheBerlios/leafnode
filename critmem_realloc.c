@@ -15,6 +15,7 @@
 void *
 mycritrealloc(const char *f, long l, void *oa, size_t size, const char *message)
 {
+    void *a;
 
 #ifdef WITH_DMALLOC
     a = _realloc_leap(f, l, oa, size);
