@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.30 2002/02/11 01:24:28 emma Exp $ */
+/* $Id: leafnode.h,v 1.31 2002/02/11 02:26:45 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -601,6 +601,9 @@ extern "C" {
 
 /* getwatermarks.c */
     int getwatermarks(unsigned long *, unsigned long *, unsigned long *);
+
+/* touch.c */
+    int touch(const char *name);
 
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
 
