@@ -295,10 +295,11 @@ main(int argc, char *argv[])
 			unlink(de->d_name);
 		    }
 		} else { /* !dryrun */
-		   if (verbose) {
-		       printf("%s would be deleted\n", de->d_name);
-		   }
-	       }
+		    if (verbose) {
+			printf("%s would be deleted\n", de->d_name);
+		    }
+		}
+		deleted++;
 	    } else {
 		/* restore atime and mtime to keep texpire
 		 * functionality intact */
@@ -326,10 +327,12 @@ main(int argc, char *argv[])
     }
     writeactive();
     unlink(lockfile);
-    printf("%d articles deleted, %d kept.\n", deleted, kept);
+    printf("%d articles %sdeleted, %d kept.\n", deleted, dryrun ? "would have been " : "", kept);
     if (verbose)
-	printf("Updating .overview file\n");
+	printf("Updating .overview file...");
     getxover(1);
+    if (verbose)
+	printf("Done.\n");
     freexover();
     freeactive(active);
     exit(EXIT_SUCCESS);
