@@ -394,6 +394,7 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
     FILE *f;
     char *t;
     char s[PATH_MAX + 1];	/* FIXME */
+    struct stat st;
 
     f = NULL;
     t = NULL;
@@ -420,6 +421,13 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
 	if (!f)
 	    f = fopenpseudoart(group, s, a);
 	markinterest(group);	/* FIXME: check error */
+    }
+
+    /* do not return articles with zero size (these have been truncated by
+     * store.c after a write error) */
+    if (fstat(fileno(f), &st) || st.st_size == 0) {
+	fclose(f);
+	f = 0;
     }
 
     return f;
@@ -664,9 +672,12 @@ dogroup(const char *arg, unsigned long *artno)
     rereadactive();
     g = findgroup(arg);
     if (g) {
+	freexover();
+	xovergroup = 0;
 	if (isinteresting(g->name))
 	    markinterest(g);
 	if (chdirgroup(g->name, FALSE)) {
+	    maybegetxover(g);
 	    if (g->count == 0) {
 		g->count = (g->last >= g->first ? g->last - g->first + 1 : 0);
 		/* FIXME: count articles in group */
@@ -735,8 +746,6 @@ dogroup(const char *arg, unsigned long *artno)
 	} else {		/* group directory is not present */
 	    g->first = g->last = g->count = ispseudogroup(g->name) ? 1 : 0;
 	}
-	freexover();
-	xovergroup = 0;
 	nntpprintf("211 %lu %lu %lu %s group selected",
 		   g->count, g->first, g->last, g->name);
 	*artno = g->first;
@@ -1425,6 +1434,8 @@ dopost(void)
 	    }
 	    if (modgroup && !approved) {
 		free(modgroup);
+		nntpprintf("240 Posting scheduled for posting to "
+		           "upstream, be patient");
 		log_unlink(inname);
 		return;
 	    }
@@ -2143,6 +2154,14 @@ dummy(int unused)
     (void)unused;
 }
 
+int mysetfbuf(FILE *f, char *buf, size_t size) {
+#ifdef SETVBUF_REVERSED
+    return setvbuf(f, _IOFBF, buf, size);
+#else
+    return setvbuf(f, buf, _IOFBF, size);
+#endif
+}
+
 int
 main(int argc, char **argv)
 {
@@ -2164,11 +2183,7 @@ main(int argc, char **argv)
     /* set buffer */
     fflush(stdout);
 
-#ifdef SETVBUF_REVERSED
-    setvbuf(stdout, _IOFBF, buf, bufsize);
-#else
-    setvbuf(stdout, buf, _IOFBF, bufsize);
-#endif
+    mysetfbuf(stdout, buf, bufsize);
 
     if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
 	|| (err >= (int)sizeof(conffile))) {
@@ -2240,7 +2255,6 @@ main(int argc, char **argv)
 		  "503 Exiting, unable to read user list: %m");
 	exit(EXIT_FAILURE);
     }
-    rereadactive();
     signal(SIGCHLD, dummy);	/* SIG_IGN would cause ECHILD on wait, so we use
 				   our own no-op dummy */
     gmt_off = gmtoff();		/* get difference between local time and GMT */
@@ -2249,11 +2263,16 @@ main(int argc, char **argv)
 	   allowposting()? "" : " (No posting.)",
 	   allowposting()? "" : getenv("NOPOSTING"));
     fflush(stdout);
+    rereadactive(); /* print banner first, so while the client command
+is in transit, we read the active file. should speed things up by 2
+round trips for clients. */
     main_loop();
     freexover();
     freeactive();
     freelocal();
     freeconfig();
+    /* Ralf Wildenhues: close stdout before freeing its buffer */
+    (void)fclose(stdout);
     free(buf);
     exit(0);
 }
