@@ -1,11 +1,11 @@
 /*
- * (C) 2001 by Matthias Andree 
+ * (C) 2001 by Matthias Andree
  */
 
 /*
  * This file (leafnode-version.c) is public domain. It comes without and
  * express or implied warranties. Do with this file whatever you wish, but
- * don't remove the disclaimer. 
+ * don't remove the disclaimer.
  */
 
 #include <stdio.h>
@@ -20,7 +20,8 @@ main(void)
     puts(version);
     fputs("current machine: ", stdout);
     fflush(stdout);
-    if (system("/bin/uname -a"))
+    putenv("PATH=/bin:/usr/bin");
+    if (system("uname -a"))
 	puts(" (error)");
     fputs("bindir: ", stdout);
     puts(bindir);
