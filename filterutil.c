@@ -258,9 +258,21 @@ readfilter(const char *filterfilename)
     if (!ff) {
 	ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 	       "Unable to open filterfile %s: %m", filterfilename);
-	rv = FALSE;
+	free(param);
+	free(value);
+	return FALSE;
     }
 
+    /* we manually hack up a state machine here to make reading the
+     * filter file robust and get proper error messages.
+     *
+     * we have four states: RF_WANTNG, RF_WANTPAT, RF_WANTNGORPAT,
+     * RF_WANTACTION, which indicate what condition (input line) leads
+     * to a transition.
+     *
+     * the initial state is RF_WANTNG, and the terminal state must be
+     * RF_WANTNG or RF_WANTNGORPAT, otherwise the file is incomplete.
+     */
     state = RF_WANTNG;
     while ((l = getaline(ff))) {
 	line++;
@@ -529,8 +541,6 @@ killfilter(const struct filterlist *f, const char *hdr)
     else
 	return FALSE;
 }
-
-
 
 /*
 ** Free filterlist but not filterentries
