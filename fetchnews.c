@@ -345,7 +345,7 @@ usage(void)
 	    "Setting none of the options\n"
 	    "    -B -H -P -R\n"
             "is equivalent to setting all of them, unless [-M message-id] is used.\n"
-	    "Options [-S Server], [-M message-id] and [-N newsgroup] may be repeated.\n"
+	    "Options [-S server], [-M message-id] and [-N newsgroup] may be repeated.\n"
 	    "Articles specified by Message-ID will always be fetched as a whole,\n"
 	    "no matter if they were posted to a delaybody group.\n"
 	    "\n"
