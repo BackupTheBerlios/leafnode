@@ -1,6 +1,25 @@
+2003-10-26  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20031026a =
+	* localutil.c: Fix handling of groups with NULL components.  Allow
+	multiple adjacent TABs in /etc/local.groups.
+	* activutil.c, activutil.h: Fix handling of groups with NULL
+	components.
+	* ln_log.c: Print warnings in any verbose level.
+	* fetchnews.c: Don't consider newsgroups that start with a dot to
+	be end of output.
+
+2003-10-20  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c, fetchnews.h, fetchnews_check_date.c, leafnode.h,
+	nntputil.c: Pass server to [new]nntpreply() to improve error
+	reporting.
+
 2003-10-19  Matthias Andree <matthias.andree@gmx.de>
 
-	= snapshot 20031009a =
+	* ChangeLog, NEWS, configure.ac: snapshot 20031019a
+
+	= snapshot 20031019a =
 	* getwatermarks.c: Fix for empty groups.
 	* fetchnews.c: Bump group "first" counter rather than last in empty
 	groups.
