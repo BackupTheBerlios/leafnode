@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.13 2001/12/18 15:57:28 emma Exp $ */
+/* $Id: leafnode.h,v 1.14 2001/12/20 03:21:32 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -29,13 +29,14 @@ extern "C" {
 /* limits.h is supposed to contain PATH_MAX, we include sys/param.h too */
 #include <limits.h>
 #include <sys/param.h>
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#endif
-#ifndef __USE_XOPEN
-#define __USE_XOPEN		/* for glibc's crypt() */
-#endif
 #include <unistd.h>
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 #define BLOCKSIZE 16384
 
