@@ -2138,7 +2138,12 @@ main(int argc, char **argv)
 
     /* set buffer */
     fflush(stdout);
+
+#ifdef SETVBUF_REVERSED
+    setvbuf(stdout, _IOFBF, buf, bufsize);
+#else
     setvbuf(stdout, buf, _IOFBF, bufsize);
+#endif
 
     if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
 	|| (err >= (int)sizeof(conffile))) {
