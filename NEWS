@@ -6,6 +6,8 @@ Changes since 20050102a:
 - Change: obtain LISTGROUP article numbers directly from the directory
   rather than from the overview, to let cancel/supersedes take effect
   before the next texpire run. Suggested by Frank Wein.
+- Bugfix: yesterdays' "do not crash if the groupinfo file is empty"
+  brought back the malformatted line "#A " bug.
 
 20050102a: Changes since 20041227a:
 - Bugfix: fetchnews will only try to obtain low/high marks for a group

@@ -486,6 +486,7 @@ readactive(void)
        return;
     }
 
+    file_index = 0;
     p = getabufferedline(mmap_ptr, &file_index, filesize);
     if (p && strncmp(p, "#A ", 3) == 0) {
 	long t;
