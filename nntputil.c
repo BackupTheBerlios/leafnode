@@ -130,10 +130,11 @@ newnntpreply(/*@out@*/ char **resline
     assert(nntpin != NULL);
 
     do {
-	response = getaline(nntpin);
+	response = mgetaline(nntpin);
 	if (!response) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "NNTP server went away while waiting for response: %m");
+		   "NNTP server went away while waiting for response");
+	    if (resline) *resline = NULL;
 	    return -1;
 	}
 	if (strlen(response) >= 3 && isdigit((unsigned char)response[0])
@@ -189,7 +190,7 @@ any_connect(const int family, const int socktype, const int protocol,
 
     as = masock_sa2addr(sa);
     ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	   "  trying address %s port %ld...",
+	   "  trying:    address %s port %ld...",
 	   as ? as : "(unknown)", masock_sa2port(sa));
 
     sock = socket(family, socktype, protocol);
