@@ -1,5 +1,18 @@
+2003-10-09  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: XOVER fixes.  XOVER n and XOVER n- didn't work for pseudo
+	articles (XOVER n-m should've been fine).
+	* applyfilter.c: Don't choke on zero-size articles. Reported by
+	Reiner Steib.
+
+2003-10-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* activutil.c: Avoid crash on fresh installs without local.groups,
+	reported by Jürgen Salk.
+
 2003-10-01  Matthias Andree <matthias.andree@gmx.de>
 
+	* ChangeLog, NEWS: Make up for missing ChangeLog/NEWS entries.
 	* README.html: Fix typo, found by Jürgen Salk.
 
 	= snapshot 20031001a =

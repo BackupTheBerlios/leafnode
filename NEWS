@@ -1,3 +1,9 @@
+Changes since 20031001a:
+- Bugfix: applyfilter no longer chokes on 0-sized articles and will
+  unconditionally deleted them. Reported by Reiner Steib.
+- Bugfix: leafnode was unable to retrieve pseudo articles with XOVER n
+  or XOVER n- forms (XOVER n-m was fine).
+
 20031001a: Changes since 20030814a:
 - Bugfix: stricter GROUP reply parsing to avoid accepting negative
   values (seen on some INN with apparently corrupt overview).
