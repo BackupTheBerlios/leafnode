@@ -2030,7 +2030,9 @@ main(int argc, char **argv)
     signal(SIGTERM, SIG_IGN);	/* FIXME */
 
     if (!postonly) {
-	if (rc != 0) {
+	if (rc == 0 && forceactive) {
+	    /* read local groups into the new active */
+	    readlocalgroups();
 	    mergeactives(oldactive, active);
 	    free(oldactive);
 	}
