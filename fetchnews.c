@@ -1852,8 +1852,8 @@ do_server(struct serverlist *cursrv, int forceactive)
 
     /* authenticate */
     if (cursrv->username && !authenticate(cursrv)) {
-	ln_log(LNLOG_SERR, LNLOG_CSERVER, "%s: error, cannot authenticate",
-		cursrv->name);
+	ln_log(LNLOG_SERR, LNLOG_CSERVER, "%s@%s: error, cannot authenticate",
+ 	        cursrv->username, cursrv->name);
 	goto out;
     }
 
