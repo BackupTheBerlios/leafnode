@@ -94,10 +94,10 @@ void readlocalgroups( void ) {
     strcpy( s, spooldir );
     strcat( s, "/leaf.node/local.groups" );
 
-    if (( f = fopen( s, "r" )) == 0 ) {
+    if (!( f = fopen( s, "r" ))) {
 	/* not very dramatic because the user probably just
 	   does not want local groups */
-	ln_log(LNLOG_DEBUG, "unable to open %s: %m", s );
+	ln_log(LNLOG_DEBUG, "unable to open %s: %s", s, strerror(errno));
 	return;
     }
 
@@ -120,7 +120,6 @@ void readlocalgroups( void ) {
 
     fclose(f);
     mergegroups();
-
 }
 
 /*

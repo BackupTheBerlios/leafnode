@@ -63,18 +63,6 @@ See README for restrictions on the use of this software.
 #define P_CONTINUE	350
 #define P_ACCEPTED	250
 
-#ifdef HAVE_IPV6
-/* 
- *  * local union struct
- *   */
-union sockaddr_union
-{
-    struct sockaddr         sa;
-    struct sockaddr_in      sin;
-    struct sockaddr_in6     sin6;
-};
-#endif
-
 int write2(int fd, const char *msg);
 int hash (const char *);
 FILE * fopenart(const char *);
@@ -1816,12 +1804,13 @@ int main( int argc, char ** argv ) {
     int option, reply;
 /* GNU libc5 does not have socklen_t */
 /*    socklen_t fodder; */
-    size_t fodder;
+    int fodder;
     char *conffile;
+    char peername[256];
     struct hostent *he;
 #ifdef HAVE_IPV6
-    union sockaddr_union su;
-    union sockaddr_union peer;
+    struct sockaddr_in6 sa;
+    struct sockaddr_in6 peer;
 #else
     struct sockaddr_in sa;
     struct sockaddr_in peer;
@@ -1857,38 +1846,32 @@ int main( int argc, char ** argv ) {
     if ( owndn )
 	strncpy( fqdn, owndn, 255 );
     else {
-#ifdef HAVE_IPV6
-	fodder = sizeof(union sockaddr_union);
-	if (getsockname(0, (struct sockaddr *)&su, &fodder)) {
-	    /* FIXME: check errno for ENOTSOCK and bail out otherwise */
-	    strcpy( fqdn, "localhost" );
-	} else {
-	    he = gethostbyaddr( (char *)&su.sin6.sin6_addr,
-				sizeof(su.sin6.sin6_addr),
-				su.sin.sin_family);
-	    if ( he && he->h_name) {
-		strncpy(fqdn, he->h_name, 63);
-	    } else {
-		if (su.sa.sa_family == AF_INET6)
-		    inet_ntop(AF_INET6, &su.sin6.sin6_addr, fqdn, 63);
-		else
-		    inet_ntop(AF_INET,  &su.sin.sin_addr,   fqdn, 63);
-	    }
-	}
-#else
-	fodder = sizeof(struct sockaddr_in);
+	fodder = sizeof(sa);
 	if (getsockname(0, (struct sockaddr *)&sa, &fodder)) {
-	    /* FIXME: check errno for ENOTSOCK and bail out otherwise */
+	    if(errno != ENOTSOCK)
+		ln_log(LNLOG_NOTICE, "cannot getsockname: %s", strerror(errno));
+	    /* FIXME: bail out? */
 	    strcpy( fqdn, "localhost" );
 	} else {
+#ifdef HAVE_IPV6
+	    he = gethostbyaddr( (char *)&sa.sin6_addr,
+				sizeof(sa.sin6_addr),
+				AF_INET6);
+#else
 	    he = gethostbyaddr( (char *)&sa.sin_addr.s_addr,
 				sizeof(sa.sin_addr.s_addr),
 				AF_INET);
-	    strncpy( fqdn, 
-		     he && he->h_name ? he->h_name : inet_ntoa(sa.sin_addr),
-		     63 );
-	}
 #endif
+	    if(!he) ln_log(LNLOG_NOTICE, "cannot gethostbyaddr: %d",
+			   h_errno);
+#ifdef HAVE_IPV6
+	    inet_ntop(AF_INET6, &sa.sin6_addr, peername, sizeof(peername));
+#else
+	    inet_ntop(AF_INET, &sa.sin_addr, peername, sizeof(peername));
+#endif
+
+	    strncpy( fqdn, he && he->h_name ? he->h_name : peername, 63);
+	}
     }
     if ( strncasecmp( fqdn, "localhost", 9 ) == 0 )
 	whoami();
@@ -1897,15 +1880,25 @@ int main( int argc, char ** argv ) {
     verbose = 0;
     umask((mode_t)02);
 
-    if ( getpeername(0, (struct sockaddr *)&peer, &fodder) )
-	ln_log(LNLOG_ERR, "Connect from unknown client");
-    else {
+    fodder=sizeof(peer);
+    if ( getpeername(0, (struct sockaddr *)&peer, &fodder) ) {
+	if (errno != ENOTSOCK) {
+	    ln_log(LNLOG_ERR, "Cannot getpeername: %s, aborting.", 
+		       strerror(errno));
+	    exit(1);
+	}
+    } else {
+	ln_log(LNLOG_INFO, "Connect from %s", 
 #ifdef HAVE_IPV6
-	/* FIXME: do nothing, because we don't know how */
+               inet_ntop(AF_INET6, &peer.sin6_addr, 
+			 peername, sizeof(peername))
 #else
-	ln_log(LNLOG_INFO, "Connect from %s", inet_ntoa(peer.sin_addr) );
+	       inet_ntop(AF_INET, &peer.sin_addr,
+			 peername, sizeof(peername))
 #endif
+	    );
     }
+/* #endif */
 
     if ( authentication && ( reply = readpasswd() ) > 0 ) {
 	printf( "503 Unable to read user list, exiting (%s)\r\n",

@@ -199,9 +199,8 @@ int readfilter( char *filterfile ) {
 
     ff = fopen( filterfile, "r" );
     if ( !ff ) {
-	ln_log(LNLOG_WARNING, "Unable to open filterfile %s: %m", filterfile );
-	if ( verbose )
-	    printf( "Unable to open filterfile %s\n", filterfile );
+	ln_log(LNLOG_WARNING, "Unable to open filterfile %s: %s", filterfile,
+	       strerror(errno) );
 	return FALSE;
     }
     debug = 0;

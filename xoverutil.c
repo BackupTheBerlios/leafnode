@@ -256,7 +256,7 @@ int getxover( void ) {
 
     d = opendir( "." );
     if ( !d ) {
-	ln_log(LNLOG_ERR, "opendir: %m" );
+	ln_log(LNLOG_ERR, "opendir: %s", strerror(errno));
 	return 0;
     }
 
@@ -347,7 +347,8 @@ int getxover( void ) {
     /* compare .overview contents with files on disk */
     d = opendir( "." );
     if ( !d ) {
-	ln_log(LNLOG_ERR, "opendir %s: %m", getcwd( s, 1024 ) );
+	ln_log(LNLOG_ERR, "opendir %s: %s", getcwd( s, 1024 ),
+	       strerror(errno) );
 	return 0;
     }
     while ( (de = readdir(d)) != NULL ) {
@@ -420,13 +421,15 @@ void writexover( void ) {
     strcpy(lineend, "\n");
 #ifdef HAVE_MKSTEMP
     if ( (wfd=mkstemp(newfile)) == -1) {
-	ln_log(LNLOG_ERR, "mkstemp of new .overview failed: %m" );
+	ln_log(LNLOG_ERR, "mkstemp of new .overview failed: %s",
+	       strerror(errno) );
 	return;
     }
 #else
     if ( !( wfd=open( mktemp(newfile), O_WRONLY|O_CREAT|O_EXCL, 0664 ) ) ) {
 	ln_log(LNLOG_ERR,
-		"open(O_WRONLY|O_CREAT|O_EXCL) of new .overview failed: %m" );
+		"open(O_WRONLY|O_CREAT|O_EXCL) of new .overview failed: %s",
+	       strerror(errno) );
 	return;
     }
 #endif
@@ -441,7 +444,8 @@ void writexover( void ) {
 	    oooh[vi++].iov_len = 1;
 	    if ( vi >= (UIO_MAXIOV - 1) ) {
 		if ( writev( wfd, oooh, vi ) != vc ) {
-		    ln_log(LNLOG_ERR, "writev() for .overview failed: %m" );
+		    ln_log(LNLOG_ERR, "writev() for .overview failed: %s",
+			   strerror(errno) );
 		    art = xlast+1;	/* so the loop will stop */
 		}
 		vi = vc = 0;
@@ -451,7 +455,8 @@ void writexover( void ) {
     }
     if ( vi ) {
 	if ( writev( wfd, oooh, vi ) != vc )
-	    ln_log(LNLOG_ERR, "writev() for .overview failed: %m" );
+	    ln_log(LNLOG_ERR, "writev() for .overview failed: %s",
+		   strerror(errno) );
 	else
 	    va = 1;
     }
@@ -460,10 +465,12 @@ void writexover( void ) {
     if ( va ) {
 	if ( rename( newfile, ".overview" ) ) {
 	    if ( unlink( newfile ) )
-		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %m" );
+		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %s",
+		       strerror(errno) );
 	    else
-		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %m",
-			getcwd(s, 1024), newfile );
+		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %s",
+		       getcwd(s, 1024), newfile,
+		       strerror(errno) );
 	}
 	else {
 	    if ( debugmode )
@@ -505,7 +512,8 @@ void fixxover( void ) {
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
     if ( !d ) {
-	ln_log(LNLOG_ERR, "opendir %s: %m", s );
+	ln_log(LNLOG_ERR, "opendir %s: %s", s,
+	       strerror(errno) );
 	return;
     }
 

@@ -369,10 +369,12 @@ int readconfig( char * configfile ) {
 	getrlimit( RLIMIT_CORE, &corelimit );	/* initialize struct */
         corelimit.rlim_cur = COREFILESIZE;
         if ( setrlimit( RLIMIT_CORE, &corelimit ) < 0 )
-            ln_log_sys(LNLOG_DEBUG, "Changing core file size failed: %m" );
+            ln_log_sys(LNLOG_DEBUG, "Changing core file size failed: %s",
+		       strerror(errno));
         corelimit.rlim_cur = 0;
         if ( getrlimit( RLIMIT_CORE, &corelimit ) < 0 )
-	    ln_log_sys(LNLOG_DEBUG, "Getting core file size failed: %m" );
+	    ln_log_sys(LNLOG_DEBUG, "Getting core file size failed: %s",
+		       strerror(errno));
 	else
 	    ln_log_sys(LNLOG_DEBUG, "Core file size: %lu", (unsigned long)corelimit.rlim_cur );
     }

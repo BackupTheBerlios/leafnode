@@ -272,7 +272,7 @@ void readactive( void ) {
 	fclose( f );
     }
     else {
-     	ln_log_sys(LNLOG_ERR, "unable to open %s: %m", s );
+     	ln_log_sys(LNLOG_ERR, "unable to open %s: %s", s, strerror(errno));
 	return;
     }
 
@@ -390,7 +390,8 @@ void fakeactive( void ) {
     strcat( s, "/interesting.groups" );
     d = opendir( s );
     if ( !d ) {
-	ln_log(LNLOG_ERR, "cannot open directory %s: %m", s );
+	ln_log(LNLOG_ERR, "cannot open directory %s: %s", s, 
+	       strerror(errno));
 	return;
     }
 

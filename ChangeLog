@@ -4,6 +4,14 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma4 -- changes since 2.0b5_ma3:
+
+- Fixes to IPv6 in nntpd.c -- PLEASE CHECK
+
+- Further fixes to console logging (leftover %m formats)
+
+- Fix local.groups handling
+
 ** History of 2.0b5_ma3 -- changes since 2.0b5_ma2:
 
 - Now has a new configuration file switch named avoidxover, if that is

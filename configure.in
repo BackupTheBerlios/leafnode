@@ -6,7 +6,7 @@ AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
 dnl version information
-VERSION="2.0b5_ma3"
+VERSION="2.0b5_ma4"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.

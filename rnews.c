@@ -248,7 +248,8 @@ int processfile ( char * filename ) {
     FILE * f;
 
     if ( ( f = fopen( filename, "r" ) ) == NULL ) {
-        fprintf( stderr, "unable to open %s: %m\n", filename );
+        fprintf( stderr, "unable to open %s: %s\n", filename,
+		 strerror(errno));
         return 0;
     }
     return fprocessfile( f, filename );	/* f is closed in fprocessfile */

@@ -65,7 +65,6 @@ static struct mydir dirs[]= {
     { "failed.postings",     0755 },
     { "interesting.groups",  0755 },
     { "leaf.node",           0755 },
-    { "local.groups",        0755 },
     { "message.id",         02755 },
     { "out.going",          02755 },
     { 0, 0 }
@@ -214,15 +213,15 @@ void checkinteresting( void ) {
 
     now = time( NULL );
     if ( chdir( spooldir ) || chdir( "interesting.groups" ) ) {
-	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %m",
-		spooldir );
+	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %s",
+	       spooldir, strerror(errno));
 	return;
     }
 
     d = opendir( "." );
     if ( !d ) {
-	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %m",
-		spooldir );
+	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %s",
+		spooldir, strerror(errno) );
 	return;
     }
 
@@ -261,8 +260,8 @@ int lockfile_exists( int silent, int block ) {
 	if (!silent)
 	    printf( "Could not open lockfile %s for writing, "
 		    "abort program ...\n", lockfile );
-	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %m",
-		lockfile );
+	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %s",
+		lockfile, strerror(errno));
 	return 1;
     }
     fl.l_type = F_WRLCK;
@@ -281,7 +280,8 @@ int lockfile_exists( int silent, int block ) {
 	    if (!silent)
 		printf( " locking %s failed: %s, abort ...\n"
 			, lockfile, strerror( errno ) );
-	    ln_log(LNLOG_ERR, "locking %s failed: %m, abort", lockfile );
+	    ln_log(LNLOG_ERR, "locking %s failed: %s, abort", lockfile,
+		   strerror(errno) );
 	    return 1;
 	}
     } else {
@@ -308,8 +308,8 @@ int isinteresting( const char *groupname ) {
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
     if ( !d ) {
-    	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s );
-	printf( "Unable to open directory %s\n", s );
+    	ln_log(LNLOG_ERR, "Unable to open directory %s: %s", s,
+	       strerror(errno));
 	return FALSE;
     }
 
@@ -388,11 +388,11 @@ static int makedir( char * d ) {
 	    continue; /* ok, I do use it sometimes :) */
 	if (errno==ENOENT)
 	    if (mkdir(p, 0775)) {
-		ln_log(LNLOG_ERR, "mkdir %s: %m", d );
+		ln_log(LNLOG_ERR, "mkdir %s: %s", d, strerror(errno) );
 		exit(EXIT_FAILURE);
 	    }
 	if (chdir(p)) {
-	    ln_log(LNLOG_ERR, "chdir %s: %m", d );
+	    ln_log(LNLOG_ERR, "chdir %s: %s", d, strerror(errno) );
 	    exit(EXIT_FAILURE);
 	}
     } while ( q );
@@ -713,7 +713,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.5 $
+/*  $Revision: 1.6 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"
