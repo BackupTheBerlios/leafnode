@@ -1,4 +1,8 @@
-Changes since 20040305a:
+Changes since 20040319a:
+- Documentation: document logstderr instead of the improper
+  ln_log_stderronly. Patch by Thomas Schwinge.
+
+20040319a: Changes since 20040305a:
 - Bugfix: XPAT, XHDR, NEWNEWS caused a segmentation fault when issued
   without argument (slrn bug triggered by ESC 1 ESC p or ESC 2 ESC p for
   instance). Reported by Robert Grimm.
@@ -189,7 +193,7 @@ to Jörg Dietrich for finding the real bug.
 20030728a: Changes since 20030716a:
 - Bugfix: unfold header before applying filters. Reported by Reiner
   Steib.
-- Feature: ln_log_stderronly (in config file) -e (on command line),
+- Feature: logstderr (in config file) -e (on command line),
   redirects all syslog to stderr, useful with daemontools or runit.
   Requested by Clemens Fischer. Only lightly tested.
 
