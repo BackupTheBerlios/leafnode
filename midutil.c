@@ -1,5 +1,6 @@
 #include "critmem.h"
 #include "ln_log.h"
+#include "ln_dir.h"
 #include "leafnode.h"
 #include "mastring.h"
 #include "msgid.h"
@@ -79,7 +80,9 @@ int
 msgid_allocate(const char *file /** file to link into message.id */,
 	const char *mid /** Non-NULL Message-ID to allocate */)
 {
-    const char *m = lookup(mid);
+    char *m = lookup(mid);
+    if (mkdir_parent(m, 0700))
+	return 0;
     if (sync_link(file, m) == 0) {
 	return 0;
     }
