@@ -9,6 +9,7 @@
 #include "ln_log.h"
 #include "get.h"
 #include "mastring.h"
+#include "bsearch_range.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -250,7 +251,33 @@ findxover(unsigned long article)
 				   address arithmetic does that already */
 }
 
-static unsigned long
+/*
+ * get index pair of smallest xoverinfo entry with
+ * artno >= low and highest entry with artno <= high
+ * returns -1 for failure
+ */
+int
+findxoverrange(unsigned long low, unsigned long high,
+	/*@out@*/ long *idxlow, /*@out@*/ long *idxhigh)
+{
+    struct xoverinfo xl, xh, *fl, *fh;
+
+    if (xcount == 0 || low > high)
+	return -1;
+
+    xl.artno = low;
+    xh.artno = high;
+
+    bsearch_range(&xl, &xh, &fl, &fh, xoverinfo, xcount,
+	    sizeof(struct xoverinfo), _compxover);
+    if (!fl || !fh)
+	return -1;
+    *idxlow = fl - xoverinfo;
+    *idxhigh = fh - xoverinfo;
+    return 0;
+}
+
+    static unsigned long
 crunchxover(struct xoverinfo *xi, unsigned long count)
 {
     unsigned long i, j;
