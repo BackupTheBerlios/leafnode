@@ -765,8 +765,10 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     deleted = kept = 0;
 
     /* skip empty groups */
-    if (!chdirgroup(n, FALSE))
+    if (!chdirgroup(n, FALSE)) {
+	g->first = g->last + 1;
 	return;
+    }
 
     /* barf on getcwd problems */
     if (!getcwd(gdir, LN_PATH_MAX)) {
