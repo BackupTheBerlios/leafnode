@@ -453,6 +453,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
  * Mark an article for download by appending its number to the
  * corresponding file in interesting.groups
  */
+/* FIXME: need error checking for write errors */
 static int
 markdownload(const struct newsgroup *group, const char *msgid)
 {
@@ -464,6 +465,7 @@ markdownload(const struct newsgroup *group, const char *msgid)
     if ((f = fopen(s, "r+"))) {
 	while ((l = getaline(f)) != NULL) {
 	    if (strncmp(l, msgid, strlen(msgid)) == 0)
+		(void)fclose(f);
 		return 0;	/* already marked */
 	}
 	fprintf(f, "%s\n", msgid);
