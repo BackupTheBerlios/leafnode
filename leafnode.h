@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.10 2001/11/29 17:48:30 emma Exp $ */
+/* $Id: leafnode.h,v 1.11 2001/12/14 03:42:30 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -176,7 +176,7 @@ extern "C" {
 				   "Other status strings may exist." */
     };
 
-    void insertgroup(const char *name, long unsigned first,
+    void insertgroup(const char *name, const char status, long unsigned first,
 		     long unsigned last, int date, const char *desc);
     void changegroupdesc(const char *groupname, char *desc);
     void mergegroups(void);
@@ -184,7 +184,6 @@ extern "C" {
     extern time_t activetime;
     void rereadactive(void);	/* only reread if none read or if it has changed */
     void writeactive(void);
-    void fakeactive(void);
     void freeactive(void);
 
 /*
@@ -333,6 +332,7 @@ extern "C" {
     extern const char *GZIP;
     extern const char *BZIP2;
     extern const char *CAT;
+    extern const char *DEFAULTMTA;
 
 /*
  * global variables from config file. These are defined in configutil.c
@@ -359,6 +359,7 @@ extern "C" {
 
     extern struct expire_entry *expire_base;
 
+    extern char *mta; /* mail transfer agent for mailing to moderators */
     /* expire for certain groups */
     extern unsigned long artlimit;
 
@@ -558,6 +559,9 @@ extern "C" {
 
 /* writes.c */
     ssize_t writes(int fd, const char *string);
+
+/* mailto.c */
+    int mailto(const char *address, int fd);
 
 #if 0
 #warning "WARNING: do not disable fsync in production use"
