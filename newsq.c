@@ -62,13 +62,19 @@ show_queue(const char *s)
 		char *fr = fgetheader(f, "From:", 1);
 		char *ng = fgetheader(f, "Newsgroups:", 1);
 		char *su = fgetheader(f, "Subject:", 1);
+		char *mi = fgetheader(f, "Message-ID:", 1);
+		char *da = fgetheader(f, "Date:", 1);
 		filesize = st.st_size;
 		count++;
 		if (fr != NULL && ng != NULL && su != NULL) {
-		    printf("%s: %8lu bytes, spooled %s\tFrom: %-.66s\n"
-			   "\tNgrp: %-.66s\n\tSubj: %-.66s\n",
+		    printf("%s: %8lu bytes, spooled %s"
+			   "\tFrom: %-.66s\n"
+			   "\tNgrp: %-.66s\n"
+			   "\tDate: %-.66s\n"
+			   "\tSubj: %-.66s\n"
+			   "\tM-ID: %-.66s\n",
 			   de->d_name, (unsigned long)filesize,
-			   ctime(&st.st_mtime), fr, ng, su);
+			   ctime(&st.st_mtime), fr, ng, da, su, mi);
 		} else {
 		    fprintf(stderr, "Header missing in file %s\n", de->d_name);
 		}
