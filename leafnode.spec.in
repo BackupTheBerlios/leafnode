@@ -73,7 +73,7 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %doc %_mandir/man8/*
 %doc ChangeLog AUTHORS COPYING COPYING.LGPL NEWS 
 %doc CREDITS DEBUGGING ENVIRONMENT FAQ INSTALL
-%doc README TODO README_FIRST README-leaf.node
+%doc README TODO README-leaf.node
 %doc README.html DEBUGGING
 %attr(2755,%{runas_user},%{runas_group}) %spooldir
 
