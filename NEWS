@@ -1,3 +1,10 @@
+Changes since 20031019a:
+- Change: log all warnings when verbosity is > 0
+- Bugfix: do not interpret group name that starts with a dot as the end
+  of server output (fetchnews).
+- Bugfix: refuse to add newsgroups with NULL components (leading or
+  trailing dot or two adjacent dots).
+
 20031019a: Changes since 20031009a:
 - Revamp applyfilter, now more robust.
 - Reply 440 rather than 500 if user tries to POST in NOPOSTING mode.
