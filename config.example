@@ -29,6 +29,11 @@ expire = 20
 # groupexpire comp.os.linux.* = 5 # groups too big to hold articles 20 days
 # groupexpire any.local.newsgroup = 100 # very interesting, hold longer
 
+## How many ARTICLE commands to we stuff down to the server in advance
+## of the article just read. Some servers may not get this right,
+## set it to 1 in that case.
+# windowsize = 50
+
 ## Never fetch more than this many articles from one group in one run.
 ## Be careful with this; setting it much below 1000 is probably a bad
 ## idea.
