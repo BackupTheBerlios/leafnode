@@ -1,6 +1,7 @@
 #!/bin/sh
 # This script updates leafnode installations < 1.6
 
+set -e
 if [ $# -ne 5 ]
 then
     echo usage: $0 [spooldir] [libdir] [lockfile] [runas_user] [runas_group]
@@ -12,10 +13,10 @@ SPOOLDIR=$1
 LIBDIR=$2
 LOCKFILE=$3
 RUNAS_USER=$4
-RUNAS_GROUP=$5
+RUNAS_GROUP=`id -g $4`
 SRCDIR=`pwd`
 
-if [ `id | cut -c5` -ne 0 ]
+if [ `id -u` -ne 0 ]
 then
     echo This command must be run as root.
     exit 1
