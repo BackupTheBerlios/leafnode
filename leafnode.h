@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.87 2003/07/28 20:34:02 emma Exp $ */
+/* $Id: leafnode.h,v 1.88 2003/10/12 15:37:58 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -345,10 +345,10 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 /*
  * various functions in artutil.c
  */
-    int parsekill_xref_line(/*@exposed@*/ char *xref,
+    int xref_to_list(/*@exposed@*/ char *xref,
       /*@out@*/ char ***groups, /*@null@*/ /*@out@*/ char ***artno_strings, int noskip);
 
-    void supersede_cancel(const char *msgid, const char *, const char *);
+    void delete_article(const char *msgid, const char *, const char *);
 
 /*
  * xover stuff -- for nntpd.c

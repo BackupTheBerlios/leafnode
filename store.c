@@ -219,7 +219,7 @@ store_stream(FILE * in /** input file */ ,
 	    if (c_subject < 2 && str_isprefix(line, "Subject:"))
 		++c_subject;
 	    else if (str_isprefix(line, "Supersedes:")) {
-		supersede_cancel(line + 11, "Supersede", "Superseded");
+		delete_article(line + 11, "Supersede", "Superseded");
 	    }
 	    break;
 	case 'P':
@@ -256,7 +256,7 @@ store_stream(FILE * in /** input file */ ,
 		const char *p = line + 8;
 		SKIPLWS(p);
 		if (str_isprefix(p, "cancel") && isspace((unsigned char)p[6]))
-		    supersede_cancel(p + 7, "Cancel", "Cancelled");
+		    delete_article(p + 7, "Cancel", "Cancelled");
 	    }
 	    break;
 	default:
@@ -447,7 +447,7 @@ store_stream(FILE * in /** input file */ ,
 
     /* delaybody downloaded: kill old pseudo article header */
     if (delayflg == 2) {
-	supersede_cancel(mid, "Delaybody body-fetch", "Body fetched");
+	delete_article(mid, "Delaybody body-fetch", "Body fetched");
     }
 
     /* now create link in message.id */

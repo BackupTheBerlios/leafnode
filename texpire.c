@@ -124,7 +124,7 @@ static struct thread *build_threadlist(unsigned long acount);
 static void free_threadlist(struct thread *);
 static unsigned long count_threads(struct thread *);
 static void remove_newer(struct thread *, time_t);
-static void delete_article(struct rnode *r);
+static void expire_article(struct rnode *r);
 static void delete_threads(struct thread *);
 static unsigned long low_wm(unsigned long high);
 
@@ -303,7 +303,7 @@ build_threadlist(unsigned long acount)
 			if (f->artno == 0) {	/* possibly update artno */
 			    f->artno = r->artno;
 			} else if (f->artno != r->artno) {	/* duplicate */
-			    delete_article(r);
+			    expire_article(r);
 			}
 		    }
 		    if (firstfound) {	/* link subthreads */
@@ -403,7 +403,7 @@ remove_newer(struct thread *threadlist, time_t expire)
  * r may be null.
  * this function does nothing if the artno of this node is zero. */
 static void
-delete_article(struct rnode *r)
+expire_article(struct rnode *r)
 {
     char name[64];
 
@@ -441,7 +441,7 @@ delete_threads(struct thread *threadlist)
 
     for (t = threadlist; t; t = t->next)
 	for (r = t->subthread; r; r = r->nthread)
-	    delete_article(r);
+	    expire_article(r);
 }
 
 /** make sure group directory is consistent */
@@ -480,7 +480,7 @@ updatedir(const char *groupname)
 				     "%s: article %lu has no "
 				     "message.id file", groupname, r->artno);
 			    if (!repair_spool)
-				delete_article(r);
+				expire_article(r);
 			    else
 				relink = 1;
 			}

@@ -893,7 +893,8 @@ fn_doxover(struct stringlist **stufftoget,
 
 	/* is there an Xref: header present as well? */
 	if (xover[8] == NULL ||
-	    (num_groups = parsekill_xref_line(xref_scratch, &newsgroups_list, NULL, 0)) == -1) {
+	    (num_groups = xref_to_list(xref_scratch,
+				       &newsgroups_list, NULL, 0)) == -1) {
 	    /* newsgroups filling by hand */
 	    num_groups = 1;
 	    newsgroups_list = critmalloc(num_groups * sizeof *newsgroups_list, "doxover");
