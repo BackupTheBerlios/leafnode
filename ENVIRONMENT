@@ -1,3 +1,7 @@
+LN_DEBUG_QUALIFICATION
+	If this environment variable is defined and non-empty, the
+	qualification process for the own host name is logged verbosely.
+
 LN_LOG_ABORT_ON_ERROR
 	If this environment variable is defined (even empty), the first
 	error logged causes leafnode to abort().
