@@ -50,6 +50,47 @@ static
 char *getxoverline(const int, const char *filename);
 int writexover(void);
 
+/* order must match enum xoverfields here! */
+static struct {
+    const char *header;
+    int len;
+} xoverentry[] = {
+    { "", 1 },
+    { "", 1 },
+    { "Subject:", 8 },
+    { "From:", 5 },
+    { "Date:", 5 },
+    { "Message-ID:", 11 },
+    { "References:", 11 },
+    { "Bytes:", 6 },
+    { "Lines:", 6 },
+    { "Xref:", 5 }
+};
+
+/** match header name -> xover entry
+ */
+enum xoverfields matchxoverfield(const char *header)
+{
+    enum xoverfields f;
+    switch (toupper(header[0])) {
+    case 'S': f = XO_SUBJECT;    break;
+    case 'F': f = XO_FROM;       break;
+    case 'D': f = XO_DATE;       break;
+    case 'M': f = XO_MESSAGEID;  break;
+    case 'R': f = XO_REFERENCES; break;
+    case 'B': f = XO_BYTES;      break;
+    case 'L': f = XO_LINES;      break;
+    case 'X': f = XO_XREF;       break;
+    default: return XO_ERR;
+    }
+    if (!strncasecmp(header, xoverentry[f].header, xoverentry[f].len))
+	return f;
+    else
+	return XO_ERR;
+}
+
+
+
 /** Extract information from given file to construct an .overview line.
  *  \return a malloc()ed string .overview */
 static
@@ -100,56 +141,58 @@ getxoverline(
 	bytes = st.st_size;
 
 	while ((l = block = getfoldedline(f))) {
+	    enum xoverfields field;
 	    if (!*l) {
 		free(block);
 		break;
-	    } else if (!from && !strncasecmp("From:", l, 5)) {
-		l += 5;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		if (*l) {
+	    }
+	    field = matchxoverfield(l);
+	    if (field == XO_ERR) {
+		free(block);
+		continue;
+	    }
+	    l += xoverentry[field].len;
+	    SKIPLWS(l);
+
+	    switch (field) {
+	    case XO_FROM:
+		if (!from && *l) {
 		    from = critstrdup(l, "getxoverline");
 		    tab2spc(from);
 		}
-	    } else if (!subject && !strncasecmp("Subject:", l, 8)) {
-		l += 8;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		subject = critstrdup(l, "getxoverline");
-		tab2spc(subject);
-	    } else if (!date && !strncasecmp("Date:", l, 5)) {
-		l += 5;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		if (*l) {
+		break;
+	    case XO_SUBJECT:
+		if (!subject) {
+		    subject = critstrdup(l, "getxoverline");
+		    tab2spc(subject);
+		}
+		break;
+	    case XO_DATE:
+		if (!date && *l) {
 		    date = critstrdup(l, "getxoverline");
 		    tab2spc(date);
 		}
-	    } else if (!msgid && !strncasecmp("Message-ID:", l, 11)) {
-		l += 11;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		if (*l) {
+		break;
+	    case XO_MESSAGEID:
+		if (!msgid && *l) {
 		    msgid = critstrdup(l, "getxoverline");
 		    tab2spc(msgid);
 		    D(d_stop_mid(msgid));
 		}
-	    } else if (!references && !strncasecmp("References:", l, 11)) {
-		l += 11;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		if (*l) {
+		break;
+	    case XO_REFERENCES:
+		if (!references && *l) {
 		    references = critstrdup(l, "getxoverline");
 		    tab2spc(references);
 		}
-	    } else if (!xref && !strncasecmp("Xref:", l, 5)) {
-		l += 5;
-		while (*l && isspace((unsigned char)*l))
-		    l++;
-		if (*l) {
+		break;
+	    case XO_XREF:
+		if (!xref && *l) {
 		    xref = critstrdup(l, "getxoverline");
 		    tab2spc(xref);
 		}
+	    default:
+		;
 	    }
 	    free(block);
 	}
@@ -209,18 +252,6 @@ _compxover(const void *a, const void *b)
 
     return (la->artno > lb->artno) - (la->artno < lb->artno);
 }
-
-#if 0
-/* FIXME: remove this */
-static int
-_compstr(const void *a, const void *b)
-{
-    const char *c = (const char *)a;
-    const char *d = (const char *)b;
-
-    return strcmp(c, d);
-}
-#endif
 
 /*
  * return xover record of "article". -1 means failure.

@@ -428,7 +428,6 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
     unsigned long int a;
     FILE *f;
     char *t;
-    char s[PATH_MAX + 1];	/* FIXME */
     struct stat st;
 
     f = NULL;
@@ -452,6 +451,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
     } else if (arg && *arg == '<') {
 	f = fopen(lookup(arg), "r");
     } else if (group && *artno) {
+	char s[64];
 	(void)chdirgroup(group->name, FALSE);
 	sprintf(s, "%lu", *artno);
 	f = fopen(s, "r");
@@ -548,7 +548,14 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
     unsigned long localartno;
     char *localmsgid = NULL;
     char *l;
-    const char *t;
+    static const char *whatyouget[] = {
+	"request text separately",
+	"body follows",
+	"head follows",
+	"text follows"
+    };
+
+    assert(what >= 0 && what <= 3);
 
     f = fopenart(group, arg, artno);
     if (!f) {
@@ -572,17 +579,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	localmsgid = fgetheader(f, "Message-ID:", 1);
     }
 
-    if (what == 0)
-	t = "request text separately";
-    else if (what == 1)
-	t = "body follows";
-    else if (what == 2)
-	t = "head follows";
-    else
-	t = "text follows";
-
     nntpprintf("%3d %lu %s article retrieved - %s", 223 - what,
-	    localartno, localmsgid, t);
+	    localartno, localmsgid, whatyouget[what]);
 
     while ((l = getaline(f)) && *l) {
 	if (what & 2) {
@@ -1677,11 +1675,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 		 struct stringlist *patterns /** pattern */ ,
 		 unsigned long *artno /** currently selected article */)
 {
-    /* FIXME: this is bloody complex and hard to follow */
-    static const char *const h[] = { "Subject:", "From:", "Date:", "Message-ID:",
-	"References:", "Bytes:", "Lines:", "Xref:"
-    };
-    int OVfield;
+    enum xoverfields OVfield;
     char *l;
     unsigned long a, b = 0;
     long int i, idxa, idxb;
@@ -1735,10 +1729,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
     markinterest(group);
 
     /* check if header can be obtained from overview */
-    OVfield = sizeof(h) / sizeof(h[0]);
-    do {
-	OVfield--;
-    } while (OVfield >= 0 && strcasecmp(h[OVfield], header));
+    OVfield = matchxoverfield(header);
 
     if (!is_pseudogroup(group->name)) {
 	/* FIXME: does this work for local groups? */
@@ -1757,41 +1748,45 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    return;
 	}
 
-	if (OVfield < 0) {
+	if (OVfield != XO_ERR)
+	    nntpprintf("221 First line of %s pseudo-header follows:", hd);
+	switch (OVfield) {
+	case XO_SUBJECT:
+	    printf("1 Leafnode placeholder for group %s\r\n", group->name);
+	    break;
+	case XO_FROM:
+	    printf("1 Leafnode <nobody@%s>\r\n", owndn ? owndn : fqdn);
+	    break;
+	case XO_DATE:
+	    printf("1 %s\r\n", rfctime());
+	    break;
+	case XO_MESSAGEID:
+	    printf("1 <leafnode:placeholder:%s@%s>\r\n", group->name,
+		   owndn ? owndn : fqdn);
+	    break;
+	case XO_REFERENCES:
+	    printf("1 (none)\r\n");	/* FIXME */
+	    break;
+	case XO_BYTES:
+	    printf("1 %d\r\n", 1024);	/* just a guess */
+	    break;
+	case XO_LINES:
+	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
+	    break;
+	case XO_XREF:
+	    printf("1 %s %s:1\r\n", fqdn, group->name);
+	    break;
+	default:
 	    if (!strcasecmp(header, "Newsgroups:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s\r\n", group->name);
-		fputs(".\r\n", stdout);
 	    } else if (!strcasecmp(header, "Path:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s!not-for-mail\r\n", owndn ? owndn : fqdn);
-		fputs(".\r\n", stdout);
 	    } else {
 		nntpprintf("221 No such header: %s", hd);
-		fputs(".\r\n", stdout);
 	    }
-	    free(header);
-	    return;
 	}
-
-	nntpprintf("221 First line of %s pseudo-header follows:", hd);
-	if (OVfield == 0)	/* Subject: */
-	    printf("1 Leafnode placeholder for group %s\r\n", group->name);
-	else if (OVfield == 1)	/* From: */
-	    printf("1 Leafnode <nobody@%s>\r\n", owndn ? owndn : fqdn);
-	else if (OVfield == 2)	/* Date: */
-	    printf("1 %s\r\n", rfctime());
-	else if (OVfield == 3)	/* Message-ID: */
-	    printf("1 <leafnode:placeholder:%s@%s>\r\n", group->name,
-		   owndn ? owndn : fqdn);
-	else if (OVfield == 4)	/* References */
-	    printf("1 (none)\r\n");	/* FIXME */
-	else if (OVfield == 5)	/* Bytes */
-	    printf("1 %d\r\n", 1024);	/* just a guess */
-	else if (OVfield == 6)	/* Lines */
-	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
-	else if (OVfield == 7)  /* Xref */
-	    printf("1 %s %s:1\r\n", fqdn, group->name);
 	fputs(".\r\n", stdout);
 	free(header);
 	return;
@@ -1819,16 +1814,16 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	free(header);
 	return;
     }
-    if (OVfield >= 0) {
+    if (OVfield != XO_ERR) {
 	nntpprintf("221 %s header %s(from overview) for postings %lu-%lu:",
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
 	    char *t;
-	    l = cuttab(xoverinfo[i].text, OVfield+2);
+	    l = cuttab(xoverinfo[i].text, OVfield);
 	    if (!l)
 		continue;
-	    t = (OVfield == 7 ? l+6 : l); /* cut out 'Xref: ' if necessary */
+	    t = (OVfield == XO_XREF ? l+6 : l); /* cut out 'Xref: ' if necessary */
 
 	    if (patterns && !matchlist(patterns, t)) {
 		free(l);
@@ -1952,8 +1947,10 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 		("224 Overview information for postings %lu-%lu:",
 		 a, b);
 	    for (idx = idxa; idx <= idxb; idx++) {
-		if (xoverinfo[idx].text != NULL)
-		    printf("%s\r\n", xoverinfo[idx].text);
+		if (xoverinfo[idx].text != NULL) {
+		    fputs(xoverinfo[idx].text, stdout);
+		    fputs("\r\n", stdout);
+		}
 	    }
 	    fputs(".\r\n", stdout);
 	}
