@@ -175,7 +175,7 @@ static int
 any_connect(const int family, const int socktype, const int protocol,
 	    const struct sockaddr *sa, socklen_t addrlen,
 	    /*@exposed@*/ const char ** const errcause)
-/*@modifies *errcause@ */
+/*@modifies *errcause@*/
 {
     char *as;
     int sock;

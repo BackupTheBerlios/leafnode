@@ -35,12 +35,12 @@
  * that) or NULL 
  * \bug should rather use Boyer-Moore or something to be quicker
  */
-/*@null@*//*@only@ */ char *
+/*@null@*//*@only@*/ char *
 mgetheader(
 /** header to find, must contain a colon, must not be NULL */
-	      /*@notnull@ */ const char *hdr,
+	      /*@notnull@*/ const char *hdr,
 /** buffer to search, may be NULL */
-	      /*@null@ */ char *buf)
+	      /*@null@*/ char *buf)
 {
     mastr *hunt;
     char *p, *q;
@@ -80,12 +80,12 @@ mgetheader(
 	int i;
 	value = (char *)critmalloc((size_t) (q - p + 1),
 				   "Allocating space for header value");
-	/*@+loopexec@ */
+	/*@+loopexec@*/
 	for (i = 0; i < q - p; i++) {
 	    /* sort of strncpy, replacing LF by space */
 	    value[i] = (p[i] == '\n' || p[i] == '\r') ? ' ' : p[i];
 	}
-	/*@+loopexec@ */
+	/*@+loopexec@*/
 	/* strip trailing whitespace */
 	while (i && isspace((unsigned char)*(value + i - 1)))
 	    i--;
@@ -100,12 +100,12 @@ mgetheader(
  * NOTE: calls abort() if header does not contain a colon.
  * \return malloc()ed copy of header without tag (caller must free that)
  * or NULL if not found. */
-/*@null@*//*@only@ */ char *
+/*@null@*//*@only@*/ char *
 fgetheader(
 /** file to search for header, may be NULL */
-	      /*@null@ */ FILE * f,
+	      /*@null@*/ FILE * f,
 /** header to find, must contain a colon, must not be NULL */
-	      /*@notnull@ */ const char *header,
+	      /*@notnull@*/ const char *header,
 /** flag, if set, the file is rewound before and after access */
 	      int rewind_file)
 {
@@ -155,12 +155,12 @@ fgetheader(
  * NOTE: calls abort() if header does not contain a colon.
  * \return malloc()ed copy of header without tag (caller must free that)
  * or NULL if not found. */
-/*@null@*//*@only@ */ char *
+/*@null@*//*@only@*/ char *
 getheader(
 /** filename of article to search */
-	     /*@notnull@ */ const char *filename,
+	     /*@notnull@*/ const char *filename,
 /** header to search */
-	     /*@notnull@ */ const char *header)
+	     /*@notnull@*/ const char *header)
 {
     FILE *f;
     char *hdr;

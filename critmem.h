@@ -3,12 +3,12 @@
 
 #include <sys/types.h>
 
-/*@only@*//*@out@ */ void *mycritmalloc(const char *f, long, size_t size,
+/*@only@*//*@out@*/ void *mycritmalloc(const char *f, long, size_t size,
 					const char *message);
 /*@only@*/ void *mycritcalloc(const char *f, long, size_t size,
 			      const char *message);
-/*@only@*//*@out@ *//*@notnull@ */ void *mycritrealloc(const char *f, long,
-/*@null@ *//*@only@ *//*@out@ *//*@returned@ */
+/*@only@*//*@out@*//*@notnull@*/ void *mycritrealloc(const char *f, long,
+/*@null@*//*@only@*//*@out@*//*@returned@*/
 						       void *a, size_t size,
 						       const char *message);
 /*@only@*/ char *mycritstrdup(const char *f, long, const char *,
