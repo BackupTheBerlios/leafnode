@@ -138,7 +138,7 @@ store_stream(FILE * in /** input file */ ,
 	return -1;
     }
 
-    /* copy header 
+    /* copy header
      *  - stripping Xref:, and possibly copying Message-ID: and Newsgroups: 
      *  - looking for Control: cancel and Supersedes:
      *  - check count of each mandatory header
