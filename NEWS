@@ -2,6 +2,22 @@ Changes since 20040108a:
 - Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group
   argument was given that was not a pattern. Patch by Hans-Jürgen
   Ficker.
+- Feature: Spooldir can now be overridden by "-d dir" on the command
+  line.
+- Feature: localgroups=file in configuration file allows to override the
+  location of the local.groups file. Default is compatible with past
+  versions, $sysconfdir/local.groups.
+- Cleanup: Lockfile is now hardcoded. It is leaf.node/lock.file relative
+  to the current $spooldir.
+- Change: Leafnode programs will only try to enforce their UID when
+  started by the root user.
+- Cleanup: TESTMODE preprocessor directive was removed, obsoleted by
+  previous change.
+- Robustness: GCC builds now try -Wformat=2 to enable more format string
+  warnings.
+- Bugfix: checkgroups now works even when options are present.
+- Change: checkgroups can process multiple files in one go.
+- Bugfix: fetchnews' "-F conffile" option did not work.
 
 20040108a: Changes since 20031221a:
 - Change: Log username and upstream server for authentication failures.
