@@ -1,3 +1,10 @@
+20031028a: Changes since 20031026a:
+- Bugfix: Change "ulong" to "unsigned long" to make the package compile
+  on FreeBSD. Reported against 20031019a by Jack Raats.
+- Cleanup: Use rbtrees rather than custom unbalanced binary tree for
+  reading the local groups.  -45 lines of code.
+- Update: libredblack now at 1.3.
+
 20031026a: Changes since 20031019a:
 - Change: log all warnings when verbosity is > 0
 - Bugfix: do not interpret group name that starts with a dot as the end
