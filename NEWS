@@ -4,6 +4,9 @@ KNOWN BUGS:
 |
 Changes since 20050104a:
 - Bugfix: delete_article also removes articles from in.coming directory
+- Bugfix: store() does not create message.id link unless there was at
+  least one valid newsgroup, also avoids writing empty Xref: header that
+  confused delete_article()
 
 20050104a: Changes since 20050103a:
 - Feature: texpire can now remove articles from the spool, new -C
