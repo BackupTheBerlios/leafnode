@@ -321,7 +321,8 @@ delete_article(
 		    "%s: failed to unlink %s:%s: %m", action, ngs[n], artnos[n]);
 	} else {
 	    struct newsgroup *g = findgroup(ngs[n], active, -1);
-	    ulong u;
+	    unsigned long u;
+
 	    if (g && get_ulong(artnos[n], &u) && u == g->first)
 		g->first++;
 
