@@ -52,18 +52,18 @@ Ralfs TODO:
 	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
 	  "%d articles deleted' message not correct.
 
-10pre4
+10pre5
 0.0 forward port bug fixes from 1.9.19rc*
     (applyfilter done)
 
-10pre4
+10pre5
 0.0 do not tamper with permissions on /var/spool/news/* directories
     (Kevin Bulgrien), to allow for leafwa tricks.
 
-10pre4
+10pre5
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
-10pre4
+10pre5
 0.0 use separate repairspool program
 
 10pre5
@@ -148,22 +148,13 @@ Ralfs TODO:
 2.2 option to freeze interesting.groups as it is -- just give away group
     permissions to root -- Ozz 2001-06-12
 
-2.2 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
-    <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
-
-
 3.3 heed Expires: header in texpire
 
 3.3 offer a per-server switch to select how the list of downloadable
     articles is fetched, offer xover, xhdr, newnews and "auto" which
     tries these methods in exactly this order.
 
-3.3 rnews is currently deactivated. Work in progress. Will have to
-    reintroduce rnews and find a way to feed news batches to UUCP mode
-    upstream
-
-3.3 does not send UUCP to upstream, introduce option to batch and spool
-    UUCP
+3.3 Does not send UUCP to upstream, introduce option to batch and spool UUCP.
 
 3.3 Ben Holmes: enable clients to read newsgroups immediately after
     completion of their download, rather than only after fetchnews
@@ -268,6 +259,9 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-07-03 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
+	   <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
 
 2002-06-18 Ralf Wildenhues
 	   make user that leafnode runs under (now hard-wired to "news")
