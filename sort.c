@@ -28,6 +28,7 @@ my_sort(void *base, size_t nmemb, size_t size,
 	compare = 0;
 	cmp = compar;
 
+	if (nmemb < 2) return;
 	if (mergesort(base, nmemb, size, cmphook)) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 		   "quicksort(base=%p, nmemb=%lu, "
@@ -46,6 +47,7 @@ my_sort(void *base, size_t nmemb, size_t size,
 	       file, line);
     } else {
 	/* not in debug mode */
+	if (nmemb < 2) return;
 	if (mergesort(base, nmemb, size, compar)) {
 	    qsort(base, nmemb, size, compar);
 	}
