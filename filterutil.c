@@ -39,7 +39,7 @@ static /*@observer@*/ const char *whatexpected(enum state s);
 static /*@null@*/ /*@dependent@*/ const char *
 findinheaders(const char *needle, const char *haystack)
 {
-    static const char *p;
+    const char *p;
     const char *q;
 
     p = haystack;
