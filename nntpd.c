@@ -1547,30 +1547,6 @@ dopost(void)
 	    }
 	}
 
-	if (!moderator && !is_alllocal(groups)) {
-	    /* also posted to external groups or moderated group with
-	       unknown moderator, store into out.going */
-	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
-	    outbasename = strrchr(inname, '/');
-	    outbasename++;
-	    sprintf(s, "%s/out.going/%s", spooldir, outbasename);
-	    if (sync_link(inname, s)) {
-		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		       "unable to schedule for posting to upstream, "
-		       "link %s -> %s failed: %m", inname, s);
-		nntpprintf("503 Could not schedule article for posting "
-			   "to upstream, see syslog.");
-		log_unlink(inname);
-		goto cleanup;
-	    }
-	    if (modgroup && !approved) {
-		nntpprintf("240 Posting scheduled for posting to "
-			   "upstream, be patient");
-		log_unlink(inname);
-		goto cleanup;
-	    }
-	}
-
 	if (moderator && !approved) {
 	    /* Mail the article to the moderator */
 	    int fd;
@@ -1736,7 +1712,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
     int OVfield;
     char *l;
     unsigned long a, b = 0, c;
-    long int i;
+    long int i, idxa, idxb;
     FILE *f;
     struct stringlist *ap;
     char *header;
@@ -1875,13 +1851,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
     }
 
     /* Check whether there are any articles in the range specified */
-    i = -1;
-    c = a;
-    while ((c <= b) && (i == -1)) {
-	i = findxover(c);
-	c++;
-    }
-    if (i == -1) {
+    if (findxoverrange(a, b, &idxa, &idxb) == -1) {
 	nntpprintf("420 No article in specified range.");
 	free(header);
 	return;
@@ -1890,56 +1860,57 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	nntpprintf("221 %s header %s(from overview) for postings %lu-%lu:",
 		   hd, patterns ? "matches " : "", a, b);
 
-	for (c = a; c <= b; c++) {
+	for (i = idxa; i <= idxb; i++) {
 	    char *t = 0;
-	    if (xoverinfo &&
-		c >= xfirst && c <= xlast && (i = findxover(c)) >= 0) {
-		char *li = xoverinfo[i].text;
-		int d;
+	    char *li = xoverinfo[i].text;
+	    int d;
 
-		/* OK MA 2001-06-27 */
-		for (d = 0; li && d <= OVfield; d++) {
-		    li = strchr(li, '\t');
-		    if (li)
-			li++;
+	    /* OK MA 2001-06-27 */
+	    for (d = 0; li && d <= OVfield; d++) {
+		li = strchr(li, '\t');
+		if (li)
+		    li++;
+	    }
+
+	    if (li) {
+		char *p;
+		p = strchr(li, '\t');
+		if (!p)
+		    p = li + strlen(li);
+
+		t = (char *)critmalloc(p - li + 1, "doselectedheader");
+		mastrncpy(t, li, p - li + 1);
+	    }
+
+	    if (patterns) {
+		ap = patterns;
+		if (!t) continue;
+		while (ap) {
+		    if (!ngmatch((const char *)&(ap->string), t))
+			break;
+		    ap = ap->next;
 		}
-
-		if (li) {
-		    char *p;
-		    p = strchr(li, '\t');
-		    if (!p)
-			p = li + strlen(li);
-
-		    t = (char *)critmalloc(p - li + 1, "doselectedheader");
-		    mastrncpy(t, li, p - li + 1);
+		if (!ap) {
+		    if (t) free(t);
+		    continue;
 		}
+	    }
 
-		if (patterns) {
-		    ap = patterns;
-		    if (!t) continue;
-		    while (ap) {
-			if (!ngmatch((const char *)&(ap->string), t))
-			    break;
-			ap = ap->next;
-		    }
-		    if (!ap) {
-			if (t) free(t);
-			continue;
-		    }
-		}
-
-		if (t) {
-		    printf("%lu %s\r\n", c, t);
-		    free(t);
-		}
+	    if (t) {
+		printf("%lu %s\r\n", xoverinfo[i].artno, t);
+		free(t);
 	    }
 	}
     } else {
 	nntpprintf
 	    ("221 %s header %s (from article files) for postings %lu-%lu:",
 	     hd, patterns ? "matches " : "", a, b);
-	for (c = a; c <= b; c++) {
+	/* as we have the overview anyway, we might as well read the article
+	   number from it, even if we have to open the article for the header,
+	   saves trying to open non-existing articles */
+	for (i = idxa; i <= idxb; i++) {
 	    char s[64];
+	    c = xoverinfo[i].artno;
 
 	    sprintf(s, "%lu", c);
 	    l = getheader(s, header);
@@ -2010,9 +1981,8 @@ dorange(/*@null@*/ const char *arg,
 void
 doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
-    unsigned long a, b, art;
-    long int idx;
-    int flag = FALSE;
+    unsigned long a, b;
+    long int idx, idxa, idxb;
     int i;
 
     if (!group) {
@@ -2045,22 +2015,18 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	if (!dorange(arg, &a, &b, artno, xfirst, xlast))
 	    return;
 
-	for (art = a; art <= b; art++) {
-	    idx = findxover(art);
-	    if (idx >= 0 && xoverinfo[idx].text != NULL) {
-		if (!flag) {
-		    flag = TRUE;
-		    nntpprintf
-			("224 Overview information for postings %lu-%lu:",
-			 a, b);
-		}
-		printf("%s\r\n", xoverinfo[idx].text);
-	    }
-	}
-	if (flag)
-	    fputs(".\r\n", stdout);
-	else
+	if (findxoverrange(a, b, &idxa, &idxb) == -1) {
 	    nntpprintf("420 No articles in specified range.");
+	} else {
+	    nntpprintf
+		("224 Overview information for postings %lu-%lu:",
+		 a, b);
+	    for (idx = idxa; idx <= idxb; idx++) {
+		if (xoverinfo[idx].text != NULL)
+		    printf("%s\r\n", xoverinfo[idx].text);
+	    }
+	    fputs(".\r\n", stdout);
+	}
     } else {
 	/* _is_ pseudogroup */
 	if ((b < 1) || (a > 1) || (a > b)) {
@@ -2084,8 +2050,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 {
     struct newsgroup *g;
     int emptygroup = FALSE;
-    long int idx;
-    unsigned long art;
+    unsigned long idx;
     int pseudogroup;
 
     if (arg && strlen(arg)) {
@@ -2124,10 +2089,9 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
     } else {
 	nntpprintf("211 Article list for %s (%lu-%lu) follows",
 		   g->name, xfirst, xlast);
-	for (art = xfirst; art <= xlast; art++) {
-	    idx = findxover(art);
-	    if (idx >= 0 && xoverinfo[idx].text)
-		printf("%lu \r\n", art);
+	for (idx = 0; idx < xcount; idx++) {
+	    if (xoverinfo[idx].text)
+		printf("%lu \r\n", xoverinfo[idx].artno);
 	}
     }
     fputs(".\r\n", stdout);
