@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.8 2003/02/17 14:00:57 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.9 2003/02/17 14:02:18 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -110,8 +110,8 @@ Print version number and exit.
 .I "-x number"
 Go
 .I number
-articles back and try to re-fetch what's missing. Chiefly used for
-debugging purposes.
+articles back and try to re-fetch what's missing. Useful to fill the
+gaps after filter rules that used to be too aggressive have been relaxed.
 
 .SH "FILES AND CONFIGURATION"
 .BR leafnode (8)
