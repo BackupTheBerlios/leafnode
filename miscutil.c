@@ -643,21 +643,13 @@ matchlist(struct stringlist *patterns, const char *str)
     return a;
 }
 
-typedef /*@observer@*/ const char *litstring;
-
 /*@dependent@*/ const char *
 rfctime(void)
 {
-    static char date[128];
-    litstring months[] = { "Jan", "Feb", "Mar", "Apr",
-	"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    };
-    litstring days[] = { "Sun", "Mon", "Tue", "Wed",
-	"Thu", "Fri", "Sat"
-    };
-    time_t now;
+    static char date[40];
+    size_t sz;
+    time_t now, off;
     struct tm *local;
-    time_t off;
     int hours, mins;
 
     /* get local and Greenwich times */
@@ -668,11 +660,12 @@ rfctime(void)
     hours = mins / 60;
     mins %= 60;
     /* finally print the string */
-    sprintf(date, "%3s, %d %3s %4d %02d:%02d:%02d %+03d%02d",
-	    days[local->tm_wday], local->tm_mday, months[local->tm_mon],
-	    local->tm_year + 1900, local->tm_hour, local->tm_min,
-	    local->tm_sec,
-	    hours, mins);
+    sz = strftime(date, sizeof date, "%a, %d %b %Y %H:%M:%S", local);
+    /* Timezone offset %z is not portable (though C99), add manually */
+    if (sz && sz + 7 <= sizeof date)
+	snprintf(date+sz, sizeof date - sz, " %+03d%02d", hours, mins);
+    else
+	*date = '\0';
     return date;
 }
 
