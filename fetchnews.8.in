@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.10 2003/04/04 09:09:12 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.11 2003/05/23 22:32:37 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -101,12 +101,15 @@ can be used (the more v, the more verbose):
 Warn about non-critical errors.
 .TP
 .I -vv
-Be verbose whenever a group command occurs.
+Be verbose whenever a server command occurs.
 .TP
 .I -vvv
-Be verbose whenever an article command occurs.
+Be verbose whenever a group command occurs.
 .TP
 .I -vvvv
+Be verbose whenever an article command occurs.
+.TP
+.I -vvvvv
 For debugging purposes. Don't expect the additional output to make sense.
 .TP
 .I -V
