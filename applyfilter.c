@@ -72,12 +72,11 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
+    ln_log_open("applyfilter");
     if (!initvars(argv[0])) {
 	fprintf(stderr, "%s: cannot initialize\n", argv[0]);
 	exit(EXIT_FAILURE);
     }
-
-    ln_log_open("applyfilter");
 
     while ((option = getopt(argc, argv, "F:DVv")) != -1) {
 	if (!parseopt("applyfilter", option, optarg, conffile,

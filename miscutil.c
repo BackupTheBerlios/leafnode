@@ -69,18 +69,22 @@ static struct mydir dirs[] = {
  * initialize all global variables
  */
 int
-initvars(char *progname)
+initvars(const char *progname)
 {
     uid_t ui;
     gid_t gi;
     struct mydir *md = &dirs[0];
 
+    (void)progname; /* shut up compiler warnings */
+
     if (uid_getbyuname("news", &ui)) {
-	fprintf(stderr, "news: %s\n", strerror(errno));
+        ln_log(LNLOG_SERR, LNLOG_CTOP, 
+               "cannot uid_getbyuname(news,&ui): %m\n");
 	return FALSE;
     }
     if (gid_getbyuname("news", &gi)) {
-	fprintf(stderr, "news: %s\n", strerror(errno));
+        ln_log(LNLOG_SERR, LNLOG_CTOP, 
+               "cannot gid_getbyuname(news,&gi): %m\n");
 	return FALSE;
     }
     /* config.c stuff does not have to be initialized */
@@ -91,35 +95,30 @@ initvars(char *progname)
 
 	snprintf(x, sizeof(x), "%s/%s", spooldir, md->name);
 	if (mkdir(x, 0110) && errno != EEXIST) {
-	    if (progname)
-		fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr, "cannot mkdir(%s): %s\n", x, strerror(errno));
+            ln_log(LNLOG_SERR, LNLOG_CTOP,
+                   "cannot mkdir(%s): %m\n", x);
 	    return FALSE;
 	}
 	if (chown(x, ui, gi)) {	/* Flawfinder: ignore */
-	    if (progname)
-		fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr, "cannot chown(%s,%ld,%ld): %s\n",
-		    x, (long)ui, (long)gi, strerror(errno));
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chown(%s,%ld,%ld): %m\n",
+		   x, (long)ui, (long)gi);
 	    return FALSE;
 	}
 	if (chmod(x, md->m)) {	/* Flawfinder: ignore */
-	    if (progname)
-		fprintf(stderr, "%s: ", progname);
-	    fprintf(stderr, "cannot chmod(%s,%o): %s\n",
-		    x, (unsigned int)md->m, strerror(errno));
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chmod(%s,%o): %m\n",
+		    x, (unsigned int)md->m);
 	    return FALSE;
 	}
 	md++;
     }
     if (gid_ensure(gi)) {
-	fprintf(stderr, "cannot ensure gid %ld: %s\n", (long)gi,
-		strerror(errno));
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure gid %ld: %m\n",
+	       (long)gi);
 	return FALSE;
     }
     if (uid_ensure(ui)) {
-	fprintf(stderr, "cannot ensure uid %ld: %s\n", (long)ui,
-		strerror(errno));
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure uid %ld: %m\n",
+	       (long)ui);
 	return FALSE;
     }
 

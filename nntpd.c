@@ -2145,9 +2145,10 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
+    ln_log_open("leafnode");
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-    ln_log_open("leafnode");
+
 
     /* have stderr discarded */
     se = freopen("/dev/null", "w+", stderr);

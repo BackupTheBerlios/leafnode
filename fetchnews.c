@@ -1467,9 +1467,11 @@ main(int argc, char **argv)
     if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
 	|| (err >= (int)sizeof(conffile)))
 	exit(EXIT_FAILURE);
+
+    ln_log_open("fetchnews");
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-    ln_log_open("fetchnews");
+
     starttime = time(NULL);
     now = time(NULL);
     umask(2);

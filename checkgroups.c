@@ -10,7 +10,7 @@
  */
 #include "leafnode.h"
 #include "critmem.h"
-
+#include "ln_log.h"
 #include <sys/types.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -77,7 +77,8 @@ main(int argc, char *argv[])
 {
     int option;
     FILE *f;
-
+    
+    ln_log_open("checkgroups");
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
     while ((option = getopt(argc, argv, "DVv")) != -1) {

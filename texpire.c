@@ -988,10 +988,10 @@ main(int argc, char **argv)
 
     snprintf(conffile, sizeof(conffile), "%s/config", libdir);
 
+    ln_log_open("texpire");
+
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-
-    ln_log_open("texpire");
 
     while ((option = getopt(argc, argv, "F:VDvfrn")) != -1) {
 	if (parseopt("texpire", option, optarg, conffile, sizeof(conffile))) {
