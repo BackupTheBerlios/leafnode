@@ -632,7 +632,7 @@ makedir(char *d)
     return 1;
 }
 
-/** convert newsgroup argument to a directory name an chdir there.
+/** convert newsgroup argument to a directory name and chdir there.
  * \return: 1 for success, 0 for error
  */
 int

@@ -54,7 +54,7 @@ static int headerbody = 0;	/* if 1, get headers only; if 2, get bodies only */
 static jmp_buf jmpbuffer;
 static int isgrouponserver(char *newsgroups);
 static int ismsgidonserver(char *msgid);
-static long getgroup(struct newsgroup *g, unsigned long server);
+static unsigned long getgroup(struct newsgroup *g, unsigned long server);
 static int postarticles(void);
 static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *);
 
@@ -806,7 +806,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
  * - 0 if group is unavailable
  * - otherwise last article number in that group
  */
-static long
+static unsigned long
 getgroup(struct newsgroup *g, unsigned long first)
 {
     struct stringlist *stufftoget = NULL;
@@ -988,7 +988,8 @@ nntpactive(void)
     sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
 	    current_server->port);
 
-    if (!forceactive && (0 == stat(s, &st))) {
+    if (!forceactive && (0 == stat(s, &st))
+	&& (time(NULL) - st.st_mtime)/86400 < timeout_active) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
@@ -1137,9 +1138,9 @@ nntpactive(void)
     }
     /* touch file */
     {
-	int fd = touch(s);
-	if (fd < 0)
-	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
+        int e = touch_truncate(s);
+        if (e < 0)
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "cannot touch %s: %m", s);
     }
 }
 

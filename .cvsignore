@@ -70,3 +70,5 @@ filterfile.5
 amiroot
 leafnode-version
 config.table.sorted
+aclocal.m4 stamp-h1
+autom4te.cache

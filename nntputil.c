@@ -423,7 +423,7 @@ nntpconnect(const struct serverlist *upstream)
 	return 0;
     }
 
-    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
+    ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 	   "%s: TCP send buffer size is %ld", upstream->name, sendbuf);
     return reply;
 }

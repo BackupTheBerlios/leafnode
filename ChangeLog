@@ -1,3 +1,212 @@
+2002-04-23  Matthias Andree  <matthias.andree@gmx.de>
+
+	* config.table: Add timeout_client to complement Jonathan
+	Larmour's timeout_client patch.
+	
+	* configutil.c: Merge the timeout_client patch by Jonathan Larmour
+	<jlarmour@redhat.com>.
+
+	* leafnode.h: Merge the timeout_client patch by Jonathan Larmour
+	<jlarmour@redhat.com>.
+
+	* timeout_getaline.c: Merge the timeout_client patch by Jonathan
+	Larmour <jlarmour@redhat.com>.
+
+	* touch.c: Rename touch() to touch_truncate().
+
+
+2002-04-17  Matthias Andree  <matthias.andree@gmx.de>
+
+	* nntpd.c: Ralf Wildenhues' fix to use size_t to check the length
+	of the string. Minor modification: also check if length is >
+	INT_MAX.  List PAT in HELP output.
+
+2002-04-11  Matthias Andree  <matthias.andree@gmx.de>
+
+	* AUTHORS: Add Volker Apelt.
+	* texpire.c: Add dormant groups feature. Patch by Volker Apelt.
+	* store.c: Add dormant groups feature. Patch by Volker Apelt.
+	* nntpd.c: Add dormant groups feature. Patch by Volker Apelt.
+	* miscutil.c: Add dormant groups feature. Patch by Volker Apelt.
+	* leafnode.spec.in: Update .spec file, courtesy of Volker Apelt.
+	* leafnode.h: Add dormant groups feature. Patch by Volker Apelt.
+	* xoverutil.c: Forward port 1.9.x bugfix to update overview
+	properly when articles are removed from between low and high water
+	mark, exclusively.
+
+	* miscutil.c: Drop HAVE_GMTOFF dependent external time zone
+	declaration.
+
+	* configure.ac: Drop HAVE_GMTOFF detection, no longer in use.
+	* artutil.c: Let mgetheader commit suicide if the input is not
+	LF-terminated. Document that LF termination is required.
+	* Makefile.am: Package lclint_fixes.h as well.
+
+2002-04-10  Matthias Andree  <matthias.andree@gmx.de>
+
+	* applyfilter.c: Ralf Wildenhues: remove arbitrary limit on header
+	length, fix possible SEGV, watermark calculation, always update
+	active.  New option -n for dry mode (no deleting done), use with
+	-v to see what would be deleted.
+
+	* applyfilter.8.in: Ralf Wildenhues: fix documentation.  Ralf
+	Wildenhues: document -n (dry-run) option.
+
+	* artutil.c: Really fix.
+	* artutil.c: Fix mgetheader infinite loop, found by Ralf
+	Wildenhues.
+
+2002-04-04  Matthias Andree  <matthias.andree@gmx.de>
+
+	* gmtoff.c: Former gmtoff() versions forced the DST flag to 0, so
+	the gmtoff() calculation as well as all generated RFC-2822 format
+	dates had the wrong offset in locales that use daylight saving
+	time. Reported by Ralf Wildenhues.
+
+	* configutil.c: Ralf Wildenhues: patch to add missing free(mta) to
+	freeconfig() (patch was accidentally omitted from 10pre3.1)
+
+	* activutil.c: Ralf Wildenhues: fix file descriptor leak in
+	readactive(). (patch was accidentally omitted from 10pre3.1)
+
+	* nntpd.c: Ralf Wildenhues: implement DATE according to RFC
+	2980. Freeinteresting not called.
+	(patch was accidentally omitted from 10pre3.1)
+
+	* texpire.c: Fix copyright.
+	* texpire.c: Drop 'F' option handling (done in parseopt
+	already). Make freexover() independent of chdirgroup(). Both
+	reported by Volker Apelt.
+
+	=== release 2.0b8_ma10pre3.1 ===
+	* Makefile.am: Drop rnews.8 comment, confuses automake and emits
+	bogus warning.
+
+	* configure.ac: Update for autoconf v2.53.
+
+2002-04-03  Matthias Andree  <matthias.andree@gmx.de>
+
+	* config.table: Ralf Wildenhues: turn preferxhdr into usexhdr.
+	* leafnode.h: Ralf Wildenhues: drop "avoidxover" variable.
+	* configutil.c: Ralf Wildenhues: Make per server option usexhdr
+	work, warn if used together with delaybody or filtering; fix
+	possible buffer overrun (not exploitable).
+	* leafnode.8.in: Ralf Wildenhues: update config docs, rename
+	preferxhdr to usexhdr to match current documentation.
+	* config.example: Ralf Wildenhues: update config docs, rename
+	preferxhdr to usexhdr to match current documentation.
+	* store.c: Ralf Wildenhues: fix typo in log message.
+	* miscutil.c: Ralf Wildenhues: use switch in argument parser.
+	* fetchnews.c: Ralf Wildenhues: use switch in argument parser.
+	* fetchnews.8.in: Ralf Wildenhues: update man page, -N can only be
+	used once.
+
+	* config.example: Ralf Wildenhues: document pseudoarticle config
+	option.
+
+	* nntputil.c: Ralf Wildenhues: drop setjmp.h #include.
+	* nntpd.c: Ralf Wildenhues: drop setjmp.h #include. Use switch in
+	argument parser. dopost general cleanup.  Fix recognition of
+	duplicate MIDs, fix Newsgroups: syntax check.  Do restrictive MID
+	syntax check in validate_messageid.
+	* checkgroups.c: Ralf Wildenhues: drop setjmp.h #include.
+	* b_sortnl.c: Ralf Wildenhues: remove bogus const.
+	* .indent.pro: Try to not format comments.
+	* lclint_fixes.h: New file by Ralf Wildenhues.
+	* xoverutil.c: Ralf Wildenhues: add SPLint annotations. Fix
+	types. Plug memory leak.
+
+	* timeout_getaline.c: Ralf Wildenhues: Fix types.
+	* strutil.c: Ralf Wildenhues: add SPLint annotations. Fix
+	types. Set freed pointers to NULL in free_strlist().
+	* store.c: Drop excess whitespace.
+	* redblack.c: Ralf Wildenhues: remove unnecessary declaration of
+	cmpmods in rb_traverse.
+
+	* queues.c: Ralf Wildenhues: fix memory leak.
+	* putaline.c: Ralf Wildenhues: Add missing casts.
+	* parserange.c: Ralf Wildenhues: fix possible memory leak.
+	* nntputil.c: Ralf Wildenhues: add SPLint annotations. Fix types.
+	* nntpd.c: print article number 0 in reply to ARTICLE <MID>
+	according to NNTP draft. FIXME: what about workaround parsing
+	Xref: for delaybody?  LIST EXTENSIONS now lists HDR, leafnode
+	accepts HDR as well as XHDR
+	(according to NNTP draft).  HELP now reports HDR as well as OVER as
+	legal commands. dolist change in ma10pre3 passed bad pointer to
+	free.  This bug caused leafnode to die on 'list newsgroups
+	pattern*'.  add missing cast to time_t in donewnews and
+	donewgroups. donewnews uses unsigned long article numbers.  in
+	donewnews, freexover needs to be called instead of
+	free(xoverinfo), and xovergroup set to NULL.  This bug resulted in
+	memory leak on NEWNEWS and segfault on GROUP de.comp.lang.c; XOVER
+	; NEWNEWS de.comp.lang.c 020202 020202 ; XOVER. return real group
+	status instead of 'y' in donewgroups().  FIXME: Check if this
+	breaks anything!
+
+	* moderated.c: Ralf Wildenhues: add SPLint annotations. Add
+	missing casts. Fix types.
+
+	* miscutil.c: Ralf Wildenhues: add SPLint annotations. Type fixes.
+	* mastrncpy.c: Ralf Wildenhues: 0 -> '\0'
+	* mastring.h: Add license. Ralf Wildenhues: add SPLint
+	annotations.
+
+	* mastring.c: Add license. Ralf Wildenhues: add SPLint
+	annotations.
+
+	* mastrcpy.c: Ralf Wildenhues: 0 -> '\0'
+	* masock_sa2name.c: Ralf Wildenhues: add SPLint annotations.
+	* masock_sa2addr.c: Ralf Wildenhues: add SPLint annotations.
+	* masock.h: Ralf Wildenhues: add SPLint annotations.
+	* lsort.c: Ralf Wildenhues: Change exit(1) to
+	exit(EXIT_FAILURE). Add some missing const keywords.
+	* lockfile.c: Cast npid to pid_t.
+	* localutil.c: Ralf Wildenhues: add SPLint annotations.
+	* ln_log.c: Ralf Wildenhues: assign strerror return to a const
+	string (was variable).
+
+	* leafnode.h: Ralf Wildenhues: add SPLint annotations.  Add
+	lclint_fixes.h
+
+	* inet_ntop.c: Fix typo in comment.
+	* h_error.h: Ralf Wildenhues: add SPLint annotations.
+	* h_error.c: Ralf Wildenhues: add SPLint annotations.
+	* gmtoff.c: Add license.
+	* getline.h: Drop /*@out@*/ annotation.
+	* getline.c: Drop /*@out@*/ annotation.
+	* getfoldedline.c: Ralf Wildenhues: add SPLint annotations.  0 ->
+	NULL.
+
+	* format_ulong.c: Ralf Wildenhues: type fix (use unsigned long).
+	* fopen_reg.c: Ralf Wildenhues: add SPLint annotations.  0 ->
+	NULL.
+
+	* filterutil.c: Ralf Wildenhues: add SPLint annotations.  Some
+	minor fixes.
+
+	* fetchnews.c: Tons of minor fixes by Ralf Wildenhues.
+	* critmem_realloc.c: Ralf Wildenhues: Change exit(1) to
+	exit(EXIT_FAILURE).
+
+	* critmem_malloc.c: Ralf Wildenhues: Change exit(1) to
+	exit(EXIT_FAILURE).  Add SPLint annotations.
+
+	* critmem_calloc.c: Ralf Wildenhues: Change exit(1) to
+	exit(EXIT_FAILURE).
+
+	* configutil.c: Ralf Wildenhues: add SPLint annotations.  Turn
+	some 0 into NULL.
+
+	* configparam.h: Ralf Wildenhues: add SPLint annotations.
+	* configparam.c: Ralf Wildenhues: add SPLint annotations.
+	* checkgroups.c: Fix typo in stderr output.
+	* artutil.c: Explicitly compare against NULL in assert().
+	* applyfilter.c: Ralf Wildenhues: add SPLint annotations.
+	* activutil.c: Ralf Wildenhues: add SPLint annotations.
+	* sync_dir.c: Cast mastrcpy results to void. (Ralf Wildenhues)
+	* store.c: Ralf Wildenhues: fix typo in Xref: header. Write only
+	necessary ref in Xref: header when create_all_links = 0.
+
 2002-02-28  Matthias Andree  <matthias.andree@gmx.de>
 
 	* nntpd.c: Now really fix. Also, return article number 1 instead
@@ -63,6 +272,7 @@
 
 2002-02-11  Matthias Andree  <matthias.andree@gmx.de>
 
+	=== release 2.0b8_ma10pre3 ===
 	* Makefile.am: Add touch.c to liblnutil_a_SOURCES.
 	* leafnode.h: Add touch().
 	* fetchnews.c: No longer call mastr_new() with 0 argument, but 256

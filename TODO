@@ -21,8 +21,49 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
+Ralfs TODO:
+	* check each time occurrence for possible 4 digit years (NNTP draft).
+	* Look at each occurence of article numbers. They can go from 1
+	  to 2^32-1 according to NNTP draft - watch out for signed long
+	  (done for all except fetchnews):
+	  getgroup() should return unsigned long.
+	* nntpd.c: doarticle: On 'ARTICLE <MID>', for delaybody an artno
+	  still has to be computed but not returned (see above).
+	* 'LIST NEWSGROUPS pattern' could add moderator address for
+	  moderated local groups.
+	* dirutil.c: should dirlist_core set count in error case?  This
+	  could break xgetxover and maybe other places.
+	* NNTP draft: wildmats are parsed wrongly:
+	  'groups.a.*,groups.b.*' is not properly detected (who needs
+	  this?)
+     ---- ACKNOWLEDGED
+	  NOTE 2002-04-06 Ralf:
+	  reconstructing a real big thread takes 90% of user time in
+	  DoMatch or wildmat (as per gprof). It would be worthwhile to
+	  use something that performs better. To test: slrn, Esc 1 Esc P
+	  (does XPAT to find children).
+     ---- DoMatch is not too inefficient. Does gprof overhead cause
+	  miscalculation because of the recursion?
+	* nntpd.c: check with NNTP draft for UTF-8 stuff.  Folding should
+	  be ok now.
+	* option fqdn not explained (option hostname sufficient?)
+	* artutil.c: mgetheader is broken.  A non-folded header is
+	  always returned as NULL.  Effect: applyfilter does not work at
+	  all, dopost dows not check for dupes.
+	  2002-04-10: is this fixed now?
+	* When POSTing an article with an upstream-already-used MID, the
+	  new article is not moved out of in.coming, causing errors at
+	  each fetchnews invocation.
+	* NEWNEWS and NEWGROUPS MUST not alter state information!
+	  Fix: save&restore group.
+	* applyfilter: does not handle to-kill-crossposts correctly:
+	  only killed if removed from _all_ other groups
+	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
+	  "%d articles deleted' message not correct.
+
 10pre4
 0.0 forward port bug fixes from 1.9.19rc*
+    (applyfilter done)
 
 10pre4
 0.0 do not tamper with permissions on /var/spool/news/* directories
@@ -39,10 +80,6 @@ urgence:
 
 10pre4
 0.0 use separate repairspool program
-
-10pre4
-1.1 Ralf Wildenhues/Thomas Schultz: draft-ietf-nntpext-base-15.txt
-    reply with 22X 0 <MID> to ARTICLE/BODY/HEAD/STAT <MID> (mind the 0)
 
 10pre4
 1.1 internal error reported when hostname = localhost (Jari Lehtonen
@@ -62,6 +99,12 @@ urgence:
     failed.postings. suggested by Jeff Grossman.
 
 10pre5
+2.2 Leopold Tötsch: offer 1.9-style posting: do not store a posted
+    article locally, but wait for its download from the upstream, to
+    make sure if it's posted or not. (2002-04-10T15:50, "Small posting
+    problem with leafnode-2.0b8_ma8rc5", leafnode-list)
+
+10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
     (Not in leafnode). Reported by Ralf Wildenhues. Bug report
@@ -71,14 +114,6 @@ urgence:
 1.1 dopost: Newsgroups: is not checked for valid groups. Use
     checkstatus(groups, 'y') after checkstatus('m'). Reported by Ralf
     Wildenhues. Message-ID: <20020126133758.A428@uni-bonn.de>
-
-10pre5
-1.1 Robert Marshall on 2.0b8_ma9:
-    Changing subject slightly, I have a filters file containing
-    newsgroups = *
-    maxcrosspost = 6
-    action = kill
-    and I've just seen an article crossposted to 8 groups...
 
 10pre5
 1.1 fix SIGCHLD behaviour or use Jeffrey Goldberg's patch
@@ -135,10 +170,6 @@ urgence:
 2.2 Create rpost/inews
 
 2.2 Fix and amend copyright statements and licenses.
-
-2.2 strings returned by {f,m,}getheader must be freed (Stefan Wiens)
-    ACTION: work in progress.
-    FIX: Use garbage collector instead?
 
 2.2 nntpd control articles are also displayed
 
@@ -269,14 +300,33 @@ urgence:
 ========================================================================
 FIXED ITEMS:
 
+2002-04-13 Matthias Andree
+	   nntpd.c: list PAT in dohelp? (Ralf Wildenhues)
+	   Fix: implemented.
+
+2002-04-10 Ralf Wildenhues
+	   Ralf Wildenhues/Thomas Schultz: draft-ietf-nntpext-base-15.txt
+	   reply with 22X 0 <MID> to ARTICLE/BODY/HEAD/STAT <MID> (mind the 0)
+
+2002-04-10 Ralf Wildenhues
+	   check for spaces and other fun in MIDs (found a MID with spaces
+	   in my spool and an article with UTF-7 encoded references).
+
+2002-03    strings returned by {f,m,}getheader must be freed (Stefan Wiens)
+	   Fixed by Ralf Wildenhues
+
+2002-02-28 Matthias Andree 
+	   NNTP draft:  no message on timeout disconnect - does this break 
+	   clients/servers?
+
 2002-02-11 tin claims "no articles" for all local groups.
-           Lutz Frommberger, 2002-01-06. Private mail, ID:
+	   Lutz Frommberger, 2002-01-06. Private mail, ID:
 	   <E16MzOy-0000An-00@dali.aufgebot.gov>
-	   Fixed by J,Av(Brg Dietrich.
+	   Fixed by Jörg Dietrich.
 
 2002-02-11 groupinfo is not updated for local groups (article low/high marks)
 	   when these are reinserted.
-	   Fixed by J,Av(Brg Dietrich.
+	   Fixed by Jörg Dietrich.
 
 2002-02-11 "Das ist eine Macke von Leafnode. Wird von einem Server die
 	   komplette Gruppenliste geholt, so werden neu hinzugekommene
@@ -289,11 +339,11 @@ FIXED ITEMS:
 	   Idea #1: Possibly emit list from mergegroups
 	   Idea #2: diff newsgroups list before and after group list fetch
 	   Idea #3: Store newsgroups in timestamped file.
-   	   Fixed by J,Av(Brg Dietrich.
+   	   Fixed by Jörg Dietrich.
 
 2002-02-04 leafnode may store newly fetched articles into the gaps if groupinfo
-           is not current. groupinfo may be out of date after a crash, fix
-           watermarks.
+	   is not current. groupinfo may be out of date after a crash, fix
+	   watermarks.
 
 2002-02-04 put conditional #include <dmalloc.h> into each file
 
@@ -301,13 +351,13 @@ FIXED ITEMS:
 	   when everything goes smoothly)
 
 2002-01-07 1.1 article can be given out in spite of missing message.id
-           file - a missing message.id file/link hints to spool
-           corruption. store() does NOT link into message.id on write
-           errors.
+	   file - a missing message.id file/link hints to spool
+	   corruption. store() does NOT link into message.id on write
+	   errors.
 
 2002-01-07 .overview must always be more current than groupinfo, so that
-           nntpd never offers article via GROUP that it cannot provide
-           via XOVER e. g. (Stefan Wiens)
+	   nntpd never offers article via GROUP that it cannot provide
+	   via XOVER e. g. (Stefan Wiens)
 
 2002-01-06 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
 	   ACTION: replace by proper state machine
@@ -326,8 +376,29 @@ FIXED ITEMS:
 ========================================================================
 DROPPED ITEMS:
 
+2002-04-13 Matthias Andree
+	Ralf asked:
+	* nntpd.c: dogroup does
+	  if (is_interesting(g->name))
+	    markinterest(g);
+	  shouldn't it be
+	  if (!is_interesting(g->name))
+	    markinterest(g);
+	  or am I just mislead by the naming?
+	# We don't want "GROUP" to mark an uninteresting group
+	  interesting, but we do want it to keep an interesting group
+	  interesting.
+2002-03-23 Robert Marshall on 2.0b8_ma9:
+	   Changing subject slightly, I have a filters file containing
+	   newsgroups = *
+	   maxcrosspost = 6
+	   action = kill
+	   and I've just seen an article crossposted to 8 groups...
+	   (cannot be reproduced. Note: "maxcrosspost = 6" still allows
+	   6 groups, but not 7 groups or more).
+
 2002-01-06 report Raymond Scholz, rnews doesn't read from pipes.
-           ACTION: reimplement rnews from scratch.
+	   ACTION: reimplement rnews from scratch.
 	   (duplicate report, merged with Jörg Dietrich's)
 
 2002-01-06 gethostbyname is not subject to timeout control

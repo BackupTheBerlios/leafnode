@@ -78,6 +78,10 @@ expire = 20
 ## the whole active file. The default is 90 days. Optional.
 # timeout_active = 90
 
+## timeout_client determines how many seconds of inactivity to allow before
+## a client is forcibly disconnected. The default is 300s. Optional.
+# timeout_client = 300
+
 ## If you want to have your newsreader score/kill on Xref: lines, you might
 ## want to uncomment this. Optional.
 # create_all_links = 1

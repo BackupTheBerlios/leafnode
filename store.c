@@ -3,6 +3,8 @@
  * Copyright 2001 by Matthias Andree <matthias.andree@gmx.de>
  * \copyright 2001
  * \author Matthias Andree
+ * Modified by Volker Apelt <volker_apelt@yahoo.de>.
+ * Copyright of the modifications 2002.
  */
 
 #include "leafnode.h"
@@ -285,7 +287,7 @@ store_stream(FILE * in /** input file */ ,
 	    if (g) {
 		int ls = 0;
 		(void)chdirgroup(name, TRUE);
-		if (touch(LASTPOSTING))
+		if (touch_truncate(LASTPOSTING))
 		    BAIL(-1, "cannot touch " LASTPOSTING);
 		for (;;) {
 		    str_ulong(nb, ++g->last);

@@ -9,6 +9,10 @@
  * The following routines comprise the wildmat routine. Written by
  * Rich $alz, taken vom INN 2.2.2
  */
+
+/* The CHEAT_MODE_STRSTR is (C) Copyright 2002 by Matthias Andree */
+/* The main() TEST function was shamelessly stolen from NetBSD's xsrc */
+
 /*  
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
@@ -37,16 +41,16 @@
 **
 **  Once the control of one instance of DoMatch enters the star-loop, that
 **  instance will return either TRUE or ABORT, and any calling instance
-**  will therefore return immediately after(without calling recursively
+**  will therefore return immediately after (without calling recursively
 **  again).  In effect, only one star-loop is ever active.  It would be
 **  possible to modify the code to maintain this context explicitly,
 **  eliminating all recursive calls at the cost of some complication and
-**  loss of clarity(and the ABORT stuff seems to be unclear enough by
+**  loss of clarity (and the ABORT stuff seems to be unclear enough by
 **  itself).  I think it would be unwise to try to get this into a
 **  released version unless you have a good test data base to try it out
 **  on.
 */
-/* YOU MUST NOT DEFINE ABORT TO 1, LEAVE AT -1(would collide with TRUE)
+/* YOU MUST NOT DEFINE ABORT TO 1, LEAVE AT -1 (would collide with TRUE)
  */
 #define ABORT			-1
     /* What character marks an inverted character class? */
@@ -55,6 +59,8 @@
 #define OPTIMIZE_JUST_STAR
     /* Do tar(1) matching rules, which ignore a trailing slash? */
 #undef MATCH_TAR_PATTERN
+    /* Optimize * matches with strstr */
+#undef CHEAT_MODE_STRSTR
 /*
  *  Match text and p, return TRUE (match), FALSE (no match), or ABORT
  *  (quick, no match).  */
@@ -87,6 +93,21 @@ DoMatch(const char *text, const char *p)
 	    if (*p == '\0')
 		/* Trailing star matches everything. */
 		return TRUE;
+#ifdef CHEAT_MODE_STRSTR
+	    {
+	    	int l = strcspn(p, "[\\?*");
+		char q[128], *r;
+
+		if (l) {
+		    if (l > sizeof(q)-1) l = sizeof(q)-1;
+		    *q = '\0';
+		    strncat(q, p, l);
+		    if ((r = strstr(text, q)) != NULL) {
+			text = r;
+		    }
+		}
+	    }
+#endif
 	    while (*text)
 		if ((matched = DoMatch(text++, p)))
 		    return matched;
@@ -130,3 +151,37 @@ wildmat(const char *text, const char *p)
 #endif				/* OPTIMIZE_JUST_STAR */
     return (DoMatch(text, p) == TRUE) ? TRUE : FALSE;
 }
+
+#ifdef	TEST
+#include <stdio.h>
+
+int main(void)
+{
+    char	 p[8000];
+    char	 text[8000];
+
+    printf("Wildmat tester.  Enter pattern, then strings to test.\n");
+    printf("A blank line gets prompts for a new pattern; a blank pattern\n");
+    printf("exits the program.\n");
+
+    for ( ; ; ) {
+	printf("\nEnter pattern:  ");
+	(void)fflush(stdout);
+	if (fgets(p, sizeof(p), stdin) == NULL || p[0] == '\n' || !*p)
+	    break;
+	for ( ; ; ) {
+	    printf("Enter text:  ");
+	    (void)fflush(stdout);
+	    if (fgets(text, sizeof(text), stdin) == NULL)
+		exit(0);
+	    if (text[0] == '\n' || !*p)
+		/* Blank line; go back and get a new pattern. */
+		break;
+	    printf("      %s\n", wildmat(text, p) ? "YES" : "NO");
+	}
+    }
+
+    exit(0);
+    /* NOTREACHED */
+}
+#endif	/* TEST */
