@@ -140,8 +140,6 @@ RB_STATIC struct RB_ENTRY(tree) *RB_ENTRY(init)(void)
 	struct RB_ENTRY(tree) *retval;
 	char c;
 
-	c=rcsid[0]; /* This does nothing but shutup the -Wall */
-
 	if ((retval=(struct RB_ENTRY(tree) *) malloc(sizeof(struct RB_ENTRY(tree))))==NULL)
 		return(NULL);
 	
