@@ -1,3 +1,14 @@
+2002-02-28  Matthias Andree  <matthias.andree@gmx.de>
+
+	* nntpd.c: Now really fix. Also, return article number 1 instead
+	of 0 for pseudo group STAT/HEAD/BODY/ARTICLE.
+	* nntpd.c: Fix STAT/HEAD/BODY/ARTICLE with pseudo article with
+	implicit article number. Bug reported, found and different fix
+	suggested by Ralf Wildenhues.  Drop 400 error code when
+	disconnecting because the client did not send a command within the
+	timeout limit, it breaks too many clients.  Rename ispseudogroup
+	to is_pseudogroup to prevent clashes with C99 future extensions.
+
 2002-02-20  Matthias Andree  <matthias.andree@gmx.de>
 
 	* TODO: Fix umlauts to iso-8859-15. Update. Postpone virtually

@@ -22,7 +22,44 @@ urgence:
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
 10pre4
+0.0 forward port bug fixes from 1.9.19rc*
+
+10pre4
+0.0 do not tamper with permissions on /var/spool/news/* directories
+    (Kevin Bulgrien), to allow for leafwa tricks.
+
+10pre4
+0.0 Supersede: don't log "No such file or directory".
+
+10pre4
+0.0 add COPYING (Ralf Wildenhues)
+
+10pre4
+0.0 do not use mkstemp on MacOS X, it's unsafe there
+
+10pre4
 0.0 use separate repairspool program
+
+10pre4
+1.1 Ralf Wildenhues/Thomas Schultz: draft-ietf-nntpext-base-15.txt
+    reply with 22X 0 <MID> to ARTICLE/BODY/HEAD/STAT <MID> (mind the 0)
+
+10pre4
+1.1 internal error reported when hostname = localhost (Jari Lehtonen
+    <jari@utu.fi>, Mark Brown)
+
+10pre4
+1.1 refuse postings with unqualified or local message ID domain part.
+
+10pre4
+1.1 left over temp files when lock cannot be obtained (Jari Lehtonen
+    <jari@utu.fi>)
+    -> change timeout handling, do not use alarm(), but let lockfile.c
+    track the time out.
+
+10pre5
+1.1 try to post an article to *every* server before moving into
+    failed.postings. suggested by Jeff Grossman.
 
 10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
@@ -66,6 +103,9 @@ urgence:
     <51nig9.kv.ln@abu.ivos.de>
     NOTE: only worked around, not fixed.
     TODO: only delete articles successfully posted
+
+2.2 Add custom headers like Organization: or X-Complaints-To: (Jeff
+    Grossman, 2002-03-09)
 
 2.2 insertgroups/mergegroups global/static variables suck big time
 
