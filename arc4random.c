@@ -31,6 +31,8 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
+#include "arc4random.h"
+
 struct arc4_stream {
     u_int8_t i;
     u_int8_t j;
