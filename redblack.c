@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: redblack.c,v 1.3 2001/12/29 01:45:18 emma Exp $";
+static char rcsid[] = "$Id: redblack.c,v 1.4 2002/01/07 21:48:08 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -734,6 +734,7 @@ rb_openlist(const struct rbnode *rootp)
     RBLIST *rblistp;
 
     rblistp = (RBLIST *) malloc(sizeof(RBLIST));
+    if (!rblistp) return NULL;
 
     rblistp->rootp = rootp;
     rblistp->nextp = rootp;
@@ -923,6 +924,10 @@ dumptree(struct rbnode * x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.4  2002/01/07 21:48:08  emma
+ * Handle OOM in rb_openlist. Found by Ralf Wildenhues.  Bug filed on
+ * https://sourceforge.net/project/libredblack, Bug-ID #500600.
+ *
  * Revision 1.3  2001/12/29 01:45:18  emma
  * Merge 2.0b8_ma8rc* series changes.
  *
