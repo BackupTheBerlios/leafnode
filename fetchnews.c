@@ -1957,7 +1957,7 @@ static int checkactive(void)
 
     if (stat(mastr_str(c), &st)) {
 	ln_log(errno == ENOENT ? LNLOG_SDEBUG : LNLOG_SERR, LNLOG_CTOP,
-		"cannot stat %s: %m%s", mastr_str(c),
+		"cannot stat %s: %s%s", mastr_str(c), strerror(errno),
 		errno == ENOENT ? " - this message means the leafnode must redownload the active files." : "");
 	mastr_delete(c);
 	return 1;
