@@ -545,10 +545,9 @@ lookup_expire(char *group)
  * return 1 if xover is a legal overview line, 0 else
  */
 static int
-legalxoverline(char *xover, unsigned long artno)
+legalxoverline(const char *xover, unsigned long artno)
 {
-    char *p;
-    char *q;
+    const char *p, *q;
 
     if (!xover)
 	return 0;
@@ -720,8 +719,6 @@ legalxoverline(char *xover, unsigned long artno)
 
     p = q + 1;
     q = strchr(p, '\t');
-    if (q)
-	*q = '\0';		/* kill any extra fields */
 
     /* line count */
 
@@ -734,6 +731,21 @@ legalxoverline(char *xover, unsigned long artno)
 	    return 0;
 	}
 	p++;
+    }
+
+    if (!q) {
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "%lu xover error: no Xref: header.", artno);
+	return 0;
+    }
+
+    /* Xref */
+    if (0 != strncasecmp(p, "Xref:", 5)) {
+	if (debugmode & DEBUG_EXPIRE)
+	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+		    "%lu xover error: Xref: header lacks XRef: tag.", artno);
+	return 0;
     }
 
     return 1;
