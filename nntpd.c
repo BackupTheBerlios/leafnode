@@ -1196,7 +1196,7 @@ generateMessageID(void)
 	*p++ = ALPHABET[(int)(n & 31)];
 	n >>= 5;
     }
-    *p++ = ',';
+    *p++ = 'x';
     n = fudge * 32768 + (int)getpid();
     while (n) {
 	*p++ = ALPHABET[(int)(n & 31)];
