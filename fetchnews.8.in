@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.12 2003/07/16 08:51:13 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.13 2003/07/16 11:32:40 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -16,8 +16,8 @@ fetchnews \- fetch news via NNTP
 .B fetchnews -V
 .br
 .B fetchnews [-BDfHnPv] [-D debugmode] [-v] [-F configfile]
-[-M message-id] [...] [-x number] [-S server[:port]]
-[-N newsgroup] [...] [-t #]
+.B [-M message-id] [...] [-x number] [-S server[:port]]
+.B [-N newsgroup] [...] [-t #]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -85,11 +85,11 @@ Post articles that have accumulated in the
 .I out.going
 directory. Done by default unless one of -B -H -M -R is used.
 .TP
-.TP
 .I -R
 Get articles from groups that are not in "delaybody" mode. Done by
 default unless one of -B -H -M -P is used. See the configuration
 section of leafnode(8) for "delaybody".
+.TP
 .I -S server[:port]
 Only get articles on "server". You can specify this option multiple times
 with different servers if you want to query several servers at once.
@@ -202,7 +202,7 @@ Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>,
 Markus Enzenberger <enz@cip.physik.uni-muenchen.de>, Randolf Skerka
 <Randolf.Skerka@gmx.de>, Matthias Andree <matthias.andree@gmx.de> and
-Jörg Lüders <joerg.lueders@gmx.de>.
+Jörg Lüders.
 Copyright of the modifications 1997-2003.
 
 .SH SEE ALSO
