@@ -13,4 +13,16 @@
 # endif
 #endif
 
+/* want uint32_t */
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#elif HAVE_STDINT_H
+#include <stdint.h>
+#elif sizeof(unsigned long) == 4 && sizeof(unsigned char) == 1
+typedef unsigned long uint32_t;
+typedef unsigned char uint8_t;
+#else
+#error "I cannot figure how to define uint32_t and uint8_t."
+#endif
+
 #endif /* SYSTEM_H */
