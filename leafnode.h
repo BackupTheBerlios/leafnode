@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.36 2002/04/23 11:40:41 emma Exp $ */
+/* $Id: leafnode.h,v 1.37 2002/04/26 15:20:27 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -638,6 +638,15 @@ extern "C" {
 
     extern void /*@exits@*/ internalerror(void);
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)
+
+/* debugutil.c */
+/* set this to 1 for debugging */
+#if 1
+#define D(a) (a)
+#else
+#define D(a)
+#endif
+void d_stop_mid(const char *mid);
 
 #if 0
 #warning "WARNING: do not disable fsync in production use"
