@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.18 2002/07/08 13:58:12 emma Exp $
+<P>Version ID of this document: $Id: README.html,v 1.19 2002/09/02 00:24:26 emma Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -126,7 +126,7 @@ installation from source is simple. To install PCRE, do (AS NORMAL USER, NOT AS 
 <LI>Download the current PCRE version from <a
 href="http://www.pcre.org/">http://www.pcre.org/</a>.
 <LI>Unpack PCRE: gunzip -c | tar xvf -
-<LI>cd pcre-3.7 <BR><I>(This is for PCRE-3.7, for other versions, replace that by the path that tar wrote when unpacking.)</I>
+<LI>cd pcre-3.9 <BR><I>(This is for PCRE-3.9, for other versions, replace that by the path that tar wrote when unpacking.)</I>
 <LI>type <KBD>./configure && make</KBD> <br><i>there should be no errors</i>
 <LI>become root
 <LI>as root, do <KBD>make install</KBD>
@@ -144,14 +144,14 @@ features that GNU automake offers. Type (AS NORMAL USER, NOT AS root!)
 to create an appropriate Makefile and config.h. If leafnode cannot find your
 PCRE, it is probably an old version without pcre-config, or pcre-config is not
 in your path. Either add the directory containing pcre-config to your $PATH, or
-call configure like this (we assume PCRE is in /opt/pcre-3.7):
+call configure like this (we assume PCRE is in /opt/pcre-3.9):
 
 <pre>
-         env CPPFLAGS="-I/opt/pcre-3.7" LDFLAGS="-L/opt/pcre-3.7" /bin/sh ./configure
+         env CPPFLAGS="-I/opt/pcre-3.9" LDFLAGS="-L/opt/pcre-3.9" /bin/sh ./configure
 </pre>
 
 NOTE: on some machines, when PCRE is linked against a shared library, you will need
-to add /opt/pcre-3.7 to LD_LIBRARY_PATH or to /etc/ld.so.conf.
+to add /opt/pcre-3.9 to LD_LIBRARY_PATH or to /etc/ld.so.conf.
 
 <P>The configure script can take some flags (replace DIR by a directory name,
 FILE by a file name):
@@ -752,11 +752,18 @@ See the file FAQ.
 &lt;agulbra@troll.no&gt; and are copyright 1995 Troll Tech AS,
 Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
 
-<p>Leafnode versions 1.5 and higher were written by Cornelius Krasel
-&lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are copyright 1997-2001.
+<p>Leafnode versions 1.5 up to 1.9.19 and 2.0b1 to 2.0b8 were written by
+Cornelius Krasel &lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are
+copyright 1997-2001.
+
+<p>Leafnode versions 1.9.20 and up were written by Matthias Andree
+&lt;matthias.andree@gmx.de&gt; and Ralf Wildenhues
+&lt;ralf.wildenhues@gmx.de&gt; and are &copy; copyright 2002.
 
 <p>Leafnode versions 2.0b8_ma were written by Matthias Andree
-&lt;matthias.andree@gmx.de&gt; and are &copy; copyright 1999-2002.
+&lt;matthias.andree@gmx.de&gt;, Ralf Wildenhues
+&lt;ralf.wildenhues@gmx.de&gt; and J&ouml;rg Dietrich
+&lt;joerg@dietrich.net&gt; and are &copy; copyright 2001 - 2002.
 
 <p>Major modifications were made by<br>
 Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
