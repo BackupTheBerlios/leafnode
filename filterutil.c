@@ -139,7 +139,7 @@ age(/*@null@*/ const char *date)
 	return 1006;
     } else {
 	struct m2n *m;
-	m = bsearch(monthname, mon2num, 12, sizeof(mon2num[0]), compmon);
+	m = (struct m2n *)bsearch(monthname, mon2num, 12, sizeof(mon2num[0]), compmon);
 	if (!m) {
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE, "Unable to parse %s", date);
 	    return 1001;
@@ -208,11 +208,12 @@ insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ pcre *ng, /*@only@*/ c
     oldf = f;
 }
 
-static const struct expect
-{
+struct expect {
     const enum state state;
     /*@observer@*/ const char *msg;
-} expect[] = {
+};
+
+static const struct expect expect[] = {
     { RF_WANTNG, "newsgroup" },
     { RF_WANTPAT, "pattern" },
     { RF_WANTNGORPAT, "newsgroup or pattern" },

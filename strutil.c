@@ -149,7 +149,7 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    x = malloc(sizeof(char *) * maxf);
+    x = (char **)malloc(sizeof(char *) * maxf);
     if (!x) {
 	fputs("out of memory\n", stderr);
 	exit(EXIT_FAILURE);

@@ -24,7 +24,7 @@ bsearch_range(const void *key1, const void *key2,
 	      const void *base, size_t nmemb, size_t size,
 	      int (*cmp)(const void *, const void *))
 {
-    const char *b = base;
+    const char *b = (const char *)base;
     size_t l1, u1, l2, u2;
 
     l1 = 0;

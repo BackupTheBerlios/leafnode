@@ -30,7 +30,7 @@
 #include "link_force.h"
 
 int link_force(const char *from, const char *to) {
-    char *x = critmalloc(strlen(to)+11, "link_force");
+    char *x = (char *)critmalloc(strlen(to)+11, "link_force");
     char *y;
     int j = 100;
     const char set[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";

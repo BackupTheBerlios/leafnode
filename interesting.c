@@ -172,7 +172,7 @@ readinteresting(/*@null@*/ RBLIST * r)
 /*@null@*/ /*@owned@*/ const char *
 addtointeresting(const char *key)
 {
-    return rbsearch(key, rb_interesting);
+    return (const char *)rbsearch(key, rb_interesting);
 }
 
 void

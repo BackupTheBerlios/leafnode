@@ -30,7 +30,7 @@
 #define GROUPINFO "/leaf.node/groupinfo"
 
 static size_t oldactivesize = 0;
-size_t activesize = 0;
+ssize_t activesize = 0;
 static time_t activetime = 0;
 static ino_t activeinode = 0;
 static time_t localmtime = 0;
@@ -227,7 +227,7 @@ mergegroups(void)
  * activesize will be used.
  */
 /*@null@*/ /*@dependent@*/ struct newsgroup *
-findgroup(const char *name, struct newsgroup *a, size_t asize)
+findgroup(const char *name, struct newsgroup *a, ssize_t asize)
 {
     char *n = critstrdup(name, "findgroup");
     struct newsgroup ng = { 0, 0, 0, 0, 0, 0, 0 };
@@ -236,7 +236,7 @@ findgroup(const char *name, struct newsgroup *a, size_t asize)
     ng.name = n;
     if (a) {
 	found = (struct newsgroup *)bsearch(&ng, a,
-					    (asize == (size_t)-1 ?
+					    (asize == -1 ?
 					     activesize : asize),
 					    sizeof(struct newsgroup),
 					    compactive);

@@ -322,7 +322,7 @@ store_stream(FILE * in /** input file */ ,
     /* parse ngs */
     /*@+loopexec@*/
     for (;;) {
-	nglist = critmalloc(nglistlen * sizeof(char *), "store");
+	nglist = (char **)critmalloc(nglistlen * sizeof(char *), "store");
 	if (str_nsplit(nglist, mastr_str(ngs), ",", nglistlen) >= 0)
 	    break;
 	/* retry with doubled size */

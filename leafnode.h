@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.100 2004/05/10 09:25:49 emma Exp $ */
+/* $Id: leafnode.h,v 1.101 2004/07/06 08:57:30 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -57,7 +57,7 @@ extern int errno;
 #include <stdarg.h>		/* va_list */
 #include <dirent.h>		/* DIR */
 
-#if !HAVE_WORKING_FORK
+#ifndef HAVE_WORKING_FORK
 #define fork() ((pid_t)(-1))
 #endif
 
@@ -216,8 +216,9 @@ void changegroupdesc(const char *groupname, char *desc);
 void mergegroups(void)
     /*@globals active@*/
     /*@modifies active, internalState@*/ ;
-    /*@null@*/ /*@dependent@*/ struct newsgroup *findgroup(const char *name, struct newsgroup *a,
-	    size_t asize);	/* active must be read */
+    /*@null@*/ /*@dependent@*/ struct newsgroup *findgroup(const char *name,
+	    struct newsgroup *a,
+	    ssize_t asize);	/* active must be read */
 time_t query_active_mtime(void);
 void rereadactive(void);	/* only reread if none read or if it has changed */
 int writeactive(void);

@@ -51,7 +51,7 @@ static void picklesscaps(struct newsgroup *d, struct newsgroup *s)
 }
 
 void validateactive(void) {
-    unsigned long p1, p2;
+    long p1, p2;
 
     for (p1 = p2 = 1 ; p1 < activesize; p1++) {
 	if (p1 > p2)

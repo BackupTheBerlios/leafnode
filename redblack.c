@@ -1,4 +1,4 @@
-static char rcsid[]="$Id: redblack.c,v 1.10 2003/10/28 00:02:40 emma Exp $";
+static char rcsid[]="$Id: redblack.c,v 1.11 2004/07/06 08:57:30 emma Exp $";
 
 /*
    Redblack balanced tree algorithm
@@ -73,7 +73,7 @@ static void RB_ENTRY(_free)(struct RB_ENTRY(node) *);
 
 #else
 
-static struct RB_ENTRY(node) *RB_ENTRY(_alloc)() {return (struct RB_ENTRY(node) *) malloc(sizeof(struct RB_ENTRY(node)));}
+static struct RB_ENTRY(node) *RB_ENTRY(_alloc)(void) {return (struct RB_ENTRY(node) *) malloc(sizeof(struct RB_ENTRY(node)));}
 static void RB_ENTRY(_free)(struct RB_ENTRY(node) *x) {free(x);}
 
 #endif
@@ -297,7 +297,7 @@ RB_ENTRY(_traverse)(int insert, const RB_ENTRY(data_t) *key, struct RB_ENTRY(tre
 	struct RB_ENTRY(node) *x,*y,*z;
 	int cmp;
 	int found=0;
-	int cmpmods();
+	/* int cmpmods(); */
 
 	y=RBNULL; /* points to the parent of x */
 	x=rbinfo->rb_root;
@@ -445,7 +445,7 @@ static struct RB_ENTRY(node) *
 RB_ENTRY(_lookup)(int mode, const RB_ENTRY(data_t) *key, struct RB_ENTRY(tree) *rbinfo)
 {
 	struct RB_ENTRY(node) *x,*y;
-	int cmp;
+	int cmp=0;
 	int found=0;
 
 	y=RBNULL; /* points to the parent of x */
@@ -1087,6 +1087,9 @@ RB_ENTRY(dumptree)(struct RB_ENTRY(node) *x, int n)
 
 /*
  * $Log: redblack.c,v $
+ * Revision 1.11  2004/07/06 08:57:30  emma
+ * Misc. minor fixes to the code is also valid C++.
+ *
  * Revision 1.10  2003/10/28 00:02:40  emma
  * Update to libredblack 1.3.
  *

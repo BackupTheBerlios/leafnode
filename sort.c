@@ -32,14 +32,14 @@ my_sort(void *base, size_t nmemb, size_t size,
 	if (mergesort(base, nmemb, size, cmphook)) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 		   "quicksort(base=%p, nmemb=%lu, "
-		   "size=%lu, compar=%p)", base,
-		   (unsigned long)nmemb, (unsigned long)size, compar);
+		   "size=%lu)", base,
+		   (unsigned long)nmemb, (unsigned long)size);
 	    qsort(base, nmemb, size, cmphook);
 	} else {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 		   "mergesort(base=%p, nmemb=%lu, "
-		   "size=%lu, compar=%p)", base,
-		   (unsigned long)nmemb, (unsigned long)size, compar);
+		   "size=%lu)", base,
+		   (unsigned long)nmemb, (unsigned long)size);
 	}
 
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP,

@@ -155,7 +155,8 @@ usage(void)
 	    "    -f                force reload of groupinfo file\n"
 	    "    -F conffile       use \"configfile\" instead of %s/config\n"
 	    "    -H                get article headers in delaybody groups\n"
-	    "    -n                switch off automatic unsubscription of groups\n"
+	    "    -n                switch off automatic unsubscription of groups\n", sysconfdir);
+    fprintf(stderr,
 	    "    -P                post only, don't get new articles\n"
 	    "    -M message-id     get article by Message-ID\n"
 	    "    -N newsgroup      get only articles in \"newsgroup\"\n"
@@ -165,7 +166,7 @@ usage(void)
 	    "    -S server         only get articles from \"server\"\n"
 	    "    -t delay          wait \"delay\" seconds between articles\n"
 	    "    -v                verbose mode (may be repeated)\n"
-	    "    -x extra          go \"extra\" articles back in upstream history\n", sysconfdir);
+	    "    -x extra          go \"extra\" articles back in upstream history\n");
     fprintf(stderr,
 	    "Setting none of the options\n"
 	    "    -B -H -P -R\n"
@@ -675,7 +676,7 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
     }
 
     t = l;
-    if (!parsegroupreply(&t, &u, &h, &window, last)) {
+    if (!parsegroupreply((const char **)&t, &u, &h, &window, last)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse GROUP reply: \"%s\"",
 		g->name, l);
 	return 0;
@@ -886,7 +887,7 @@ fn_doxover(struct stringlisthead *stufftoget,
 				       &newsgroups_list, NULL, 0)) == -1) {
 	    /* newsgroups filling by hand */
 	    num_groups = 1;
-	    newsgroups_list = critmalloc(num_groups * sizeof *newsgroups_list, "doxover");
+	    newsgroups_list = (char **)critmalloc(num_groups * sizeof *newsgroups_list, "doxover");
 	    newsgroups_list[0] = groupname;
 	}
 
@@ -1494,7 +1495,7 @@ get_old_watermark(const char *group, struct rbtree *upstream)
     if (upstream == NULL)
 	return 1;
 
-    k = rbfind(group, upstream);
+    k = (const char *)rbfind(group, upstream);
 
     if (k == NULL)
 	return 1;
@@ -1518,7 +1519,7 @@ remove_watermark(const char *group, struct rbtree *upstream,
 
     if (upstream == NULL)
 	return;
-    k  = rbdelete(group, upstream);
+    k  = (const char *)rbdelete(group, upstream);
     if (k) {
 	free((char *)k);		/* ugly but true */
     } else {
@@ -1597,7 +1598,7 @@ processupstream(struct serverlist *cursrv, const char *const server,
 
 	from = get_old_watermark(ng, upstream);
 
-	donethisgroup = rbfind(ng, done_groups);
+	donethisgroup = (const char *)rbfind(ng, done_groups);
 
 	if (donethisgroup) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
@@ -1631,7 +1632,7 @@ processupstream(struct serverlist *cursrv, const char *const server,
 	    if (newserver != 0) { /* group successfully fetched */
 		if (only_fetch_once) {
 		    char *k1 = critstrdup(ng, "processupstream");
-		    const char *k2 = rbsearch(k1, done_groups);
+		    const char *k2 = (const char *)rbsearch(k1, done_groups);
 		    assert(k1 == k2);
 		}
 	    }

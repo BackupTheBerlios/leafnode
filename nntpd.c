@@ -1205,7 +1205,7 @@ validate_messageid(const char *n)
     if (!r) return 0;
     r++;
     l = strcspn(r, ">");
-    s = critmalloc(l+1, "validate_messageid");
+    s = (char *)critmalloc(l+1, "validate_messageid");
     *s = '\0';
     strncat(s, r, l);
     l = is_validfqdn(s);
@@ -2189,7 +2189,7 @@ doauth_file(char *const cmd, char *const val)
 
 	if (user)
 	    free(user);
-	user = critmalloc(strlen(val) + 2, "doauth_file");
+	user = (char *)critmalloc(strlen(val) + 2, "doauth_file");
 	t = mastrcpy(user, val);
 	*t++ = ':';
 	*t = '\0';

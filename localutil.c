@@ -39,7 +39,7 @@
 static int rbcmp(const void *p1, const void *p2, const void *config)
 {
     (void)config;
-    return strcasecmp(p1, p2);
+    return strcasecmp((const char *)p1, (const char *)p2);
 }
 
 void

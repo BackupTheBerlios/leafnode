@@ -403,7 +403,7 @@ xgetxover(
     /* read .overview file into memory */
     if (((fd = open(".overview", O_RDONLY)) >= 0)
 	&& (fstat(fd, &st) == 0)
-	&& (overview = critmalloc((size_t) st.st_size + 1, "xgetxover")) != NULL
+	&& (overview = (char *)critmalloc((size_t) st.st_size + 1, "xgetxover")) != NULL
 	&& (read(fd, overview, st.st_size) == (ssize_t)st.st_size)) {
 	overview[st.st_size] = '\0';
     } else {

@@ -12,7 +12,8 @@ int
 cmp_firstcolumn(const void *a, const void *b,
         /*@unused@*/ const void *config __attribute__ ((unused)))
 {
-    const unsigned char *s = a, *t = b;
+    const unsigned char *s = (const unsigned char*)a;
+    const unsigned char *t = (const unsigned char*)b;
     unsigned int c, d;
 
     do {

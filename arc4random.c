@@ -90,7 +90,7 @@ arc4_stir(struct arc4_stream *as)
     /* fd < 0?  Ah, what the heck. We'll just take whatever was on the
      * stack... */
 
-    arc4_addrandom(as, (void *)&rdat, sizeof(rdat));
+    arc4_addrandom(as, (u_char *)&rdat, sizeof(rdat));
 }
 
 static inline uint8_t

@@ -2,7 +2,7 @@
 #define ACTIVUTIL_H
 #include "leafnode.h"
 
-extern size_t activesize;
+extern ssize_t activesize;
 
 int compactive(const void *, const void *);
 void validateactive(void);

@@ -1,7 +1,7 @@
 #include "leafnode.h"
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(void) {
     const char *haystack = "X: y\nMessage-Id: teSt\n";
     const char *needle = "Message-ID:";
     char *res;

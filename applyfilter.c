@@ -69,7 +69,7 @@ readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *de
 
     nread = 0;
     if (*size < 1 || *bufp == NULL)
-	*bufp = critmalloc((*size = MAXHEADERSIZE+1), "readtodelim");
+	*bufp = (char *)critmalloc((*size = MAXHEADERSIZE+1), "readtodelim");
 
     /*@+loopexec@*/
     for (;;) {
@@ -93,7 +93,7 @@ readtodelim(int fd, const char *name, /*@unique@*/ /*@observer@*/ const char *de
 	}
 
 	/* must read more */
-	*bufp = critrealloc(*bufp, (*size)*=2, "readtodelim");
+	*bufp = (char *)critrealloc(*bufp, (*size)*=2, "readtodelim");
     }
     /*@=loopexec@*/
 }

@@ -214,9 +214,9 @@ xref_to_list(/*@exposed@*/ char *xref,
     }
     SKIPWORD(p);	/* skip hostname */
 
-    ngs = critmalloc(max * sizeof *ngs, "parsekill_xref_line");
+    ngs = (char **)critmalloc(max * sizeof *ngs, "parsekill_xref_line");
     if (artno_strings)
-	nums = critmalloc(max * sizeof *nums, "parsekill_xref_line");
+	nums = (char **)critmalloc(max * sizeof *nums, "parsekill_xref_line");
     else
 	nums = NULL;
 
@@ -237,9 +237,9 @@ xref_to_list(/*@exposed@*/ char *xref,
 	p = q;
 	if (++n >= max) {
 	    max += max;
-	    ngs = critrealloc(ngs, max * sizeof *ngs, "parsekill_xref_line");
+	    ngs = (char **)critrealloc(ngs, max * sizeof *ngs, "parsekill_xref_line");
 	    if (nums)
-		nums = critrealloc(nums, max * sizeof *nums, "parsekill_xref_line");
+		nums = (char **)critrealloc(nums, max * sizeof *nums, "parsekill_xref_line");
 	}
     }
     if (n == 0)

@@ -48,7 +48,7 @@
  * \return -1 in case of trouble
  * (which is also logged), the count of hard links otherwise
  */
-static nlink_t
+static long
 fd_st_nlink(const int fd /** open file descriptor */ )
 {
     struct stat st;
@@ -58,7 +58,7 @@ fd_st_nlink(const int fd /** open file descriptor */ )
 	return -1;
     }
 
-    return st.st_nlink;
+    return st.st_nlink > LONG_MAX ? LONG_MAX : st.st_nlink;
 }
 
 /** Check if the lock file given by "name" is stale and if so, erase it.

@@ -355,7 +355,7 @@ initgrouplistdir(const char *dir, int deleteconflicts)
 	if (de->d_name[0] == '.')
 	    continue;
 	k = critstrdup(de->d_name, myname);
-	k2 = rbsearch(k, rb);
+	k2 = (const char *)rbsearch(k, rb);
 	if (NULL == k2) {
 	    /* OOM */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
@@ -419,7 +419,7 @@ initfilelist(FILE *f, const void *config,
 	const char *k2;
 
 	k1 = critstrdup(l, myname);
-	k2 = rbsearch(k1, rb);
+	k2 = (const char *)rbsearch(k1, rb);
 
 	if (k2 == NULL) {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "out of memory in "
@@ -632,7 +632,7 @@ void initlist(struct stringlisthead **list) {
     if (*list) return;
 
     /* create a merged list head that implements first/last marker */
-    head = critmalloc(3 * sizeof(struct stringlist *), "initlist");
+    head = (struct stringlisthead *)critmalloc(3 * sizeof(struct stringlist *), "initlist");
     head->head = (struct stringlistnode *)&(head->tail);
     head->tail = 0;
     head->tailpred = (struct stringlistnode *)head;

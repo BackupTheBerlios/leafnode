@@ -56,7 +56,7 @@ getline(char **pto, size_t * size, FILE * stream)
 
     if (!(*size) && !(*pto)) {
 	*size = 256;
-	*pto = critmalloc(*size, "fgetline");
+	*pto = (char *)critmalloc(*size, "fgetline");
     }
     while ((cur = _getline(*pto + off, *size - off, stream)) > 0) {
 	i += cur;
@@ -64,7 +64,7 @@ getline(char **pto, size_t * size, FILE * stream)
 	    return i;
 	off = i;
 	*size += *size;
-	*pto = critrealloc(*pto, *size, "fgetline");
+	*pto = (char *)critrealloc(*pto, *size, "fgetline");
     }
     if (!cur && i)
 	return i;
