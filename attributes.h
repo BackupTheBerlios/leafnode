@@ -3,7 +3,7 @@
 /*
    attributes.h
    (C) 2000 by Matthias Andree
-   LICENCE: GNU GENERAL PUBLIC LICENSE V2
+   LICENCE: GNU LESSER GENERAL PUBLIC LICENSE
    suppresses __attributes__ on function prototypes when the compiler is
    not GCC.
 */
