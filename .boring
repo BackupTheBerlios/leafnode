@@ -41,3 +41,4 @@ cscope\.out$
 ^t\.mgetheader$
 ^texpire$
 ^xsnprintf$
+^new$

@@ -1,3 +1,47 @@
+2004-12-04  Matthias Andree <matthias.andree@gmx.de>
+  * ignore generated files
+
+    M ./.boring +22
+
+  * Add more ignore entries.
+
+    M ./.boring +4
+
+  * convert .cvsignore to .boring
+  we now have regexps rather than globs and use one global file for the
+  whole repository.
+
+     ./.cvsignore -> ./.boring
+    M ./.boring -87 +17
+    R ./tools/.cvsignore
+
+  tagged initial darcs import
+  (repository converted to darcs)
+
+2004-11-17  Matthias Andree <matthias.andree@gmx.de>
+  * Change: More useful logging when getting the range of articles in a
+  Change: More useful logging when getting the range of articles in a
+  group, now includes the server name.
+  
+
+    M ./NEWS +2
+    M ./fetchnews.c -17 +20
+
+2004-11-15  Matthias Andree <matthias.andree@gmx.de>
+  * add missing word
+
+    M ./NEWS -1 +1
+
+2004-11-15  Matthias Andree <matthias.andree@gmx.de>
+  * Bugfix: get rid of cosmetic "Groupinfo file damaged, ignoring line: 18"
+  Bugfix: get rid of cosmetic "Groupinfo file damaged, ignoring line: 18"
+  Change: when complaining about damaged groupinfo file, print the line number
+  and encapsulate the line in double quotes.
+  
+
+    M ./NEWS +5
+    M ./activutil.c -3 +5
+
 2004-11-13  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20041113a =

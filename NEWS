@@ -2,12 +2,13 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20041113a:
+20041213a: Changes since 20041113a:
 - Bugfix: get rid of cosmetic bug "Groupinfo file damaged, ignoring line: 18"
 - Change: when complaining about damaged groupinfo file, print the line
   number and encapsulate the line in double quotes.
 - Change: More useful logging when getting the range of articles in a
   group, now includes the server name.
+- Change: Upstream repository switched from CVS to DARCS, http://darcs.net/
 
 20041113a: Changes since 20041007a:
 - Speedup: the active file now has a header line that contains the number
