@@ -1,3 +1,17 @@
+2002-07-06  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* TODO: Update.
+	* fetchnews.c: Doxygenification.  Fix possible null deref in
+	doxover.  Pretty-print debug output messages for pseudo headers.
+	* fetchnews.c: Bugfixing round 1.  processupstream:  insert
+	cmdline-specified group before reading rbtree.	process_options: 
+	no pattern in nglist already means all.  write_pseudo_header:  log
+	errors, counting successful stores work.  getgroup:  enhanced
+	logging of fetched headers.
+	* fetchnews.c, leafnode.h, interesting.c: Really implement
+	fetchnews'  -N un.interesting.group [ ... ] by adding the group
+	name to the interesting rbtree, new function addtointeresting.
+
 2002-07-06  Matthias Andree <matthias.andree@gmx.de>
 
 	* config.example: Drop "dontpost" option. Replaced by
