@@ -347,10 +347,10 @@ store_stream(FILE * in /** input file */ ,
 	    && isspace((unsigned char)*(q - 1))
 	    && q[strlen(name)] == ':')
 	    continue;		/* skip if duplicate */
-	if (create_all_links 
-            || is_interesting(name) 
-            || is_alllocal(name) /* FIXME: alllocal or local? */
-            || is_dormant(name)) 
+	if ((create_all_links
+            || is_interesting(name)
+            || is_alllocal(name) /* FIXME: alllocal or local? */)
+            && !is_dormant(name))
         {
 	    g = findgroup(name, active, -1);
 	    if (g) {

@@ -44,9 +44,6 @@ Ralfs TODO:
 	* XPAT hdr range *PATTERN WITH SPACES* does not work, cf. RFC2980
 	* race condition in fetchnews between ismsgidonserver and post_FILE.
 	  Using only_fetch_once e.g. can hit the window with two upstream servers.
-	* If some.group is dormant (i.e. listed in dormant.groups),
-	crossposts from interesting groups can newly appear in some.group.
-	(Ralf Wildenhues, 2002-09-05)
 
 * forward port leafnode-1 STAT blacklisting code? Or go for real posting
 stuff?
@@ -237,6 +234,11 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2003-10-30 Matthias Andree
+	   If some.group is dormant (i.e. listed in dormant.groups),
+	   crossposts from interesting groups can newly appear in
+	   some.group.  (Ralf Wildenhues, 2002-09-05)
 
 2003-10-30 Matthias Andree
 	   'LIST NEWSGROUPS pattern' could add moderator address for
