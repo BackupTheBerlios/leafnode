@@ -14,6 +14,8 @@ A. Olaru <aolaru@datacomm.ch>
 Akim Demaille <akim@epita.fr>
 Alexander Rudyk <alexrudyk@arnet.de>
 Anders Dinsen <dinsen@danbbs.dk>
+Andreas Ferber <aferber@techfak.uni-bielefeld.de>
+Andrzej Radecki <radecki@wpk.p.lodz.pl>
 Andy Doran <andy@psn.ie>
 Andy Piper <squiggle@ukgateway.net>
 Arkadiusz Mi¶kiewicz <misiek@misiek.eu.org>
@@ -23,13 +25,20 @@ Benjamin Schweizer <SternSZ@gmx.de>
 Bjørn Frantzen <bjoff@bgnett.no>
 Brent J. Nordquist <brent-nordquist@bethel.edu>
 Brian Ewins <brian.ewins@bt.com>
+Bruce Schneier
 Bruno Rohee <rohee@OpenBSD.ORG>
+Carl D. Craven <raven@phoenyx.net>
 Carles Sadurní Anguita <sadurni@benidorm.net>
+Carlos Robinson <cerobinson@teleline.es>
 Carsten Bobek <c.bobek@gmx.de>
 Christian Fertig <fertig@informatik.uni-frankfurt.de>
+Christian Gebauer <gebauer@bigfoot.com>
 Christian Winter <thepoet1@rz.fh-augsburg.de>
+Claude Michel <cpjm@free.fr>
+Colin Brough <Colin.Brough@otinternet.com>
 Daniel Barron <daniel@jadeb.com>
 Daniel Fraga <chapolin@inc101.internetcom.com.br>
+David Mazieres <dm@lcs.mit.edu>
 David Steuber <david@david-steuber.com>
 Diana Schirmer <diana.schirmer@t-online.de>
 Diedrich Ehlerding <diedrich.ehlerding@t-online.de>
@@ -40,8 +49,10 @@ Erik Beckers <erik.beckers@planet-interkom.de>
 Evert Meulie <evert@royal.net>
 Friedhelm Hinrichs <F.Hinrichs@tu-bs.de>
 Gerd R. Greye <gerd.greye@pironet.netsurf.de>
+Gerhard Schromm <Gerhard.Schromm@student.uni-ulm.de>
 Giulio <giuliox@tin.it>
 Greg Weeks <greg@durendal.tzo.com>
+Gunnar Ritter <g-r@bigfoot.de>
 Hannes Birnbacher <ad-soft@t-online.de>
 Harald Kretzschmar <hk@thuer.slf.uunet.de>
 Holger Graf <Holger.Graf@gmx.net>
@@ -59,20 +70,28 @@ John R. Schrader <jrschrader@mainz-online.de>
 Johnny Tevessen <j.tevessen@gmx.net>
 Jose Rosales <jrosales@tdv.net>
 Juergen Richter <richter@wohnheim.uni-ulm.de>
+Juergen Salk <juergen.salk@gmx.de>
+Juergen Strohmayer <usenet@bigfoot.de>
 Juergen Vollmer <vollmer@cocolab.de>
 Juha Pohjalainen <jmp@iki.fi>
+Karen Nakamura <mail@gpsy.com>
 Karsten Merker <merker@guug.de>
+Karsten Petersen <karsten.petersen@informatik.tu-chemnitz.de>
+Kaspar Klingholz <kp@balu.klingholz.de>
+Kenneth Porter <shiva@sewingwitch.com>
 Kent B. Hansen <kent.hansen@bigfoot.com>
 Klaus Berger <klausmartin.berger@gmx.net>
 Lenz Grimmer <grimmer@suse.de>
+Lloyd Zusman <lzj@asfast.com>
 Maarten Geurts <mgeurts@tip.nl>
 Malte Gell <malte.gell@gmx.net>
 Manfred Haertel <Manfred.Haertel@rz-online.de>
 Marcus Szumigala <MSzumigala@gmx.net>
 Mark Brown <broonie@tardis.ed.ac.uk>
 Mark Hannon <mark.hannon@stockholm.mail.telia.com>
+Martin Kissel <martinkissel@sharing.de>
 Matt Armstrong <matt@lickey.com>
-Matthias Andree <mandree@dosis.uni-dortmund.de>
+Matthias Andree <matthias.andree@web.de>
 Matthias Flohr <mflohr@gmx.de>
 Max Matveev <max@melbourne.sgi.com>
 Michael Dreher <micha@planet-interkom.de>
@@ -82,7 +101,9 @@ Michael Mayer <mmayer@muenster.de>
 Michael Schuetz <michael.schuetz@tu-clausthal.de>
 Michael Schwendt <sidplay@geocities.com>
 Michael Stroeder <s_stroed@ira.uka.de>
+Mike Castle <dalgoda@ix.netcom.com>
 Nick Drage <nick-drage@gmx.ch>
+Oisin Curtin <ocurtin@usa.net>
 Otto Niesser <Otto.Niesser@nbgm.siemens.de>
 Pasqualino Casciano <pasqualino.casciano@stud.lrz-muenchen.de>
 Peter Hirdina <Peter.Hirdina@gmx.net>
@@ -102,21 +123,30 @@ Richard van Denzel <richardd@interaccess.nl>
 Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>
 Ron Rosson <insane@oneinsane.net>
 Sebastien Bellefeuille <sebas@magma.ca>
+Shaul Karl <shaulk@israsrv.net.il>
+Stefan Fleiter <stefan.fleiter@gmx.de>
 Stefan Ladwig <stefan.ladwig@privat.kkf.net>
 Stefan Luetkebrune <s.luetkebrune@ndh.net>
 Stefan Troeger <stefan.troeger@wirtschaft.tu-chemnitz.de>
+Stefan Wiens <s.wi@gmx.net>
 Stephan Block <block@enst.fr>
+Stephane Boffin <sboffin@nertec.com>
+Stephen Marley <stephen@home.uklinux.net>
 Steven Flintham <steven@lemma.demon.co.uk>
 Sven Paulus <sven@karlsruhe.org>
 Taisuke Yamada <tai@imasy.or.jp>
 Ted Marston <ted@nowtsfree.freeserve.co.uk>
+Thomas Bader <thomasb@trash.net>
 Thomas J. Merritt <tjm@codegen.com>
 Thomas Themel <tthemel@gmx.net>
+Thomas Zajic <zlatko@gmx.at>
 Timo Giesselmann <gmann@on-line.de>
 Tobias Burnus <tobias.burnus@uumail.de>
 Tom Schlangen <t.schlangen@ndh.net>
+Tony de Haan <tony@iae.nl>
 Torsten Berger <ToBerger@t-online.de> 
 Trever Adams <highlander@teleteam.net>
+Ulf Herbers <ulf@herbers-schramm.de>
 Vladimir Dozen <dozen@do-labs.spb.ru>
 Vladimir Litovka <doka@root.webest.com>
 Walt Mankowski <waltman@netaxs.com>
