@@ -1,3 +1,55 @@
+2002-02-20  Matthias Andree  <matthias.andree@gmx.de>
+
+	* TODO: Fix umlauts to iso-8859-15. Update. Postpone virtually
+	anything to 10pre5 to make 10pre4 into a worship-Ralf-Wildenhues
+	release.
+
+	* INSTALL: Add note that SGI may need GNU make.
+	* leafnode.8.in: Ralf Wildenhues: Fix typo.
+	* nntpd.c: Ralf Wildenhues: Read NOPOSTING environment into
+	file-local variable. Fix ANSI violation in
+	allowposting(). main_loop(): Fix possible cmd[] underflow. Many
+	more fixes, memory leak plugs, not listed here. Optimize by using
+	fputs for static strings rather than printf.
+
+	* ln_log.c: Ralf Wildenhues: Fix comment.
+	* leafnode.h: Ralf Wildenhues: more splint annotations.
+	* fetchnews.c: Matthias Andree: postarticles(): drop
+	haveid. Reported by Ralf Wildenhues.  Ralf Wildenhues: make
+	newserver an unsigned long in do_group().  Matthias Andree: mark
+	newserver as FIXME unused in processupstream. Reported by Ralf
+	Wildenhues.
+
+	* xoverutil.c (xgetxover): Drop unused variable "body". Reported
+	by Ralf Wildenhues.
+
+	* nntpd.c: Ralf Wildenhues: in dolist(): memleak (local variable
+	arg not freed), variable p set but not used. in doxover():
+	variable l set but not used. in markinterest(): fix memleak in
+	s. in doselectedheader(): fix memleak in header.  Matthias Andree:
+	Fix another memleak in header, reported by Ralf.
+
+	* miscutil.c: rfcdate(): make local a pointer, use gmtoff, discard
+	gmt. (Ralf Wildenhues reported "gmt" as unused).
+	* miscutil.c: Ralf Wildenhues: in lookup(): variable q set but not
+	used. in initvars(): make ui/gi depend on TESTMODE.
+	* ln_log_open.c: Ralf Wildenhues: Suppress openlog in TESTMODE.
+	* ln_log.c: Ralf Wildenhues: Suppress syslog in TESTMODE.
+	* mastring.c: Ralf Wildenhues: Drop unused variable c in
+	mastr_getln().
+
+	* localutil.c: Ralf Wildenhues: use int instead of char to carry
+	strcasecmp result, to prevent troubles on machines that have char
+	== unsigned char.
+
+2002-02-16  Matthias Andree  <matthias.andree@gmx.de>
+
+	* mastring.c: Fix types.
+	* configure.ac: Bump version to 2.0b8_ma10pre4.
+	* activutil.c: Merge Jörg Dietrich's patch to propagate newsgroup
+	mode changes from local groups into groupinfo.  Clean up this
+	patch, just always copy the status into groupinfo.
+
 2002-02-11  Matthias Andree  <matthias.andree@gmx.de>
 
 	* Makefile.am: Add touch.c to liblnutil_a_SOURCES.
