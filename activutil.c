@@ -287,7 +287,7 @@ writeactive(void)
 	goto bye;
     }
 
-    if (log_fchmod(fd, 0664)) {
+    if (log_fchmod(fd, 0660)) {
 	goto bye;
     }
 

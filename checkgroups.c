@@ -105,7 +105,7 @@ main(int argc, char *argv[])
     if (!init_post())
 	init_failed(myname);
 
-    umask((mode_t)2);
+    umask((mode_t)07);
 
     /* lock */
     if (attempt_lock(LOCKWAIT)) {

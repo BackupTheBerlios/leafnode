@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.97 2004/02/27 01:23:49 emma Exp $ */
+/* $Id: leafnode.h,v 1.98 2004/03/26 14:36:54 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -78,7 +78,7 @@ typedef int bool;
 #define BLOCKSIZE 16384
 
 /*@constant mode_t MKDIR_MODE;@*/
-#define MKDIR_MODE 0750
+#define MKDIR_MODE 0770
 
 /*@constant unsigned long LOCKWAIT;@*/
 /** how long to wait for a lock, in seconds */

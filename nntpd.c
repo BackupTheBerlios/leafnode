@@ -1235,7 +1235,7 @@ dopost(void)
 	sprintf(inname, "%s/temp.files/%d-%lu-%d",
 		spooldir, (int)getpid(), (unsigned long)time(NULL),
 		++postingno);
-	out = open(inname, O_WRONLY | O_EXCL | O_CREAT, (mode_t) 0444);
+	out = open(inname, O_WRONLY | O_EXCL | O_CREAT, (mode_t) 0440);
     } while (out < 0 && errno == EEXIST);
 
     if (out < 0) {
@@ -2503,7 +2503,7 @@ main(int argc, char **argv)
 	init_failed(myname);
 
     verbose = 0;
-    umask((mode_t) 02);
+    umask((mode_t) 07);
 
     /* get local address */
     fodder = sizeof(sa);

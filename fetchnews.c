@@ -1731,7 +1731,7 @@ postarticles(const struct serverlist *cursrv)
 				    (void)log_unlink(*y, 1);
 				} else {
 				    /* set u+x bit to mark article as posted */
-				    chmod(*y, 0544);
+				    chmod(*y, 0540);
 				}
 
 				if (mod != NULL)
