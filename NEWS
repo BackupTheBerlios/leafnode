@@ -1,4 +1,15 @@
-Changes since 20040206a:
+20040305a: Changes since 20040227a:
+- Robustness: Leafnode programs refuse to start when an unknown or
+  unsupported authentication method is configured.
+- Bugfix: Fetchnews will no longer move articles to failed.postings if
+  it has been run with the "-S server" switch. (Report by Robert Marshall)
+- Bugfix: Fetchnews will no longer abort when it needs to fetch the
+  active file (-f option, timeout_active expired, fresh install) when
+  the first server has the "noactive" option set.
+- Portability: ugid_gset.c lacked #include directives that caused
+  compile trouble. Fix by Ralf Wildenhues.
+
+20040227a: Changes since 20040206a:
 - Feature: Supports PAM, based on a patch by Hynek Schlawack.
 - Bugfix: all fetchnews functions now read from the network with a
   timeout limit.

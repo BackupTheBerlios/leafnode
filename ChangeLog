@@ -1,4 +1,36 @@
+2004-03-05  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040305a =
+	* fetchnews.c: Running fetchnews with the -S switch would falsely
+	file out.going articles into failed.postings. Bug found by Robert
+	Marshall.
+
+2004-03-04  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO, fetchnews.c: Work around abort when the first server has
+	"noactive" set.
+
+2004-03-01  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* configure.ac, ugid_gset.c: Portability fix for linux: setgroups
+	needs sys/types.h and grp.h.
+
+2004-03-01  Matthias Andree <matthias.andree@gmx.de>
+
+	* addpatches.pl, release.sh: Local, site-specific release helpers
+	stored in CVS.
+	* pam.d_leafnode: Sample file for PAM, not being shipped for it
+	uses system accounts.
+
+2004-02-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* configutil.c: Refuse to start when an unknown or unsupported
+	authentication method is configured.
+
 2004-02-27  Matthias Andree <matthias.andree@gmx.de>
+
+	* CREDITS: Credit Hynek.
+	* ChangeLog, NEWS, README.html, configure.ac: snapshot 20040227a.
 
 	= snapshot 20040227a =
 	* leafnode.h, leafnode-2/leafnode.h: Fix incomplete type in
