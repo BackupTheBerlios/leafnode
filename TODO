@@ -70,6 +70,9 @@ Matthias:
 
 * store group lists per server and merge them into a DB?
 
+* separate audit logging (who subscribes, who downloads) from debug
+  logging
+
 10pre5
 0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
