@@ -1,5 +1,30 @@
+2002-06-24  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: doarticle: no need for \n removal any more -- done by
+	getaline.
+	* fetchnews.c: Cleanup of main() -- use volatile for setjmp
+	affected variables, simplify getopt processing.
+
+2002-06-23  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Unbreak previous fgets->getaline migration.
+	* nntpd.c: Get rid of the last fgets() caller. In doarticle, get
+	rid of static buffer.
+	* leafnode.h, lockfile.c: New lockfile_exists prototype,
+	lockfile_exists is always blocking. New function handover_lock.
+	From leafnode-1.
+	* applyfilter.c, checkgroups.c, fetchnews.c, texpire.c: New
+	lockfile_exists prototype, lockfile_exists is always blocking. From
+	leafnode-1.
+	* TODO: [no log message]
+	* activutil.c: Also copy the 'count' member. Reported by Ralf
+	Wildenhues.
+
 2002-06-22  Matthias Andree <matthias.andree@gmx.de>
 
+	* getaline.c: Fix ln_log severity.
+	* getaline.c: Ignore incomplete lines (without trailing LF).
+	Suggested by Mirko Liss.
 	* nntpd.c: Major cleanup of dogroup(). is_pseudogroup now also
 	returns true for empty groups not in interesting; since introduction
 	of .last.posting in 2.0b8_ma7.4pre on 2001-10-05, this has been
