@@ -2606,6 +2606,7 @@ main(int argc, char **argv)
     freeactive(active);
     active = NULL;
     freelocal();
+    freeallfilter(filter);
     freeconfig();
     freeinteresting();
     free_dormant();

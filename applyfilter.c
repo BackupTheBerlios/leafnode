@@ -364,6 +364,7 @@ main(int argc, char *argv[])
     unlink(lockfile);
     if (verbose)
 	printf("Done.\n");
+    freeallfilter(filter);
     freexover();
     freeactive(active);
     exit(EXIT_SUCCESS);

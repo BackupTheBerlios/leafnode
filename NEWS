@@ -5,6 +5,7 @@ KNOWN BUGS:
 Changes since 20041215a:
 - Bugfix: Fix massive memory leak in "GROUP" command and other commands
   that read the overview data. Reported by Lloyd Zusman.
+- Bugfix: Free filter memory at program exit.
 
 20041215a: Changes since 20041213a:
 - Feature: when a fresh post matches a filter, reject the post.

@@ -345,6 +345,7 @@ main(int argc, char *argv[])
 		   "%s: cannot stat %s\n", argv[0], ptr);
     }
     writeactive();		/* write groupinfo file */
+    freeallfilter(filter);
     log_unlink(lockfile, 0);
     exit(0);
 }
