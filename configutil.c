@@ -480,5 +480,9 @@ freeconfig(void)
 	free(filterfile);
 	filterfile = NULL;
     }
+    if (mta) {
+        free(mta);
+	mta = NULL;
+    }
     freeexpire();
 }
