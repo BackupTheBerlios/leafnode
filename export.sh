@@ -10,6 +10,8 @@ rsync -a ./ "$repo" \
     --exclude 'autom4te.cache' \
     --delete --delete-excluded
 cd $repo
+yes | darcs revert --all || true
+rm -f _darcs/patches/unrevert
 darcs whatsnew --boring -ls \
 | awk '/^a / { printf "%s\0", $2; }' \
 | xargs -0 rm -f
