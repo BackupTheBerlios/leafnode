@@ -500,7 +500,7 @@ getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
     if (!xref)
 	return NULL;
 
-    if ((num_groups = parsekill_xref_line(xref, &ngs, &artnos, 1)) == -1) {
+    if ((num_groups = xref_to_list(xref, &ngs, &artnos, 1)) == -1) {
 	free(xref);
 	return NULL;
     }
@@ -832,7 +832,7 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 
 	if (is_pseudogroup(g->name))
 	    nntpprintf("211 %lu %lu %lu %s group selected",
-		    1, g->first, g->first, g->name);
+		    1lu, g->first, g->first, g->name);
 	else
 	    nntpprintf("211 %lu %lu %lu %s group selected",
 		    g->count, g->first, g->last, g->name);
@@ -2021,7 +2021,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 {
     unsigned long a, b;
     long int idx, idxa, idxb;
-    int i;
+    int i = 0;
 
     if (!group) {
 	nntpprintf("412 Use the GROUP command first");
