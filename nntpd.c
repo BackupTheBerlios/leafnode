@@ -374,11 +374,10 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	if (is_pseudogroup(group->name)) {
 	    f = fopenpseudoart(group, arg, a);
 	} else {
-	    if (is_pseudogroup(group->name) && !is_localgroup(group->name))
-		f = fopenpseudoart(group, arg, a);
-	    else
-		f = fopen(arg, "r");
+	    f = fopen(arg, "r");
 	}
+	if (!f && errno != ENOENT)
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s in %s: %m", arg, group->name);
 
 	if (f)
 	    *artno = a;
@@ -392,6 +391,8 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	} else {
 	    f = fopen(lookup(arg), "r");
 	}
+	if (!f && errno != ENOENT)
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s: %m", arg);
     } else if (group && *artno) {
 	char s[64];
 	(void)chdirgroup(group->name, FALSE);
@@ -399,6 +400,8 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	f = fopen(s, "r");
 	if (!f && allowsubscribe())
 	    f = fopenpseudoart(group, s, *artno);
+	if (!f && errno != ENOENT)
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "cannot open %s in %s: %m", arg, group->name);
 	/* warning: f may be NULL */
 	markinterest(group->name);	/* FIXME: check error */
     }
