@@ -131,6 +131,9 @@ urgence:
 
 3.3 add IHAVE support for feeding upstream
 
+3.3 Suggestion by Jörg Mensmann: only pick groups from supplement that
+    have not been fetched before (or filter groups by server)
+
 3.3 document NOPOSTING env variable that prevents posting
 
 3.3 does not send UUCP to upstream, introduce option to batch and spool
