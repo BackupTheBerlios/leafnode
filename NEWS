@@ -1,4 +1,8 @@
 2.0b8_ma10pre4:
+- IMPORTANT: leafnode now automatically appends "leafnode" to your
+  sysconfdir. For backwards compatibility, ./configure will strip a
+  trailing "/leafnode" or "/leafnode/" so you don't end up with your
+  configuration in /etc/leafnode/leafnode/config.
 - Rnews is back!
 - The "dontpost" configuration option is replaced by "feedtype=none".
 - There is a new "only_fetch_once" option, that reads a group only from
