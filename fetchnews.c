@@ -1323,7 +1323,6 @@ processupstream(const char *const server, const unsigned short port,
     const char *ng;
     unsigned long newserver; /* FIXME variable newserver set but not used */
     char *oldfile = 0;
-    int havefile;
     struct stringlist *ngs = NULL;
     struct stringlist *helpptr = NULL;
     char *s;
@@ -1333,17 +1332,14 @@ processupstream(const char *const server, const unsigned short port,
     s = server_info(spooldir, server, port, "");
 
     oldfile = critstrdup(s, "processupstream");
-    havefile = 0;
     if ((f = fopen(s, "r"))) {
 	char *l;
 	/* FIXME: a sorted array or a tree would be better than a list */
-	ngs = NULL;
 
 	while ((l = getaline(f)) && *l) {
 	    appendtolist(&ngs, &helpptr, l);
 	}
 
-	havefile = 1;
 	fclose(f);
     } else {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", s);
@@ -1378,26 +1374,27 @@ processupstream(const char *const server, const unsigned short port,
     if (!newsgrp) {
 	while ((ng = readinteresting(r))) {
 	    if (isalnum((unsigned char)*ng)) {
-		newserver = do_group(ng, havefile ? ngs : 0, f);
+		newserver = do_group(ng, ngs, f);
 	    }
 	}
 	closeinteresting(r);
 	freeinteresting();
     } else {
-	newserver = do_group(newsgrp, havefile ? ngs : 0, f);
+	newserver = do_group(newsgrp, ngs, f);
+	helpptr = ngs;
+	while (helpptr) {
+	    if (strncmp(helpptr->string, newsgrp, strlen(newsgrp)))
+		fprintf(f, "%s\n", helpptr->string);
+	    helpptr = helpptr->next;
+	}
     }
 
-    if (f) {
-	fclose(f);
-	s = server_info(spooldir, server, port, "~");
-	(void)log_rename(s, oldfile);
-	free(s);
-    }
+    (void)log_fclose(f);
+    s = server_info(spooldir, server, port, "~");
+    (void)log_rename(s, oldfile);
+    free(s);
     free(oldfile);
-    if (!newsgrp) {
-	freelist(ngs);
-    }
-
+    freelist(ngs);
     return 1;
 }
 
