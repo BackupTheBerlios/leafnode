@@ -1,3 +1,10 @@
+2004-10-06  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20041006a =
+	* fetchnews.c: Quench ICC 8.1 warning.
+	* NEWS, README.html: Use netmask, not prefix length, in
+	tcpd/hosts.allow example.  Reported by Gundemarie Scholz.
+
 2004-09-30  Matthias Andree <matthias.andree@gmx.de>
 
 	* texpire.c: Fix 'kept' counters in texpire -a mode. Reported by
