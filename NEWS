@@ -2,7 +2,7 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20040823b:
+20040915a: Changes since 20040823b:
 - Bugfix: A timeout while connecting to a server (default 30 seconds)
   caused fetchnews to abort and print "Alarm clock."
   Reported by Michael Rulov.

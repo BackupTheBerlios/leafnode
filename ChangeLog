@@ -1,4 +1,40 @@
+2004-09-15  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040915b =
+	* configure.ac: Bump version.
+	* CREDITS, NEWS, config.example, leafnode.8.in, nntputil.c: Bugfix:
+	A timeout while connecting to a server (default 30 seconds) caused
+	fetchnews to abort and print "Alarm clock." Reported by Michael
+	Rulov.  Change: the fetchnews connect timeout now applies to each of
+	the server's addresses.
+
+2004-09-13  Matthias Andree <matthias.andree@gmx.de>
+
+	* README.html: Mention debug info and that the file needs to be
+	created.
+	* texpire.c: Bugfix: legalxoverline() considered all overview lines
+	broken, because it did not skip over the TAB before the Xref: header
+	tag.
+
+2004-09-12  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, texpire.8.in: Update texpire man page.
+	* texpire.8.in: Rewrite explanation for -f option. Suggested by
+	Robert Marshall.
+
+2004-09-01  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* configure.ac, fetchnews.c: configure.ac: add AC_PROG_CC_C_O to
+	placate automake-1.9a.  fetchnews.c: fix format string bug.
+
+2004-08-31  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Update.
+
 2004-08-23  Matthias Andree <matthias.andree@gmx.de>
+
+	* CREDITS: Add Andreas Kneib for a good laugh.
+	* ChangeLog, NEWS, configure.ac: 2.0.0.alpha20040823b
 
 	= snapshot 20040823b =
 	* fetchnews.c: Revert plausibility tests to not abort. Found by
