@@ -17,8 +17,7 @@
  * NULL in case of error. The returned pointer must be free()ed by
  * the caller. (c) 2001 Joerg Dietrich.
  */
-/*@null@*/ /*@only@*/ char
-*
+/*@null@*/ /*@only@*/ char *
 getmoderator(const char *group)
 {
     char *line, *p;
@@ -75,8 +74,7 @@ getmoderator(const char *group)
  * the first group on which status matches, NULL otherwise.
  * Caller must free returned pointer. (c) 2001 Joerg Dietrich.
  */
-/*@null@*/ /*@only@*/ char
-*
+/*@null@*/ /*@only@*/ char *
 checkstatus(const char *groups, const char status)
 {
     char *p;
