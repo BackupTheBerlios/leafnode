@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.15 2002/04/26 15:19:51 emma Exp $
+# $Id: Makefile.am,v 1.16 2002/04/27 08:47:30 ralf Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -85,6 +85,7 @@ liblnutil_a_SOURCES	= \
 	log_fsync.c \
 	log_rename.c \
 	log_unlink.c \
+	log_moveto.c \
 	mailto.c \
 	masock.h \
 	masock_sa2addr.c \

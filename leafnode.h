@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.37 2002/04/26 15:20:27 emma Exp $ */
+/* $Id: leafnode.h,v 1.38 2002/04/27 08:47:30 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -575,6 +575,7 @@ extern "C" {
     int log_rename(const char *, const char *);
     int log_chmod(const char *, mode_t);
     int log_fchmod(const int, mode_t);
+    int log_moveto(/*@notnull@*/ const char *, const char *dir);
 
 /* from wildmat.c */
     int wildmat(const char *text, const char *p);
@@ -634,7 +635,7 @@ extern "C" {
     int getwatermarks(unsigned long *, unsigned long *, unsigned long /*@null@*/ *);
 
 /* touch.c */
-    int touch(const char *name);
+    int touch_truncate(const char *name);
 
     extern void /*@exits@*/ internalerror(void);
 #define internalerror() do { ln_log(LNLOG_SCRIT, LNLOG_CTOP, "internal error at %s:%d", __FILE__, __LINE__); abort(); } while(0)

@@ -129,12 +129,12 @@ feedincoming(void)
 	}
 
 	/* FIXME: fix xover */
-	/* FIXME: apply filter */
 	if ((rc = store(*di, 0, 0))) {
-	    char buf[1024];
-	    snprintf(buf, sizeof(buf), "Could not store %%s: %s",
-		     store_err(rc));
-	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, buf, *di);
+	    static const char xx[] = "/failed.postings/";
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
+		   "moving to %s%s",
+		   *di, store_err(rc), spooldir, xx);
+	    (void)log_moveto(*di, xx);
 	} else {
 	    const char *j;
 	    for (j = strtok(ngs, "\t ,"); j && *j; j = strtok(NULL, "\t ,")) {

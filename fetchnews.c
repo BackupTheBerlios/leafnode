@@ -1173,28 +1173,6 @@ post_FILE(FILE * f, char **line)
     return FALSE;
 }
 
-/** Strip off directories from file and move that file to dir below
- * spooldir, logging difficulties.
- * \return the return value of the embedded rename(2) syscall
- */
-static
-    int
-moveto(/*@notnull@*/ const char *file /** source file */ ,
-       const char *dir /** destination directory */ )
-{
-    int r, e;
-
-    mastr *s = mastr_new(PATH_MAX);
-    mastr_vcat(s, spooldir, dir, BASENAME(file), 0);
-    r = rename(file, mastr_str(s));
-    e = errno;
-    if (r)
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot move %s to %s: %m", file, dir);
-    mastr_delete(s);
-    errno = e;
-    return r;
-}
-
 /*
  * post all spooled articles to currently connected server
  *
@@ -1251,17 +1229,17 @@ postarticles(void)
 			    if (post_FILE(f, &line)) {
 				/* POST was OK */
 				if (checkstatus(f1, 'm'))
-				    (void)moveto(*y, "/backup.moderated/");
+				    (void)log_moveto(*y, "/backup.moderated/");
 				++n;
 			    } else {
 				/* POST failed */
-				const char xx[] = "/failed.postings/";
+				static const char xx[] = "/failed.postings/";
 
 				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 				       "Unable to post %s: \"%s\", "
-				       "moving to %s/%s", *y, line,
+				       "moving to %s%s", *y, line,
 				       spooldir, xx);
-				(void)moveto(*y, xx);
+				(void)log_moveto(*y, xx);
 			    }
 			}
 			free(f2);
