@@ -92,7 +92,7 @@ feedincoming(void)
 
     for (di = dl; *di; di++) {
 	FILE *f = fopen(*di, "r");
-	char *ngs;
+	char *ngs, *mod, *app, *forbidden, *good;
 	int rc;
 
 	if (!f) {
@@ -109,15 +109,38 @@ feedincoming(void)
 	    continue;
 	}
 
-	if ((rc = store(*di, 0, 0, 3))) {
-	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
-		   "moving to %s/failed.postings/",
-		   *di, store_err(rc), spooldir);
-	    (void)log_moveto(*di, "/failed.postings/");
+	if ((forbidden = checkstatus(ngs, 'n'))) {
+	    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+		    "Article was posted to non-writable group %s", forbidden);
+	    log_unlink(*di, 0);
+	    log_fclose(f);
+	    free(forbidden);
+	    free(ngs);
+	    continue;
+	}
+
+	good = checkstatus(ngs, 'y');
+	mod = checkstatus(ngs, 'm');
+	app = fgetheader(f, "Approved:", 1);
+
+	if (good || (mod && app)) {
+	    if ((rc = store(*di, 0, 0, 3))) {
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
+			"moving to %s/failed.postings/",
+			*di, store_err(rc), spooldir);
+		(void)log_moveto(*di, "/failed.postings/");
+	    } else {
+		log_unlink(*di, 0);
+	    }
 	} else {
+	    if (!good && !mod) ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+		    "Article was posted to unknown groups %s", ngs);
 	    log_unlink(*di, 0);
 	}
 	log_fclose(f);
+	if (good) free(good);
+	if (mod) free(mod);
+	if (app) free(app);
 	free(ngs);
     }
 
