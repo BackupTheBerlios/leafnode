@@ -118,11 +118,11 @@ newnntpreply(/*@out@*/ char **resline
 {
     char *response;
     int r = 0;
-    bool c = TRUE;
+    bool c;
 
     assert(nntpin != NULL);
 
-    while (c) {
+    do {
 	response = getaline(nntpin);
 	if (!response) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
@@ -151,7 +151,7 @@ newnntpreply(/*@out@*/ char **resline
 	    c = 0;
 	    r = -1;		/* protocol error */
 	}
-    }
+    } while(c);
 
     if (resline)
 	*resline = response;
