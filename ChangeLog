@@ -1,3 +1,70 @@
+2002-01-03  Matthias Andree  <matthias.andree@gmx.de>
+
+        === RELEASE 2.0b8_ma9.1pre ===
+	* Makefile.in: Include README (text version) in distributions --
+	note: requires lynx to build the tarball!
+	* rnews.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* nntpd.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* fetchnews.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* checkgroups.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* leafnode.h: Change initvars "program" parameter prototype to
+	const char * (was char *).
+
+	* texpire.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* applyfilter.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* miscutil.c: Apply Volker Apelt's patch to log initialization
+	troubles to syslog.
+
+	* fetchnews.c: Accept =, x, j status characters in LIST replies.
+	Move first/last initialization down a bit to fix bogus low/high
+	article numbers in groupinfo that occurred after fetchnews
+	-f. Long-standing bug. This should fix a couple of
+	incompatibilities.
+
+	* activutil.c: Transform status characters: x -> n, j -> y, = -> y
+	* texpire.c: Fix commentary whitespace.
+	* store.c: Fix double angle bracket reject filter logging.
+	* leafnode.h: Change return type of writeactive to int (was void).
+	* fetchnews.c: When reading newsgroups from an upstream server,
+	make finding and parsing the status character more robust. Should
+	fix the NUL bytes in groupinfo's status column that Tim Dodge
+	reported.
+
+	* artutil.c: When superseding or canceling an article, an ENOENT
+	is only logged with NOTICE priority (the article may have been
+	filtered or expired already).
+
+	* activutil.c: Make writeactive() more robust (no crash without
+	active).  If groupinfo is truncated, log problematic lines and
+	skip over them.
+
+2002-01-02  Matthias Andree  <matthias.andree@gmx.de>
+
+	* filterutil.c: Respect DEBUG_FILTER. Found by Olaf Titz, fixed by
+	Raymond Scholz.
+
+2001-12-29  Matthias Andree  <matthias.andree@gmx.de>
+
+	* Makefile.in: Use $(...) Makefile macros rather than
+	config.status @...@ expansions for config.c for everything except
+	PACKAGE_VERSION. Found by Ben Holness and Jörg Dietrich.
+
+2001-12-29  Matthias Andree  <matthias.andree@gmx.de>
+
+	=== RELEASE 2.0b8_ma8 ===
+
 2001-12-27  Matthias Andree  <matthias.andree@gmx.de>
 
         === RELEASE 2.0b8_ma8rc8 ===
