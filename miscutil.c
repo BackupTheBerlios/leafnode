@@ -1,4 +1,4 @@
-/** \file miscutil
+/** \file miscutil.c
  * miscellaneous stuff.
  *
  * See AUTHORS for copyright holders and contributors.
@@ -188,7 +188,7 @@ getoptarg(char option, int argc, char *argv[])
  */
 int
 parseopt(const char *progname, int option,
-	 /*@null@*/ const char *opta, char *conffile, size_t conffilesize)
+	 /*@null@*/ const char *opta, /*@unique@*/ char *conffile, size_t conffilesize)
 {
     if (option == 'V') {
 	printf("%s %s\n", progname, version);
@@ -271,7 +271,7 @@ checkinteresting(void)
     while ((de = readdir(d)) != NULL) {
 	time_t lastart = getlastart(de->d_name);
 	if ((stat(de->d_name, &st) == 0) && S_ISREG(st.st_mode)) {
-/*@dependent@*//*@null@*/ const char *reason;
+	    /*@dependent@*//*@null@*/ const char *reason;
 	    /* reading a newsgroup changes the ctime (in
 	     * markinterest()), if the newsgroup is newly created, the
 	     * mtime is changed as well */
@@ -309,7 +309,7 @@ compare(const void *a, const void *b,
     return strcasecmp((const char *)a, (const char *)b);
 }
 
-static struct rbtree *rb;
+static /*@null@*/ /*@only@*/ struct rbtree *rb;
 
 /** Read interesting.groups directory. Trouble is logged.
  *  \return TRUE for success, FALSE in case of trouble.
@@ -380,20 +380,20 @@ critinitinteresting(void)
 	exit(EXIT_FAILURE);
 }
 
-RBLIST *
+/*@null@*/ /*@only@*/ RBLIST *
 openinteresting(void)
 {
     return rbopenlist(rb);
 }
 
-const char *
-readinteresting(RBLIST * r)
+/*@null@*/ /*@owned@*/ const char *
+readinteresting(/*@null@*/ RBLIST * r)
 {
     return (const char *)rbreadlist(r);
 }
 
 void
-closeinteresting(RBLIST * r)
+closeinteresting(/*@null@*/ /*@only@*/ RBLIST * r)
 {
     rbcloselist(r);
 }
@@ -431,10 +431,10 @@ is_interesting(const char *groupname)
 }
 
 /* no good but this server isn't going to be scalable so shut up */
-char *
+/*@dependent@*/ char *
 lookup(/*@null@*/ const char *msgid)
 {
-    static char *name = NULL;
+    static /*@null@*/ /*@owned@*/ char *name = NULL;
     static unsigned int namelen = 0;
     unsigned int r;
     unsigned int i;
@@ -468,8 +468,8 @@ lookup(/*@null@*/ const char *msgid)
  \return 
    - 0 if article not present or mid parameter NULL 
    - 1 if article is already there */
-int
-ihave(const char *mid
+/*@falsewhennull@*/ int
+ihave(/*@null@*/ const char *mid
 /** Message-ID of article to check, may be NULL */ )
 {
     const char *m = lookup(mid);
@@ -583,7 +583,7 @@ whoami(void)
  */
 void
 appendtolist(struct stringlist **list, struct stringlist **lastentry,
-	     char *newentry)
+	     /*@unique@*/ char *newentry)
 {
     struct stringlist *ptr;
     ptr = (struct stringlist *)critmalloc(sizeof(struct stringlist) +
@@ -604,15 +604,18 @@ appendtolist(struct stringlist **list, struct stringlist **lastentry,
  * return pointer to string if found, NULL otherwise
  */
 /*@null@*/ char *
-findinlist(struct stringlist *haystack, /*@null@*/ const char *const needle)
+findinlist(/*@null@*/ struct stringlist *haystack, /*@null@*/ const char *const needle)
 {
     struct stringlist *a;
+    size_t n;
 
     if (needle == NULL)
 	return NULL;
+
+    n = strlen(needle);
     a = haystack;
     while (a && a->string) {
-	if (strncmp(needle, a->string, strlen(needle)) == 0)
+	if (strncmp(needle, a->string, n) == 0)
 	    return a->string;
 	a = a->next;
     }
@@ -623,7 +626,7 @@ findinlist(struct stringlist *haystack, /*@null@*/ const char *const needle)
  * free a list
  */
 void
-freelist( /*@only@*/ struct stringlist *list)
+freelist(/*@null@*/ /*@only@*/ struct stringlist *list)
 {
     struct stringlist *a = list, *b;
     if (!list)
@@ -640,7 +643,7 @@ freelist( /*@only@*/ struct stringlist *list)
  * get the length of a list
  */
 int
-stringlistlen(const struct stringlist *list)
+stringlistlen(/*@null@*/ const struct stringlist *list)
 {
     int i;
 
@@ -652,7 +655,7 @@ stringlistlen(const struct stringlist *list)
 /*
  * convert a space separated string into a stringlist
  */
-struct stringlist *
+/*@null@*/ /*@only@*/ struct stringlist *
 cmdlinetolist(const char *cmdline)
 {
     char *c;
