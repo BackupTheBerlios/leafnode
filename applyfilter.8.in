@@ -64,7 +64,7 @@ Switch to cancel mode, manually remove articles with given Message-IDs.
 Note that the Message-IDs must be given in angle brackets, which means
 that you will need to protect them from the shell, example:
 applyfilter -C '<some.1234.id@killme.example.org>'
-.PP
+.IP
 The cancel will only remove the article locally. No control message will
 be generated or sent to other hosts.
 .TP
