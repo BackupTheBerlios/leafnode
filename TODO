@@ -61,9 +61,6 @@ Ralfs TODO:
     (Kevin Bulgrien), to allow for leafwa tricks.
 
 10pre4
-0.0 Supersede: don't log "No such file or directory".
-
-10pre4
 0.0 add COPYING (Ralf Wildenhues)
 
 10pre4
@@ -73,17 +70,7 @@ Ralfs TODO:
 0.0 use separate repairspool program
 
 10pre4
-1.1 internal error reported when hostname = localhost (Jari Lehtonen
-    <jari@utu.fi>, Mark Brown)
-
-10pre4
 1.1 refuse postings with unqualified or local message ID domain part.
-
-10pre4
-1.1 left over temp files when lock cannot be obtained (Jari Lehtonen
-    <jari@utu.fi>)
-    -> change timeout handling, do not use alarm(), but let lockfile.c
-    track the time out.
 
 10pre5
 1.1 try to post an article to *every* server before moving into
@@ -290,6 +277,16 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-05-05 Matthias Andree
+	   left over temp files when lock cannot be obtained (Jari Lehtonen
+	   <jari@utu.fi>)
+	   -> changed timeout handling, do not use alarm(), but let lockfile.c
+	   track the time out.
+
+2002-05-05 Matthias Andree
+           internal error reported when hostname = localhost (Jari Lehtonen
+           <jari@utu.fi>, Mark Brown)
 
 2002-05-01 Ralf Wildenhues
 	   NEWNEWS and NEWGROUPS MUST not alter state information!
