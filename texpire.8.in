@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.7 2004/08/13 15:56:52 emma Exp $
+.\" $Id: texpire.8.in,v 1.8 2004/09/12 12:03:33 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -47,9 +47,8 @@ Read configuration from an alternate config file instead of
 /etc/leafnode/config.
 .TP
 .I -f
-Force expire. Expire will be made regardless of the access time of the file.
-Especially useful if you regularly backup your news spool or do other things
-to it where you open files in there.
+Expire will look at the arrival time of the articles rather than at the
+access time. Expiry will still be thread-based.
 .TP
 .I -n
 Dry run mode. In this mode, texpire will not delete anything, it will
