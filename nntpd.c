@@ -1256,7 +1256,7 @@ validate_messageid(const char *n)
 	return 0;
     /* must end with '>', no control characters or whitespace allowed */
     while (*++n != '\0' && *n != '>') {
-	if (isspace(*n) || iscntrl(*n))
+	if (isspace((unsigned char)*n) || iscntrl((unsigned char)*n))
 	    return 0;
     }
     /* must end with '>' */
