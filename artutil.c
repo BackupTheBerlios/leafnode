@@ -255,17 +255,7 @@ err_out:
     return -1;
 }
 
-/**
- * Delete a message in the local news base and in out.going.
- */
-void
-delete_article(
-/** article to kill, with angle brackets around Message-ID */
-		    const char *mid,
-/** "Supersede" or "Cancel" */
-		    const char *action,
-/** "Superseded" or "Cancelled" */
-		    const char *past_action)
+void delete_article(const char *mid, const char *action, const char *past_action, const int updatexover)
 {
     const char *filename;
     char *r, *hdr;
@@ -329,6 +319,8 @@ delete_article(
 
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 		    "%s %s:%s", past_action, ngs[n], artnos[n]);
+	    if (updatexover)
+		xgetxover(1,NULL,1);
 	}
     }
     free(ngs);

@@ -134,7 +134,7 @@ static int applyfilter(const char *name, struct newsgroup *g,
 		if (strlen(l)) {
 		    msgid = mgetheader("Message-ID:", l);
 		    if (msgid) {
-			delete_article(msgid, "applyfilter", "filtered");
+			delete_article(msgid, "applyfilter", "filtered", 0);
 		    } else {
 			ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 				"%s: Article %s has no Message-ID header",
@@ -265,7 +265,7 @@ main(int argc, char *argv[])
 	for (;optind<argc;optind++) {
 	    if (verbose)
 		printf("trying to cancel %s\n", argv[optind]);
-	    delete_article(argv[optind], "manual remove", "manually removed");
+	    delete_article(argv[optind], "manual remove", "manually removed", 0);
 	}
     } else {
 	if (check) {

@@ -364,7 +364,12 @@ mgetheader( /*@notnull@*/ const char *hdr, /*@null@*/ const char *buf);
     int xref_to_list(/*@exposed@*/ char *xref,
 	    /*@out@*/ char ***groups, /*@null@*/ /*@out@*/ char ***artno_strings, int noskip);
 
-void delete_article(const char *msgid, const char *, const char *);
+/** Delete an article. */
+void delete_article(
+	const char *msgid,	/**< Message-ID, including angle brackets */
+	const char *present,	/**< Action, infinitive */
+	const char *past,	/**< Action, past tense */
+	const int   updatexover	/**< if set, update .overview data */);
 
 /*
  * xover stuff -- for nntpd.c
