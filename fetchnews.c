@@ -1511,7 +1511,7 @@ postarticles(void)
 				}
 				/* POST was OK */
 				++n;
-			    } else if (!current_server->next) {
+			    } else {
 				/* POST failed */
 				/* FIXME: TOCTOU race here - check for
 				 * duplicate article here */
