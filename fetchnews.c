@@ -1932,9 +1932,6 @@ main(int argc, char **argv)
 	forceactive |= checkactive();
     if (forceactive)
 	markactive(AM_KILL);
-    rereadactive();
-
-    feedincoming();
 
     /* If fetchnews should post only, no lockfile or filters are required.
      * It is also sensible to check if there is anything to post when
@@ -1964,6 +1961,11 @@ main(int argc, char **argv)
 	    done_groups = rbinit(cmp_firstcolumn, NULL);
 	}
     }
+
+    rereadactive();
+
+    feedincoming();
+
     signal(SIGHUP, SIG_IGN);
     sa.sa_handler = sigcatch;
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
