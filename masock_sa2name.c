@@ -37,7 +37,7 @@
 char *
 masock_sa2name(const struct sockaddr *sa
     /** socket address to convert */ ,
-	       int *h_e
+	       /*@out@*/ int *h_e
     /** variable to place h_errno into */ )
 {
     struct hostent *he;
