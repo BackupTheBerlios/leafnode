@@ -1983,7 +1983,6 @@ main(int argc, char **argv)
 
     starttime = time(NULL);
     now = time(NULL);
-    umask(2);
 
     if (process_options(argc, argv, &forceactive, &conffile) != 0)
 	exit(EXIT_FAILURE);
