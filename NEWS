@@ -1,4 +1,4 @@
-2.0b8_ma10pre4:
+2.0b-snapshot:
 - no longer installs the "lsort" program. You can remove it from
   /usr/local/sbin/lsort
 - IMPORTANT: leafnode now automatically appends "leafnode" to your
@@ -6,6 +6,7 @@
   trailing "/leafnode" or "/leafnode/" so you don't end up with your
   configuration in /etc/leafnode/leafnode/config.
 - Rnews is back!
+- timeout_active is back!
 - The "dontpost" configuration option is replaced by "feedtype=none".
 - There is a new "only_fetch_once" option, that reads a group only from
   the first server queried that carries this group. Suggested by Jörg

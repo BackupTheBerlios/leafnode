@@ -1,3 +1,22 @@
+2002-07-15  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: bump version 
+	* fetchnews.c: fix timeout_active handling 
+	* TODO: add note about multithreaded fetch 
+	* activutil.c, artutil.c, checkgroups.c, interesting.c, leafnode.h,
+	log_unlink.c, nntpd.c, queues.c, rnews.c, store.c, texpire.c,
+	xoverutil.c: log_unlink() now has an option to ignore ENOENT
+	errors.  
+
+2002-07-12  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, NEWS: No longer install lsort.  
+
+2002-07-11  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Fix signedness in generateMessageID. In the same go,
+	bump the offset quite a bit and do a sanity check on the time stamp.  
+
 2002-07-11  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* activutil.c, applyfilter.c, checkgroups.c, configutil.c,
