@@ -35,7 +35,7 @@ wait
 
 [ -f leafnode-ann.$vers ] && exit 0
 tmp=`mktemp leafnode-ann.$vers.XXXXXXXXXX`
-trap "rm -f $tmp" 0
+trap "rm -f $tmp $tmp.asc" 0
 rm -f $tmp
 cat <<_EOF >$tmp
 Leafnode $vers is available from
@@ -49,5 +49,3 @@ gpg --clearsign $tmp
 
 nail -v -s "leafnode-$vers snapshot available" \
     leafnode-list@dt.e-technik.uni-dortmund.de <$tmp.asc \
-&& touch leafnode-ann.$vers
-rm -f $tmp
