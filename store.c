@@ -276,7 +276,11 @@ store_stream(FILE * in /** input file */ ,
 	if ((q = strstr(mastr_str(xref), name))
 	    && isspace((unsigned char)*(q - 1)))
 	    continue;		/* skip if duplicate */
-	if (create_all_links || is_interesting(name) || is_alllocal(name)) {
+	if (create_all_links 
+            || is_interesting(name) 
+            || is_alllocal(name) 
+            || is_dormant(name)) 
+        {
 	    g = findgroup(name, active, -1);
 	    if (g) {
 		int ls = 0;

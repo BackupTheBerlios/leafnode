@@ -58,6 +58,7 @@ static const struct mydir dirs[] = {
     {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
     {"backup.moderated", 0755},	/* carries articles to moderated upstream groups */
     {"interesting.groups", 0755},
+    {"dormant.groups", 0755},
     {"leaf.node", 0755},
     {"message.id", 02755},
     {"out.going", 02755},	/* FIXME: outgoing queue */
@@ -311,7 +312,8 @@ compare(const void *a, const void *b,
     return strcasecmp((const char *)a, (const char *)b);
 }
 
-static /*@null@*/ /*@only@*/ struct rbtree *rb;
+static /*@null@*/ /*@only@*/ struct rbtree *rb_interesting;
+static /*@null@*/ /*@only@*/ struct rbtree *rb_dormant;
 
 /** Read interesting.groups directory. Trouble is logged.
  *  \return TRUE for success, FALSE in case of trouble.
@@ -324,12 +326,12 @@ initinteresting(void)
     mastr *t;
     const char *const myname = "initinteresting";
 
-    if (rb)
+    if (rb_interesting)
 	return TRUE;
 
     t = mastr_new(PATH_MAX);
-    rb = rbinit(compare, 0);
-    if (!rb) {
+    rb_interesting = rbinit(compare, 0);
+    if (!rb_interesting) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "cannot init red-black-tree, out of memory.");
 	mastr_delete(t);
@@ -351,7 +353,7 @@ initinteresting(void)
 	if (de->d_name[0] == '.')
 	    continue;
 	k = critstrdup(de->d_name, myname);
-	k2 = rbsearch(k, rb);
+	k2 = rbsearch(k, rb_interesting);
 	if (NULL == k2) {
 	    /* OOM */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
@@ -373,6 +375,68 @@ initinteresting(void)
     return TRUE;
 }
 
+/** Read dormant.groups directory. Trouble is logged.
+ *  \return TRUE for success, FALSE in case of trouble.
+ */
+int
+init_dormant(void)
+{
+    DIR *d;
+    struct dirent *de;
+    mastr *t;
+    const char *const myname = "init_dormant";
+
+    
+    if (rb_dormant)
+	return TRUE;
+
+    t = mastr_new(PATH_MAX);
+    rb_dormant = rbinit(compare, 0);
+    if (!rb_dormant) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP,
+	       "cannot init dormant-red-black-tree, out of memory.");
+	mastr_delete(t);
+	return 0;
+    }
+
+    (void)mastr_vcat(t, spooldir, "/dormant.groups", 0);
+    d = opendir(mastr_str(t));
+    if (!d) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m",
+	       mastr_str(t));
+	mastr_delete(t);
+	return FALSE;
+    }
+    while ((de = readdir(d)) != NULL) {
+	char *k;
+	const char *k2;
+
+	if (de->d_name[0] == '.')
+	    continue;
+	k = critstrdup(de->d_name, myname);
+	k2 = rbsearch(k, rb_dormant);
+	if (NULL == k2) {
+	    /* OOM */
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
+		   "%s, cannot build rbtree", myname);
+	    exit(EXIT_FAILURE);
+	}
+	if (k != k2) {
+	    /* key was already present in tree */
+	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
+		   "directory lists same file \"%s\" more than once!? "
+		   "Confused, aborting.", k);
+	    abort();
+	}
+	/* NOTE: rbsearch does NOT make a copy of k, so you must not
+         * free k here! */
+    }
+    (void)closedir(d);
+    mastr_delete(t);
+    return TRUE;
+}
+
+
 /** Read interesting.groups directory, terminate program in case of
     trouble. */
 void
@@ -385,7 +449,7 @@ critinitinteresting(void)
 /*@null@*/ /*@only@*/ RBLIST *
 openinteresting(void)
 {
-    return rbopenlist(rb);
+    return rbopenlist(rb_interesting);
 }
 
 /*@null@*/ /*@owned@*/ const char *
@@ -403,7 +467,7 @@ closeinteresting(/*@null@*/ /*@only@*/ RBLIST * r)
 void
 freeinteresting(void)
 {
-    if (rb) {
+    if (rb_interesting) {
 	RBLIST *r = openinteresting();
 	const char *x;
 	while ((x = readinteresting(r))) {
@@ -411,11 +475,52 @@ freeinteresting(void)
 	    free((char *)x);
 	}
 	closeinteresting(r);
-	rbdestroy(rb);
-	rb = NULL;
+	rbdestroy(rb_interesting);
+	rb_interesting = NULL;
     }
 }
+/************************
+ * the same for dormant.groups
+ */
+void
+critinit_dormant(void)
+{
+    if (!init_dormant())
+	exit(EXIT_FAILURE);
+}
+RBLIST *
+open_dormant(void)
+{
+    return rbopenlist(rb_dormant);
+}
 
+const char *
+read_dormant(RBLIST * r)
+{
+    return (const char *)rbreadlist(r);
+}
+
+void
+close_dormant(RBLIST * r)
+{
+    rbcloselist(r);
+}
+
+void
+free_dormant(void)
+{
+    if (rb_dormant) {
+	RBLIST *r = open_dormant();
+	const char *x;
+	while ((x = read_dormant(r))) {
+	    /* this is ugly, but read_dormant delivers const */
+	    free((char *)x);
+	}
+	close_dormant(r);
+	rbdestroy(rb_dormant);
+	rb_dormant = NULL;
+    }
+}
 /**
  * check whether "groupname" is represented in interesting.groups, without
  * touching the file.
@@ -428,10 +533,21 @@ is_interesting(const char *groupname)
 	return TRUE;
 
     critinitinteresting();	/* does not return in case of trouble */
+    /* dormant groups are not interesting */
 
-    return rbfind(groupname, rb) != 0;
+    return rbfind(groupname, rb_interesting) != 0;
 }
-
+/**
+ * check whether "groupname" is represented in 
+ *   spool/dormant.groups 
+ * touching the file. 
+ */
+int
+is_dormant(const char *groupname)
+{
+    critinit_dormant();	/* does not return in case of trouble */
+    return  rbfind(groupname, rb_dormant) != 0;
+}
 /* no good but this server isn't going to be scalable so shut up */
 /*@dependent@*/ char *
 lookup(/*@null@*/ const char *msgid)

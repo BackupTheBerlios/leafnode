@@ -610,9 +610,12 @@ markinterest(const struct newsgroup *group)
     time_t now;
     FILE *f;
     mastr *s;
+    mastr *s_dormant;
 
     if (is_localgroup(group->name))
 	return 0;		/* local groups don't have to be marked */
+    if (is_dormant(group->name))
+	return 0;		/* dormant groups don't have to be marked */
 
     not_yet_interesting = 0;
 
@@ -1614,7 +1617,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 		 const char *hd /** header to extract */ ,
 		 const char *messages /** message range */ ,
 		 struct stringlist *patterns /** pattern */ ,
-		 unsigned long *artno /** currently selected article */ )
+		 unsigned long *artno /** currently selected article */)
 {
     /* FIXME: this is bloody complex and hard to follow */
     const char *const h[] = { "Subject:", "From:", "Date:", "Message-ID:",

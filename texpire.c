@@ -844,7 +844,10 @@ dogroup(struct newsgroup *g, time_t expire)
 	} else {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/.overview", gdir);
 	}
-	if (!chdir("..") && (is_interesting(g->name) == 0)) {
+	if (!chdir("..") && (
+            (is_interesting(g->name) == 0) ||
+            (is_dormant(g->name) == 0))
+            ) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
 		if (!getcwd(gdir, PATH_MAX)) {
