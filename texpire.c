@@ -837,8 +837,11 @@ dogroup(struct newsgroup *g, time_t expire)
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: %lu articles deleted, " "%lu kept", g->name, deleted, kept);
     if (!kept) {
-	if (unlink(".overview") < 0)
+	if (unlink(".overview") < 0) {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/.overview: %m", gdir);
+	} else {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "unlinked %s/.overview", gdir);
+	}
 	if (!chdir("..") && (is_interesting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
