@@ -224,12 +224,14 @@ main_loop(void)
 	} else if (!strcasecmp(cmd, "newnews")) {
 	    if (isauthorized())
 		donewnews(arg);
-	} else if (!strcasecmp(cmd, "post") && allowposting()) {
-	    if (isauthorized())
-		dopost();
 	} else if (!strcasecmp(cmd, "slave")) {
-	    if (isauthorized()) {
-		nntpprintf("202 Cool - I always wanted a slave");
+	    nntpprintf("202 Cool - I always wanted a slave");
+	} else if (!strcasecmp(cmd, "post")) {
+	    if (allowposting()) {
+		if (isauthorized())
+		    dopost();
+	    } else {
+		nntpprintf("440 You are not allowed to post.");
 	    }
 	} else if (!strcasecmp(cmd, "xhdr") || !strcasecmp(cmd, "hdr")) {
 	    if (isauthorized())
@@ -823,7 +825,6 @@ static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
-    unsigned long count;
 
     rereadactive();
     g = findgroup(arg, active, -1);
