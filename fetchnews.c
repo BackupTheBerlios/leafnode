@@ -485,12 +485,12 @@ getmsgidlist(struct stringlist **first)
  * unfortunately DNews returns 230 even if NEWNEWS is disabled
  */
 static unsigned long
-donewnews(struct newsgroup *g, time_t lastrun)
+fn_donewnews(struct newsgroup *g, time_t lastrun)
 {
     char timestr[64];
 
     ln_log(LNLOG_SERR, LNLOG_CTOP,
-	   "WARNING: donewnews called, not yet implemented, aborting");
+	   "WARNING: fn_donewnews called, not yet implemented, aborting");
     abort();
     /* these two lines borrowed from nntpactive() */
 #ifdef NOTYET
@@ -772,7 +772,7 @@ out:
  * - -2 if XOVER was rejected
  */
 static long
-doxover(struct stringlist **stufftoget,
+fn_doxover(struct stringlist **stufftoget,
 	unsigned long first, unsigned long last,
 	/*@null@*/ struct filterlist *filtlst, char *groupname)
 {
@@ -891,7 +891,8 @@ next_over:
  * - -2 if XHDR was rejected
  */
 static long
-doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
+fn_doxhdr(struct stringlist **stufftoget, unsigned long first,
+	unsigned long last)
 {
     char *l;
     unsigned long count = 0;
@@ -1124,7 +1125,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 		(last - first + 1),
 		delaybody_this_group ? "headers" : "articles",
 		first, last);
-	outstanding = doxover(&stufftoget, first, last, f, g->name);
+	outstanding = fn_doxover(&stufftoget, first, last, f, g->name);
 
 	/* fall back to XHDR only without filtering or delaybody mode */
 	if (outstanding == -2 && !f && !delaybody_this_group)
@@ -1137,7 +1138,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 	       "%s: considering %ld articles %lu - %lu, using XHDR", g->name,
 	       (last - first + 1), first, last);
-	outstanding = doxhdr(&stufftoget, first, last);
+	outstanding = fn_doxhdr(&stufftoget, first, last);
     }
 
     switch (outstanding) {

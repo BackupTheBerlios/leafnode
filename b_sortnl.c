@@ -19,7 +19,7 @@
 #include "leafnode.h"
 
 static int
-comp(const void *a, const void *b)
+b_comp(const void *a, const void *b)
 {
     return strcmp(*(const char *const *)a, *(const char *const *)b);
 }
@@ -57,8 +57,8 @@ main(void)
     if (ferror(stdin))
 	exit(2);
 
-    if (mergesort(x, count, sizeof(char *), comp))
-	qsort(x, count, sizeof(char *), comp);
+    if (mergesort(x, count, sizeof(char *), b_comp))
+	qsort(x, count, sizeof(char *), b_comp);
 
     for (i = 0; i < count; i++) {
 	if (EOF == fputs(x[i], stdout)) {

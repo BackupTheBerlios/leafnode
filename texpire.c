@@ -750,10 +750,10 @@ legalxoverline(char *xover, unsigned long artno)
 }
 
 /*
- * dogroup: expire group
+ * doexpiregroup: expire group
  */
 static void
-dogroup(struct newsgroup *g, time_t expire)
+doexpiregroup(struct newsgroup *g, time_t expire)
 {
 
     /* FIXME: why is getxover run twice? why is chdirgroup run
@@ -874,7 +874,7 @@ expiregroup(struct newsgroup *g)
     ng = g;
     while (ng && ng->name) {
 	expire = lookup_expire(ng->name);
-	dogroup(ng, expire);
+	doexpiregroup(ng, expire);
 	ng++;
     }
 }

@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 static int
-comp(const void *a, const void *b)
+lcomp(const void *a, const void *b)
 {
     return strcasecmp(*(const char *const *)a, *(const char *const *)b);
 }
@@ -58,7 +58,7 @@ main(void)
     }
     (void)fclose(f);
 
-    qsort(act, acount, sizeof(char *), &comp);
+    qsort(act, acount, sizeof(char *), &lcomp);
 
     for (i = 0; i < acount; i++)
 	printf("%s\n", act[i]);
