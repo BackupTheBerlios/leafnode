@@ -2,7 +2,7 @@ KNOWN BUG:
 Valgrind-2.1.X will interfere with writeactive, break fchmod.
 Use Valgrind 2.0.
 |
-Changes since 20040818a:
+20040823a: Changes since 20040818a:
 - Bugfix: only_group_pcre now also applies to delaybody groups. Reported
   by Cory C. Albrecht.
 - Bugfix: diagnose errors when getting articles marked for download
