@@ -1,5 +1,21 @@
+2004-02-17  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: posting vs. approved
+	* fetchnews.c, grouplist.c, grouplist.h, leafnode.h, miscutil.c,
+	nntpd.c, texpire.c: Stringlist reformation patch. stringlists now
+	use a sentinel element as first (head) and last (tail) element.
+	Bugfix: -M will now be able to try the same Message-ID on more than
+	one server (reported by Daniel Zwick).  Feature: Unfetched articles
+	from -M options are now logged at the end of the run.
+
+2004-02-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am: Use grouplist test program.
+
 2004-02-10  Matthias Andree <matthias.andree@gmx.de>
 
+	* TODO: crossposts into local groups should be prohibited
+	* TODO: Clarify Ivo Schwalbe's article loss bug.
 	* TODO: Mark Ivo Schwalbe's article loss bug fixed without further
 	tests. (hynek)
 	* xoverutil.c: Remove 'cannot lstat' message after 'removing empty
