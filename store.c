@@ -191,7 +191,7 @@ store_stream(FILE * in /** input file */ ,
 		ngs_just_seen = 0;
 	    }
 	}
-	switch (toupper(line[0])) {
+	switch (toupper((unsigned char)line[0])) {
 	case 'D':
 	    if (c_date < 2 && str_isprefix(line, "Date:"))
 		++c_date;

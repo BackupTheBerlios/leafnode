@@ -71,7 +71,7 @@ static struct {
 enum xoverfields matchxoverfield(const char *header)
 {
     enum xoverfields f;
-    switch (toupper(header[0])) {
+    switch (toupper((unsigned char)header[0])) {
     case 'S': f = XO_SUBJECT;    break;
     case 'F': f = XO_FROM;       break;
     case 'D': f = XO_DATE;       break;
