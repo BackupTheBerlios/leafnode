@@ -390,6 +390,13 @@ readconfig(/*@null@*/ const char *configfile)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: nntpport is %d", p->port);
 		    break;
+		case CP_NOACTIVE:
+		    p->noactive = TRUE;
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: no active/grouplist updates for %s",
+				   p->name);
+		    break;
 		case CP_NODESC:
 		    p->descriptions = FALSE;
 		    if (debugmode & DEBUG_CONFIG)
@@ -411,7 +418,6 @@ readconfig(/*@null@*/ const char *configfile)
 				   pseudofile);
 		    break;
 		case CP_SERVER:
-		case CP_SUPPL:
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: server is %s", value);
@@ -518,6 +524,7 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
 
     p->name = critstrdup(name, "readconfig");
     p->descriptions = TRUE;
+    p->noactive = FALSE;
     p->next = NULL;
     p->timeout = 30;	/* default 30 seconds */
     p->port = port;

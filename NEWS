@@ -8,6 +8,8 @@ Changes since 20040122a:
 - Robustness: leaf.dnoe/server[:port]~ files are now line buffered to
   make them actually useful after a crash.
 - Documentation: new README-leaf.node file.
+- Feature: forward port "noactive" from leafnode 1.9.25+.
+- Cleanup: drop support for "supplement" in configuration file.
 
 20040122a: Changes since 20040119a:
 - Feature: applyfilter -C message-ID [...] now cancels articles

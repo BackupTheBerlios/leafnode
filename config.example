@@ -184,6 +184,12 @@ server = news.hiof.no
 # server = broken.upstream.server
 # nodesc = 1
 
+## You can suppress all group listing commands on a server, for example
+## if the server has way too many groups and you use it as fast
+## supplement.
+# server = some.upstream.server
+# noactive = 1
+
 ## Here we have another news server which has a very slow connection. For
 ## that reason, we wait a full minute before we give up trying to connect.
 ## The default is 10 seconds.

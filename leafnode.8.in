@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.20 2004/01/05 23:56:19 emma Exp $
+.\" $Id: leafnode.8.in,v 1.21 2004/01/29 11:09:37 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -197,6 +197,12 @@ By default, leafnode tries to connect for 10 seconds to a server and then
 gives up. If you have a slow server, you can try for a longer time by
 setting the timeout higher (in this example, 30 seconds). The timeout
 can be tuned individually for each server.
+.TP
+noactive = 1
+In some configurations, the user does not want to download the list of
+newsgroups from a particular server, and this is the magic word to
+prevent it. It can be used if you want to use this as a supplement
+server for fast downloads but it has way too many news groups.
 .TP
 nodesc = 1
 Some servers do not deliver news groups descriptions correctly because

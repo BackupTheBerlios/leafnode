@@ -1877,8 +1877,13 @@ do_server(struct serverlist *cursrv, int forceactive)
     check_date(cursrv);
 
     /* get list of newsgroups or new newsgroups */
-    if (nntpactive(cursrv, forceactive)) {
-	flag |= f_error;
+    if (!cursrv -> noactive) {
+	if (nntpactive(cursrv, forceactive)) {
+	    flag |= f_error;
+	}
+    } else {
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "%s: skipping newsgroups list update (noactive is set)",
+		cursrv->name);
     }
 
     /* post articles */

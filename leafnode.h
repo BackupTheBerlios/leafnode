@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.93 2004/01/16 18:29:44 emma Exp $ */
+/* $Id: leafnode.h,v 1.94 2004/01/29 11:09:37 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -437,6 +437,7 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 	unsigned short port;	/* port, if 0, look up nntp/tcp */
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
+	int noactive;		/* if true, do not request group lists */
 	int timeout;		/* timeout in seconds before we give up */
 	int post_anygroup;
 	enum feedtype feedtype;

@@ -64,6 +64,8 @@ Matthias:
 * when server supports DATE, compensate for offset when sending
   NEWGROUPS et al.? See report of John Carlyle-Clarke of 2004-01-27
 
+* store group lists per server and merge them into a DB?
+
 10pre5
 0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
@@ -237,6 +239,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2004-01-29 Matthias Andree
+	   forward port "noactive" from leafnode-1
 
 2003-10-31 Matthias Andree
 	   if group is empty, low water mark is not bumped up to high water mark
