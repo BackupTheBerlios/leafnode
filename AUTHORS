@@ -1,0 +1,25 @@
+Current maintainer: Matthias Andree
+Home page, mailing list: http://www.leafnode.org/
+Current development snapshots: http://mandree.home.pages.de/leafnode/beta/
+
+(This list is sorted by year of last contribution, and within this,
+alphabetically by last name.)
+
+- Arnt Gulbrandsen <agulbra@troll.no> (C) 1995
+  (C) by Troll Tech A/S, Postboks 6133 Etterstad, 0602 Oslo, Norway,
+         fax +47-22646949
+- Randolf Skerka <randolf.skerka@gmx.de> (C) 1997
+- Tim Sweeney (C) 1997
+- Kent Robotti <robotti@erols.com> (C) 1998
+- Markus Enzensberger <enz@cip.physik.uni-muenchen.de> (C) 1998
+- Kazushi (Jam) Marukawa <jam@pobox.com> (C) 1998 - 1999
+- Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de> (C) 1997 - 2001
+- Stefan Wiens <s.wi@gmx.net> (C) 2000 - 2001
+- Matthias Andree <matthias.andree@gmx.de> (C) 1999 - 2002
+- Jörg Dietrich <joerg@dietrich.net> (C) 2000 - 2002
+- Ralf Wildenhues <Ralf.Wildenhues@gmx.de> (C) 2001 - 2002
+
+Stolen work:
+
+- Theo de Raadt: vsnprintf (BSD-style license)
+- Rich Salz: wildmat (1986-1991, INN 2.2.2)
