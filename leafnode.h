@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.91 2003/11/28 03:18:18 emma Exp $ */
+/* $Id: leafnode.h,v 1.92 2004/01/05 13:56:05 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -494,6 +494,8 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 #define AM_FILE 1		/* authenticate password via
 				   /etc/leafnode/users (needed for password
 				   authentication) */
+    extern int ln_log_posterip; /* log poster ip in
+                                   X-Leafnode-NNTP-Posting-Host header */
     extern int timeout_active;	/* reread active file after that many days */
     extern int timeout_client;	/* activity timeout for clients in seconds */
     extern int filtermode;	/* can be one of */

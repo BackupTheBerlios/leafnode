@@ -47,6 +47,7 @@ int timeout_active = 90;
 int timeout_client = 300;
 int authentication = 0;		/* use authentication for NNTP access:
 				   possible values defined in leafnode.h */
+int ln_log_posterip = 0;
 
 int filtermode = FM_XOVER | FM_HEAD;
 			/* filter xover headers or heads or both(default) */
@@ -465,6 +466,11 @@ readconfig(/*@null@*/ const char *configfile)
 		    ln_log_stderronly = atoi(value);
 		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: ln_log_stderronly = %d", ln_log_stderronly);
+		    break;
+		case CP_LOGPOSTERIP:
+		    ln_log_posterip = atoi(value);
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			   "config: ln_log_posterip = %d", ln_log_posterip);
 		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,

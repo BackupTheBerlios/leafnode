@@ -88,6 +88,10 @@ expire = 20
 ## a client is forcibly disconnected. The default is 300s. Optional.
 # timeout_client = 300
 
+## If you want leafnode to log the poster IP address in custom header
+## X-Leafnode-NNTP-Posting-Host, uncomment this.
+# log_poster_ip = 1
+
 ## If you want to have your newsreader score/kill on Xref: lines, you might
 ## want to uncomment this. Optional.
 # create_all_links = 1

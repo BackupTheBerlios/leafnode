@@ -116,6 +116,7 @@ static /*@dependent@*/ const struct newsgroup *xovergroup;	/* FIXME */
 /*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
 static int authflag = 0;	/* TRUE if authenticated */
+static char *peeraddr = NULL;	/* peer address, for X-NNTP-Posting header */
 
 /*
  * this function avoids the continuous calls to both ln_log and printf
@@ -1510,6 +1511,12 @@ dopost(void)
 		writes(out, msgid);
 		writes(out, "\r\n");
 	    }
+	    /* Build the X-Leafnode-NNTP-Posting-Host header if required */
+	    if (ln_log_posterip) {
+		writes(out, "X-Leafnode-NNTP-Posting-Host: ");
+		writes(out, peeraddr ? peeraddr : "(unknown)");
+		writes(out, "\r\n");
+	    }
 	}
 	writes(out, "\r\n");
     } while (*line);
@@ -2459,7 +2466,6 @@ main(int argc, char **argv)
     }
 
     /* get remote address */
-
     fodder = sizeof(peer);
     if (getpeername(0, (struct sockaddr *)&peer, (socklen_t *) & fodder)) {
 	if (errno != ENOTSOCK) {
@@ -2468,8 +2474,10 @@ main(int argc, char **argv)
 		   strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
+	peeraddr = critstrdup("local file or pipe", "leafnode");
     } else {
 	log_sockaddr("remote host", (struct sockaddr *)&peer);
+	peeraddr = masock_sa2addr((struct sockaddr *)&peer);
     }
 
 /* #endif */
