@@ -1,8 +1,8 @@
 #! /bin/sh
 
 set -e
-if test "x`cvs update | grep -v ^? | grep -v release\\.sh`" != "x" ; then
-    echo "commit your changes to CVS first!"
+if test "x`darcs whatsnew -ls | grep -v '^No changes!'`" != "x" ; then
+    echo "record your changes in darcs first!"
     exit 1
 fi
 builddir=`pwd`/build
@@ -29,7 +29,7 @@ vim $dest/HEADER.html
 fi
 perl addpatches.pl
 synchome.sh &
-ssh krusty cvsup -L2 supfile &
+#ssh krusty cvsup -L2 supfile &
 wait
 
 [ -f leafnode-ann.$vers ] && exit 0
