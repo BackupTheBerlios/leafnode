@@ -267,7 +267,7 @@ mastr_getln(mastr * m, FILE * f,
 
     for (;;) {
 	r = _getline(buf,
-		     (size_t)(maxbytes > 0 ? min(bufsiz, maxbytes) : bufsiz),
+		     (size_t)(maxbytes >= 0 ? min(bufsiz, maxbytes) : bufsiz),
 		     f);
 	if (r < 0)
 	    return r;
@@ -277,6 +277,7 @@ mastr_getln(mastr * m, FILE * f,
 		/*@notreached@*/ return 0;
 	    }
 	memcpy(m->dat + m->len, buf, (size_t)r); /* FIXME: avoid this copy */
+	m->dat[r] = '\0';
 	if (maxbytes > 0)
 	    maxbytes -= r;
 	m->len += r;
