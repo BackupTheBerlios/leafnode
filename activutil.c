@@ -57,11 +57,13 @@ struct nglist *newgroup;
  */
 void
 insertgroup(const char *name, char status, long unsigned first,
-	    long unsigned last, int age, const char *desc)
+	    long unsigned last, time_t age, const char *desc)
 {
     struct nglist *l;
     static struct nglist *lold;
     struct newsgroup *g;
+
+    lold = newgroup;
 
     /* interpret INN status characters */
     if (status == 'x') status = 'n';
