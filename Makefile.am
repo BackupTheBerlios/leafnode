@@ -4,10 +4,10 @@
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
-SUBDIRS		= tools
-
 sysconf_DATA	= config.example \
 	       filters.example
+
+GENERATED_MANS=lsmac.1
 
 man_MANS = \
 	applyfilter.8 \
@@ -17,7 +17,11 @@ man_MANS = \
 	leafnode.8 \
 	newsq.1 \
 	rnews.8 \
-	texpire.8
+	texpire.8 \
+	$(GENERATED_MANS)
+
+lsmac.1: tools/lsmac.pl
+	pod2man $(srcdir)/tools/lsmac.pl $@
 
 dist_MANS = \
 	rbcloselist.3 \
@@ -158,6 +162,10 @@ sbin_PROGRAMS = \
 	rnews \
 	texpire
 
+sbin_SCRIPTS =		tools/sendbatch.bash
+dist_bin_SCRIPTS =	tools/lsmac.pl
+dist_sysconf_DATA=	tools/uucp
+
 bin_PROGRAMS = \
 	leafnode-version \
 	newsq
@@ -203,7 +211,15 @@ EXTRA_DIST = \
 	README_FIRST \
 	README.html \
 	update.sh \
-	UPDATING
+	UPDATING \
+	tools/archivefaq.pl \
+	tools/make_pass.pl \
+	tools/README \
+	tools/sendbatch.bash.in \
+	tools/simple-batcher.sh \
+	$(GENERATED_MANS)
+
+CLEANFILES=	$(GENERATED_MANS)
 
 BUILT_SOURCES = \
 	config.c \

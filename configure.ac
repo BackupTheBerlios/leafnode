@@ -363,6 +363,6 @@ if test x$silent != xyes ; then
     echo
 fi
 
-AC_CONFIG_FILES([Makefile tools/Makefile tools/sendbatch.bash leafnode.spec leafnode.8 newsq.1
+AC_CONFIG_FILES([Makefile tools/sendbatch.bash leafnode.spec leafnode.8 newsq.1
 applyfilter.8 filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
 AC_OUTPUT
