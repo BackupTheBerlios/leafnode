@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.15 2001/12/29 01:45:18 emma Exp $ */
+/* $Id: leafnode.h,v 1.16 2002/01/03 00:34:29 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -183,7 +183,7 @@ extern "C" {
     struct newsgroup *findgroup(const char *name);	/* active must be read */
     extern time_t activetime;
     void rereadactive(void);	/* only reread if none read or if it has changed */
-    void writeactive(void);
+    int writeactive(void);
     void freeactive(void);
 
 /*
