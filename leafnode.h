@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.18 2002/01/05 11:44:06 emma Exp $ */
+/* $Id: leafnode.h,v 1.19 2002/01/06 01:06:54 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -38,6 +38,31 @@ extern "C" {
 #include <strings.h>
 #endif
 
+#ifdef HAVE_AP_CONFIG_H
+#define AP_CONFIG_H
+#endif
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#include <sys/errno.h>
+#else
+    extern int errno;
+#endif				/* HAVE_ERRNO_H */
+
+#include <sys/types.h>		/* size_t */
+#include <stdio.h>		/* FILE */
+#include <time.h>		/* time_t */
+#include <stdarg.h>		/* va_list */
+#include <dirent.h>		/* DIR */
+
+#include <pcre.h>
+
+    typedef int bool;
+
 #define BLOCKSIZE 16384
 
 #define MKDIR_MODE 0750
@@ -52,6 +77,10 @@ extern "C" {
 #define SKIPWORD(p) while (*(p) && !isspace((unsigned char) *(p))) \
 			(p)++; \
 		    SKIPLWS(p);
+
+/* skip word, pointer on first space */
+#define SKIPWORDNS(p) while (*(p) && !isspace((unsigned char) *(p))) \
+			(p)++; \
 
 /* skip first word, replace its trailing space by nuls */
 #define CUTSKIPWORD(p) while (*(p) && !isspace((unsigned char) *(p))) \
@@ -76,27 +105,6 @@ extern "C" {
     typedef unsigned int socklen_t;
 #endif
 
-#ifdef HAVE_AP_CONFIG_H
-#define AP_CONFIG_H
-#endif
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#include <sys/errno.h>
-#else
-    extern int errno;
-#endif				/* HAVE_ERRNO_H */
-
-#include <sys/types.h>		/* size_t */
-#include <stdio.h>		/* FILE */
-#include <time.h>		/* time_t */
-#include <stdarg.h>		/* va_list */
-#include <dirent.h>		/* DIR */
-
 #ifndef HAVE_SNPRINTF
     int snprintf(char *str, size_t n, const char *format, ...);
 #endif
@@ -109,8 +117,6 @@ extern "C" {
     int mkstemp(char *);
 #endif
 
-#include <pcre.h>
-
 /*
  * end of actions due to autoconf
  */
@@ -119,7 +125,7 @@ extern "C" {
  * various constants
  */
 #define SECONDS_PER_DAY (24 * 60 * 60)
-#define FQDN_SIZE 256
+#define FQDN_SIZE ((size_t)256)
 
 /* local and canonical line separators */
 #define LLS "\n"
@@ -351,7 +357,7 @@ extern "C" {
 	char *username;
 	char *password;
 	int dontpost;		/* bool: this server is never fed articles */
-	int port;		/* port, if 0, use nntp port */
+	unsigned short port;	/* port, if 0, look up nntp/tcp */
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */
 	int timeout;		/* timeout in seconds before we give up */
@@ -397,8 +403,7 @@ extern "C" {
 				   that many days */
     extern int authentication;	/* authentication method to use. Methods are: */
 
-#define AM_NAME 1		/* authenticate only username via /etc/passwd */
-#define AM_FILE 2		/* authenticate password via
+#define AM_FILE 1		/* authenticate password via
 				   /etc/leafnode/users (needed for password
 				   authentication) */
     extern int timeout_active;	/* reread active file after that many days */
@@ -420,11 +425,10 @@ extern "C" {
  * other global variables
  */
 /* defined in nntputil.c */
-    extern FILE *nntpin;
-    extern FILE *nntpout;
+    /*@null@*/ extern FILE *nntpin;
+    /*@null@*/ extern FILE *nntpout;
     extern int stat_is_evil;
 
-#define FQDN_SIZE 256
 /* defined in miscutil.c */
     extern char fqdn[];		/* my name, and my naming myself */
     extern int verbose;		/* verbosity level, for fetch and texpire */
@@ -460,9 +464,9 @@ extern "C" {
 /*
  * stuff from nntputil.c
  */
-    int authenticate(void);	/* authenticate ourselves at a server */
+    bool authenticate(void);	/* authenticate ourselves at a server */
     int nntpreply(void);	/* decode an NNTP reply number */
-    int newnntpreply(char **);	/* decode an NNTP reply number */
+    int newnntpreply( /*@null@*/ /*@out@*/ char **);	/* decode an NNTP reply number */
     int nntpconnect(const struct serverlist *upstream);
 
     /* connect to upstream server */
