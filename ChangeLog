@@ -1,5 +1,6 @@
 2002-09-02  Matthias Andree <matthias.andree@gmx.de>
 
+	--- release snapshot-20020902a ---
 	* NEWS: Explain new single-pass store scheme (without fixxover).  
 	* fetchnews.c: Drop [g]fixxover(), store creates .overview lines
 	for us.  Let go of fork(), no longer needed.  

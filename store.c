@@ -1,7 +1,7 @@
 /** \file store.c
  * Store article into news store.
- * Copyright 2001 by Matthias Andree <matthias.andree@gmx.de>
- * \copyright 2001
+ * Copyright 2001 - 2002 by Matthias Andree <matthias.andree@gmx.de>
+ * \copyright 2001 - 2002
  * \author Matthias Andree
  * Modified by Volker Apelt <volker_apelt@yahoo.de>.
  * Copyright of the modifications 2002.
@@ -44,11 +44,13 @@
    - 5. make links into newsgroups
    - 6. write body
    - 7. link into message.id
+   - 8. generate .overview line and directly append it
 
    ADVANTAGES:
    - just one store function
    - can be streamed into
    - message-id/newsgroups need not be known in advance
+   - no second pass necessary to clean the .overview files up.
 */
 
 /*@observer@*/ const char *

@@ -227,6 +227,9 @@ Ralfs TODO:
 3.4 postarticles is a horrible mess. It deletes the articles IMMEDIATELY
     if it's available on a server.
 
+3.4 cache 411 replies to GROUP for some fetches to speed things up a
+little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
+
 4.2 get rid of all those if (verbose > anything)
 
 4.3 move old articles from out.going to failed.postings if they are,
