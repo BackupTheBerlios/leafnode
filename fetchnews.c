@@ -627,7 +627,7 @@ doxover(struct stringlist **stufftoget,
 	}
 	free_strlist(xover);
     }
-    if (strcmp(l, ".") == 0)
+    if (l && strcmp(l, ".") == 0)
 	return count;
     else
 	return -1;
@@ -668,7 +668,7 @@ doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
 	appendtolist(stufftoget, &helpptr, l);
     }
     debug = debugmode;
-    if (strcmp(l, ".") == 0)
+    if (l && strcmp(l, ".") == 0)
 	return count;
     else
 	return -1;
@@ -1283,10 +1283,10 @@ postarticles(void)
 }
 
 /* FIXME: this is U-G-L-Y */
-static int
+static long
 do_group(const char *ng, /** which group to operate on */
 	 struct stringlist *ngs /** upstream high water mark */ ,
-		    /*@null@ *//** where to write the new upstream 
+		    /*@null@*//** where to write the new upstream 
           high water mark */ FILE * const f)
 {
     struct newsgroup *g;
@@ -1382,6 +1382,7 @@ processupstream(const char *const server, const int port,
 	if (!r) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
 	    free(s);
+	    free(oldfile);
 	    return 0;
 	}
     }
@@ -1397,6 +1398,7 @@ processupstream(const char *const server, const int port,
 	if (!newsgrp) {
 	    closeinteresting(r);
 	}
+	free(oldfile);
 	return 0;
     }
     free(s);
