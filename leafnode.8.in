@@ -149,7 +149,7 @@ as user news.
 All configuration is done using the file
 .I @sysconfdir@/config.
 .B All global parameters must be mentioned before server and
-server-specific parameters.
+.B server-specific parameters.
 .PP
 For the purposes of this section, whitespace shall be defined as an
 arbitrary sequence consisting of one or more SPACE or HTAB characters,
