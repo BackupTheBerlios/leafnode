@@ -413,8 +413,10 @@ xgetxover(
 
     if (fixxover) {
 	dl = dirlist(".", DIRLIST_ALLNUM, &xcount);
-	if (!dl)
+	if (!dl) {
+	    free(overview);
 	    return 0;
+	}
 
 	/* find article range on disk, store into xcount */
 	/* FIXME: don't choke on numeric subgroups */
@@ -467,6 +469,7 @@ xgetxover(
 	xcount = current;		/* to prevent findxover from choking */
 	if (g)
 	    g->count = current;
+	free(overview);
 	return 1;
     }
 
@@ -561,6 +564,7 @@ xgetxover(
 	g->count = current;
     }
 
+    free(overview);
     return 1;
 }
 
