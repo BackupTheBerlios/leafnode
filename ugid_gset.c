@@ -6,7 +6,8 @@
 
 #include "ugid.h"
 int
-gid_set(uid_t gid)
+gid_set(gid_t gid)
 {
+    setgroups(0, &gid);
     return setgid(gid);
 }
