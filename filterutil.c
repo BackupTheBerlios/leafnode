@@ -513,13 +513,15 @@ killfilter(const struct filterlist *f, const char *hdr)
 	    }
 	} else if (strcasecmp(g->cleartext, "maxcrosspost") == 0) {
 	    long l = 1;
-	    p = findinheaders("Newsgroups:", hdr);
-	    if (p == NULL) internalerror();
-	    while (*p && *p != '\n') { /* FIXME: cope with folding */
-		if (*p++ == ',') {
-		    SKIPLWS(p);
-		    l++;
+	    char *q = mgetheader("Newsgroups:", hdr);
+	    if (q) {
+		while (*q && *q != '\n') {
+		    if (*q++ == ',') {
+			SKIPLWS(q);
+			l++;
+		    }
 		}
+		free(q);
 	    }
 	    if (l > g->limit)
 		match = 0;
