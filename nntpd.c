@@ -1218,23 +1218,46 @@ validate_newsgroups(const char *n)
     return 1;
 }
 
-/* check for correct Message-ID, feed with n pointing to first MID char */
-/* this version is pedantic: no whitespace, no weird characters */
+/** Check if the Message-ID is acceptable, feed with n pointing to the
+ * first angle bracket. <MID> This version is pedantic: no whitespace,
+ * no weird characters, no bogus domains.
+ */
 static int
 validate_messageid(const char *n)
 {
+    const char *m = n;
+    const char *r;
+    char *s;
+    size_t l;
+
+    /* must begin with '<' */
     if (*n != '<')
 	return 0;
+    /* must end with '>', no control characters or whitespace allowed */
     while (*++n != '\0' && *n != '>') {
 	if (isspace(*n) || iscntrl(*n))
 	    return 0;
     }
+    /* must end with '>' */
     if (*n++ != '>')
 	return 0;
+    /* but tolerate trailing white space after angle bracket */
     SKIPLWS(n);
+    /* barf if nonspace character */
     if (*n != '\0')
 	return 0;
-    return 1;
+    /* check for valid domain part */
+    r = strrchr(m, (int)'@');
+    /* barf if no at ('@') present */
+    if (!r) return 0;
+    r++;
+    l = strcspn(r, ">");
+    s = critmalloc(l, "validate_messageid");
+    *s = '\0';
+    strncat(s, m, l);
+    l = is_validfqdn(s);
+    free(s);
+    return l;
 }
 
 
