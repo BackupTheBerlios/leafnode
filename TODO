@@ -114,6 +114,13 @@ Ralfs TODO:
     NOTE: only worked around, not fixed.
     TODO: only delete articles successfully posted
 
+11pre1
+2.2 Report by Peter Holm, filtering does NOT happen on XOVER, but only
+    on articles later: 
+    Aug  7 18:04:43 holm fetchnews[1534]: news.utanet.at: found 3 new newsgroups
+    Aug  7 19:58:30 holm fetchnews[1534]: alt.binaries.pictures.erotica.close-up: 0  articles fetched (to 2205), 102 killed
+    With 2 hours of download on a constant 5.9 kB/s link.
+
 2.2 Add custom headers like Organization: or X-Complaints-To: (Jeff
     Grossman, 2002-03-09)
 
