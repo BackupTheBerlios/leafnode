@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.56 2002/07/03 15:09:21 emma Exp $ */
+/* $Id: leafnode.h,v 1.57 2002/07/04 09:26:15 ralf Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -98,13 +98,13 @@ extern "C" {
 
 /* skip word, pointer on first space */
 #define SKIPWORDNS(p) while (*(p) && !isspace((unsigned char) *(p))) \
-			(p)++; \
+			(p)++;
 
 /* skip first word, replace its trailing space by nuls */
 #define CUTSKIPWORD(p) while (*(p) && !isspace((unsigned char) *(p))) \
 			(p)++; \
 		    while (*(p) && isspace((unsigned char) *(p))) { \
-			*(p)++ = '\0'; \
+			*((p)++) = '\0'; \
 		    }
 
 /* strip trailing isspace characters */

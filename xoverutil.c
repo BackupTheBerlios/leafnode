@@ -479,8 +479,7 @@ xgetxover(
     while (p && *p) {
 	char *tmp;
 
-	while (p && isspace((unsigned char)*p))
-	    p++;
+	SKIPLWS(p);
 	q = strchr(p, '\n');
 	if (q)
 	    *q++ = '\0';
@@ -671,8 +670,7 @@ gfixxover(const char *i)
     g = gb = critstrdup(i, "gfixxover");
 
     while (g && *g) {
-	while (isspace((unsigned char)*g))
-	    g++;
+	SKIPLWS(g);
 	q = strchr(g, ',');
 	if (q) {
 	    *q++ = '\0';

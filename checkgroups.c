@@ -48,8 +48,7 @@ process_input(char *s)
 
 	p = l;
 	if (isalnum((unsigned char)*p)) {
-	    while (!isspace((unsigned char)*p))
-		p++;
+	    SKIPWORDNS(p);
 	    if (*p)
 		*p++ = '\0';
 	    if ((g = findgroup(l, active, -1)) != NULL) {

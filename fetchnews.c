@@ -922,8 +922,7 @@ splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
 {
     char *p = line;
 
-    while (*p && !isspace((unsigned char)*p))
-	p++;
+    SKIPWORDNS(p);
     *nameend = p;		/* end of the group name */
     SKIPLWS(p);
     SKIPWORD(p);		/* last */
@@ -1116,11 +1115,7 @@ nntpactive(void)
 	}
 	while (l && (strcmp(l, "."))) {
 	    p = l;
-	    while (!isspace((unsigned char)*p))
-		p++;
-	    while (isspace((unsigned char)*p)) {
-		*(p++) = '\0';
-	    }
+	    CUTSKIPWORD(p);
 	    changegroupdesc(l, *p ? p : NULL);
 	    l = getaline(nntpin);
 	}

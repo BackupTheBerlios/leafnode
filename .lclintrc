@@ -1,4 +1,3 @@
--weak
 -warnunixlib
 +unixlib
 -DHAVE_CONFIG_H

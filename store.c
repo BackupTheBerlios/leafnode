@@ -313,8 +313,7 @@ store_stream(FILE * in /** input file */ ,
 	char *q;
 	SKIPLWS(name);
 	q = name;
-	while (*q && !isspace((unsigned char)*q))
-	    q++;
+	SKIPWORDNS(q);
 	*q = '\0';
 	/* name now contains the trimmed newsgroup */
 	if ((q = strstr(mastr_str(xref), name))

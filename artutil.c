@@ -233,9 +233,7 @@ supersede_cancel(
     }
 
     /* jump hostname entry */
-    while (p && !isspace((unsigned char)*p))
-	p++;
-    SKIPLWS(p);
+    SKIPWORD(p);
     /* now p points to the first newsgroup */
 
     /* unlink all the hardlinks in the various newsgroups directories */

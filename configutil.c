@@ -75,10 +75,8 @@ parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
     else
 	*q++ = '\0';
     /* skipping leading blanks or tabs */
-    while (isspace((unsigned char)*p))
-	p++;
-    while (isspace((unsigned char)*q))
-	q++;
+    SKIPLWS(p);
+    SKIPLWS(q);
     strncpy(param, p, TOKENSIZE);
     strncpy(value, q, TOKENSIZE);
     /* now param contains the stuff before '=' and value the stuff behind it */
@@ -295,8 +293,7 @@ readconfig(char *configfile)
 			    m++;
 			}
 			*m++ = '\0';
-			while (isspace((unsigned char)*m))
-			    m++;
+			SKIPLWS(m);
 			if (m && *m) {
 			    long days;
 

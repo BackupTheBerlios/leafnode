@@ -458,8 +458,9 @@ killfilter(const struct filterlist *f, const char *hdr)
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
 	    p = findinheaders("Date:", hdr);
-	    while (p && *p && isspace((unsigned char)*p))
-		p++;
+	    if (p) {
+		SKIPLWS(p);
+	    }
 	    if ((a = age(p)) > g->limit)
 		match = 0;	/* limit has been hit */
 	    else

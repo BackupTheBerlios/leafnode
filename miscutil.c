@@ -612,11 +612,9 @@ cmdlinetolist(const char *cmdline)
     while (*c) {
 	char *p;
 
-	while (*c && isspace((unsigned char)*c))
-	    c++;
+	SKIPLWS(c);
 	p = c;
-	while (*c && !isspace((unsigned char)*c))
-	    c++;
+	SKIPWORDNS(c);
 	if (*c)
 	    *c++ = '\0';
 	if (*p)
