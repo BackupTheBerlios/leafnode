@@ -30,9 +30,9 @@
 /*
  * misc. global variables, documented in leafnode.h
  */
-char *mta = 0;
+char *mta = NULL;
 time_t default_expire = 0;
-struct expire_entry *expire_base = 0;
+/*@null@*/ struct expire_entry *expire_base = NULL;
 unsigned long artlimit = 0;
 unsigned long initiallimit = 0;
 int create_all_links = 0;
@@ -49,17 +49,17 @@ int filtermode = FM_XOVER | FM_HEAD;
 			/* filter xover headers or heads or both(default) */
 long windowsize = 5;
 
-char *filterfile = NULL;
-char *pseudofile = NULL;	/* filename containing pseudoarticle body */
-char *owndn = NULL;		/* own domain name, if you can't 
-				   set a sensible one */
-struct serverlist *servers = NULL;
+/*@null@*/ char *filterfile = NULL;
+/*@null@*/ char *pseudofile = NULL;	/* filename containing pseudoarticle body */
+/*@null@*/ char *owndn = NULL;		/* own domain name, if you can't
+					   set a sensible one */
+/*@null@*/ struct serverlist *servers = NULL;
 				/* global work variable */
 static struct serverlist *serverlist;	/* local copy to free list */
 
 /* parse a line, destructively */
 int
-parse_line(char *l, char *param, char *value)
+parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
 {
     char *p, *q;
 
@@ -68,7 +68,7 @@ parse_line(char *l, char *param, char *value)
     q = strchr(p, '#');
     if (q)
 	*q = '\0';
-    if (*p == 0)
+    if (*p == '\0')
 	return 0;
     if ((q = strchr(p, '=')) == NULL)
 	return 0;
@@ -115,7 +115,8 @@ readconfig(char *configfile)
     FILE *f;
     char *l;
     char *param, *value;
-    int i, err;
+    int err;
+    time_t i;
     char s[PATH_MAX];		/* FIXME: possible overrun below */
 
     artlimit = 0;
@@ -126,7 +127,7 @@ readconfig(char *configfile)
     } else {
 	snprintf(s, 1023, "%s/config", libdir);
     }
-    if ((f = fopen(s, "r")) == 0) {
+    if ((f = fopen(s, "r")) == NULL) {
 	err = errno;
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", s);
 	free(param);
@@ -138,19 +139,22 @@ readconfig(char *configfile)
 
 	if (parse_line(l, param, value)) {
 	    if ((cp = find_configparam(param))) {
-		if (cp->scope == CS_SERVER && !p) {
+		if (cp->scope == CS_SERVER && p == NULL) {
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			   /* FIXME: use these as defaults instead */
 			   "config: \"%s=%s\" requires server name, abort",
 			   param, value);
 		    return EINVAL;
 		}
-		if (cp->scope == CS_GLOBAL && p) {
+		if (cp->scope == CS_GLOBAL && p != NULL) {
 		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 			   "config: \"%s=%s\" found in section of server %s, "
 			   "please move it in front of any "
 			   "server declaration", param, value, p->name);
 		}
+#ifdef __LCLINT__
+		assert(p != NULL); /* can't happen */
+#endif /* __LCLINT__ */
 		switch (cp->code) {
 		case CP_DEBUG:
 		    debug = debugmode = strtol(value, NULL, 10);
@@ -164,12 +168,14 @@ readconfig(char *configfile)
 				   "config: mta is %s", mta);
 		    break;
 		case CP_USER:
+		    if (p->username) free(p->username);
 		    p->username = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: found username for %s", p->name);
 		    break;
 		case CP_PASS:
+		    if (p->password) free(p->password);
 		    p->password = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
@@ -285,7 +291,7 @@ readconfig(char *configfile)
 			    *m = tolower((unsigned char)*m);
 			    m++;
 			}
-			*m++ = 0;
+			*m++ = '\0';
 			while (isspace((unsigned char)*m))
 			    m++;
 			if (m && *m) {
@@ -408,7 +414,7 @@ readconfig(char *configfile)
 	}
     }
     expire_base = ent;
-    fclose(f);
+    (void)fclose(f);
     if (!default_expire)
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "no expire declaration in config file");
     if (!mta) {
@@ -460,11 +466,17 @@ void
 freeconfig(void)
 {
     freeservers();
-    if (owndn)
+    if (owndn) {
 	free(owndn);
-    if (pseudofile)
+	owndn = NULL;
+    }
+    if (pseudofile) {
 	free(pseudofile);
-    if (filterfile)
+	pseudofile = NULL;
+    }
+    if (filterfile) {
 	free(filterfile);
+	filterfile = NULL;
+    }
     freeexpire();
 }
