@@ -496,11 +496,11 @@ readactive(void)
     } else {
 	/* old format; count lines = newsgroups */
 	activesize = 0;
-	file_index = 0;
+	file_index = 0; /* rewind */
 	while ( (p = getabufferedline(mmap_ptr, &file_index, filesize)) != NULL ) {
 	    activesize++;
 	}
-	file_index = 0;
+	file_index = 0; /* rewind */
     }
 
     active = (struct newsgroup *)critmalloc((1 + activesize) *
