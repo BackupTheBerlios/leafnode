@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.68 2004/07/06 08:56:57 emma Exp $
+# $Id: Makefile.am,v 1.69 2004/08/14 08:21:31 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -181,6 +181,7 @@ EXTRA_DIST = \
 	arc4random.3 \
 	arc4random.c \
 	arc4random.h \
+	CHANGES-FROM-LEAFNODE-1 \
 	config.table \
 	config.h.in \
 	COPYING.LGPL \
