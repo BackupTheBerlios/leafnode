@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.98 2004/03/26 14:36:54 emma Exp $ */
+/* $Id: leafnode.h,v 1.99 2004/05/10 09:24:58 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -154,7 +154,7 @@ int mkstemp(char *);
 /* initialize global variables */
 int initvars(const char *const progname, int logtostdout);
 int init_post(void);
-void init_failed(const char *) /*@noreturn@*/;
+/*@noreturn@*/ void init_failed(const char *);
 
 /* get configuration file */
 /*@null@*//*@observer@*/ char *
