@@ -138,7 +138,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    while ((option = getopt(argc, argv, "F:D:nVv")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "n")) != -1) {
 	if (parseopt("applyfilter", option, optarg, &conffile))
 	    continue;
 	switch (option) {

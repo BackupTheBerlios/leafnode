@@ -293,7 +293,7 @@ main(int argc, char *argv[])
     if (!initvars(argv[0], 0))
 	exit(EXIT_FAILURE);
 
-    while ((option = getopt(argc, argv, "F:D:Vv")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
 	if (parseopt("rnews", option, optarg, &conffile))
 	    continue;
 	switch(option) {

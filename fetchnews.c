@@ -211,7 +211,7 @@ process_options(int argc, char *argv[], int *forceactive)
     int action_method_seen = 0;	/* BHPR */
     int servers_limited = 0;
 
-    while ((option = getopt(argc, argv, "VD:HBPRF:S:N:M:fnvx:p:t:")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "HBPRS:N:M:fnx:p:t:")) != -1) {
 	if (parseopt("fetchnews", option, optarg, NULL))
 	    continue;
 	switch (option) {
