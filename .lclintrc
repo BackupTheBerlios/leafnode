@@ -1,0 +1,4 @@
++posix-lib
+-predboolint
+-DHAVE_CONFIG_H
+-booltype bool
