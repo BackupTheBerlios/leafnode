@@ -91,6 +91,13 @@ expire = 20
 ## and set (optional):
 # filterfile = /etc/leafnode/filterfile
 
+## If you want to provide a customized pseudo article, create a file
+## containing the article body (preferably using ASCII chars only).
+## Occurrences of the strings %server %version %newsgroup are replaced
+## by the server name, leafnode version and group name respectively.
+# pseudoarticle = /etc/leafnode/pseudoarticle
+
+
 ## If your newsreader does not supply a Message-ID for your postings
 ## Leafnode will supply one, using the hostname of the machine it is
 ## running on.  If this hostname is not suitable, this parameter can be
