@@ -1,3 +1,39 @@
+2004-08-13  Matthias Andree <matthias.andree@gmx.de>
+
+	* applyfilter.8.in, fetchnews.8.in, filterfile.5.in, leafnode.8.in,
+	rnews.8.in, texpire.8.in: Fix path of $(sysconfdir) files. Reported
+	by Cory C. Albrecht.
+
+2004-07-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: high water mark issue
+
+2004-07-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Disable moving articles to failed.postings for now.
+	* activutil.c, activutil.h, activutil_resolve.c, applyfilter.c,
+	arc4random.c, artutil.c, b_sortnl.c, bsearch_range.c,
+	cmp_firstcolumn.c, fetchnews.c, filterutil.c, getline.c,
+	interesting.c, leafnode.h, link_force.c, localutil.c, lockfile.c,
+	miscutil.c, nntpd.c, redblack.c, sort.c, store.c, strutil.c,
+	t.mgetheader.c, xoverutil.c: Misc. minor fixes to the code is also
+	valid C++.
+	* Makefile.am: Suppress bogus error message.
+
+2004-06-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* NEWS, texpire.c: Bugfix: restoring hard links didn't work for
+	cross-posted articles.  Reported by Jeff Grossman.
+
+2004-06-22  Matthias Andree <matthias.andree@gmx.de>
+
+	* texpire.c: Cleanup: legalxover line no longer modifies the XOVER
+	information.
+
+2004-05-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO: Note Andreas Kneib's suggestion.
+
 2004-05-13  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20040513a =
