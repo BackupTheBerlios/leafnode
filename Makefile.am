@@ -1,23 +1,10 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.54 2004/01/16 21:46:44 emma Exp $
+# $Id: Makefile.am,v 1.55 2004/01/17 03:50:29 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
 SUBDIRS		= tools
-VPATH		= $(srcdir)
-
-# external programs
-LYNX		= @LYNX@
-
-# external variables
-BINDIR		= @bindir@
-SBINDIR		= @sbindir@
-sysconfdir	= @sysconfdir@/leafnode
-SYSCONFDIR	= $(sysconfdir)
-VERSION		= @VERSION@
-
-CFLAGS		= @CFLAGS@ @GCC_FLAGS@
 
 sysconf_DATA	= config.example \
 	       filters.example
