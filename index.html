@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+  <head>
+    <meta name="generator" content=
+    "HTML Tidy for Linux/x86 (vers 1st April 2002), see www.w3.org">
+
+    <title>DARCS repository</title>
+  </head>
+
+  <body>
+    <h1>Getting started with the leafnode-2 DARCS repository</h1>
+
+    <h2>Checking out the repository</h2>
+
+    <p>To obtain the initial copy, type:</p>
+<pre>
+darcs get --partial \
+http://home.pages.de/~mandree/leafnode/beta/darcs/ leafnode-2-darcs
+</pre>
+
+    <p><em>The --partial only obtains the patches since the last
+    checkpoint. Omit if you need to review very old
+    patches.</em></p>
+
+    <h2>Doing your first build</h2>
+
+    <p>Auto-generated files are not part of the repository, so you
+    must generate them before your first build.</p>
+
+    <ol>
+      <li>
+        To generate configure and friends, type: 
+<pre>
+autoreconf -iv
+</pre>
+      </li>
+
+      <li>
+        To configure and build leafnode, type: 
+<pre>
+mkdir -p build
+cd build
+../configure -C
+make
+</pre>
+      </li>
+
+      <li>Then install as usual.</li>
+    </ol>
+
+    <h2>Updating your repository</h2>
+
+    <p>Switch to your working directory, then type:</p>
+<pre>
+darcs pull
+</pre>
+
+    <h1>Submitting patches</h1>
+
+    <p>To submit your modifications, send GnuPG-signed mail, or
+    expose your repository and send the URL to pull from. See</p>
+<pre>
+darcs send --help
+</pre>
+    for details.<br>
+     <br>
+     
+
+    <h1>Further reading</h1>
+
+    <p><a href="http://darcs.net/">The DARCS homepage</a></p>
+    <hr>
+
+    <address>
+      <a href=
+      "mailto:matthias.andree@gmx.de?subject=Your%20leafnode-2%20DARCS%20repository">
+      Matthias Andree,</a> 2004-12-13
+    </address>
+  </body>
+</html>
+
