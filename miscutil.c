@@ -41,8 +41,6 @@
 #include <dmalloc.h>
 #endif
 
-static void whoami(void);
-
 char fqdn[FQDN_SIZE];
 
 /*
@@ -71,6 +69,43 @@ static const struct mydir dirs[] = {
     {0, 0}
 };
 /*@=matchanyintegral@*/
+
+/* get the fully qualified domain name of this box into fqdn */
+static void
+whoami(void)
+{
+    struct hostent *he;
+    int debugqual = 0;
+    char *x;
+
+    if ((x = getenv("LN_DEBUG_QUALIFICATION")) != NULL
+	&& *x)
+	debugqual = 1;
+
+    if (!gethostname(fqdn, 255) && (he = gethostbyname(fqdn)) != NULL) {
+	fqdn[0] = '\0';
+	strncat(fqdn, he->h_name, 255);
+	if (debugqual) ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			      "canonical hostname: %s", fqdn);
+	if (!is_validfqdn(fqdn)) {
+	    char **alias;
+	    alias = he->h_aliases;
+	    while (alias && *alias) {
+		if (debugqual) {
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			   "alias for my hostname: %s", *alias);
+		}
+		if (is_validfqdn(*alias)) {
+		    fqdn[0] = '\0';
+		    strncat(fqdn, *alias, 255);
+		    break;
+		} else {
+		    alias++;
+		}
+	    }
+	}
+    }
+}
 
 /*
  * initialize all global variables
@@ -540,43 +575,6 @@ chdirgroup(const char *group,
     }
     mastr_delete(s);
     return 0;
-}
-
-/* get the fully qualified domain name of this box into fqdn */
-static void
-whoami(void)
-{
-    struct hostent *he;
-    int debugqual = 0;
-    char *x;
-
-    if ((x = getenv("LN_DEBUG_QUALIFICATION")) != NULL
-	&& *x)
-	debugqual = 1;
-
-    if (!gethostname(fqdn, 255) && (he = gethostbyname(fqdn)) != NULL) {
-	fqdn[0] = '\0';
-	strncat(fqdn, he->h_name, 255);
-	if (debugqual) ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-			      "canonical hostname: %s", fqdn);
-	if (!is_validfqdn(fqdn)) {
-	    char **alias;
-	    alias = he->h_aliases;
-	    while (alias && *alias) {
-		if (debugqual) {
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-			   "alias for my hostname: %s", *alias);
-		}
-		if (is_validfqdn(*alias)) {
-		    fqdn[0] = '\0';
-		    strncat(fqdn, *alias, 255);
-		    break;
-		} else {
-		    alias++;
-		}
-	    }
-	}
-    }
 }
 
 /*
