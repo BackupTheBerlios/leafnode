@@ -1390,6 +1390,9 @@ processupstream(const char *const server, const int port,
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 	       "Could not open %s for writing: %m", s);
 	free(s);
+	if (!newsgrp) {
+	  closeinteresting(r);
+	}
 	return 0;
     }
     free(s);
