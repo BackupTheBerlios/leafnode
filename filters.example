@@ -65,7 +65,7 @@ action = kill
 ### Do not fetch articles that Gmane considered spam (only effective in
 ### groups of the gmane hierarchy). Note that filtering on "Xref"
 ### already filters at XOVER level, see section EFFICIENCY in
-### filterfile(8).
+### filterfile(5).
 newsgroups = gmane\..*
 pattern = ^Xref:.* gmane\.spam\.detected:
 action = kill
