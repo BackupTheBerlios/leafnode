@@ -6,7 +6,7 @@
 - Bugfix: Fetchnews will no longer abort when it needs to fetch the
   active file (-f option, timeout_active expired, fresh install) when
   the first server has the "noactive" option set.
-- Portability: ugid_gset.c lacked #include directives that caused
+- Portability: ugid_gset.c lacked #include directives, causing
   compile trouble. Fix by Ralf Wildenhues.
 
 20040227a: Changes since 20040206a:
