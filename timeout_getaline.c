@@ -22,7 +22,7 @@ timer(int sig)
  * call getaline with timeout
  */
 char *
-timeout_getaline(FILE * f, int timeout)
+timeout_getaline(FILE * f, unsigned int timeout)
 {
     char *l;
 
@@ -40,5 +40,5 @@ timeout_getaline(FILE * f, int timeout)
 char *
 mgetaline(FILE * f)
 {
-    return timeout_getaline(f, 300);
+    return timeout_getaline(f, 300u);
 }
