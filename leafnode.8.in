@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.17 2003/02/17 14:00:57 emma Exp $
+.\" $Id: leafnode.8.in,v 1.18 2003/07/25 18:38:44 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -342,6 +342,15 @@ will start to log lots of debugging output via
 .B syslog (8)
 to news.debug. Use it for tracking down problems with your feed. See
 config.example for details.
+.TP
+windowsize = 5
+This option defaults to 5, it will specify how many ARTICLE commands the
+fetchnews program sends ahead before reading articles, to minimize
+network round trip delays without using additional threads. Set this
+higher (say, 100 as a rule of thumb) for high-throughput, high-latency
+or for congested links (satellite or DSL without "fast path" option). In
+case of trouble (fetchnews hangs), you can set this to 1, although no
+such trouble has been reported so far.
 
 .SH PROTOCOL
 Here are the NNTP commands supported by this server.
