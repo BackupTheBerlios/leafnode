@@ -1505,29 +1505,56 @@ postarticles(void)
     return 1;
 }
 
+
+/* these groups need not be fetched *again* */
+static struct rbtree *done_groups = NULL;
+
+static int
+cmp_upstream(const void *a, const void *b,
+	/*@unused@*/ const void *config __attribute__ ((unused)))
+{
+    const char *s = a, *t = b;
+    return strcasecmp(s, t);
+}
+
 /** get server high water mark
- *  \return 1 on parse error
+ *  \return 1 if parse error or group not found
  */
 static unsigned long
-get_old_watermark(struct stringlist *ngs, const char *name)
+get_old_watermark(const char *group, struct rbtree *upstream)
 {
-    mastr *s;
-    char *l, *t;
+    char *t;
+    const char *k;
     unsigned long a;
 
-    if (ngs == NULL)
+    if (upstream == NULL)
 	return 1;
-    s = mastr_new(1024);
-    mastr_vcat(s, name, " ", NULL);	/* find 'group ' */
-    l = findinlist(ngs, mastr_str(s));
-    mastr_delete(s);
-    if (l == NULL || (l = strchr(l, ' ')) == NULL || ++l == '\0')
+
+    k = rbfind(group, upstream);
+
+    if (k == NULL)
 	return 1;
-    a = strtoul(l, &t, 10);
+    k += strlen(group) + 1;
+    if (*k == '\0')
+	return 1;
+
+    a = strtoul(k, &t, 10);
     if (!*t)
 	return a;
     else
 	return 1;
+}
+
+
+static void
+remove_watermark(const char *group, struct rbtree *upstream)
+{
+
+    const char *k = rbfind(group, upstream);
+    if (k) {
+	rbdelete(group, upstream);
+	free((char *)k);		/* ugly but true */
+    }
 }
 
 
@@ -1543,28 +1570,28 @@ processupstream(const char *const server, const unsigned short port,
 {
     FILE *f;
     const char *ng;			/* current group name */
-    struct stringlist *ngs = NULL;	/* upstream water marks and groups */
-    struct stringlist *helpptr = NULL;
     char *newfile, *oldfile;		/* temp/permanent server info files */
-    char *l;
-    RBLIST *r = 0;			/* =0 is to squish compiler warnings */
-    int rc = 0;
+    RBLIST *r;				/* interesting groups pointer */
+    struct rbtree *upstream = NULL;	/* upstream water marks */
+    int rc = 0;				/* return value */
 
     /* read info */
     oldfile = server_info(spooldir, server, port, "");
     newfile = server_info(spooldir, server, port, "~");
 
+    /* read old watermarks in rbtree */
     if ((f = fopen(oldfile, "r")) == NULL) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open %s: %m", oldfile);
 	goto out;
     }
-
-    /* FIXME: a sorted array or a tree would be better than a list */
-    while ((l = getaline(f)) && *l) {
-	appendtolist(&ngs, &helpptr, l);
-    }
+    upstream = initfilelist(f, NULL, cmp_upstream);
     fclose(f);
+    if (upstream == NULL) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read %s", oldfile);
+	goto out;
+    }
 
+    /* read interesting.groups */
     if (!initinteresting()) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
 	goto out;
@@ -1588,28 +1615,58 @@ processupstream(const char *const server, const unsigned short port,
 	struct newsgroup *g;
 	unsigned long from;		/* old server high mark */
 	unsigned long newserver = 0;	/* new server high mark */
-	int wantthis;
+	const char *donethisgroup;
 
 	if (!isalnum((unsigned char)*ng))
 	    continue;			/* FIXME: why? */
 
-	from = get_old_watermark(ngs, ng);
+	from = get_old_watermark(ng, upstream);
 
-	/* does ng match what we currently want? */
-	wantthis = (nglist == NULL || matchlist(nglist, ng) != NULL);
+	donethisgroup = rbfind(ng, done_groups);
 
-	if (wantthis) {
+	if (donethisgroup) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+		    "%s already fetched successfully, skipping", ng);
+	}
+
+	if ((!nglist || matchlist(nglist, ng)) && !donethisgroup) {
+	    /* we still want this group */
+
 	    g = findgroup(ng, active, -1);
-	    if (!g) {
-		if (!forceactive && (debugmode & DEBUG_ACTIVE))
-		    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-			    "%s not found in groupinfo file", ng);
-	    }
+            if (!g) {
+                if (!forceactive && (debugmode & DEBUG_ACTIVE))
+                    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+                            "%s not found in groupinfo file", ng);
+            }
 
 	    newserver = getgroup(g, from);
+	    if (newserver == (unsigned long)-2) { /* fatal */
+		/* FIXME: write back all other upstream entries, return */
+		closeinteresting(r);
+		freeinteresting();
+		goto out;
+	    }
+	    /* write back as good info as we have, drop if no real info */
+	    if (newserver != 0) {
+		fprintf(f, "%s %lu\n", ng, newserver);
+	    } else if (from != 1) {
+		fprintf(f, "%s %lu\n", ng, from);
+	    }
+	    /* remove from upstream tree */
+	    remove_watermark(ng, upstream);
+
+	    if (newserver != 0) { /* group successfully fetched */
+		if (only_fetch_once) {
+		    char *k1 = critstrdup(ng, "processupstream");
+		    const char *k2 = rbsearch(k1, done_groups);
+		    assert(k1 == k2);
+		}
+	    }
+
+	} else {
+	    if (from != 1)	/* write back old high mark if not fake */
+		fprintf(f, "%s %lu\n", ng, from);
 	}
-	if (newserver != 0 || from != 1)
-	    fprintf(f, "%s %lu\n", ng, newserver != 0 ? newserver : from);
     }
     closeinteresting(r);
     freeinteresting();
@@ -1620,7 +1677,7 @@ processupstream(const char *const server, const unsigned short port,
 out:
     free(newfile);
     free(oldfile);
-    freelist(ngs);
+    freegrouplist(upstream);
     return rc;
 }
 
@@ -1678,7 +1735,7 @@ do_server(time_t lastrun)
     }
 
     /* do regular fetching of articles, headers, delayed bodies */
-    if (action_method & ~FETCH_POST) {
+    if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
 	nntpactive();	/* get list of newsgroups or new newsgroups */
 	res = processupstream(current_server->name, current_server->port, lastrun);
 	if (res == 1)
@@ -1823,6 +1880,10 @@ main(int argc, char **argv)
 
 	if (!noexpire)
 	    expireinteresting();
+
+	if (only_fetch_once) {
+	    done_groups = rbinit(cmp_upstream, NULL);
+	}
     }
     if (signal(SIGTERM, sigcatch) == SIG_ERR)
 	fprintf(stderr, "Cannot catch SIGTERM.\n");
@@ -1868,6 +1929,9 @@ main(int argc, char **argv)
 	ln_log(LNLOG_SINFO, LNLOG_CTOP,
 	       "%s: %lu articles fetched, %lu killed, %lu posted, in %ld seconds",
 	       myname, globalfetched, globalkilled, globalposted, time(0) - starttime);
+
+	if (only_fetch_once)
+	    freegrouplist(done_groups);
 
 	switch (fork()) {
 	case -1:		/* problem */
