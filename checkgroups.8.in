@@ -13,7 +13,7 @@ checkgroups \- update group descriptions
 .SH SYNOPSIS
 .B checkgroups -V
 .br
-.B checkgroups [-v] [checkgroups script]
+.B checkgroups [-v [...]] [-D debugmode] [checkgroups script]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -31,11 +31,12 @@ sets its real and effective uid to "news".
 
 .SH OPTIONS
 .TP
-.I -D
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
-problems. If debug mode has already been set in the config file, increase
-verbosity.
+problems. Check
+.I config.example
+for details on how to set the debugmode.
 .TP
 .I -v
 Be more verbose.

@@ -13,7 +13,7 @@ fetchnews \- fetch news via NNTP
 .SH SYNOPSIS
 .B fetchnews -V
 .br
-.B fetchnews [-BDfHnPv] [-D debugmode] [-v] [-F configfile]
+.B fetchnews [-BDfHnP] [-D debugmode] [-v [...]] [-F configfile]
 .B [-M message-id] [...] [-x number] [-S server[:port]]
 .B [-N newsgroup] [...] [-t #]
 
@@ -287,6 +287,7 @@ Copyright of the modifications 1997-2003.
 .BR texpire (8),
 .BR pcre (3),
 .BR stat (2),
-.BR ntpd (8), ntp.conf (5).
+.BR ntpd (8),
+.BR ntp.conf (5).
 .BR @sysconfdir@/filters.example ,
 .B "RFC 977"

@@ -43,8 +43,7 @@ the Message-IDs from the shell.
 .I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
-problems with your upstream server(s). If debug mode has already been
-set in the config file, increase verbosity. See
+problems with your upstream server(s). See
 .I config.example
 for details on how to set the debugmode.
 .TP
@@ -66,7 +65,7 @@ just write what it would do without -n.
 .I -r
 Repair and migrate mode. In this mode, texpire tries to save as much of the news
 spool as it can. This mode MUST be used when upgrading to a leafnode
-version which has a different hash function for message.id than the
+version which has a different hash function for messageid than the
 version previously installed. If in doubt, use -r after an update.
 .TP
 .I -v

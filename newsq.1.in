@@ -1,4 +1,4 @@
-.TH NEWSQ 1 "@VERSION@" leafnode Leafnode \" -*-nroff-*-
+.TH newsq 1 "@VERSION@" leafnode Leafnode \" -*-nroff-*-
 .SH NAME
 newsq \- view the leafnode news queue
 .SH SYNOPSIS
@@ -8,9 +8,8 @@ newsq \- view the leafnode news queue
 outputs a summary of news that is in leafnode's out.going, in.coming and
 failed.postings news queues.
 .P
-In out.going, leafnode queues
-news that has been posted locally on your site and not yet upload the the
-upstream news server.
+In out.going, leafnode queues news that has been posted locally on your
+site and not yet uploaded to the upstream news server.
 .P
 In in.coming, leafnode queues news destined to the
 local system that it could
@@ -31,7 +30,7 @@ EXIT_FAILURE when there was an error.
 Help. Print a short help and print the exit codes used in -c mode. They
 are system-specific and should not change after updating leafnode.
 .SH SECURITY
-newsq is supposed to be installed set-group-id (mode 02755) to your
+newsq is supposed to be installed set-group-id (mode 02711) to your
 .I news
 group. Do
 .B not

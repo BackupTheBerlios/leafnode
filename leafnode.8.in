@@ -212,7 +212,7 @@ text, it is recommended that you set the rights on the config file as
 restrictive as possible, otherwise other users of your computer will be able
 to get your password(s) from that file.
 .TP
-feedtype = TYPE
+feedtype = type
 Determine how to send postings to the upstream server. Can be any of
 NNTP (default), UUCP or NONE. Case does not matter.
 .TP
@@ -367,7 +367,7 @@ timeout_client = 300
 Wait timeout_client seconds for a command from the client (newsreader)
 before exiting.
 .TP
-timeout_delaybody = HOURS
+timeout_delaybody = hours
 Retry at fetchnews runs in the next timeout_delaybody hours after an
 article has been marked for download to download it (only applies to
 delaybody mode). Be sure to run fetchnews at least once within that
@@ -562,6 +562,6 @@ has been paid for by Uninett AS (http://www.uninett.no/).
 .BR texpire (8),
 .BR checkgroups (8),
 .BR glob (7),
-.BR pcre (3),
+.BR pcre (3).
 .BR @sysconfdir@/filters.example ,
 .B "RFC 977"

@@ -11,7 +11,7 @@ applyfilter \- apply filter settings to news spool
 .SH SYNOPSIS
 .B applyfilter -V
 .PP
-.B applyfilter [-vnc] [-D debugmode] [-F configfile] object [...]
+.B applyfilter [-v [...]] [-n] [-c] [-D debugmode] [-F configfile] object [...]
 
 .SH DESCRIPTION
 .B Leafnode

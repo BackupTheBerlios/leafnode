@@ -50,7 +50,7 @@ parameter determines which newsgroup(s) the following patterns should be
 applied to. You can use
 .B PCRE
 expressions as explained in the 
-.B pcre
+.BR pcre (3)
 manual page. When prefixed with an exclamation point, the match result
 is inverted, i. e. the rule applies if the newsgroup name is \fBnot\fR
 matched by the PCRE, useful for "for all newsgroups except... do"-style
@@ -65,7 +65,7 @@ The
 .BR recognize
 can be one of the following:
 .TP
-pattern = [!]\fIpcre\fR
+pattern = [!]\fIPCRE\fR
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
 a separate manual page (
@@ -142,7 +142,7 @@ support the "XOVER" command, and only use filter criteria that can be
 satisfied from overview data. This means only filter on these headers
 with "pattern": Subject, From, Date, Message-ID, References, Bytes, Lines.
 
-Filtering maxage, minlines, maxlines, maxbytes is fine. maxcrosspost
+Filtering maxage, minlines, maxlines, maxbytes is fine. Maxcrosspost
 filtering, due to a lack of Newsgroups: headers in overview data,
 resorts to checking the Xref: header and will therefore count how many
 of the groups the article was crossposted into are offered by the

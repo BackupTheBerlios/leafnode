@@ -11,7 +11,7 @@ rnews \- sort batch files into spool
 .SH SYNOPSIS
 .B rnews -V
 .br
-.B rnews [-F configuration] [-v[v[v[v[v]]]]] [-D [level]] [file|directory]
+.B rnews [-F configuration] [-v[v[v[v[v]]]]] [-D debugmode] [file|directory]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -38,13 +38,12 @@ sets its real and effective uid to "news".
 
 .SH OPTIONS
 .TP
-.I -D [debugmode]
+.I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to
 the facility "news" with the priority "debug". Useful for tracking down
 problems. See
 .I @sysconfdir@/config.example
-for details on how to configure the debug mode. If the mode is omitted,
-assume maximum debug level.
+for details on how to configure the debug mode.
 .TP
 .I -F configfile
 If set, use configfile instead of the default configuration.
