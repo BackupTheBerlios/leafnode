@@ -725,7 +725,7 @@ doxover(struct stringlist **stufftoget,
 	char *xover[20];
 	char *artno, *subject, *from, *date, *messageid;
 	char *references, *lines, *bytes;
-	char **newsgroups_list;
+	char **newsgroups_list = NULL;
 	int num_groups;
 
 	if (abs(str_nsplit(xover, l, "\t", sizeof(xover) / sizeof(xover[0]))) <
@@ -790,7 +790,8 @@ doxover(struct stringlist **stufftoget,
 	}
 next_over:
 	free_strlist(xover);
-	free(newsgroups_list);
+	if (newsgroups_list)
+	  free(newsgroups_list);
     }
     if (l && strcmp(l, ".") == 0)
 	return count;
