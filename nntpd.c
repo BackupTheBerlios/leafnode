@@ -173,7 +173,8 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
 		"If you do an operation on a group - such as reading an article,\n"
 		"looking at the group table of contents or similar, then leafnode\n"
 		"will go and fetch articles from that group when it next updates.\n"
-		"\n"
+		"\n");
+	fprintf(pseudoart,
 		"Since you have read this dummy article, leafnode will retrieve\n"
 		"the newsgroup %s when fetchnews is run\n"
 		"the next time. If you'll look into this group a little later, you\n"

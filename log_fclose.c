@@ -14,6 +14,6 @@ log_fclose(FILE * f)
 {
     int r = fclose(f);
     if (r)
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot fclose(%p): %m", f);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot fclose(%p): %m", (void *)f);
     return r;
 }

@@ -150,7 +150,8 @@ usage(void)
 	    "fetchnews [-BDfHnPRv] [-F configfile] [-t #] [-x #] [-S server]\n"
 	    "          [-N newsgroup] [-N group.pattern] [-M message-id]\n"
 	    "    -B                get article bodies in delaybody groups\n"
-	    "    -D debugmode      switch on debugmode\n"
+	    "    -D debugmode      switch on debugmode\n");
+    fprintf(stderr,
 	    "    -f                force reload of groupinfo file\n"
 	    "    -F conffile       use \"configfile\" instead of %s/config\n"
 	    "    -H                get article headers in delaybody groups\n"
@@ -164,7 +165,8 @@ usage(void)
 	    "    -S server         only get articles from \"server\"\n"
 	    "    -t delay          wait \"delay\" seconds between articles\n"
 	    "    -v                verbose mode (may be repeated)\n"
-	    "    -x extra          go \"extra\" articles back in upstream history\n"
+	    "    -x extra          go \"extra\" articles back in upstream history\n", sysconfdir);
+    fprintf(stderr,
 	    "Setting none of the options\n"
 	    "    -B -H -P -R\n"
             "is equivalent to setting all of them, unless [-M message-id] is used.\n"
@@ -173,7 +175,7 @@ usage(void)
 	    "no matter if they were posted to a delaybody group.\n"
 	    "\n"
 	    "See also the leafnode homepage at\n"
-	    "    http://www.leafnode.org/\n", sysconfdir);
+	    "    http://www.leafnode.org/\n");
 }
 
 /**
