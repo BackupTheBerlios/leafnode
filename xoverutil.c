@@ -548,7 +548,7 @@ xgetxover(
 						    sizeof(struct xoverinfo) *
 						    (current + 1),
 						    "reallocating overview array");
-	sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
+	ln_sort(xoverinfo, current, sizeof(struct xoverinfo), _compxover);
     }
 
     /* sort xover */

@@ -217,7 +217,7 @@ mergegroups(void)
     newgroup = NULL;
     active[count].name = NULL;
     activesize = count;
-    sort(active, activesize, sizeof(struct newsgroup), compactive);
+    ln_sort(active, activesize, sizeof(struct newsgroup), compactive);
     validateactive();
 }
 
@@ -304,7 +304,7 @@ writeactive(void)
 	g++;
     }
     count = activesize = (size_t)(g - active);
-    sort(active, count, sizeof(struct newsgroup), &compactive);
+    ln_sort(active, count, sizeof(struct newsgroup), &compactive);
     validateactive();
 
     /* write groupinfo */
@@ -569,7 +569,7 @@ readactive(void)
     }
     activesize = (size_t)(g - active);	/* C magic */
     /* needed so that subsequent insertgroup can work properly */
-    sort(active, activesize, sizeof(struct newsgroup), &compactive);
+    ln_sort(active, activesize, sizeof(struct newsgroup), &compactive);
     validateactive();
 
     /* don't check for errors, we opened the file for reading only */

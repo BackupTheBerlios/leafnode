@@ -681,7 +681,7 @@ void my_sort(void *base, size_t nmemb, size_t size,
 	int (*compar) (const void *, const void *),
 	const char *f, unsigned long l);
 
-#define sort(a,b,c,d) my_sort(a,b,c,d,__FILE__,__LINE__)
+#define ln_sort(a,b,c,d) my_sort(a,b,c,d,__FILE__,__LINE__)
 
 #ifndef HAVE_MERGESORT
 int mergesort(void *base, size_t nmemb, size_t size,
