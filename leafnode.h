@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.55 2002/07/03 13:23:52 emma Exp $ */
+/* $Id: leafnode.h,v 1.56 2002/07/03 15:09:21 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -71,7 +71,9 @@ extern "C" {
 #endif /* not __LCLINT__ */
 
 
+#ifndef __cplusplus
     typedef int bool;
+#endif
 
     /*@constant int BLOCKSIZE;@*/
 #define BLOCKSIZE 16384
@@ -219,7 +221,7 @@ extern "C" {
     void rereadactive(void);	/* only reread if none read or if it has changed */
     int writeactive(void);
     void freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a);
-    void mergeactives(struct newsgroup *old, struct newsgroup *new) ;
+    void mergeactives(struct newsgroup *old, struct newsgroup *newng) ;
     struct newsgroup *cpactive(struct newsgroup *a);
 /*
  * local groups
