@@ -16,12 +16,14 @@
 #include <limits.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
 #include <time.h>
 #include <fcntl.h>
+#include <string.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -312,6 +314,7 @@ writeactive(void)
     validateactive();
 
     /* write groupinfo */
+    fprintf(a, "#A %lu\n", (unsigned long) count);
     g = active;
     err = 0;
     while (g->name) {
@@ -438,22 +441,26 @@ read_group_parameters(char *l, struct newsgroup *g, unsigned long *age)
 }
 
 /*
- * read active file into memory
+ * read active file into memory. because this can be a fairly I/O intensive
+ * operation, the active file is loaded into memory before it is processed.
  */
 static void
 readactive(void)
 {
-    char *p, *r = 0;
+    char *p, *mmap_ptr, *r = 0;
     int n;
-    FILE *f;
+    int fd;
     struct newsgroup *g;
+    struct stat stat_buf;
+    size_t filesize;
+    size_t file_index;
     mastr *s = mastr_new(LN_PATH_MAX);
-
+    
     freeactive(active);
     active = 0;
     mastr_vcat(s, spooldir, GROUPINFO, NULL);
 
-    if ((f = fopen(mastr_str(s), "r")) == NULL) {
+    if ((fd = open(mastr_str(s), O_RDONLY)) == -1) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
 		mastr_str(s));
 	mastr_delete(s);
@@ -462,17 +469,52 @@ readactive(void)
 	return;
     }
 
-    /* count lines = newsgroups */
-    activesize = 0;
-    while ((p = getaline(f)))
-	activesize++;
-    rewind(f);
+    /*
+     * Scanning this group list is fairly expensinve and is done twice
+     * so we mmap the file for speed. 
+     */
+    if ( stat(mastr_str(s), &stat_buf) == -1 ) {
+        ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "could not pre-determine size of %s: %m", mastr_str(s));
+        mastr_delete(s);
+       active = NULL;
+       activesize = 0;
+       return;
+    }
+    filesize = stat_buf.st_size;
+
+    mmap_ptr = mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0 );
+    close(fd); /* close the file, not needed after it has be mapped to memory. */
+    if (mmap_ptr == MAP_FAILED) {
+        ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "Could not memory map file %s: %m", mastr_str(s));
+        mastr_delete(s);
+       active = NULL;
+       activesize = 0;
+       return;
+    }
+
+    if (strncmp(mmap_ptr, "#A ", 3) == 0) {
+	long t;
+	/* new format: first line = #X u where u is the natural number
+	 * with line count and X is a version letter */
+	get_long(mmap_ptr + 3, &t);
+	activesize = t;
+	file_index = strcspn(mmap_ptr + 3, "\n") + 1;
+    } else {
+	/* old format; count lines = newsgroups */
+	activesize = 0;
+	file_index = 0;
+	while ( (p = getabufferedline(mmap_ptr, &file_index, filesize)) != NULL ) {
+	    activesize++;
+	}
+	file_index = 0;
+    }
+
     active = (struct newsgroup *)critmalloc((1 + activesize) *
 					    sizeof(struct newsgroup),
 					    "allocating active");
     g = active;
-    while ((p = getaline(f))) {
-	unsigned long temp;
+    while ( (p = getabufferedline(mmap_ptr, &file_index, filesize)) != NULL ) {
+        unsigned long temp;
 
 	r = strchr(p, '\t');
 	if (!r && check_old_format(p)) {
@@ -534,8 +576,9 @@ readactive(void)
     sort(active, activesize, sizeof(struct newsgroup), &compactive);
     validateactive();
 
-    /* don't check for errors, we opened the file for reading */
-    (void)fclose(f);
+    /* don't check for errors, we opened the file for reading only */
+    (void)munmap(mmap_ptr, filesize);
+
     mastr_delete(s);
 }
 

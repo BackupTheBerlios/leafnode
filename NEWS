@@ -2,6 +2,13 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20041007a:
+- Speedup: the active file now has a header line that contains the number
+  of lines. leafnode can read both the old format (requires two passes)
+  and the new format (requires one pass).
+- Speedup: the active file is now mmapped, rather than read, into memory.
+  Patch by Robert Clark.
+
 20041007a: Changes since 20041006a:
 - Change: fetchnews will treat groups as moderated if the reported status
   flag is 'y' but the group has the tag ' (Moderated)'
