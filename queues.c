@@ -75,7 +75,7 @@ compare(const void *a, const void *b,
 }
 
 /** Feeds all postings in $(SPOOLDIR)/in.coming/ into newsgroups
- * \return 
+ * \return
  *  - TRUE in case of success
  *  - FALSE in case of trouble
  */
@@ -116,7 +116,8 @@ feedincoming(void)
 	ngs = fgetheader(f, "Newsgroups:", 1);
 	if (!ngs) {
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		   "Cannot read Newsgroups from %s", *dl);
+		   "Cannot read Newsgroups from %s, deleting", *dl);
+	    log_unlink(*di);
 	    log_fclose(f);
 	    continue;
 	}
