@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20020930a])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.39 $)
+AC_REVISION($Revision: 1.40 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -370,6 +370,6 @@ if test x$silent != xyes ; then
     echo
 fi
 
-AC_CONFIG_FILES([Makefile tools/Makefile leafnode.spec leafnode.8 newsq.1
+AC_CONFIG_FILES([Makefile tools/Makefile tools/sendbatch.bash leafnode.spec leafnode.8 newsq.1
 applyfilter.8 filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8])
 AC_OUTPUT
