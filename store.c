@@ -16,6 +16,7 @@
 #include "attributes.h"
 #include "ln_dir.h"
 #include "msgid.h"
+#include "link_force.h"
 
 #include <ctype.h>
 #include <stdio.h>
