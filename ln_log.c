@@ -25,16 +25,12 @@
 
 extern int verbose;
 
-static void vln_log_core(int slg, FILE /*@null@*/ * console,
-			 int severity,
-			 int context, const char *format, va_list ap);
-
 /* log to syslog if slg != 0
  * log to stream console if console != 0
  * ctx to have verbosity like context
  * other arguments like syslog */
 static void
-vln_log_core(int slg, FILE * console, int severity,
+vln_log_core(int slg, FILE /*@null@*/ * console, int severity,
 	     int context, const char *format, va_list ap)
 {
     char buf[2048], fmt[2048], *y;
