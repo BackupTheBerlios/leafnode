@@ -279,9 +279,6 @@ process_options(int argc, char *argv[])
 	    return -1;
 	}
     }
-    if (!nglist) {	/* default: fetch all interesting news groups */
-	appendtolist(&nglist, &nglast, "*");
-    }
     return 0;
 }
 
@@ -654,10 +651,15 @@ create_pseudo_header(const char *subject, const char *from,
     return s;
 }
 
-/* for delaybody: store pseudo article header */
+/** for delaybody: store pseudo article header
+ *  \return
+ *  - -1 for error
+ *  -  0 for sucess
+ */
 static int
 write_pseudo_header(mastr *s)
 {
+    int rc = 0;
     int tmpfd;
     mastr *tmpfn = mastr_new(4095l);
 
@@ -667,26 +669,32 @@ write_pseudo_header(mastr *s)
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		"write_pseudo_header: error in mkstemp(\"%s\"): %m",
 		mastr_str(tmpfn));
-	mastr_delete(tmpfn);
-	return -1;
+	rc = -1;
+	goto out;
     }
-    write(tmpfd, mastr_str(s), mastr_len(s)); /* FIXME: check error! */
-    if (!log_fsync(tmpfd) && !log_close(tmpfd)) {
-	if (store(mastr_str(tmpfn), 0, 0, 1) == 0) {
-	    (void)log_unlink(mastr_str(tmpfn));
-	} else {
-	    int dummy;
-	    (void)dummy;
-	    ; /* FIXME */
-	}
+    if (write(tmpfd, mastr_str(s), mastr_len(s)) < (ssize_t)mastr_len(s)) {
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		"write_pseudo_header: write failed: %m");
+	rc = -1;
     }
+
+    if (log_fsync(tmpfd) || log_close(tmpfd)) {
+	rc = -1;
+	goto out;
+    }
+    if (store(mastr_str(tmpfn), 0, 0, 1) == 0) {
+	(void)log_unlink(mastr_str(tmpfn));
+    } else {
+	rc = -1;
+    }
+out:
     mastr_delete(tmpfn);
-    return 0;
+    return rc;
 }
 
 /*
  * get headers of articles with XOVER and return a stringlist of article
- * numbers to get
+ * numbers to get (or number of pseudo headers stored)
  * return -1 for error
  * return -2 if XOVER was rejected
  */
@@ -764,8 +772,8 @@ doxover(struct stringlist **stufftoget,
 
 	    if (delaybody_this_group) {
 		/* write pseudoarticle */
-		write_pseudo_header(s);
-		/* FIXME: what can we do to recover from write errors here? */
+		if (write_pseudo_header(s) == 0)
+		    count++;
 	    } else {
 		count++;
 		appendtolist(stufftoget, &helpptr, artno);
@@ -975,6 +983,7 @@ getgroup(struct newsgroup *g, unsigned long first)
 
     /* we don't care about x-posts for delaybody */
     delaybody_this_group = delaybody_group(g->name);
+
     /* get marked articles first */
     if (delaybody_this_group) {
         if (action_method & FETCH_BODY) {
@@ -1049,19 +1058,18 @@ getgroup(struct newsgroup *g, unsigned long first)
     case 0:
 	freefilter(f);
 	freelist(stufftoget);
-	if (!delaybody_this_group) {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		    "%s: all articles already there", g->name);
-	}
-	return (last + 1);	/* all articles already here */
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+		"%s: all articles already there", g->name);
+	return last + 1;	/* all articles already here */
     default:
-	break;
-    }
-
-    if (delaybody_this_group) {
-	freefilter(f);
-	freelist(stufftoget);
-	return last;
+	if (delaybody_this_group) {
+	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
+		   "%s: %lu pseudo headers fetched",
+		   g->name, outstanding);
+	    freefilter(f);
+	    freelist(stufftoget);
+	    return last + 1;
+	}
     }
 
     ln_log(LNLOG_SINFO, LNLOG_CGROUP,
@@ -1480,13 +1488,17 @@ processupstream(const char *const server, const unsigned short port,
     }
     fclose(f);
 
-    if (!initinteresting() ||
-	    (r = openinteresting()) == NULL) {
+    if (!initinteresting()) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot open interesting.groups");
 	goto out;
     }
     /* add cmdline -N groups to r */
     add_fetchgroups();
+
+    if ((r = openinteresting()) == NULL) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "no interesting.groups");
+	goto out;
+    }
 
     if ((f = fopen(newfile, "w")) == NULL) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
