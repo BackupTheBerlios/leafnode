@@ -862,10 +862,16 @@ next_over:
 	if (newsgroups_list)
 	  free(newsgroups_list);
     }
-    if (l && strcmp(l, ".") == 0)
+    
+    if (l && strcmp(l, ".") == 0) {
+	ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: XOVER: %ld to get, %ld filtered",
+		groupname, count, groupkilled);
 	return count;
-    else
+    } else {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: XOVER: reply was mutilated",
+		groupname);
 	return -1;
+    }
 }
 
 /**
