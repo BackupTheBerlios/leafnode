@@ -1,3 +1,27 @@
+2002-11-08  Matthias Andree <matthias.andree@gmx.de>
+
+	--- release alpha20021108a ---
+	* NEWS, activutil.c, fetchnews.c, getwatermarks.c: Try to fix the
+	'unsigned -1' issue that Reiner Steib reported.  
+	* Makefile.am, t.getwatermarks.c: Add t.getwatermarks.c.  
+
+2002-10-26  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Also apply only_groups_pcre when updating the
+	active, to avoid presenting groups that are not really fetched. If
+	you have multiple upstream servers and you are using
+	only_groups_pcre, run fetchnews -f.  
+	* mailto.c: Fix copyright.  
+	* leafnode.h: C++ compatibility fix.  
+
+2002-10-25  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* configutil.c: Fix uninitialized group_pcre.  
+
+2002-10-23  Joerg Dietrich <joerg@dietrich.net>
+
+	* mailto.c: add missing include of signal.h 
+
 2002-10-23  Matthias Andree <matthias.andree@gmx.de>
 
 	--- release alpha20021023a ---
