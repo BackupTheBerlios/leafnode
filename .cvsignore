@@ -83,3 +83,4 @@ depcomp
 aclocal.m4
 filterutil
 grouplist
+config_paths.h
