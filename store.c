@@ -388,6 +388,8 @@ store_stream(FILE * in /** input file */ ,
 	mastr_delete(xref);
     if (mid)
 	free(mid);
+    if (ln)
+	mastr_delete(ln);
     if (nglist) {
 	free_strlist(nglist);
 	free(nglist);
