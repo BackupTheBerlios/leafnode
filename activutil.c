@@ -636,6 +636,7 @@ void mergeactives(struct newsgroup *old, struct newsgroup *newa)
 				       sizeof(struct newsgroup),
 				       "allocating active copy");
     (void)memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
+    free(active);
     active = NULL;
     activesize = 0;
     return b;
