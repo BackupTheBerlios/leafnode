@@ -1524,7 +1524,7 @@ dopost(void)
 	/* check if we can obtain the MID or if the article is duplicate */
 	switch(msgid_allocate(inname, mid)) {
 	    case 1:
-		nntpprintf("441 435 Duplicate, article not posted");
+		nntpprintf("441 435 Duplicate, article not posted.");
 		log_unlink(inname, 0);
 		goto cleanup;
 		break;
@@ -1532,6 +1532,7 @@ dopost(void)
 		/* OK */
 		break;
 	    default:
+		nntpprintf("441 Server error: cannot allocate Message-ID.");
 		ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot link %s to %s: %m",
 			inname, lookup(mid));
 		log_unlink(inname, 0);
