@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.34 2002/04/03 21:58:12 emma Exp $ */
+/* $Id: leafnode.h,v 1.35 2002/04/10 22:51:49 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -183,6 +183,7 @@ extern "C" {
     int is_interesting(const char *groupname);
     void checkinteresting(void);
 
+    int is_dormant(const char *groupname);
 /*
  * newsgroup management
  */
@@ -492,6 +493,15 @@ extern "C" {
     /*@null@*/ /*@owned@*/ const char *readinteresting(/*@null@*/ RBLIST *);
     void closeinteresting(/*@null@*/ /*@only@*/ RBLIST *);
     void freeinteresting(void);
+
+
+    int init_dormant(void);
+    void critinit_dormant(void);
+    RBLIST *open_dormant(void);
+    const char *read_dormant(RBLIST *);
+    void close_dormant(RBLIST *);
+    void free_dormant(void);
+
 
 #if 0
     int rename(const char *oldname, const char *newname);
