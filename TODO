@@ -221,8 +221,6 @@ Ralfs TODO:
 
 4.4 implement detection if local group shadows server group
 
-4.4 can fetchnews cope with servers that reject XOVER? (Matthias Andree)
-
 4.4 server dependent out.going, possibly a repost command?
 
 4.4 interrupt fetch every 100 (configurable) postings and then
@@ -252,6 +250,8 @@ Ralfs TODO:
 FIXED ITEMS:
 
 2002-07-06 Ralf Wildenhues
+	   can fetchnews cope with servers that reject XOVER?
+
 	   delaybody only for certain groups?
 
 	   clean up fetchnews main function, it's a horrible mess with all
