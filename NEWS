@@ -1,6 +1,9 @@
 Changes since 20040319a:
 - Documentation: document logstderr instead of the improper
   ln_log_stderronly. Patch by Thomas Schwinge.
+- Documentation: mention there was an internal change to stringlist
+  handling before 20040227a. This triggered the XPAT/XHDR/NEWNEWS
+  regression.
 
 20040319a: Changes since 20040305a:
 - Bugfix: XPAT, XHDR, NEWNEWS caused a segmentation fault when issued
@@ -19,6 +22,8 @@ Changes since 20040319a:
   compile trouble. Fix by Ralf Wildenhues.
 
 20040227a: Changes since 20040206a:
+- Internal: The stringlist handling code internal to leafnode has
+  changed and can expose bugs in other code.
 - Feature: Supports PAM, based on a patch by Hynek Schlawack.
 - Bugfix: all fetchnews functions now read from the network with a
   timeout limit.
