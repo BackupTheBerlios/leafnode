@@ -1,3 +1,58 @@
+2002-06-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Merge missing bits before Ralf's 1.58.  
+
+2002-06-16  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: Use findxoverrange to exploit possible sparsity of
+	.overview with respect to article numbers for commands XOVER, XPAT
+	and XHDR within doxover and doselectedheader (even for non- overview
+	headers, since the overview is read anyway).  Remove duplicate code
+	block in dopost which made POST fail.  
+	* leafnode.h, xoverutil.c: New function findxoverrange takes a pair
+	of article numbers and finds the index interval of xoverinfo
+	matching these articles.  Export xcount in leafnode.h.  
+	* bsearch_range.h, Makefile.am, bsearch_range.c: New function
+	bsearch_range searches a sorted array the way bsearch(3) does. 
+	Receives a pair of ordered keys and returns pointers to the smallest
+	and largest element within the given key range.  On error or empty
+	match, one of the pointers given back will be NULL.  
+
+2002-06-15  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* xoverutil.c: fix buggy forward port: xoverinfo is not indexed by
+	artno-xfirst in leafnode-2, unlike leafnode-1.  
+
+2002-06-14  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: New feature: no_direct_post, to store local posts into
+	the local spool only after it has been received from the upstream.
+	(1.9 behaviour).  Robustness: only schedule article for local
+	posting if it has been received and validated (store into temp.files
+	rather than in.coming).  
+	* config.example, config.table, configutil.c, leafnode.h: New
+	feature: no_direct_post, to store local posts into the local spool
+	only after it has been received from the upstream. (1.9 behaviour).  
+	* leafnode.h, localutil.c: Speed up is_alllocal(). Add
+	is_anylocal().  
+	* newsq.c: Print Date and Message-ID as well.  
+	* nntpd.c: Fix off-by-one error in malloc in validate_messageid().
+	Found by glibc's MALLOC_CHECK_=2.  
+
+2002-06-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* getfoldedline.c: Never try to unfold after a . line 
+
+2002-06-02  Matthias Andree <matthias.andree@gmx.de>
+
+	* miscutil.c: Apply patch by Raymond Scholz, to fix broken hostname
+	resolver.  
+
+2002-05-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* getwatermarks.c: Do proper checking of strtoul results. Bug found
+	and fix suggested by Ralf Wildenhues.  
+
 2002-05-06  Matthias Andree <matthias.andree@gmx.de>
 
 	* validatefqdn.c, validatefqdn.h: No longer shadow the global
