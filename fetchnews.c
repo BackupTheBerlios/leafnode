@@ -48,7 +48,7 @@ static unsigned long groupfetched;
 static unsigned long groupkilled;
 static sigjmp_buf jmpbuffer;
 static volatile sig_atomic_t canjump;
-time_t now;
+static time_t now;
 
 /* Variables set by command-line options which are specific for fetchnews */
 static unsigned long extraarticles = 0;		/* go back in upstream high mark and try refetching */
@@ -68,6 +68,7 @@ static const char *action_description[] = {
 
 static struct stringlist *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
 static struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
+static char *only_server = NULL;		/* server name when -S option is given */
 
 /* function declarations */
 static void usage(void);
@@ -129,49 +130,6 @@ sigcatch(int signo)
 	verbose--;
 }
 
-static void deactivate_servers(void)
-{
-    struct serverlist *sl;
-
-    sl = servers;
-    while (sl) {
-	sl->active = FALSE;
-	sl = sl->next;
-    }
-}
-
-static /*@null@*/ /*@dependent@*/ struct serverlist *
-findserver(const char *servername)
-{
-    struct serverlist *sl;
-
-    sl = servers;
-    while (sl) {
-	if (sl->name && strcasecmp(servername, sl->name) == 0) {
-	    return sl;
-	}
-	sl = sl->next;
-    }
-    return NULL;
-}
-
-/* add a new server before the other, using server:port if given */
-static void
-insert_server(char *servspec)
-{
-    struct serverlist *sl;
-    char *p;
-
-    if ((p = strchr(servspec, ':')) != NULL) {
-	*p++ = '\0';
-	sl = create_server(servspec, strtol(p, NULL, 10));
-    } else {
-	sl = create_server(servspec, 0);
-    }
-    sl->next = servers;
-    servers = sl;
-}
-
 /* add the group names given on the cmdline to the interesting rbtree */
 static void
 add_fetchgroups(void)
@@ -203,13 +161,11 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
     char *p;
-    struct serverlist *sl;
     struct stringlist *msgidlast = NULL;
     struct stringlist *nglast = NULL;
 
     /* state information */
     int action_method_seen = 0;	/* BHPR */
-    int servers_limited = 0;
 
     while ((option = getopt(argc, argv, GLOBALOPTS "HBPRS:N:M:fnx:p:t:")) != -1) {
 	if (parseopt(argv[0], option, optarg, conffile))
@@ -231,14 +187,9 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    }
 	    break;
 	case 'S':
-	    if (!servers_limited) {
-		deactivate_servers();
-		servers_limited = TRUE;
-	    }
-	    if ((sl = findserver(optarg)) != NULL)
-		sl->active = TRUE;
-	    else
-		insert_server(optarg);
+	    if (only_server)
+		free(only_server);
+	    only_server = critstrdup(optarg, "processoptions");
 	    break;
 	case 'N':
 	    appendtolist(&nglist, &nglast, optarg);
@@ -564,7 +515,6 @@ getmarked(struct newsgroup *group)
     str = mastr_new(256);
     while ((l = getaline(f))) {
 	char *p, *q, *sep;
-	unsigned long artno;
 	FILE *g;
 
 	mastr_cpy(str, l);
@@ -576,7 +526,9 @@ getmarked(struct newsgroup *group)
 	p = sep + 1;
 	if (!*p)
 	    continue;
-	artno = strtoul(p, &q, 10);
+
+	/* skip article number */
+	(void)strtoul(p, &q, 10);
 
 	if (*q || !(g = fopen(p, "r")))
 	    continue;
@@ -952,8 +904,8 @@ next_over:
 	int rc = count;
 
 	if (l && strcmp(l, ".") == 0) {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: XOVER: %ld seen, %ld I have, "
-		    "%ld filtered, %ld to get",
+	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: XOVER: %lu seen, %lu I have, "
+		    "%lu filtered, %lu to get",
 		    groupname, seen, dupes, groupkilled, count);
 	} else {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: XOVER: reply was mutilated",
@@ -1206,7 +1158,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
        is requested */
     if (!cursrv->usexhdr || f || delaybody_this_group) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: considering %ld %s %lu - %lu, using XOVER", g->name,
+	       "%s: considering %lu %s %lu - %lu, using XOVER", g->name,
 		(last - first + 1),
 		delaybody_this_group ? "headers" : "articles",
 		first, last);
@@ -1221,7 +1173,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 
     if (tryxhdr) {
 	ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-	       "%s: considering %ld articles %lu - %lu, using XHDR", g->name,
+	       "%s: considering %lu articles %lu - %lu, using XHDR", g->name,
 	       (last - first + 1), first, last);
 	outstanding = fn_doxhdr(&stufftoget, first, last);
     }
@@ -1245,7 +1197,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 	if (delaybody_this_group) {
 	    globalhdrfetched += outstanding;
 	    ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
-		   "%s: %lu pseudo headers fetched",
+		   "%s: %ld pseudo headers fetched",
 		   g->name, outstanding);
 	    freefilter(f);
 	    freelist(stufftoget);
@@ -1565,19 +1517,21 @@ postarticles(const struct serverlist *cursrv)
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		   "Cannot open %s to post, expecting regular file.", *y);
 	} else {
+	    struct stat st;
 	    char *f1;
 
 	    f1 = fgetheader(f, "Newsgroups:", 1);
-	    if (f1) {
+	    if (0 == fstat(fileno(f), &st) && f1) {
 		if (cursrv->post_anygroup || isgrouponserver(cursrv, f1)) {
 		    char *f2;
 
 		    f2 = fgetheader(f, "Message-ID:", 1);
 		    if (f2) {
 			if (ismsgidonserver(f2)) {
-			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-				   "Message-ID of %s already in use upstream"
-				   " -- discarding article", *y);
+			    if (!(st.st_mode & S_IXUSR))
+				ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+					"Message-ID of %s already in use upstream"
+					" -- discarding article", *y);
 			    if (unlink(*y)) {
 				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 				       "Cannot delete article %s: %m", *y);
@@ -1603,25 +1557,25 @@ postarticles(const struct serverlist *cursrv)
 				app = fgetheader(f, "Approved:", 1);
 				if (mod != NULL && app == NULL) {
 				    (void)log_unlink(*y, 1);
+				} else {
+				    /* set u+x bit to mark article as posted */
+				    chmod(*y, 0544);
 				}
+
 				if (mod != NULL)
 				    free(mod);
 				if (app != NULL)
 				    free(app);
-				
+
 				/* POST was OK or duplicate */
 				++n;
 			    } else {
 				/* POST failed */
 				/* FIXME: TOCTOU race here - check for
 				 * duplicate article here */
-				static const char xx[] = "/failed.postings/";
 
-				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				       "Unable to post %s: \"%s\", "
-				       "moving to %s%s", *y, line,
-				       spooldir, xx);
-				(void)log_moveto(*y, xx);
+				ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+				       "Unable to post %s: \"%s\".", *y, line);
 			    }
 			}
 			free(f2);
@@ -1638,7 +1592,6 @@ postarticles(const struct serverlist *cursrv)
     globalposted += n;
     return 1;
 }
-
 
 /* these groups need not be fetched *again* */
 static struct rbtree *done_groups = NULL;
@@ -2026,6 +1979,8 @@ main(int argc, char **argv)
     struct sigaction sa;
     int forceactive = 0;	/* if 1, reread complete active file */
     struct serverlist *current_server;
+    unsigned long articles;
+    char **x;
 
     verbose = 0;
     ln_log_open(myname);
@@ -2148,11 +2103,12 @@ main(int argc, char **argv)
 	canjump = 1;
     }
 
-    while (servers) {
+    for (;servers; servers = servers->next) {
 	/* time_t lastrun = 0;		/ * FIXME: save state for NEWNEWS */
 
 	current_server = servers;
-	if (current_server->active) {
+	if (only_server && strcasecmp(current_server->name, only_server))
+		continue;
 	    err = do_server(current_server, forceactive);
 	    if (err == -2) {
 		abort(); /* -2 is undocumented for do_server! */
@@ -2168,10 +2124,34 @@ main(int argc, char **argv)
 	    if (err == 0) {
 		break;	/* no other servers have to be queried */
 	    }
-	}
-	servers = servers->next;
     }
 
+    /* Check for unsent postings, provided we were able to talk to all
+     * servers successfully. Do not touch articles that have been posted
+     * before. */
+    if (rc == 0 && action_method & FETCH_POST) {
+	char **y;
+        x = spooldirlist_prefix("out.going", DIRLIST_NONDOT, &articles);
+        if (!x) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read out.going: %m");
+	} else {
+	    y = x;
+	    for (; *x; x++) {
+		static const char xx[] = "/failed.postings/";
+		struct stat st;
+
+		/* successfully posted -> don't move to failed.postings */
+		if (0 == lstat(*x, &st) && (S_IXUSR & st.st_mode))
+		    continue;
+
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+			"Failed to post %s, moving to %s%s", *x,
+			spooldir, xx);
+		(void)log_moveto(*x, xx);
+	    }
+	    free_dirlist(y);
+	}
+    }
     signal(SIGINT, SIG_IGN);
     signal(SIGTERM, SIG_IGN);	/* FIXME */
 
@@ -2207,5 +2187,7 @@ main(int argc, char **argv)
     freeallfilter(filter);
     freelocal();
     freeconfig();
+    if (only_server)
+	free(only_server);
     exit(rc);
 }
