@@ -50,6 +50,7 @@ int mastr_resizekill(mastr *, size_t);
 size_t mastr_size(mastr *);
 #if LEAFNODE_VERSION > 1
 ssize_t mastr_getln(mastr *, FILE *, ssize_t maxbytes);
+void mastr_unfold(mastr *);
 #endif
 #define mastr_autosize(m) do { (void)mastr_resizekeep(m, m->len); } while(0)
 void mastr_delete(/*@only@*/ mastr *);

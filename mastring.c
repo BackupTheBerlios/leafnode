@@ -292,6 +292,19 @@ mastr_getln(mastr * m, FILE * f,
     }
     return (ssize_t)(m->len);
 }
+
+void mastr_unfold(mastr *m) {
+    char *p, *q;
+    p = q = m->dat;
+    while (p < m->dat + m->len) {
+	if (p[0] != '\n' || p + 1 == m->dat + m->len
+		|| !isspace((unsigned char)p[1])) {
+	    *q++ = *p++;
+	} else {
+	    p++;
+	}
+    }
+}
 #endif
 
 /* chop off last character of string */
