@@ -1,6 +1,11 @@
 2004-08-13  Matthias Andree <matthias.andree@gmx.de>
 
+	* nntpd.c:
+	(fopenart) Log errors (other than ENOENT) when opening articles.
+	(fopenart) Drop an if branch that is never executed.
+
 	= snapshot 20040813a =
+	* ChangeLog, NEWS, configure.ac: snapshot 20040813a
 	* applyfilter.8.in, fetchnews.8.in, filterfile.5.in, leafnode.8.in,
 	rnews.8.in, texpire.8.in: Fix path of $(sysconfdir) files. Reported
 	by Cory C. Albrecht.
