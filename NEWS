@@ -2,6 +2,10 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+20040920a: Changes since 20040916a:
+- Bugfix: 20040916a broke article retrieval for many newsreaders.
+  Reported by Robert Clark and Jack Raats.
+
 20040916a: Changes since 20040915a:
 - Change: leafnode, the NNTP daemon, will no longer update overview
   information, in an attempt to fix Yvon Thoraval's slowness observed on

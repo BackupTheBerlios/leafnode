@@ -1,5 +1,14 @@
+2004-09-20  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040920a =
+	* xoverutil.c: Initialize xfirst/xlast properly if running without
+	fixxover flag.  Fixes XOVER and other trouble retrieving articles
+	reported by Jack Raats and Robert Clark.
+
 2004-09-16  Matthias Andree <matthias.andree@gmx.de>
 
+	= snapshot 20040916a =
+	* ChangeLog, NEWS, configure.ac: Snapshot 20040916a
 	* xoverutil.c: Drop dead code, make rebuilding overview information
 	optional for efficiency.
 	* applyfilter.c, nntpd.c, texpire.c: Chase getxover() removal.
