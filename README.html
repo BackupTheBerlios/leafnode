@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.14 2002/02/09 23:52:09 emma Exp $
+<P>Version ID of this document: $Id: README.html,v 1.15 2002/02/11 00:36:45 emma Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -639,9 +639,13 @@ server, the newsgroup is not treated as a local one.
 not mangle TABs to SPACEs.
 The file should consist of lines in the format
 
-<blockquote>
+<pre>
+# Comment lines are allowed, with a hash at the beginning of a line.
+#
+# However, no white space may precede the hash mark, and empty lines
+# are not valid.
 news.group.name&lt;TAB&gt;status&lt;TAB&gt;description
-</blockquote>
+</pre>
 (replace &lt;TAB&gt; with a TAB character!)
 
 <p>The first column of each line is taken as the newsgroup name; the
