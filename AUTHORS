@@ -15,12 +15,13 @@ alphabetically by last name.)
 - Kazushi (Jam) Marukawa <jam@pobox.com> (C) 1998 - 1999
 - Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de> (C) 1997 - 2001
 - Stefan Wiens <s.wi@gmx.net> (C) 2000 - 2001
-- Matthias Andree <matthias.andree@gmx.de> (C) 1999 - 2002
-- Jörg Dietrich <joerg@dietrich.net> (C) 2000 - 2002
-- Ralf Wildenhues <Ralf.Wildenhues@gmx.de> (C) 2001 - 2002
 - Volker Apelt <volker_apelt@yahoo.de>. (C) 2002.
+- Jörg Dietrich <joerg@dietrich.net> (C) 2000 - 2003
+- Ralf Wildenhues <Ralf.Wildenhues@gmx.de> (C) 2001 - 2004
+- Hynek Schlawack <hynek@hys.in-berlin.de>. (C) 2004
+- Matthias Andree <matthias.andree@gmx.de> (C) 1999 - 2004
 
-Stolen work:
+Integrated independent open-source work:
 
 - Theo de Raadt: vsnprintf (BSD-style license)
 - Rich Salz: wildmat (1986-1991, INN 2.2.2)

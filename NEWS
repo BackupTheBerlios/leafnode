@@ -1,3 +1,14 @@
+Changes since 20040129a:
+- Feature: sanity check at initialization, to avoid operating on a bogus
+  spooldir after updates.
+- Cleanup: try to post article to all servers. Only when all servers
+  could be reached, we consider moving the article to failed.postings.
+- Cleanup: do not log "article discarded" when it's already available
+  upstream.
+- Bugfix: -S server.name works again. Broken since 20040116a.
+- Bugfix: some signedness fixes in printf (%lu vs. %ld).
+- Cleanup: some dead code has been removed.
+
 20040129a: Changes since 20040122a:
 - Feature: newsq -c now checks the queue if there are articles to post.
   Exits 0 if there are, EX_UNAVAILABLE if there are not, EXIT_FAILURE on

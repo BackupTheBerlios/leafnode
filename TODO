@@ -73,10 +73,6 @@ Matthias:
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
 10pre5
-1.1 try to post an article to *every* server before moving into
-    failed.postings. suggested by Jeff Grossman.
-
-10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
     (Not in leafnode). Reported by Ralf Wildenhues. Bug report
@@ -239,6 +235,10 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2004-02-06 Hynek Schlawack, Matthias Andree
+	   try to post an article to *every* server before moving into
+	   failed.postings, suggested by Jeff Grossman
 
 2004-01-29 Matthias Andree
 	   forward port "noactive" from leafnode-1

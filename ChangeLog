@@ -1,4 +1,50 @@
+2004-02-06  Matthias Andree <matthias.andree@gmx.de>
+
+	* newsq.c: Print whether an article has successfully been posted.
+	* fetchnews.c:
+	* Mark successfully posted articles with S_IXUSR mode to suppress
+	warnings or moving into failed.postings.
+	* Move all non-S_IXUSR articles into failed.postings after a run in
+	which all servers have successfully been contacted.
+	* Fix -S option, broken since leafnode-2-0-0-alpha20040116a. Allows
+	to drop some functions.
+	* Format string signedness fixes.
+	* configure.ac: Support ICC, ignoring AC_FUNC_SETVBUF_REVERSED
+	check.
+	* ln_log.c, ln_log.h: move "verbose" import into header file.
+	* xoverutil.c: Kill dead code. Fix printf format string signedness.
+	* texpire.c: Kill dead code. Cast time_t to long before printf.
+	* applyfilter.c, miscutil.c, nntpd.c, nntputil.c: Kill dead code.
+	* Makefile.am: #include "leafnode.h" in config.c
+	* configure.ac: Add -Wsequence-point -Wswitch -Wunused
+	-Wuninitialized -Wundef to GCC warning options.
+
+2004-02-05  Matthias Andree <matthias.andree@gmx.de>
+
+	* xoverutil.c: Obtain Bytes: and Lines: from header and from file
+	and take whichever is larger, to support delaybody.
+	* miscutil.c: Sanity check spooldir option, expect leaf.node
+	subdir.
+
+2004-01-31  Matthias Andree <matthias.andree@gmx.de>
+
+	* ChangeLog, ChangeLog-2003: Split ChangeLog into two files.
+	* miscutil.c: Drop extraneous prototype.
+	* strutil.c: Drop cruft from TEST body.
+	* interesting.c: Drop unused variable now.
+	* fetchnews.c: Degrade 'Wrong reply to ARTICLE command' from error
+	to notice.
+	* xoverutil.c: Drop extraneous declarations.
+	* leafnode.h: Clean up, add prototype for writexover.
+	* getline.c: Drop prototype, belongs into header.
+	* activutil.c: Don't use %lu to sscanf into time_t. Scan into
+	unsigned long and then assign. Quiets compiler warning.
+
 2004-01-29  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am, strutil.c: Fix strutil test mode.
+	* draft-ietf-nntpext-base-15.txt: Drop IETF draft.
+	* ChangeLog, NEWS, configure.ac: snapshot 20040129a "Sticky Snow"
 
 	= snapshot 20040129a =
 	* NEWS, TODO, config.example, config.table, configutil.c,
