@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.13 2003/07/16 11:32:40 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.14 2003/12/18 10:44:02 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -74,7 +74,9 @@ fetchnews -M '<1234$5678@example.org>'
 .I -n
 Don't unlink files in the
 .I interesting.groups
-directory. This avoids automatic unsubscription of newsgroups.
+directory. This avoids automatic unsubscription of newsgroups, see
+.B EXPIRY OF NEWSGROUPS
+below.
 .TP
 .I -N newsgroup
 Get only articles posted to "newsgroup". The -N option can be used
@@ -131,15 +133,46 @@ Go
 articles back and try to re-fetch what's missing. Useful to fill the
 gaps after filter rules that used to be too aggressive have been relaxed.
 
-.SH "FILES AND CONFIGURATION"
-.BR leafnode (8)
-for the list of files affected, and for information on configuring
-.B fetchnews.
-If you want to use filtering, see also
-.BR filterfile (5)
-for the format of the filterfile and
-.BR pcre (7)
-on the format of perl-compatible regular expressions.
+.SH "EXPIRY OF NEWSGROUPS"
+.BR fetchnews (8)
+will drop newsgroup subscriptions after a certain amount of time a
+particular "interesting" group has not been read, unless run with the
+.I -n
+option.
+
+.BR Leafnode(8)
+will track for each group 1. when the last posting has been
+downloaded from the upstream (.last.posting), 2. when an article in the
+group or the group overview data has been requested by a client.  The
+former is marked in the ctime of the .last.posting file in the group
+directory (@SPOOLDIR@/group/name/.last.posting for the group
+group.name), the latter in the ctime of the group.name file below
+@SPOOLDIR@/interesting.groups. When the ctime difference between
+\.last.posting and the interesting.groups/group.name file exceeds
+.I timeout_long,
+the group is expired from interesting.groups. Use "ls -lc" or "ls -ltc" or
+the tools/lsmac.pl utility to view the ctime(s) of a particular directory
+or file or set of files.
+
+For a newly subscribed group that has not been read more than once, the
+interesting.group/group.name's ctime will match its mtime. In this case,
+.I timeout_short
+applies instead of
+.I timeout_long.
+
+Dormant groups do not expire.
+
+Note that this time mechanism does not recover when your system clock is
+changed, so make sure your system clock is right. A few minutes off
+don't matter practially, and daylight savings time is invisible to
+leafnode.
+
+It is a good idea to run some NTP software, for instance, "ntpd" or
+"chrony", against your ISP's NTP server, when you've got a permanent
+internet connection, or to run "ntpd -g -q -x" or "ntpdate" right after
+your dialup connection goes online. Chrony and Ntpd are third-party
+packages that do not ship with leafnode and the documentation of which
+are beyond the scope of this manual.
 
 .SH ALGORITHM
 Here is a brief description of what
@@ -165,6 +198,16 @@ Third,
 .B fetchnews
 iterates over the list of newsgroups, performing a GROUP, an XOVER
 and a number of ARTICLE commands for each group which has been read recently.
+
+.SH "FILES AND CONFIGURATION"
+.BR leafnode (8)
+for the list of files affected, and for information on configuring
+.B fetchnews.
+If you want to use filtering, see also
+.BR filterfile (5)
+for the format of the filterfile and
+.BR pcre (7)
+on the format of perl-compatible regular expressions.
 
 .SH NOTES
 .B Fetchnews
@@ -212,5 +255,7 @@ Copyright of the modifications 1997-2003.
 .BR leafnode (8),
 .BR texpire (8),
 .BR pcre (7),
+.BR stat (2),
+.BR ntpd (8), ntp.conf (5).
 .BR @sysconfdir@/leafnode/filters.example ,
 .B "RFC 977"

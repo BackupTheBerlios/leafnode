@@ -1,4 +1,10 @@
-20031203a: Changes since 20031129a:
+Changes since 20031203:
+- Documentation: fetchnews(8) now documents group expiry.
+- Documentation: lsmac.pl is now documented.
+- Change: lsmac.pl now defaults to UTC and has a --local option to
+  restore old behaviour (that used to be undocumented).
+
+20031203a (was not announced): Changes since 20031129a:
 - Cleanup: (nntpd) Avoid extraneous fflush() that causes the status line
   and the following input to be sent in separate packets, adding packet
   overhead. Add nntpprintf_as for this purpose.
