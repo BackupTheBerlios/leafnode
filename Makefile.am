@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.70 2004/08/19 01:48:46 emma Exp $
+# $Id: Makefile.am,v 1.71 2004/08/23 09:45:33 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -276,13 +276,13 @@ install-data-hook:
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
-	@echo "### IF you are installing a version newer than 20040326a"
+	@echo
+	@echo "### IF you are upgrading to a version newer than 20040326a"
 	@echo "### for the first time, run: chmod -R o= $(DESTDIR)$(SPOOLDIR)"
 	@echo
-	@echo "*** DO MAKE SURE THAT YOU RUN texpire -r IF YOU HAVE ARTICLES IN THE SPOOL ***"
-	@echo
-	@echo "Then edit /etc/inetd.conf to start $(DESTDIR)$(SBINDIR)/leafnode"
+	@echo "Then edit /etc/inetd.conf to start $(DESTDIR)$(sbindir)/leafnode"
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
+	@echo
 
 uninstall-local:
 	-rm -f $(SYSCONFDIR)/config.example
