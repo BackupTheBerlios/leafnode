@@ -1261,11 +1261,12 @@ postarticles(void)
 }
 
 static int
-do_group(const char *ng, char **const s, 
+do_group(const char *ng, char **const s,
 	     struct stringlist *ngs, FILE *const f) {
     struct newsgroup *g;
     unsigned long newserver = 0;
     char *l;
+    int from;
 
     g = findgroup(ng);
     if (g) {
@@ -1278,29 +1279,33 @@ do_group(const char *ng, char **const s,
 	    /* now check by which means we're checking for new articles,
 	       NEWNEWS vs. XHDR/XOVER */
 	    t = strchr(l, ' ');
-	    if (!t || !*t)
-		/* group not in groupinfo */
-		newserver = getgroup(g, 1);
-	    else {
+	    from = 1;
+	    if (t && *t)
+	    {
 		/* group is in groupinfo */
 		a = strtoul(t, NULL, 10);
 		if (a)
-		    newserver = getgroup(g, a);
-		else
-		    newserver = getgroup(g, 1);
+		    from = a;
 	    }
 	} else {
-	    newserver = getgroup(g, 1);
+	    from = 1;
 	    /* new group */
 	}
-	if ((f != NULL) && newserver)
-	    fprintf(f, "%s %lu\n", g->name, newserver);
-    } else {		/* g != NULL */
-	if (!forceactive || (debug & DEBUG_ACTIVE))
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		   "%s not found in groupinfo file", ng);
+
+	newserver = getgroup(g, from);
+
+	if (f && newserver) {
+	    fprintf(f, "%s %lu\n", g->name,
+		    newserver > 0 ? newserver : from);
+	} else {		/* g != NULL */
+	    if (!forceactive || (debug & DEBUG_ACTIVE))
+		ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+		       "%s not found in groupinfo file", ng);
+	}
+	return newserver;
+    } else {
+	return -2;
     }
-    return newserver;
 }
 
 /** process a given server/port,
