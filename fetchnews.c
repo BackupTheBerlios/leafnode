@@ -1557,6 +1557,11 @@ postarticles(const struct serverlist *cursrv)
     ln_log(LNLOG_SINFO, LNLOG_CSERVER, "found %lu articles in out.going.",
 	   articles);
 
+    if (active == NULL) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "I need an active file (to figure which groups are moderated) before I can post.");
+	return 0;
+    }
+
     n = 0;
     for (y = x; *y; y++) {
 	FILE *f;
@@ -1588,22 +1593,26 @@ postarticles(const struct serverlist *cursrv)
 				   "Posting %s", *y);
 			    
 			    if (post_FILE(f, &line) || (xdup = strncmp(line, "441 435 ", 8) == 0)) {
-				char *ngs = fgetheader(f, "Newsgroups:", 1);
+				char *mod;
+				char *app;
+
 				if (xdup)
 				    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 					    "Duplicate article %s, treating as success.", *y);
-				if (ngs != NULL) {
-				    char *mod = checkstatus(ngs, 'm');
-				    char *app = fgetheader(f, "Approved:", 1);
-				    if (mod != NULL && app == NULL) {
-					(void)log_unlink(*y, 1);
-				    }
-				    if (mod != NULL)
-					free(mod);
-				    if (app != NULL)
-					free(app);
-				    free(ngs);
+
+				/* don't post unapproved postings to
+				 * moderated groups more than once
+				 */
+				mod = checkstatus(f1, 'm');
+				app = fgetheader(f, "Approved:", 1);
+				if (mod != NULL && app == NULL) {
+				    (void)log_unlink(*y, 1);
 				}
+				if (mod != NULL)
+				    free(mod);
+				if (app != NULL)
+				    free(app);
+				
 				/* POST was OK or duplicate */
 				++n;
 			    } else {
@@ -1866,6 +1875,8 @@ do_server(int forceactive)
 
     check_date(current_server);
 
+    nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
+
     /* post articles */
     if (action_method & FETCH_POST) {
 	flag |= f_mustnotshort;
@@ -1897,7 +1908,6 @@ do_server(int forceactive)
 
     /* do regular fetching of articles, headers, delayed bodies */
     if (action_method & (FETCH_ARTICLE|FETCH_HEADER|FETCH_BODY)) {
-	nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
 	res = processupstream(current_server->name, current_server->port,
 			forceactive);
 	if (res != 1)
