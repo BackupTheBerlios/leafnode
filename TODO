@@ -116,17 +116,16 @@ Ralfs TODO:
 2.2 for posts to moderated groups, add server preferences for posting?
 
 2.2 track which user posted an article (Stefan Fleiter)
+    log RFC931 or AUTH data who posted an article (maybe show in newsq)
 
 2.2 also run feedincoming on exit of programs that lock (after they free
     the lock)
 
 2.2 do not store cancel and perhaps other control messages locally?
 
-2.2 cancelwatch
+2.2 cancelwatch (send mail to user if a posting he sent is cancelled)
 
-2.2 heed Expires: header in texpire
 
-2.2 log RFC931 or AUTH data who posted an article (maybe show in newsq)
 
 2.2 Check RPM build
 
@@ -151,6 +150,9 @@ Ralfs TODO:
 
 2.2 "rnews does not work in pipes", Jörg Dietrich, Raymond Scholz,
     <3AF40BA6.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
+
+
+3.3 heed Expires: header in texpire
 
 3.3 offer a per-server switch to select how the list of downloadable
     articles is fetched, offer xover, xhdr, newnews and "auto" which
