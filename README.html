@@ -1,5 +1,7 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
-<HEAD></HEAD>
+<HEAD><TITLE>Leafnode manual</TITLE></HEAD>
 <BODY>
 
 <h2 align=center>LEAFNODE</h2>
@@ -21,6 +23,9 @@
     <LI>The filter file
     </OL>
 <LI>Local newsgroups
+<OL>
+<LI>Moderated newsgroups
+</OL>
 <LI>Deinstallation
 <LI>Frequently asked questions
 <LI>Copyright
@@ -30,14 +35,12 @@
 
 <h3 align=center>1. OVERVIEW</h3>
 
-<p>
-Leafnode is a USENET software package designed for small sites, with a
+<p>Leafnode is a USENET software package designed for small sites, with a
 few tens of readers and only a slow link to the net. It is developed
 on Linux, but has been reported to compile and run also under any BSD
 flavour, Solaris and Irix.
 
-<p>
-The Leafnode package consists of several programs, three essential ones
+<p>The Leafnode package consists of several programs, three essential ones
 and several add-ons.
 
 <UL>
@@ -51,7 +54,7 @@ and several add-ons.
 </UL>
 
 <p>
-These are the add-ons:
+These are the additional tools:
 
 <UL>
 <LI><u>Applyfilter</u> lets you delete articles from your local news spool
@@ -64,15 +67,13 @@ These are the add-ons:
     into the news spool.
 </UL>
 
-<p>
-Only groups that someone has been reading in the past week are fetched
+<p>Only groups that someone has been reading in the past week are fetched
 from the upstream NNTP server.  When someone stops reading a group,
 fetchnews will stop reading that group a week later (this is the default
 which can be configured), and when someone starts reading a group, fetchnews
 will grab all the articles it can in that group the next time it runs.
 
-<p>
-Leafnode's distinguishing features are:
+<p>Leafnode's distinguishing features are:
 
 <UL>
 <LI>Leafnode is written with the novice user in mind. It is very
@@ -97,31 +98,26 @@ Of course, Leafnode also has weaknesses. Some of these are:
 <LI>Due to its open architecture, Leafnode scales very badly.
 </UL>
 
-<p>
-The current version of leafnode is available from http://www.leafnode.org/ .
+<p>The current version of leafnode is available from http://www.leafnode.org/ .
 
-<p>
-There is also a leafnode mailing list. Send mail to
+<p>There is also a leafnode mailing list. Send mail to
 <p align=center>
 	leafnode-list@wpxx02.toxi.uni-wuerzburg.de
-<p>
-with "Subscribe" in the Subject: to subscribe.
+<p>with "Subscribe" in the Subject: to subscribe.
 
 <hr>
 
 <h3 align=center>2. INSTALLATION</h3>
 
 <OL>
-<LI>
-<p>
-Leafnode uses GNU autoconf to determine the configuration of the
+<LI>Leafnode uses GNU autoconf to determine the configuration of the
 machine it will be compiled on. Type
 <pre>
          sh ./configure
 </pre>
-to coreate an appropriate Makefile and config.h .
-<p>
-The configure script can take some flags:
+to create an appropriate Makefile and config.h.
+
+<p>The configure script can take some flags:
 <pre>
 --with-ipv6       use this if you have and want to use IPV6
 --prefix=[dir]    Leafnode installs itself normally in the /usr/local/sbin
@@ -130,9 +126,7 @@ The configure script can take some flags:
 		  /usr/sbin, use --prefix=/usr/sbin .
 </pre>
 
-<LI>
-<p>
-Type
+<LI>Type
 <pre>
           make
 </pre>
@@ -144,11 +138,9 @@ the warning:
 </pre>
 Don't worry about it.
 
-<LI>
-Create a user "news" if you don't have one.
+<LI>Create a user "news" if you don't have one.
 
-<LI>
-Type
+<LI>Type
 <pre>
           make install
 </pre>
@@ -159,25 +151,21 @@ use
 </pre>
 instead.
 
-<LI>
-If you are updating leafnode from a previous version, see the section
+<LI>If you are updating leafnode from a previous version, see the section
 "Updating" below.
 
-<LI>
-<p>
-Edit $(LIBDIR)/config. $(LIBDIR) defaults to /etc/leafnode, but can be
+<LI>Edit $(LIBDIR)/config. $(LIBDIR) defaults to /etc/leafnode, but can be
 adjusted in the Makefile. For documentation, see below or config.example
 and leafnode(8). It is absolutely necessary to change the "server"
 parameter to point it to your upstream news server (generally the
 one of your IP provider). Make sure the environment variable $NNTPSERVER
 or /etc/nntpserver points to your own host so clients will talk to
 leafnode rather than try to go to the upstream server.
-<p>
-If you want to use filtering of the incoming spool, see the section on
+
+<p>If you want to use filtering of the incoming spool, see the section on
 the filter file below.
 
-<LI>
-Set up a cron job (as user "root" or "news") to run texpire every night
+<LI>Set up a cron job (as user "root" or "news") to run texpire every night
 or maybe every week. Here is my crontab line, which runs nightly:
 <pre>
 0 4 * * * /usr/local/sbin/texpire
@@ -189,38 +177,32 @@ this line.  Substituting "1" for the third "*", thus:
 </pre>
 tells cron to run texpire at 4am every Monday morning.
 
-<LI>
-Make sure fetchnews is run at the appropriate time. If you have a
+<LI>Make sure fetchnews is run at the appropriate time. If you have a
 full-time link, run it out of cron (as "news" again); if not, run it
 when your connection to the net is established. If it is run as root
 it will change to user "news". If you use PPP, you can run fetchnews
 from /etc/ppp/ip-up.
 
-<LI>
-<p>
-Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
+<LI>We assume that you have tcpd installed, it ships with most
+distributions. If you don't, fetch it from
+ftp://ftp.porcupine.org/pub/security/, it's in tcp_wrappers, and install
+it. It's preferable if you compile it with -DHOSTS_OPTIONS, and the
+examples below assume you did.
+
+<LI>Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
 NNTP connections.  Here is my inetd.conf line:
 <pre>
 nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
 </pre>
-This starts leafnode for all connections on the nntp port, subject to
-/etc/hosts.allow and /etc/hosts.deny screening. If you don't have
-tcp wrappers (i.e. /usr/sbin/tcpd) you might use this line instead:
-<pre>
-nntp    stream  tcp     nowait  news    /usr/local/sbin/leafnode
-</pre>
-However, using leafnode without tcp wrappers is strongly discouraged since
-it opens up your news server to abuse.
-<p>
-After these changes, force inetd to read the changed configuration file
+
+<p>After these changes, force inetd to read the changed configuration file
 by sending it the HANGUP signal. To achieve this, issue the following
 command (as root):
 <pre>
 kill -HUP `cat /var/run/inetd.pid`
 </pre>
 
-<LI>
-If you have tcpd installed, write the following into /etc/hosts.deny:
+<LI>Write the following into /etc/hosts.deny:
 <pre>
 leafnode: ALL
 </pre>
@@ -233,33 +215,66 @@ accessible to additional IP numbers/domains, add them in /etc/hosts.allow
 in the format described above. See hosts_access(5) and hosts_options(5)
 (if applicable) for more information about tcp wrappers.
 
-<LI>
-Run fetchnews. The first run will take some time since fetchnews reads
+<LI><I>(optional)</I>
+If you want to allow read-only access, you can set the NOPOSTING
+environment variable, for example, put this into /etc/hosts.allow:
+
+<pre>
+leafnode: 192.168.0.4: setenv NOPOSTING "You may only read."
+</pre>
+
+The contents of this variable are printed at the end of the banner, with
+control characters (as per iscntrl(3)) replaced by an underscore.
+
+<LI>Run fetchnews. The first run will take some time since fetchnews reads
 a list of all newsgroups from your upstream server. In the worst case,
 this can take up to 60 minutes, depending on how many newsgroups your
 provider offers and how reliable your modem connection is. To see
 fetchnews working, run it with -vvv.
 
-<LI>
-<p>
-Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
+<LI>Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
 pointing to your own host). Select the groups you want to read in
 the future. You will find them empty except a default article.
 Reading this article is necessary with some newsreaders to select
 the groups for further fetching.
-<p>
-After this, you should have empty files in
+
+<p>After this, you should have empty files in
 /var/spool/news/interesting.groups/ for every group you want to read.
 
-<LI>
-Run fetchnews again. This run should pick up all the groups you want
+<LI>Run fetchnews again. This run should pick up all the groups you want
 to read.
-
 </OL>
 
 <hr>
 
 <h3 align=center>3. UPDATE FROM PREVIOUS VERSIONS</h3>
+
+<h3 align=center>3.1 Update from versions &lt; 2.0b8_ma8</h3>
+
+<p>The local.groups and groupinfo files have changed from any former
+version to 2.0b8_ma8.
+
+<p>To fix <strong>local.groups</strong>, if you have perl installed:
+
+<PRE>
+  perl -ple 's /\s+/\ty\t/' -i.bak /etc/leafnode/local.groups
+</PRE>
+
+This will make a backup of your original /etc/leafnode/local.groups in
+/etc/leafnode/local.groups.bak.
+
+<p>If you don't have Perl, use a text editor that preserves HTAB
+characters, change all while space to TAB and insert an additional field
+reading just y:
+
+<blockquote>
+Before: local.test some test group
+<br>After:  local.testTAByTABsome test group
+</blockquote>
+
+<br>Use the real TAB character rather than TAB.
+
+<P>To fix the "remote" groups, run fetchnews -f.
 
 <h3 align=center>3.1 Update from versions &lt; 2.0</h3>
 
@@ -495,44 +510,89 @@ want to hunt down bugs.
 
 <h3 align=center>5. LOCAL NEWSGROUPS</h3>
 
-<p>
-From version 2.0 on, Leafnode is able to handle local newsgroups. Local
-newsgroups are groups that exist only on your local server but not on
-upstream servers.
+<p>From version 2.0 on, Leafnode is able to handle local newsgroups.
+Local newsgroups are groups that exist only on your local server but not
+on upstream servers.
 
-<p>
-To create a local newsgroup, you have to think of a newsgroup name which
-should not exist on any of your upstream servers. It is therefore a good
-idea to start a new top-level hierarchy. You should also make up a
-description for your newsgroup.
+<p>To create a local newsgroup, you have to think of a newsgroup name
+which should not exist on any of your upstream servers. It is therefore
+a good idea to start a new top-level hierarchy. You should also make up
+a description for your newsgroup.
 
-<p>
-If you choose a newsgroup name which exists already on an upstream server,
-the newsgroup is not treated as a local one.
+<p>If you choose a newsgroup name which exists already on an upstream
+server, the newsgroup is not treated as a local one.
 
-<p>
-Next, you write both the name and description into the file
-/etc/leafnode/local.groups using your preferred text editor.
+<p>Next, you write the name, status and description into the file
+/etc/leafnode/local.groups using your preferred text editor, which must
+not mangle TABs to SPACEs.
 The file should consist of lines in the format
-<blockquote>
-news.group.name &nbsp; &nbsp; description
-</blockquote>
-The first word of each line is taken as the newsgroup name; the rest
-of the line is interpreted as description. For example, to set up a
-newsgroup "local.leafnode" which deals with Leafnode's internals, you
-would put a line
 
 <blockquote>
-local.leafnode &nbsp; &nbsp; Local leafnode user group
+news.group.name&lt;TAB&gt;status&lt;TAB&gt;description
+</blockquote>
+(replace &lt;TAB&gt; with a TAB character!)
+
+<p>The first column of each line is taken as the newsgroup name; the
+second as the status (y for "may be posted to", m for "moderated" -- see
+below for moderator configuration), the third column of the line is
+interpreted as description. For example, to set up a newsgroup
+"local.leafnode" which deals with Leafnode's internals, you would put a
+line
+
+<blockquote>
+local.leafnode&lt;TAB&gt;y&lt;TAB&gt;Local leafnode user group
 </blockquote>
 
-into /etc/leafnode/local.groups . (If your configuration does not
-reside in /etc/leafnode, replace this part of the pathname with the
-appropriate directory.)
+into /etc/leafnode/local.groups. (If your configuration does not reside
+in /etc/leafnode, replace this part of the pathname with the appropriate
+directory.)
 
-<p>
-That's it! You just have created a local newsgroup and can now access it
-using your newsreader of choice.
+<h4 align=center>5.1 MODERATED NEWSGROUPS</h4>
+
+<P>From version 2.0 on, Leafnode also handles <strong>moderated</strong>
+newsgroups. These are newsgroups which only certain people may post
+into, and articles which a regular (non-moderator) user posts, are
+mailed to the moderator. To configure the moderators, an INN-compatible
+"moderators" file is used. It is named /etc/leafnode/moderators and has
+the following format:
+
+<PRE>
+pattern:moderator
+</PRE>
+
+<p>Empty lines and lines that start with a hash character (#) are
+considered comment lines and are ignored.
+
+<p>The <strong>pattern</strong> is a normal wildmat pattern, which means
+that it's a SHELL pattern, the most useful character is the asterisk (*)
+which matches any sequence of characters. The moderator given on that
+line applies to all groups that the pattern matches. Should multiple
+lines match a group, the first match in the file "wins", the second and
+subsequent patterns are not taken into account. So put the more special
+patterns first.
+
+<p>The <strong>moderator</strong> is a regular internet mail address,
+with the exception that the first occurrence of "%s" is replaced with
+the newsgroup name, with dots (.) converted to dashes (-) for INN
+compatibility.
+
+<p>Example:
+
+<PRE>
+# This is a comment line
+#
+# special moderator, hans@example.com is mailed all articles for
+# local.special
+local.special:hans@example.com
+# moderator for all other local groups:
+local.*:egon+%s@example.net
+# that means:
+# mail postings for local.test to egon+local-test@example.net
+# mail postings for local.video to egon+local-video@example.net
+#
+# Note: if you put local.special below local.*, local.special will be
+# ignored.
+</PRE>
 
 <hr>
 
@@ -560,37 +620,32 @@ See the file FAQ.
 
 <h3 align=center>8. COPYRIGHT</h3>
 
-<p>
-Leafnode versions through 1.4 were written by Arnt Gulbrandsen
+<p>Leafnode versions through 1.4 were written by Arnt Gulbrandsen
 &lt;agulbra@troll.no&gt; and are copyright 1995 Troll Tech AS,
 Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
 
-<p>
-Leafnode versions 1.5 and higher were written by Cornelius Krasel
+<p>Leafnode versions 1.5 and higher were written by Cornelius Krasel
 &lt;krasel@wpxx02.toxi.uni-wuerzburg.de&gt; and are copyright 1997-2000.
 
-<p>
-Major modifications were made by<br>
+<p>Major modifications were made by<br>
 Randolf Skerka &lt;Randolf.Skerka@gmx.de&gt;<br>
 Kent Robotti &lt;robotti@erols.com&gt;<br>
 Markus Enzenberger &lt;enz@cip.physik.uni-muenchen.de&gt;<br>
 Matthias Andree &lt;matthias.andree@gmx.de&gt;<br>
 J&ouml;rg Dietrich &lt;joerg@dietrich.net&gt;<br>
+Stefan Wiens &lt;s.wi@gmx.net&gt;<br>
 
-<p>
-Permission is hereby granted, free of charge, to any person obtaining a copy
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-<p>
-The above copyright notice and this permission notice shall be included in
+<p>The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-<p>
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -598,14 +653,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-<p>
-The getaline() and getline() routines are Copyright (c) 2000
+<p>The getaline() and getline() routines are Copyright (c) 2000
 Matthias Andree &lt;matthias.andree@gmx.de&gt;. They are licensed
 under the GNU Lesser General Public License (GNU LGPL) 2.1. A
 copy of the LGPL is provided in the file COPYING.
 
-<p>
-The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
+<p>The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
 &lt;rsalz@osf.org&gt;. The original copyright notice, taken from
 INN 2.2.2, follows:
 
