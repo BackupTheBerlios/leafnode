@@ -312,7 +312,22 @@ getmarked(struct newsgroup *group)
     }
     str = mastr_new(256);
     while ((l = getaline(f))) {
+	char *p, *q;
+	unsigned long artno;
+	FILE *g;
+
+	/* silently drop article with non existent pseudo head or bad formatted line */
+	if (!(p = strchr(l, ' ')))
+	    continue;
+	*p++ = '\0';
+	if (!*p)
+	    continue;
 	mastr_cpy(str, l);
+	artno = strtoul(p, &q, 10);
+
+	if (*q || !(g = fopen(p, "r")))
+	    continue;
+	fclose(g);
 	if (getbymsgid(mastr_str(str), 2)) {
 	    groupfetched++;
 	} else {
@@ -839,6 +854,9 @@ getgroup(struct newsgroup *g, unsigned long first)
     groupfetched = 0;
     groupkilled = 0;
 
+    if (!chdirgroup(g->name, TRUE))	/* also creates the directory */
+	return 0;
+
     /* we don't care about x-posts for delaybody */
     delaybody_this_group = delaybody_group(g->name);
     /* get marked articles first */
@@ -855,9 +873,6 @@ getgroup(struct newsgroup *g, unsigned long first)
 
     if (g->first > g->last)
 	g->last = g->first;
-
-    if (!chdirgroup(g->name, TRUE))	/* also creates the directory */
-	return 0;
 
     x = getfirstlast(g, &first, &last);
 
