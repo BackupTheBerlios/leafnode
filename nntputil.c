@@ -54,7 +54,7 @@ int authenticated;
 bool
 authenticate(void)
 {
-    int d, reply;
+    int reply;
 
     assert(nntpout != NULL);
 
@@ -71,15 +71,12 @@ authenticate(void)
 	return FALSE;
     }
 
-    d = debug;
-    debug = debugmode;
     fprintf(nntpout, "AUTHINFO USER %s\r\n", current_server->username);
-    if (debug & DEBUG_NNTP)
+    if (debugmode & DEBUG_NNTP)
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 	       ">AUTHINFO USER %s", current_server->username);
     if (fflush(nntpout)) return FALSE;
     reply = nntpreply();
-    debug = d;
     if (reply == 281) {
 	return TRUE;
     } else if (reply != 381) {
@@ -94,14 +91,12 @@ authenticate(void)
 	       current_server->name);
 	return FALSE;
     }
-    debug = debugmode;
     fprintf(nntpout, "authinfo pass %s\r\n", current_server->password);
-    if (debug & DEBUG_NNTP)
+    if (debugmode & DEBUG_NNTP)
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 	       ">AUTHINFO PASS [password not shown]");
     if (fflush(nntpout)) return FALSE;
     reply = nntpreply();
-    debug = d;
     if (reply != 281) {
 	ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
 	       "authenticate: password failed: %03d", reply);

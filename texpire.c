@@ -68,9 +68,6 @@ See README for restrictions on the use of this software.
 #define LINES 7
 #define XREF 8
 
-
-int debug = 0;
-
 static int dryrun = 0;		/* do not delete articles */
 static int use_atime = 1;	/* look for atime on articles to expire */
 static int repair_spool = 0;
@@ -481,7 +478,7 @@ updatedir(const char *groupname)
 			    /* message.id file missing, kill off
 			     * article, since it has been left behind by
 			     * a crashed store() */
-			    if (debug & DEBUG_EXPIRE)
+			    if (debugmode & DEBUG_EXPIRE)
 				ln_log
 				    (LNLOG_SDEBUG,
 				     LNLOG_CARTICLE,
@@ -1013,7 +1010,6 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	    }
     }
-    debug = debugmode;
     expire_base = NULL;
     if ((reply = readconfig(conffile)) != 0) {
 	fprintf(stderr,

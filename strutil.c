@@ -136,8 +136,6 @@ str_isprefix(const char *string, const char *prefix)
 
 #ifdef TEST
 #include <stdio.h>
-int debug = 0;
-
 int
 main(int argc, char **argv)
 {

@@ -30,8 +30,6 @@
 extern char *optarg;
 extern int optind, opterr, optopt;
 
-int debug = 0;
-
 static void
 usage(void)
 {

@@ -238,8 +238,6 @@ DIRLIST_ALLNUM(const char *x)
 }
 
 #ifdef TEST
-int debug = 0;
-
 #include <stdio.h>
 int
 main(int argc, char **argv)

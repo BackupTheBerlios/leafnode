@@ -35,7 +35,6 @@
 #include <dmalloc.h>
 #endif
 
-int debug = 0;
 static unsigned long globalfetched = 0;
 static unsigned long globalkilled = 0;
 static unsigned long groupfetched;
@@ -659,7 +658,6 @@ doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
 	       "Unknown reply to XHDR command: %s", l ? l : "(null)");
 	return -1;
     }
-    debug = 0;
     while ((l = getaline(nntpin)) && strcmp(l, ".")) {
 	/* format is: [# of article] [message-id] */
 	char *t;
@@ -672,7 +670,6 @@ doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
 	count++;
 	appendtolist(stufftoget, &helpptr, l);
     }
-    debug = debugmode;
     if (l && strcmp(l, ".") == 0)
 	return count;
     else
@@ -1306,7 +1303,7 @@ do_group(const char *ng, /** which group to operate on */
 	}
 	return newserver;
     } else {			/* g != NULL */
-	if (!forceactive && (debug & DEBUG_ACTIVE))
+	if (!forceactive && (debugmode & DEBUG_ACTIVE))
 	    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		   "%s not found in groupinfo file", ng);
     }
@@ -1594,7 +1591,6 @@ main(int argc, char **argv)
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
-	debug = debugmode;
     }
 
     if (!servers) {

@@ -112,7 +112,6 @@ static int dorange(/*@null@*/ const char *arg,
 static /*@dependent@*/ const struct newsgroup *xovergroup;	/* FIXME */
 /*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
-int debug = 0;
 static int authflag = 0;	/* TRUE if authenticated */
 
 /*
@@ -272,7 +271,6 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
     char *l, *cl, *c;
 
     if (pseudofile && ((f = fopen(pseudofile, "r")) != NULL)) {
-	debug = 0;
 	while ((l = getaline(f)) != NULL) {
 	    cl = l;
 	    while ((c = strchr(cl, '%')) != NULL) {
@@ -1377,9 +1375,7 @@ dopost(void)
     if (strcmp(line, ".")) {	/* skip if header contained a single dot line */
 	havebody = TRUE;
 	for (;;) {
-	    debug = 0;
 	    line = getaline(stdin);
-	    debug = debugmode;
 
 	    if (!line) {
 		/* client died */
@@ -2267,7 +2263,6 @@ main(int argc, char **argv)
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
 	    exit(EXIT_FAILURE);
 	}
-	debug = debugmode;
 	verbose = 0;		/* overwrite verbose logging */
     }
 

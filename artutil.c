@@ -133,7 +133,6 @@ fgetheader(
 
     if (rewind_file)
 	rewind(f);
-    debug = 0;
     hdr = NULL;
     hlen = strlen(header);
 
@@ -151,7 +150,6 @@ fgetheader(
 	}
 	free(block);
     }
-    debug = debugmode;
     if (rewind_file)
 	rewind(f);
     return hdr;
@@ -217,7 +215,7 @@ supersede_cancel(
 	return;
     r[1] = '\0';
 
-    if (debug & DEBUG_CANCEL)
+    if (debugmode & DEBUG_CANCEL)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
 
     filename = lookup(msgid);
@@ -242,7 +240,7 @@ supersede_cancel(
 
     /* unlink all the hardlinks in the various newsgroups directories */
     while (p && ((q = strchr(p, ':')))) {
-	if (debug & DEBUG_CANCEL)
+	if (debugmode & DEBUG_CANCEL)
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 		   "debug %s: xref: \"%s\"", action, p);
 	*q++ = '\0';

@@ -53,8 +53,6 @@ mygetfoldedline(const char *fi, unsigned long ln, FILE * f)
 }
 
 #ifdef TEST
-int debug = 0;
-
 int
 main()
 {

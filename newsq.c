@@ -21,7 +21,6 @@
 
 #include <unistd.h>
 
-int debug = 0;
 static void
 usage(void)
 {

@@ -52,7 +52,7 @@ getaline(FILE * f /** file to read from */ )
 	    /* also delete CR */
 	    --len;
     } else {
-	if (debug & DEBUG_IO) {
+	if (debugmode & DEBUG_IO) {
 	    /* FIXME: CTOP? */
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "<%s (incomplete, ignored)", buf);
 	}
@@ -60,7 +60,7 @@ getaline(FILE * f /** file to read from */ )
     }
     buf[len] = '\0';		/* unconditionally terminate string,
 				   possibly overwriting newline */
-    if (debug & DEBUG_IO)
+    if (debugmode & DEBUG_IO)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", buf);	/* FIXME: CTOP? */
     return buf;
 }

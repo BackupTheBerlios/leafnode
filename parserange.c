@@ -63,8 +63,6 @@ parserange(const char *in /** input string */ , unsigned long *from,
 }
 
 #ifdef TEST
-int debug = 0;
-
 int
 main(int argc, char **argv)
 {

@@ -115,7 +115,6 @@ readlocalgroups(void)
 	return;
     }
 
-    debug = 0;
     while ((l = getaline(f))) {
 	/* skip comments */
 	if (l[0] == '#') continue;
@@ -140,7 +139,6 @@ readlocalgroups(void)
     }
     log_fclose(f);
     mergegroups();
-    debug = debugmode;
     free(s);
 }
 

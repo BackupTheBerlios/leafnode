@@ -30,8 +30,6 @@
 
 #include <unistd.h>
 
-int debug = 0;
-
 static void process_input(char *s);
 void
 process_input(char *s)
@@ -95,7 +93,6 @@ main(int argc, char *argv[])
 	usage();
 	exit(EXIT_FAILURE);
     }
-    debug = debugmode;
     /* Check whether input file exists */
     if (!(f = fopen(argv[optind], "r"))) {
 	if (errno == EACCES)

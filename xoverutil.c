@@ -266,7 +266,7 @@ findxover(unsigned long article)
 	return -1;
     xoi.artno = article;
 
-    if (debug & DEBUG_XOVER) {	/* check ordering */
+    if (debugmode & DEBUG_XOVER) {	/* check ordering */
 	unsigned i;
 	for (i = 0; i < xcount - 1; i++) {
 	    if (xoverinfo[i].artno > xoverinfo[i + 1].artno) {
