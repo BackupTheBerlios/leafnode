@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.14 2002/10/23 16:27:12 emma Exp $
+.\" $Id: leafnode.8.in,v 1.15 2003/01/19 12:29:44 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -354,6 +354,10 @@ Return the headers and body text of an article.
 .TP
 .B BODY
 Return the body text of an article.
+.TP
+.B DATE
+Return the current GMT (UT) date and time of the server in YYMMDDhhmmss
+format.
 .TP
 .B GROUP
 Sets the current USENET group and article pointer, and returns the
