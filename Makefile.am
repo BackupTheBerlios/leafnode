@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.9 2002/01/30 12:22:08 emma Exp $
+# $Id: Makefile.am,v 1.10 2002/02/04 20:57:08 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -67,6 +67,7 @@ liblnutil_a_SOURCES	= \
 	getfoldedline.c \
 	getline.c \
 	getline.h \
+	getwatermarks.c \
 	gmtoff.c \
 	h_error.c \
 	h_error.h \
