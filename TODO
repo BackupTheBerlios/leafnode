@@ -61,6 +61,9 @@ Matthias:
 
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
 
+* when server supports DATE, compensate for offset when sending
+  NEWGROUPS et al.? See report of John Carlyle-Clarke of 2004-01-27
+
 10pre5
 0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
