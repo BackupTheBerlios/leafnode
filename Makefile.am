@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.6 2002/01/08 17:42:18 emma Exp $
+# $Id: Makefile.am,v 1.7 2002/01/11 00:06:32 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -24,8 +24,8 @@ man_MANS = \
 	fetchnews.8 \
 	leafnode.8 \
 	newsq.1 \
-	rnews.8 \
 	texpire.8
+#	rnews.8 \
 
 dist_MANS = \
 	rbcloselist.3 \
@@ -77,7 +77,9 @@ liblnutil_a_SOURCES	= \
 	ln_log_open.c \
 	localutil.c \
 	lockfile.c \
+	log_chmod.c \
 	log_close.c \
+	log_fchmod.c \
 	log_fclose.c \
 	log_fsync.c \
 	log_rename.c \
