@@ -497,7 +497,7 @@ store_stream(FILE * in /** input file */ ,
 	    else *tt = '\0';
 	    /* now p has the number the article has in the current group */
 
-	    if (chdirgroup(q, FALSE)) {
+	    if (ov && chdirgroup(q, FALSE)) {
 		int fdo;
 
 		mastr_clear(xowrite);
