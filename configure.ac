@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20030318a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.49 $)
+AC_REVISION($Revision: 1.50 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -291,7 +291,18 @@ AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid snprintf vsnprintf getaddrinfo gai_strerror])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror])
+
+dnl Check if system vsnprintf works
+AC_MSG_CHECKING(if your system's vsnprintf works)
+AC_RUN_IFELSE([[
+	       `cat $srcdir/xsnprintf.c`
+	       ]], AC_MSG_RESULT(yes)
+	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ `vsnprintf' function.]), 
+AC_MSG_RESULT(no)
+AC_LIBOBJ(vsnprintf),
+AC_MSG_RESULT(unknown -- cross-compiling -- assuming no)
+AC_LIBOBJ(vsnprintf))
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it

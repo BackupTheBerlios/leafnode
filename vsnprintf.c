@@ -29,7 +29,11 @@
  * Modified by Cornelius Krasel:
  * (1) vsnprintf() and snprintf() are now treated separately, with the macros
  *     HAVE_VSNPRINTF and HAVE_SNPRINTF
+ *     (REVERTED by Matthias Andree)
  * (2) declarations made ANSI because gcc issued warnings
+ *
+ * BUG: in case of overrun, these functions return size + 1 rather than
+ * how many characters would have been printed.
  */
 #include <sys/param.h>
 #include <sys/types.h>
@@ -99,7 +103,7 @@ mcleanup(char *str, size_t n, char *p)
 }
 
 int
-#if __STDC__
+#ifdef __STDC__
 vsnprintf(char *str, size_t n, char const *fmt, va_list ap)
 #else
 vsnprintf(str, n, fmt, ap)
@@ -134,10 +138,8 @@ char *ap;
     (void)sigaction(SIGSEGV, &osa, NULL);
     return (ret);
 }
-#endif				/* HAVE_VSNPRINTF */
-#ifndef HAVE_SNPRINTF
 int
-#if __STDC__
+#ifdef __STDC__
 snprintf(char *str, size_t n, char const *fmt, ...)
 #else
 snprintf(str, n, fmt, va_alist)
@@ -157,7 +159,7 @@ va_dcl
     return (vsnprintf(str, n, fmt, ap));
     va_end(ap);
 }
-#endif				/* HAVE_SNPRINTF */
+#endif				/* HAVE_VSNPRINTF */
 /* ANSI C forbids en empty source file... */
 static void
 dummy_func(void)
