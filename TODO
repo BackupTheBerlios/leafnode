@@ -1,4 +1,4 @@
- -*- mode: text; coding: iso-8859-15; -*-
+ -*- mode: text; coding: iso-8859-15; -*- :vim:set ai:
  ----------------------------------------------------------------------
 		   Leafnode 2.0b8_ma branch TODO list
  ----------------------------------------------------------------------
@@ -22,8 +22,6 @@ urgence:
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
 Ralfs TODO:
-	* 'LIST NEWSGROUPS pattern' could add moderator address for
-	  moderated local groups.
 	* dirutil.c: should dirlist_core set count in error case?  This
 	  could break xgetxover and maybe other places.
 	* NNTP draft: wildmats are parsed wrongly:
@@ -239,6 +237,10 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2003-10-30 Matthias Andree
+	   'LIST NEWSGROUPS pattern' could add moderator address for
+	   moderated local groups.
 
 2003-10-30 Matthias Andree
 	   Reiner Steib: applyfilter -c /path/to/some/article
@@ -506,5 +508,3 @@ DROPPED ITEMS:
 
 2002-01-06 determine interesting groups from .newsrc
 	   (.newsrc format is not consistent; layer violation)
-
- :vim:set ai

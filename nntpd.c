@@ -950,9 +950,19 @@ list(struct newsgroup *g, int what, char *pattern)
     ng = g;
     while (ng->name) {
 	if (!pattern || !ngmatch(pattern, ng->name)) {
-	    if (what)
-		printf("%s\t%s\r\n", ng->name, ng->desc ? ng->desc : "-x-");
-	    else
+	    if (what) {
+		char *m, *s;
+		printf("%s\t%s", ng->name, ng->desc ? ng->desc : "-x-");
+		if (is_localgroup(ng->name)
+			&& (s = checkstatus(ng->name, 'm'))) {
+		    if ((m = getmoderator(ng->name))) {
+			printf(" (moderator: %s)", m);
+			free(m);
+		    }
+		    free(s);
+		}
+		printf("\r\n");
+	    } else
 		printf("%s %010lu %010lu %c\r\n", ng->name, ng->last,
 		       ng->first, ng->status);
 	}
