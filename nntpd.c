@@ -1562,9 +1562,10 @@ dopost(void)
 	    approved = getheader(inname, "Approved:");
 	}
 
-	if (!moderator && !is_alllocal(groups)) {
-	    /* also posted to external groups or moderated group with
-	       unknown moderator, store into out.going */
+	if ((!moderator || (moderator && approved)) && !is_alllocal(groups)) {
+	    /* also posted to external groups
+	     * or moderated group with unknown moderator,
+	     * or approved, store into out.going */
 	    mastr *s = mastr_new(LN_PATH_MAX);
 	    outbasename = strrchr(inname, '/');
 	    outbasename++;
