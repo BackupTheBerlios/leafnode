@@ -166,6 +166,6 @@ snprintf(str, n, fmt, va_alist)
 #endif /* HAVE_SNPRINTF */
 
 /* ANSI C forbids en empty source file... */
-static void dummy_func( void ) {
+static void dummy_func(void) {
    dummy_func();
 }

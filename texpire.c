@@ -71,10 +71,10 @@ struct exp {
 			    we it store seperately */
 };
 
-char *xoverextract( char *xover, unsigned int field );
-void savethread( struct exp *articles, char *refs, unsigned long acount );
+char *xoverextract(char *xover, unsigned int field);
+void savethread(struct exp *articles, char *refs, unsigned long acount);
 
-void free_expire( void ) {
+void free_expire(void) {
     struct expire_entry *a, *b;
 
     b = expire_base;
@@ -104,191 +104,191 @@ static time_t lookup_expire(char* group) {
 /*
  * return 1 if xover is a legal overview line, 0 else
  */
-static int legalxoverline ( char * xover, unsigned long artno ) {
+static int legalxoverline (char * xover, unsigned long artno) {
     char * p;
     char * q;
 
-    if ( !xover )
+    if (!xover)
 	return 0;
 
     /* anything that isn't tab, printable ascii, or latin-* ? then killit */
 
     p = xover;
-    while ( *p ) {
+    while (*p) {
 	int c = (unsigned char)*p++;
 
-	if ( ( c != '\t' && c < ' ' ) || ( c > 126 && c < 160 ) ) {
-	    if ( debugmode )
+	if (( c != '\t' && c < ' ') || ( c > 126 && c < 160 ) ) {
+	    if (debugmode)
 		ln_log(LNLOG_DEBUG,
-			"%lu xover error: non-printable chars.", artno );
+			"%lu xover error: non-printable chars.", artno);
 	    return 0;
 	}
     }
 
     p = xover;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Subject: header.", artno );
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Subject: header.", artno);
 	return 0;
     }
 
     /* article number */
 
-    while( p != q ) {
-	if ( !isdigit((unsigned char)*p) ) {
-	    if ( debugmode )
+    while(p != q) {
+	if (!isdigit((unsigned char)*p)) {
+	    if (debugmode)
         	ln_log(LNLOG_DEBUG, "%lu xover error: article "
-			"number must consists of digits.", artno );
+			"number must consists of digits.", artno);
 	    return 0;
 	}
 	p++;
     }
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no From: header.", artno );
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no From: header.", artno);
 	return 0;
     }
 
     /* subject: no limitations */
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
-            ln_log(LNLOG_DEBUG, "%lu xover error: no Date: header.", artno );
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
+            ln_log(LNLOG_DEBUG, "%lu xover error: no Date: header.", artno);
 	return 0;
     }
 
     /* from: no limitations */
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
             ln_log(LNLOG_DEBUG,
-		    "%lu xover error: no Message-ID: header.", artno );
+		    "%lu xover error: no Message-ID: header.", artno);
 	return 0;
     }
 
     /* date: no limitations */
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: no References: or Bytes: header.",
-		    artno );
+		    artno);
 	return 0;
     }
 
     /* message-id: <*@*> */
 
-    if ( *p != '<' ) {
-	if ( debugmode )
+    if (*p != '<') {
+	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
 		    "%lu xover error: Message-ID does not start with <.",
-		    artno );
+		    artno);
 	return 0;
     }
-    while ( p != q && *p != '@' && *p != '>' && *p != ' ' )
+    while (p != q && *p != '@' && *p != '>' && *p != ' ')
 	p++;
-    if ( *p != '@' ) {
-	if ( debugmode )
+    if (*p != '@') {
+	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
-		    "%lu xover error: Message-ID does not contain @.", artno );
+		    "%lu xover error: Message-ID does not contain @.", artno);
 	return 0;
     }
-    while ( p != q && *p != '>' && *p != ' ' )
+    while (p != q && *p != '>' && *p != ' ')
 	p++;
-    if ( *p != '>' ) {
-	if ( debugmode )
+    if (*p != '>') {
+	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
-		    "%lu xover error: Message-ID does not end with >.", artno );
+		    "%lu xover error: Message-ID does not end with >.", artno);
 	return 0;
     }
-    if ( ++p != q ) {
-	if ( debugmode )
+    if (++p != q) {
+	if (debugmode)
 	    ln_log(LNLOG_DEBUG,
-		    "%lu xover error: Message-ID does not end with >.", artno );
+		    "%lu xover error: Message-ID does not end with >.", artno);
 	return 0;
     }
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Bytes: header.", artno );
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Bytes: header.", artno);
 	return 0;
     }
 
     /* references: a series of <*@*> separated by space */
 
-    while ( p != q ) {
-	if ( *p != '<' ) {
-	    if ( debugmode )
+    while (p != q) {
+	if (*p != '<') {
+	    if (debugmode)
         	ln_log(LNLOG_DEBUG, "%lu xover error: "
-			"Reference does not start with <.", artno );
+			"Reference does not start with <.", artno);
 	    return 0;
 	}
-	while ( p != q && *p != '@' && *p != '>' && *p != ' ' )
+	while (p != q && *p != '@' && *p != '>' && *p != ' ')
 	    p++;
-	if ( *p != '@' ) {
-	    if ( debugmode )
+	if (*p != '@') {
+	    if (debugmode)
         	ln_log(LNLOG_DEBUG,
 			"%lu xover error: Reference does not contain @.",
-			artno );
+			artno);
 	    return 0;
 	}
-	while ( p != q && *p != '>' && *p != ' ' )
+	while (p != q && *p != '>' && *p != ' ')
 	    p++;
-	if ( *p++ != '>' ) {
-	    if ( debugmode )
+	if (*p++ != '>') {
+	    if (debugmode)
         	ln_log(LNLOG_DEBUG,
 			"%lu xover error: Reference does not end with >.",
-			artno );
+			artno);
 	    return 0;
 	}
-	while ( p != q && *p == ' ' )
+	while (p != q && *p == ' ')
 	    p++;
     }
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( !q ) {
-	if ( debugmode )
-	    ln_log(LNLOG_DEBUG, "%lu xover error: no Lines: header.", artno );
+    q = strchr(p, '\t');
+    if (!q) {
+	if (debugmode)
+	    ln_log(LNLOG_DEBUG, "%lu xover error: no Lines: header.", artno);
 	return 0;
     }
 
     /* byte count */
 
-    while( p != q ) {
-	if ( !isdigit((unsigned char)*p) ) {
-	    if ( debugmode )
+    while(p != q) {
+	if (!isdigit((unsigned char)*p)) {
+	    if (debugmode)
 		ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
-			"in Bytes: header.", artno );
+			"in Bytes: header.", artno);
 	    return 0;
 	}
 	p++;
     }
 
     p = q+1;
-    q = strchr( p, '\t' );
-    if ( q )
+    q = strchr(p, '\t');
+    if (q)
         *q = '\0'; /* kill any extra fields */
 
  /* line count */
 
-    while( p && *p && p != q ) {
-	if ( !isdigit((unsigned char)*p) ) {
-	    if ( debugmode )
+    while(p && *p && p != q) {
+	if (!isdigit((unsigned char)*p)) {
+	    if (debugmode)
         	ln_log(LNLOG_DEBUG, "%lu xover error: illegal digit "
-			"in Lines: header.", artno );
+			"in Lines: header.", artno);
 	    return 0;
 	}
 	p++;
@@ -328,7 +328,7 @@ static void dogroup(struct newsgroup* g) {
     clearidtree();
 
     /* eliminate empty groups */
-    if ( !chdirgroup( g->name, FALSE ) )
+    if (!chdirgroup( g->name, FALSE) )
 	return;
     getcwd(gdir, PATH_MAX);
 
@@ -342,9 +342,9 @@ static void dogroup(struct newsgroup* g) {
 
     first = ULONG_MAX;
     last = 0;
-    while ( ( de = readdir(d) ) != 0 ) {
-	if ( !isdigit((unsigned char)de->d_name[0]) ||
-	     stat( de->d_name, &st ) || !S_ISREG( st.st_mode ) )
+    while (( de = readdir(d)) != 0 ) {
+	if (!isdigit((unsigned char)de->d_name[0]) ||
+	     stat(de->d_name, &st) || !S_ISREG( st.st_mode ) )
 	    continue;
 	art = strtoul(de->d_name, &p, 10);
 	if (p && !*p) {
@@ -360,15 +360,15 @@ static void dogroup(struct newsgroup* g) {
     if (last < first)
 	return;
 
-    if ( verbose > 1 )
+    if (verbose > 1)
         printf("%s: low water mark %lu, high water mark %lu\n",
-	        g->name, first, last );
-    if ( debugmode )
+	        g->name, first, last);
+    if (debugmode)
 	ln_log(LNLOG_DEBUG,
 		"%s: expire %lu, low water mark %lu, high water mark %lu",
-		g->name, expire, first, last );
+		g->name, expire, first, last);
 
-    if ( expire <= 0 )
+    if (expire <= 0)
 	return;
 
     /* allocate and clear article array */
@@ -386,7 +386,7 @@ static void dogroup(struct newsgroup* g) {
     overview = NULL;
 
     /* if overview file does not exist, create it */
-    if ( stat(".overview", &st) )
+    if (stat(".overview", &st))
 	getxover();
 
     if (stat(".overview", &st) == 0) {
@@ -428,36 +428,36 @@ static void dogroup(struct newsgroup* g) {
     /* check the syntax of the .overview info, and delete all 
        illegal stuff */
     
-    for( current = 0; current < acount; current++ ) {
-	if (!legalxoverline( articles[current].xover, 
-			     articles[current].artno )) 
+    for(current = 0; current < acount; current++) {
+	if (!legalxoverline(articles[current].xover, 
+			     articles[current].artno)) 
 	    articles[current].xover = NULL;	/* memory leak */
     }
 
     /* insert articles in tree, and clear 'kill' for new or read articles */
 
-    for( current = acount; current > 0; current-- ) {
+    for(current = acount; current > 0; current--) {
 	articles[current-1].kill = 1;	/* by default, kill all articles */
-	sprintf( artfile, "%lu", articles[current-1].artno );
+	sprintf(artfile, "%lu", articles[current-1].artno);
 	if (stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
 	    ((st.st_mtime > expire) ||
 	     (use_atime && (st.st_atime > expire)))) {
 	    articles[current-1].kill = 0;
-	    refs = xoverextract( articles[current-1].xover, REFERENCES );
-	    msgid = xoverextract( articles[current-1].xover, MESSAGEID );
+	    refs = xoverextract(articles[current-1].xover, REFERENCES);
+	    msgid = xoverextract(articles[current-1].xover, MESSAGEID);
 
-	    if ( refs ) {
-		savethread( articles, refs, acount );
-		free( refs );
+	    if (refs) {
+		savethread(articles, refs, acount);
+		free(refs);
 		refs = NULL;
 	    }
-	    if ( msgid ) {
-		if (findmsgid( msgid )) { /* another file with same msgid? */
+	    if (msgid) {
+		if (findmsgid(msgid)) { /* another file with same msgid? */
 		    articles[current-1].kill = 1;
 		} else {
 		    insertmsgid(msgid, articles[current-1].artno);
 		    if (st.st_nlink < 2) { /* repair fs damage */
-			if (link(artfile, lookup( msgid ))) {
+			if (link(artfile, lookup(msgid))) {
 			    if (errno == EEXIST)
 			    /* exists, but points to another file */
 				articles[current-1].kill = 1;
@@ -465,10 +465,10 @@ static void dogroup(struct newsgroup* g) {
 				ln_log(LNLOG_ERR, 
 				       "relink of %s failed: %s (%s)",
 				       msgid, 
-				       lookup( msgid ), strerror(errno));
+				       lookup(msgid), strerror(errno));
 			}
 			else
-			    ln_log(LNLOG_INFO, "relinked message %s", msgid );
+			    ln_log(LNLOG_INFO, "relinked message %s", msgid);
 		    }
 		}
 	    } else if (articles[current-1].xover) {
@@ -477,8 +477,8 @@ static void dogroup(struct newsgroup* g) {
 	    } else {
 		/* possibly read the xover line into memory? */
 	    }
-	    if ( msgid ) {
-		free( msgid );
+	    if (msgid) {
+		free(msgid);
 		msgid = NULL;
 	    }
 	}
@@ -487,8 +487,8 @@ static void dogroup(struct newsgroup* g) {
     /* compute new low-water mark */
 
     first = last;
-    for( art = 0; art < acount; art++ ) {
-	if( !articles[art].kill && articles[art].artno < first )
+    for(art = 0; art < acount; art++) {
+	if(!articles[art].kill && articles[art].artno < first)
 	    first = articles[art].artno;
     }
     g->first = first;
@@ -499,9 +499,9 @@ static void dogroup(struct newsgroup* g) {
 	if (articles[art].kill) {
 	    sprintf(artfile, "%lu", articles[art].artno);
 	    if (!unlink(artfile)) {
-		if ( debugmode )
+		if (debugmode)
 		    ln_log(LNLOG_DEBUG, "deleted article %s/%lu", 
-			    gdir, articles[art].artno );
+			    gdir, articles[art].artno);
 		deleted++;
 	    } else if (errno != ENOENT && errno != EEXIST) {
 		/* if file was deleted already or it was not a file */
@@ -516,26 +516,26 @@ static void dogroup(struct newsgroup* g) {
 	    kept++;
 	}
     }
-    free( articles );
-    free( overview );
+    free(articles);
+    free(overview);
     
-    if ( last > g->last ) /* try to correct insane newsgroup info */
+    if (last > g->last) /* try to correct insane newsgroup info */
 	g->last = last;
 
-    if ( deleted || kept ) {
+    if (deleted || kept) {
 	printf("%s: %d articles deleted, %d kept\n", g->name, deleted, kept);
 	ln_log(LNLOG_INFO,
 		"%s: %d articles deleted, %d kept", g->name, deleted, kept);
     }
 
-    if ( !kept ) {
-	if ( unlink( ".overview" ) < 0 )
+    if (!kept) {
+	if (unlink( ".overview") < 0 )
 	    ln_log(LNLOG_ERR, "unlink %s/.overview: %s", gdir, 
 		   strerror(errno));
-	if ( !chdir("..") && ( isinteresting(g->name) == 0 ) ) {
+	if (!chdir("..") && ( isinteresting(g->name) == 0) ) {
 	    /* delete directory and empty parent directories */
-	    while ( rmdir( gdir ) == 0 ) {
-		getcwd( gdir, PATH_MAX );
+	    while (rmdir( gdir) == 0 ) {
+		getcwd(gdir, PATH_MAX);
 		chdir("..");
 	    }
 	}
@@ -547,25 +547,25 @@ static void dogroup(struct newsgroup* g) {
     getxover();
 }
     
-char *xoverextract( char *xover, unsigned int field ) {
+char *xoverextract(char *xover, unsigned int field) {
     unsigned int n;
     char *line;
     char *p, *q, *tmp;
 
-    if ( !xover )
+    if (!xover)
 	return NULL;
 
-    tmp = p = strdup( xover ); 
+    tmp = p = strdup(xover); 
     for (n = 0; n < field; n++)
 	if (p && (p = strchr(p + 1, '\t')))
 	    p++;
     q = p ? strchr(p, '\t') : NULL;
-    if ( p && q ) {
+    if (p && q) {
 	*q = '\0';
-	line = strdup( p );
+	line = strdup(p);
     } else
 	line = NULL;
-    free( tmp );
+    free(tmp);
     return line;
 }
 
@@ -576,19 +576,19 @@ char *xoverextract( char *xover, unsigned int field ) {
  * this is rather slow because all articles are searched, and in groups
  * with many short threads, this will be done very repetitively.
  */
-void savethread( struct exp *articles, char *refs, unsigned long acount ) {
+void savethread(struct exp *articles, char *refs, unsigned long acount) {
     char *p, *q;
     unsigned long i;
     unsigned int n = 0;
   
     p = refs;
-    while( (q = strchr( p, ' ' ) ) && n < THREADSAFETY ) {
-	if ( p && q )
+    while((q = strchr( p, ' ') ) && n < THREADSAFETY ) {
+	if (p && q)
 	    *q = '\0';
-	for( i = 0; i < acount; i++ ) {
-	    if ( articles[i].xover && articles[i].kill ) {
-		if ( strstr( articles[i].xover, p ) ) {
-		    if ( debugmode )
+	for(i = 0; i < acount; i++) {
+	    if (articles[i].xover && articles[i].kill) {
+		if (strstr( articles[i].xover, p) ) {
+		    if (debugmode)
 			ln_log(LNLOG_DEBUG, "rescued thread %lu", 
 			       articles[i].artno);
 		    articles[i].kill = 0;
@@ -606,10 +606,10 @@ static void expiregroup(struct newsgroup* g) {
     struct newsgroup * ng;
 
     ng = g;
-    while ( ng && ng->name ) {
+    while (ng && ng->name) {
 	if (!(expire = lookup_expire(ng->name)))
 	    expire = default_expire;
-	dogroup( ng );
+	dogroup(ng);
 	ng++;
     }
 }
@@ -625,19 +625,19 @@ static void expiremsgid(void)
 
     deleted = kept = 0;
 
-    for ( n=0; n<1000; n++ ) {
-	sprintf( s, "%s/message.id/%03d", spooldir, n );
-	if ( chdir( s ) ) {
-	    if ( errno == ENOENT )
-		mkdir( s, 0755 ); /* file system damage again */
-	    if ( chdir( s ) ) {
+    for (n=0; n<1000; n++) {
+	sprintf(s, "%s/message.id/%03d", spooldir, n);
+	if (chdir( s) ) {
+	    if (errno == ENOENT)
+		mkdir(s, 0755); /* file system damage again */
+	    if (chdir( s) ) {
 		ln_log(LNLOG_ERR, "chdir %s: %s", s, strerror(errno));
 		continue;
 	    }
 	}
 
-	d = opendir( "." );
-	if ( !d )
+	d = opendir(".");
+	if (!d)
 	    continue;
 	while ((de = readdir(d)) != 0) {
 	    if (stat(de->d_name, &st) == 0) {
@@ -647,17 +647,17 @@ static void expiremsgid(void)
 		    kept++;
 	    }
 	}
-	closedir( d );
+	closedir(d);
     }
 
-    if ( kept || deleted ) {
+    if (kept || deleted) {
 	printf("total: %d articles deleted, %d kept\n", deleted, kept);
-	ln_log(LNLOG_INFO, "%d articles deleted, %d kept", deleted, kept );
+	ln_log(LNLOG_INFO, "%d articles deleted, %d kept", deleted, kept);
     }
 }
 
-static void usage( void ) {
-    fprintf( stderr,
+static void usage(void) {
+    fprintf(stderr,
 	"Usage:\n"
 	"texpire -V\n"
 	"    print version on stderr and exit\n"
@@ -668,26 +668,26 @@ static void usage( void ) {
 	"    -F: use \"configfile\" instead of %s/config\n"
 	"See also the leafnode homepage at http://www.leafnode.org/\n",
 	libdir
-    );
+   );
 }
 
 int main(int argc, char** argv) {
     int option, reply;
     char * conffile;
 
-    conffile = critmalloc( strlen(libdir) + 10,
-			   "Allocating space for configuration file name" );
-    sprintf( conffile, "%s/config", libdir );
+    conffile = critmalloc(strlen(libdir) + 10,
+			   "Allocating space for configuration file name");
+    sprintf(conffile, "%s/config", libdir);
 
-    if ( !initvars( argv[0] ) )
+    if (!initvars( argv[0]) )
 	exit(EXIT_FAILURE);
 
     ln_log_open("texpire");
 
-    while ( (option=getopt( argc, argv, "F:VDvf" )) != -1 ) {
-	if ( parseopt( "texpire", option, optarg, conffile ) ) {
+    while ((option=getopt( argc, argv, "F:VDvf")) != -1 ) {
+	if (parseopt( "texpire", option, optarg, conffile) ) {
 	    ;
-	} else if ( option == 'f' ) {
+	} else if (option == 'f') {
 	    use_atime = 0;
 	} else {
 	    usage();
@@ -697,47 +697,47 @@ int main(int argc, char** argv) {
     debug = debugmode;
     expire = 0;
     expire_base = NULL;
-    if ( ( reply = readconfig( conffile ) ) != 0 ) {
-	printf( "Reading configuration from %s failed (%s).\n",
-		conffile, strerror(reply) );
-	unlink( lockfile );
-	exit( 2 );
+    if (( reply = readconfig( conffile) ) != 0 ) {
+	printf("Reading configuration from %s failed (%s).\n",
+		conffile, strerror(reply));
+	unlink(lockfile);
+	exit(2);
     }
 
     checkinteresting();
 
-    if ( lockfile_exists( FALSE, FALSE ) )
+    if (lockfile_exists( FALSE, FALSE) )
 	exit(EXIT_FAILURE);
     readactive();
-    if ( !active ) {
-	fprintf( stderr, "Reading active file failed, exiting "
+    if (!active) {
+	fprintf(stderr, "Reading active file failed, exiting "
 			 "(see syslog for more information).\n"
-			 "Has fetchnews been run?\n" );
-	unlink( lockfile );
-	exit( 2 );
+			 "Has fetchnews been run?\n");
+	unlink(lockfile);
+	exit(2);
     }
 
-    if ( verbose ) {
-	printf( "texpire %s: ", version );
-	if ( use_atime )
-	    printf( "check mtime and atime\n" );
+    if (verbose) {
+	printf("texpire %s: ", version);
+	if (use_atime)
+	    printf("check mtime and atime\n");
 	else
-	    printf( "check mtime only\n" );
+	    printf("check mtime only\n");
     }
-    if ( debugmode )
-	ln_log(LNLOG_DEBUG, "texpire %s: use_atime is %d", version, use_atime );
+    if (debugmode)
+	ln_log(LNLOG_DEBUG, "texpire %s: use_atime is %d", version, use_atime);
 
-    if ( expire == 0 ) {
-	fprintf( stderr, "%s: no expire time\n", argv[0] );
-	exit( 2 );
+    if (expire == 0) {
+	fprintf(stderr, "%s: no expire time\n", argv[0]);
+	exit(2);
     }
 
-    now = time( NULL );
+    now = time(NULL);
     default_expire = expire;
 
-    expiregroup( active );
+    expiregroup(active);
     writeactive();
-    unlink( lockfile );
+    unlink(lockfile);
     expiremsgid();
     free_expire();
     return 0;

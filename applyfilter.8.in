@@ -59,9 +59,9 @@ by a # at the beginning of the line) are allowed.
 Each rule is a regular expression. For example, the following set of
 rulings will delete all crosspostings to alt.flame.
 .PP
-^Newsgroups:.*[, ]alt.flame$
+^Newsgroups:.*[,]alt.flame$
 .br
-^Newsgroups:.*[, ]alt.flame,
+^Newsgroups:.*[,]alt.flame,
 .PP
 ^Newsgroups: indicates that the pattern should only be applied to the
 Newsgroups: header. After the header, an arbitrary number of characters

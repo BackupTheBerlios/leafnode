@@ -47,3 +47,7 @@ vsnprintf.o
 xoverutil.o
 configparse.c
 config_defs.h
+b_sortnl
+configparam_data.c
+pcre
+confdefs.h

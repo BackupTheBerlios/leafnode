@@ -17,6 +17,6 @@ char *strdup(const char *s) {
 #endif
 
 /* ANSI C forbids en empty source file... */
-static void dummy_func( void ) {
+static void dummy_func(void) {
     dummy_func();
 }

@@ -4,6 +4,32 @@ To our all-time favourite emacs: this is -*-outline-*- mode.
 
 Note leafnode 2.0 is not yet released. These are pre-beta tests.
 
+** History of 2.0b5_ma5 -- changes since 2.0b5_ma4:
+
+NOTE that the new locking scheme is not in place yet.
+
+- squash all whitespace on the inner side of parentheses.
+
+- remove gperf dependency, not portable enough. as replacement, now
+  use qsort and bsearch. New file config.table, requires awk at build
+  time to generate configparam_data.c and config_defs.h. New configparam.c.
+
+- make dist builds bzip2 without PCRE
+
+- various logging consistency fixes, remove excess LF in some ln_log files.
+
+- remove some if(verbose > XX) in favor of ln_log.
+
+- minor Makefile fixes to reduce rebuilding of components already built
+
+- new b_sortnl.c (build-time utility to overcome sort LC_COLLATE
+  madness, AT&T's Graphviz was trapped by that one)
+
+- new h_error.h and .c to give symbolic output of gethostbyname h_errno.
+
+- improved error checking in nntpconnect (check for dup and
+  gethostbyname failures)
+
 ** History of 2.0b5_ma4 -- changes since 2.0b5_ma3:
 
 - Fixes to IPv6 in nntpd.c -- PLEASE CHECK

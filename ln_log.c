@@ -6,12 +6,12 @@
 #include <stdio.h>
 
 /* add LOG_NEWS where it doesn't exist */
-#if !defined( LOG_NEWS )
+#if !defined(LOG_NEWS)
 #define LOG_NEWS LOG_DAEMON
 #endif
 
 /* if LOG_CONS isn't supported, do without */
-#if !defined( LOG_CONS )
+#if !defined(LOG_CONS)
 #define LOG_CONS 0 
 #endif
 

@@ -11,7 +11,6 @@ SHOWSTOPPERS:
 BUGS:
 ====
 
-- gperf unsigned detection is unreliable and may fail (Matthias)
 - can fetchnews cope with servers that reject XOVER? (Matthias)
 - maxage doesn't work
 - signal needs to be worked around on Solaris 7 (Matthias Andree)
@@ -19,9 +18,8 @@ BUGS:
 general:
 =======
 
+- get rid of all those if(verbose > anything)
 - get rid of _all_ sscanf (Matthias Andree)
-- preprocess manual pages with config.status (Matthias Andree)
-  (already in 1.9.17ma3)
 - apply all the patches :-)
 - determine interesting groups from .newsrc
 - how to make newsgroup names 8-bit compliant? E.g., how to produce

@@ -41,7 +41,7 @@ char *getaline(FILE *f) {
     buf[len] = '\0';        /* unconditionally terminate string,
                                possibly overwriting newline */
 
-    if ( debug )
-        ln_log(LNLOG_DEBUG, "<%s", buf );
+    if (debug)
+        ln_log(LNLOG_DEBUG, "<%s", buf);
     return buf;
 }

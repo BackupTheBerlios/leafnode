@@ -63,9 +63,6 @@
 /* Define if you have IPv6 */
 #undef HAVE_IPV6
 
-/* Define if your gperf wants unsigned int as length */
-#undef GPERF_UNSIGNED
-
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 

@@ -6,7 +6,7 @@ AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
 dnl version information
-VERSION="2.0b5_ma4"
+VERSION="2.0b5_ma5"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.
@@ -22,11 +22,10 @@ then
 GCC_FLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
 fi
 
-AC_CHECK_PROG( AR, ar, ar )
-AC_PATH_PROG( LYNX, lynx )
-AC_PATH_PROG( RPM, rpm )
-AC_PATH_PROG( GPERF, gperf, false )
-AC_PATH_PROG( SED, sed )
+AC_CHECK_PROG(AR, ar, ar)
+AC_PATH_PROG(LYNX, lynx)
+AC_PATH_PROG(RPM, rpm)
+AC_PATH_PROG(SED, sed)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -38,10 +37,10 @@ dnl Check whether all necessary include files are there
 AC_MSG_CHECKING(for system include files)
 AC_CACHE_VAL(cf_cv_sysheaders, AC_TRY_COMPILE([
 #include <sys/param.h>],[
-    return 0; ],
-  [ cf_cv_sysheaders="yes" ],
-  [ cf_cv_sysheaders="no" ])
-  )
+    return 0;],
+  [cf_cv_sysheaders="yes"],
+  [cf_cv_sysheaders="no"])
+ )
 if test "$cf_cv_sysheaders" = "yes"
 then
   AC_MSG_RESULT(yes)
@@ -49,25 +48,6 @@ else
   AC_MSG_RESULT(no)
   AC_MSG_ERROR(Kernel sources not installed - unable to continue)
 fi
-
-dnl Check if gperf throws unsigned int or not
-dnl to work around inconsistency between older and newer gperf versions
-AC_MSG_CHECKING(if gperf wants unsigned int)
-AC_CACHE_VAL(cf_cv_gperf_unsigned, 
-if test -x "`which gperf`" ; then 
-echo "x" | gperf -a | grep 'register.*len' | head -1 \
-| grep unsigned >/dev/null 2>&1 \
- && cf_cv_gperf_unsigned=yes \
- || cf_cv_gperf_unsigned=no
-else
-  grep 'register.*len' configparse.c | head -1 | grep unsigned \
-  >/dev/null 2>&1 \
- && cf_cv_gperf_unsigned=yes \
- || cf_cv_gperf_unsigned=no
-fi
-)
-AC_MSG_RESULT($cf_cv_gperf_unsigned)
-test "$cf_cv_gperf_unsigned" = "yes" && AC_DEFINE(GPERF_UNSIGNED)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -81,7 +61,7 @@ AC_STRUCT_TM
 dnl check where to put the spooldir
 AC_MSG_CHECKING(spooldir)
 AC_ARG_WITH(spooldir,
-[  --with-spooldir         news spool directory (/var/spool/news) ],
+[  --with-spooldir         news spool directory (/var/spool/news)],
   if echo "$withval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
@@ -115,7 +95,7 @@ AC_SUBST(sysconfdir)
 dnl check where to put the lockfile
 AC_MSG_CHECKING(lockfile)
 AC_ARG_WITH(lockfile,
-[  --with-lockfile         lockfile (/var/lock/news/fetchnews.lck) ],
+[  --with-lockfile         lockfile (/var/lock/news/fetchnews.lck)],
   if echo "$withval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
@@ -136,20 +116,30 @@ AC_MSG_RESULT(${RPMSRC})
 test "${RPMSRC}" = "none" || AC_SUBST(RPMSRC) 
 
 dnl Check for libcrypt
-AC_CHECK_LIB(crypt, crypt, [ CRYPTLIB="-lcrypt" ])
+AC_CHECK_LIB(crypt, crypt, [CRYPTLIB="-lcrypt"])
 AC_SUBST(CRYPTLIB)
 
 dnl Check for PCRE library.
 AC_CHECK_HEADER(pcre.h)
 if test "$ac_cv_header_pcre_h" = yes
 then
-  AC_CHECK_LIB(pcre, pcre_compile, [ LINKPCRELIB="-lpcre" ])
+  # do not add this to LIBS
+  AC_CHECK_LIB(pcre, pcre_compile, LINKPCRELIB="-lpcre")
 fi
 if test "$ac_cv_lib_pcre_pcre_compile" != yes
 then
-  AC_DEFINE(NEW_PCRE_COMPILE)
-  PCRELIB=libpcre.a
-  LINKPCRELIB=libpcre.a
+  echo "*** error: you do not have PCRE installed. You must install PCRE"
+  echo "*** before you can install leafnode."
+  echo  
+  if test -d pcre ; then
+    echo "*** Please install PCRE. To do so, become root and do:"
+    echo "*** cd `pwd`/pcre && ./configure && make install"
+  else
+    echo "*** Please download PCRE 3.4 from http://www.pcre.org/"
+    echo "*** and install it, preferably as shared version."
+    echo "*** Then, reconfigure leafnode."
+  fi
+  AC_ERROR(PCRE missing)
 else
   AC_DEFINE(HAVE_LIBPCRE)
   AC_MSG_CHECKING(for pcre_compile version)
@@ -160,10 +150,10 @@ else
 	const char **errptr;
 	int *erroffset;
 	const unsigned char *tableptr;
-	pcre_compile(pattern, options, errptr, erroffset, tableptr); ],
-  [ cf_cv_new_pcre_compile="yes" ],
-  [ cf_cv_new_pcre_compile="no" ])
-  ])
+	pcre_compile(pattern, options, errptr, erroffset, tableptr);],
+  [cf_cv_new_pcre_compile="yes"],
+  [cf_cv_new_pcre_compile="no"])
+ ])
   if test $cf_cv_new_pcre_compile = "yes"
   then
     AC_MSG_RESULT(2.01)
@@ -181,9 +171,9 @@ else
 	int options;
 	int *ovec;
 	int ovecsize;
-	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize); ],
-   [ cf_cv_new_pcre_exec="no" ], [ cf_cv_new_pcre_exec="yes" ])
-  ])
+	pcre_exec(pattern, extra, subject, length, options, ovec, ovecsize);],
+   [cf_cv_new_pcre_exec="no"], [ cf_cv_new_pcre_exec="yes" ])
+ ])
   if test $cf_cv_new_pcre_exec = "yes"
   then
     AC_MSG_RESULT(2.06)
@@ -204,8 +194,8 @@ AC_CACHE_VAL(cf_cv_have_gmtoff,[AC_TRY_COMPILE([
 	struct tm gmt;
 	now = time(0);
 	gmt = *(gmtime(&now));
-	gmtoff = gmt.tm_gmtoff; ],
-   [ cf_cv_have_gmtoff="yes" ], [ cf_cv_have_gmtoff="no" ])
+	gmtoff = gmt.tm_gmtoff;],
+   [cf_cv_have_gmtoff="yes"], [ cf_cv_have_gmtoff="no" ])
 ])
 if test $cf_cv_have_gmtoff = "yes"
 then
@@ -250,7 +240,7 @@ test ".$cf_cv_good_bcopy" = ".yes" && \
 
 dnl check whether called with --with-ipv6
 AC_ARG_WITH(ipv6,
-[  --with-ipv6             support IPv6 ],
+[  --with-ipv6             support IPv6],
   if test "$withval" != "no" ; then
     AC_DEFINE(HAVE_IPV6)
   fi
@@ -259,4 +249,4 @@ AC_ARG_WITH(ipv6,
 AC_SUBST(PCRE_DEFINES)
 AC_SUBST(GCC_FLAGS)
 
-AC_OUTPUT(stamp-h Makefile pcre/Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)
+AC_OUTPUT(stamp-h Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)

@@ -21,6 +21,3 @@
 
 /* Define if you have getline (GNU libc) */
 #undef HAVE_GETLINE
-
-/* Define if your gperf wants unsigned int as length */
-#undef GPERF_UNSIGNED

@@ -34,7 +34,7 @@ struct nglist {
     struct nglist * next;
 } ;
 
-static int _compactive( const void *a, const void *b ) {
+static int _compactive(const void *a, const void *b) {
     struct newsgroup *la = (struct newsgroup *)a;
     struct newsgroup *lb = (struct newsgroup *)b;
 
@@ -47,32 +47,32 @@ struct nglist * newgroup;
  * insert a group into a list of groups. If a group is already present,
  * it will not be affected.
  */
-void insertgroup( const char *name, long unsigned first,
-    long unsigned last, int age, char *desc ) {
+void insertgroup(const char *name, long unsigned first,
+    long unsigned last, int age, char *desc) {
     struct nglist * l;
     static struct nglist * lold;
     struct newsgroup * g;
 
-    g = findgroup( name );
-    if ( g )
+    g = findgroup(name);
+    if (g)
 	return;
 
-    g = (struct newsgroup *)critmalloc( sizeof(struct newsgroup),
+    g = (struct newsgroup *)critmalloc(sizeof(struct newsgroup),
 	"Allocating space for new group");
-    g->name = strdup( name );
+    g->name = strdup(name);
     g->first = first;
     g->last  = last;
     g->count = 0;
     g->age = age;
-    if ( desc == NULL )
+    if (desc == NULL)
 	g->desc = NULL;
     else
-	g->desc = strdup( desc );
+	g->desc = strdup(desc);
     l = (struct nglist *)critmalloc(sizeof(struct nglist),
 	"Allocating space for newsgroup list");
     l->entry = g;
     l->next = NULL;
-    if ( newgroup == NULL )
+    if (newgroup == NULL)
 	newgroup = l;
     else
 	lold->next = l;
@@ -82,36 +82,36 @@ void insertgroup( const char *name, long unsigned first,
 /*
  * change description of newsgroup
  */
-void changegroupdesc( const char * groupname, char * description ) {
+void changegroupdesc(const char * groupname, char * description) {
     struct newsgroup * ng;
 
-    if ( groupname && description ) {
-	ng = findgroup( groupname );
-	if ( ng )
-	    ng->desc = strdup( description );
+    if (groupname && description) {
+	ng = findgroup(groupname);
+	if (ng)
+	    ng->desc = strdup(description);
     }
 }
 
 /*
  * merge nglist with active group, then free it
  */
-void mergegroups( void ) {
+void mergegroups(void) {
     struct nglist * l, *la;
     int count = 0;
     
     l = newgroup;
-    while ( l ) {
+    while (l) {
 	count++;
 	l = l->next;
     }
 
-    active = (struct newsgroup *)critrealloc( (char *)active,
+    active = (struct newsgroup *)critrealloc((char *)active,
     		(1+count+activesize) * sizeof(struct newsgroup),
-		"reallocating active" );
+		"reallocating active");
     
     l = newgroup;
     count = activesize;
-    while ( l ) {
+    while (l) {
 	la = l;
 	active[count].name  = (l->entry)->name ;
 	active[count].first = (l->entry)->first;
@@ -120,32 +120,32 @@ void mergegroups( void ) {
 	active[count].desc  = (l->entry)->desc ;
 	l = l->next;
 	count ++;
-	free( la );	/* clean up */
+	free(la);	/* clean up */
     }
     newgroup = NULL;
     active[count].name = NULL;
 
     activesize = count;
-    qsort( active, activesize, sizeof(struct newsgroup), &_compactive );
+    qsort(active, activesize, sizeof(struct newsgroup), &_compactive);
 }
 
 /*
  * find a group by name
  */
-static long helpfindgroup( const char *name, long low, long high ) {
+static long helpfindgroup(const char *name, long low, long high) {
     long result;
     long mid;
 
-    if ( low > high )
+    if (low > high)
 	return -1 ;
     mid = (high-low)/2+low;
-    result = strcasecmp( name, active[mid].name );
-    if ( result == 0 )
+    result = strcasecmp(name, active[mid].name);
+    if (result == 0)
 	return mid;
-    else if ( result < 0 )
-	return helpfindgroup( name, low, mid-1 );
+    else if (result < 0)
+	return helpfindgroup(name, low, mid-1);
     else
-	return helpfindgroup( name, mid+1, high );
+	return helpfindgroup(name, mid+1, high);
 }
 
 /*
@@ -154,8 +154,8 @@ static long helpfindgroup( const char *name, long low, long high ) {
 struct newsgroup * findgroup(const char *name) {
     long i;
 
-    i = helpfindgroup( name, 0, (long)activesize-1 );
-    if ( i < 0 )
+    i = helpfindgroup(name, 0, (long)activesize-1);
+    if (i < 0)
 	return NULL;
     else
 	return (&active[i]);
@@ -164,7 +164,7 @@ struct newsgroup * findgroup(const char *name) {
 /*
  * write active file
  */
-void writeactive( void ) {
+void writeactive(void) {
     FILE * a;
     struct newsgroup * g;
     char c[PATH_MAX];
@@ -174,71 +174,71 @@ void writeactive( void ) {
 
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/groupinfo.new");
-    a = fopen( s, "w" );
-    if ( !a ) {
-	ln_log_sys( LNLOG_ERR, "cannot open new groupinfo file: %s", 
-		    strerror(errno) );
+    a = fopen(s, "w");
+    if (!a) {
+	ln_log_sys(LNLOG_ERR, "cannot open new groupinfo file: %s", 
+		    strerror(errno));
 	return;
     }
 
     /* count members in array and sort it */
     g = active;
     count = 0;
-    while ( g->name ) {
+    while (g->name) {
 	count++;
 	g++;
     }
-    qsort( active, count, sizeof(struct newsgroup), &_compactive );
+    qsort(active, count, sizeof(struct newsgroup), &_compactive);
 
     g = active;
     err = 0;
-    while ( ( err != EOF ) && g->name ) {
-	if ( strlen( g->name ) ) {
-	    snprintf( l, PATH_MAX,
+    while (( err != EOF) && g->name ) {
+	if (strlen( g->name) ) {
+	    snprintf(l, PATH_MAX,
 		      "%s %lu %lu %lu %s\n", g->name, g->last, g->first,
 		      (unsigned long) g->age,
-		      g->desc && *(g->desc) ? g->desc : "-x-" );
-	    err = fputs( l, a );
+		      g->desc && *(g->desc) ? g->desc : "-x-");
+	    err = fputs(l, a);
 	}
 	g++;
     }
-    fclose( a );
-    if ( err == EOF ) {
-	ln_log_sys( LNLOG_ERR, 
-		    "failed writing new groupinfo file (disk full?)" );
+    fclose(a);
+    if (err == EOF) {
+	ln_log_sys(LNLOG_ERR, 
+		    "failed writing new groupinfo file (disk full?)");
 	unlink(s);
 	return;
     }
     strcpy(c, spooldir);
     strcat(c, "/leaf.node/groupinfo");
-    rename( s, c );
+    rename(s, c);
     free(c);
 }
 
 /*
  * free active list. Written by Lloyd Zusman
  */
-static void freeactive( void ) {
+static void freeactive(void) {
     struct newsgroup * g;
 
-    if ( active == NULL )
+    if (active == NULL)
 	return;
 
     g = active;
-    while ( g->name ) {
-	free( g->name );
-	if ( g->desc )
-	    free( g->desc );
+    while (g->name) {
+	free(g->name);
+	if (g->desc)
+	    free(g->desc);
 	g++;
     }
 
-    free( active );
+    free(active);
 }
 
 /*
  * read active file into memory
  */
-void readactive( void ) {
+void readactive(void) {
     char *buf;
     char *p, *q, *r;
     size_t bufsize;
@@ -247,75 +247,75 @@ void readactive( void ) {
     FILE *f;
     struct newsgroup * g;
 
-    if ( active ) {
+    if (active) {
 	freeactive();
 	active = NULL;
     }
 
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/groupinfo");
-    if ( stat( s, &st ) ) {
+    if (stat( s, &st) ) {
     	ln_log_sys(LNLOG_ERR, "can't stat %s: %s", s, strerror(errno));
 	return;
-    } else if ( !S_ISREG( st.st_mode ) ) {
-    	ln_log_sys(LNLOG_ERR, "%s not a regular file", s );
+    } else if (!S_ISREG( st.st_mode) ) {
+    	ln_log_sys(LNLOG_ERR, "%s not a regular file", s);
 	return;
     }
-    buf = critmalloc( (size_t)st.st_size+2, "Reading group info" );
-    if (( f = fopen( s, "r" )) != NULL ) {
-    	bufsize = fread( buf, 1, (size_t)st.st_size, f );
-	if ( bufsize < (size_t)st.st_size ) {
+    buf = critmalloc((size_t)st.st_size+2, "Reading group info");
+    if ((f = fopen( s, "r")) != NULL ) {
+    	bufsize = fread(buf, 1, (size_t)st.st_size, f);
+	if (bufsize < (size_t)st.st_size) {
 	    ln_log_sys(LNLOG_ERR,
 		       "Groupinfo file truncated while reading: %ld < %ld.",
 		       (long)bufsize, (long)st.st_size);
 	}
-	fclose( f );
+	fclose(f);
     }
     else {
      	ln_log_sys(LNLOG_ERR, "unable to open %s: %s", s, strerror(errno));
 	return;
     }
 
-    bufsize = ( bufsize > (size_t)st.st_size ) ? (size_t)st.st_size : bufsize ;
+    bufsize = (bufsize > (size_t)st.st_size) ? (size_t)st.st_size : bufsize ;
     			/* to read truncated groupinfo files correctly */
     buf[bufsize++] = '\n';
     buf[bufsize++] = '\0';	/* 0-terminate string */
-    buf = critrealloc( buf, bufsize, "Reallocating active file size" );
+    buf = critrealloc(buf, bufsize, "Reallocating active file size");
 
     /* delete spurious 0-bytes except not the last one */
-    while (( p = (char *)memchr(buf, '\0', bufsize-1) ) != NULL )
+    while ((p = (char *)memchr(buf, '\0', bufsize-1)) != NULL )
 	*p = ' ';	/* \n might be better, but produces more errors */
 
     /* count lines = newsgroups */
     activesize = 0;
     p = buf;
-    while ( p && *p &&
-	    ( (q = (char *)memchr(p, '\n', buf-p+bufsize)) != NULL ) ) {
+    while (p && *p &&
+	    ((q = (char *)memchr(p, '\n', buf-p+bufsize)) != NULL) ) {
 	activesize++;
 	p = q+1;
     }
 
-    active = (struct newsgroup *)critmalloc( (1+activesize)*
-		 sizeof(struct newsgroup), "allocating active" );
+    active = (struct newsgroup *)critmalloc((1+activesize)*
+		 sizeof(struct newsgroup), "allocating active");
     g = active;
 
     p = buf;
-    while ( p && *p ) {
-	q = strchr( p, '\n' );
-	if ( q ) {
+    while (p && *p) {
+	q = strchr(p, '\n');
+	if (q) {
 	    *q = '\0';
-	    if ( strlen( p ) == 0 ) {
+	    if (strlen( p) == 0 ) {
 		p = q+1;
 		continue ;		/* skip blank lines */
 	    }
 	}
-	r = strchr( p, ' ' );
-	if ( !q || !r ) {
-	    if ( !q && r )
+	r = strchr(p, ' ');
+	if (!q || !r) {
+	    if (!q && r)
 		*r = '\0';
-	    else if ( q && !r )
+	    else if (q && !r)
 		*q = '\0';
-	    else if ( strlen(p) > 30 ) {
+	    else if (strlen(p) > 30) {
 		q = p+30;
 		*q = '\0';
 	    }
@@ -328,23 +328,23 @@ void readactive( void ) {
 	*q++ = '\0';
 
 	g->name = strdup(p);
-	if ( sscanf(r, "%lu %lu %lu",
-		    &g->last, &g->first, &g->age) != 3 ) {
+	if (sscanf(r, "%lu %lu %lu",
+		    &g->last, &g->first, &g->age) != 3) {
 	    ln_log_sys(LNLOG_ERR,
-		       "Groupinfo file possibly truncated or damaged: %s", p );
+		       "Groupinfo file possibly truncated or damaged: %s", p);
 	    break;
 	}
-	if ( g->first == 0 )
+	if (g->first == 0)
 	    g->first = 1;		/* pseudoarticle */
-	if ( g->last == 0 )
+	if (g->last == 0)
 	    g->last = 1;
 	g->count = 0;
 	p = r;
-	for ( n = 0; n < 3; n++ ) {	/* Skip the numbers */
-	    p = strchr( r, ' ' );
+	for (n = 0; n < 3; n++) {	/* Skip the numbers */
+	    p = strchr(r, ' ');
 	    r = p+1;
 	}
-	if ( strcmp( r, "-x-" ) == 0 )
+	if (strcmp( r, "-x-") == 0 )
 	    g->desc = NULL;
 	else
 	    g->desc = strdup(r);
@@ -352,7 +352,7 @@ void readactive( void ) {
         p = q;		/* next record */
 	g++;
     }
-    free( buf );
+    free(buf);
     /* last record, to mark end of array */
     g->name = NULL;
     g->first = 0;
@@ -363,21 +363,21 @@ void readactive( void ) {
     /* count member in the array - maybe there were some empty lines */
     g = active;
     activesize = 0;
-    while ( g->name ) {
+    while (g->name) {
 	g++;
 	activesize++;
     }
 
     /* sort the thing, just to be sure */
 /*
-    qsort( active, activesize, sizeof(struct newsgroup), &_compactive );
+    qsort(active, activesize, sizeof(struct newsgroup), &_compactive);
 */
 }
 
 /*
  * fake active file if it cannot be retrieved from the server
  */
-void fakeactive( void ) {
+void fakeactive(void) {
     DIR * d;
     struct dirent * de;
     DIR * ng;
@@ -386,18 +386,18 @@ void fakeactive( void ) {
     long unsigned first, last;
     char * p;
 
-    strcpy( s, spooldir );
-    strcat( s, "/interesting.groups" );
-    d = opendir( s );
-    if ( !d ) {
+    strcpy(s, spooldir);
+    strcat(s, "/interesting.groups");
+    d = opendir(s);
+    if (!d) {
 	ln_log(LNLOG_ERR, "cannot open directory %s: %s", s, 
 	       strerror(errno));
 	return;
     }
 
-    while ( (de = readdir(d)) ) {
-	if ( isalnum((unsigned char)*(de->d_name) ) &&
-	     chdirgroup(de->d_name, FALSE) ) {
+    while ((de = readdir(d))) {
+	if (isalnum((unsigned char)*(de->d_name)) &&
+	     chdirgroup(de->d_name, FALSE)) {
 	    /* get first and last article from the directory. This is
 	     * the most secure way to get to that information since the
 	     * .overview files may be corrupt as well
@@ -407,75 +407,75 @@ void fakeactive( void ) {
 	    first = INT_MAX;
 	    last = 0;
 
-	    ng = opendir( "." );
-	    while ( ( nga = readdir( ng ) ) != NULL ) {
-		if ( isdigit ((unsigned char) *(nga->d_name ) ) ) {
+	    ng = opendir(".");
+	    while (( nga = readdir( ng) ) != NULL ) {
+		if (isdigit ((unsigned char) *(nga->d_name) ) ) {
 		    p = NULL;
-		    i = strtoul( nga->d_name, &p, 10 );
-		    if ( *p == '\0' ) {
-			if ( i < first )
+		    i = strtoul(nga->d_name, &p, 10);
+		    if (*p == '\0') {
+			if (i < first)
 		    	    first = i;
-			if ( i > last )
+			if (i > last)
 		    	    last = i;
 		    }
 		}
 	    }
-	    if ( first > last ) {
+	    if (first > last) {
 	    	first = 1;
 		last = 1;
 	    }
-	    closedir( ng );
-	    if ( debugmode )
+	    closedir(ng);
+	    if (debugmode)
 	    	ln_log_sys(LNLOG_DEBUG, 
 			   "parsed directory %s: first %lu, last %lu",
-			   de->d_name, first, last );
-	    insertgroup( de->d_name, first, last, 0, NULL );
+			   de->d_name, first, last);
+	    insertgroup(de->d_name, first, last, 0, NULL);
 	}
     }
 
     /* Repeat for local groups. Writing a wrapper might be more elegant */
-    strcpy( s, spooldir );
-    strcat( s, "/local.groups" );
-    d = opendir( s );
-    if ( !d ) {
+    strcpy(s, spooldir);
+    strcat(s, "/local.groups");
+    d = opendir(s);
+    if (!d) {
 	ln_log_sys(LNLOG_ERR, "cannot open directory %s: %s", s,
 		   strerror(errno));
 	return;
     }
 
-    while ( (de = readdir(d)) ) {
-	if ( isalnum((unsigned char)*(de->d_name) ) &&
-	     chdirgroup(de->d_name, FALSE) ) {
+    while ((de = readdir(d))) {
+	if (isalnum((unsigned char)*(de->d_name)) &&
+	     chdirgroup(de->d_name, FALSE)) {
 	    first = INT_MAX;
 	    last = 0;
 
-	    ng = opendir( "." );
-	    while ( ( nga = readdir( ng ) ) != NULL ) {
-		if ( isdigit ((unsigned char) *(nga->d_name ) ) ) {
+	    ng = opendir(".");
+	    while (( nga = readdir( ng) ) != NULL ) {
+		if (isdigit ((unsigned char) *(nga->d_name) ) ) {
 		    p = NULL;
-		    i = strtoul( nga->d_name, &p, 10 );
-		    if ( *p == '\0' ) {
-			if ( i < first )
+		    i = strtoul(nga->d_name, &p, 10);
+		    if (*p == '\0') {
+			if (i < first)
 		    	    first = i;
-			if ( i > last )
+			if (i > last)
 		    	    last = i;
 		    }
 		}
 	    }
-	    if ( first > last ) {
+	    if (first > last) {
 	    	first = 1;
 		last = 1;
 	    }
-	    closedir( ng );
-	    if ( debugmode )
+	    closedir(ng);
+	    if (debugmode)
 	    	ln_log_sys(LNLOG_DEBUG, 
 			   "parsed directory %s: first %lu, last %lu",
-			   de->d_name, first, last );
-	    insertgroup( de->d_name, first, last, 0, NULL );
+			   de->d_name, first, last);
+	    insertgroup(de->d_name, first, last, 0, NULL);
 	}
     }
 
     mergegroups();
 
-    closedir( d );
+    closedir(d);
 }

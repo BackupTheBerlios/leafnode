@@ -33,13 +33,13 @@ void process_input(char *s) {
     FILE * f;
     char * l;
    
-    f = fopen( s, "r" );
+    f = fopen(s, "r");
     if (!f) {
         fprintf(stderr,"%s deleted (shouldn't happen)\n",s);
         return;
     }
 
-    while ( (l=getaline( f )) ) {
+    while ((l=getaline( f)) ) {
         char * p;
         struct newsgroup * g;
 
@@ -50,41 +50,41 @@ void process_input(char *s) {
             if (*p)
                 *p++ = '\0';
             if ((g = findgroup(l)) != NULL) {
-	        fprintf( stderr, "%s\n", l );
+	        fprintf(stderr, "%s\n", l);
                 if (strlen(p) > 0)
                     g->desc = strdup(p);
 	    }
         }
     }
 
-    fclose( f );
+    fclose(f);
 }
 
-static void usage( void ) {
-    fprintf( stderr,
+static void usage(void) {
+    fprintf(stderr,
 	"Usage:\n"
 	"checkgroups -V: print version number and exit\n"
 	"checkgroups [-Dv] checkfile\n"
 	"    -D: switch on debug mode\n"
 	"    -v: switch on verbose mode\n"
 	"See also the leafnode homepage at http://www.leafnode.org/\n"
-    );
+   );
 }
 
-int main(int argc, char *argv[] ) {
+int main(int argc, char *argv[]) {
     extern int optind;
     int option;
     FILE * f;
 
-    if ( ! initvars( argv[0] ) )
+    if (! initvars( argv[0]) )
 	exit(EXIT_FAILURE);
-    while ( (option=getopt( argc, argv, "DVv" )) != -1 ) {
-	if ( !parseopt( "checkgroups", option, NULL, NULL ) ) {
+    while ((option=getopt( argc, argv, "DVv")) != -1 ) {
+	if (!parseopt( "checkgroups", option, NULL, NULL) ) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
     }
-    if ( optind == 0 ) {
+    if (optind == 0) {
 	usage();
 	exit(EXIT_FAILURE);
     }
@@ -92,13 +92,13 @@ int main(int argc, char *argv[] ) {
     debug = debugmode;
 
     /* Check whether input file exists */
-    if ( !( f = fopen( argv[optind], "r" ))) {
-        if ( errno == EACCES )
-	    fprintf( stderr, "%s: not permitted to open %s\n",
-		     argv[0], argv[1] );
+    if (!( f = fopen( argv[optind], "r"))) {
+        if (errno == EACCES)
+	    fprintf(stderr, "%s: not permitted to open %s\n",
+		     argv[0], argv[1]);
 	else
-	    fprintf( stderr, "%s: checkgroups file %s doesn't exist\n",
-		     argv[0], argv[1] );
+	    fprintf(stderr, "%s: checkgroups file %s doesn't exist\n",
+		     argv[0], argv[1]);
         exit(EXIT_FAILURE);
     }
     else

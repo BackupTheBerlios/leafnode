@@ -19,6 +19,7 @@ See README for restrictions on the use of this software.
 
 #include "leafnode.h"
 #include "ln_log.h"
+#include "h_error.h"
 
 #include <fcntl.h>
 #include <sys/uio.h>
@@ -61,68 +62,68 @@ static void timer(int sig) {
 /*
 05/26/97 - T. Sweeney - Send a string out, keeping a copy in reserve.
 */
-void putaline( const char *fmt, ... ) {
+void putaline(const char *fmt, ...) {
     char lineout[1025];
     va_list args;
 
-    va_start( args, fmt );
-    vsnprintf( lineout, sizeof(lineout), fmt, args );
-    if ( debug )
-	ln_log(LNLOG_DEBUG, ">%s", lineout );
+    va_start(args, fmt);
+    vsnprintf(lineout, sizeof(lineout), fmt, args);
+    if (debug)
+	ln_log(LNLOG_DEBUG, ">%s", lineout);
     strcpy(last_command, lineout);
     fprintf(nntpout, "%s\r\n", lineout);
     fflush(nntpout);
-    va_end( args );
+    va_end(args);
 }
 
 /*
  * Authenticate ourselves at a remote server.
  * Returns TRUE if authentication succeeds, FALSE if it does not.
  */
-int authenticate( void ) {
+int authenticate(void) {
     int d, reply;
 
-    if ( !current_server ) {
-	ln_log(LNLOG_INFO, "authenticate: unknown server" );
+    if (!current_server) {
+	ln_log(LNLOG_INFO, "authenticate: unknown server");
 	return FALSE;
     }
-    if ( !current_server->username ) {
+    if (!current_server->username) {
 	ln_log(LNLOG_INFO, "%s: username needed for authentication",
-		current_server->name );
+		current_server->name);
 	return FALSE;
     }
 
     d = debug;
     debug = debugmode;
-    fprintf( nntpout, "AUTHINFO USER %s\r\n", current_server->username );
-    if ( debug )
-	ln_log(LNLOG_DEBUG, ">AUTHINFO USER [username]" );
-    fflush( nntpout );
+    fprintf(nntpout, "AUTHINFO USER %s\r\n", current_server->username);
+    if (debug)
+	ln_log(LNLOG_DEBUG, ">AUTHINFO USER %s", current_server->username);
+    fflush(nntpout);
 
     reply = nntpreply();
     debug = d;
     if (reply == 281) {
 	return TRUE;
-    } else if ( reply != 381 ) {
+    } else if (reply != 381) {
 	ln_log(LNLOG_INFO, "username rejected: %03d", reply);
 	return FALSE;
     }
 
-    if ( !current_server->password ) {
+    if (!current_server->password) {
 	ln_log(LNLOG_INFO, "%s: password needed for authentication",
-		current_server->name );
+		current_server->name);
 	return FALSE;
     }
     debug = debugmode;
-    fprintf( nntpout, "authinfo pass %s\r\n", current_server->password );
-    if ( debug )
-	ln_log(LNLOG_DEBUG, ">AUTHINFO PASS [password]" );
-    fflush( nntpout );
+    fprintf(nntpout, "authinfo pass %s\r\n", current_server->password);
+    if (debug)
+	ln_log(LNLOG_DEBUG, ">AUTHINFO PASS [password not shown]");
+    fflush(nntpout);
 
     reply = nntpreply();
     debug = d;
 
-    if ( reply != 281) {
+    if (reply != 281) {
 	ln_log(LNLOG_INFO, "password failed: %03d", reply);
 	return FALSE;
     }
@@ -148,18 +149,18 @@ int nntpreply(void) {
     while (c) {
 	response=getaline(nntpin);
 	if (!response) {
-	    ln_log(LNLOG_ERR, "NNTP server went away" );
+	    ln_log(LNLOG_ERR, "NNTP server went away");
 	    return 498;
 	}
 	if (strlen(response)>2
 	    && isdigit((unsigned char)response[0])
 	    && isdigit((unsigned char)response[1])
 	    && isdigit((unsigned char)response[2])
-	    && ( (response[3]==' ')
+	    && ((response[3]==' ')
 		 || (response[3]=='\0')
-		 || (response[3]=='-') ) ) {
+		 || (response[3]=='-')) ) {
 	    int rl;
-	    rl = strtol( response, NULL, 10 );
+	    rl = strtol(response, NULL, 10);
 	    if (r>0 && r!=rl)
 		r = 498;    /* protocol error */
 	    else
@@ -171,9 +172,9 @@ int nntpreply(void) {
 	}
     }
 
-    if (r == 480 && !authenticated ) { /* need to authenticate */
+    if (r == 480 && !authenticated) { /* need to authenticate */
 	authenticated = TRUE;
-	if ( authenticate() ) {
+	if (authenticate()) {
 	    fprintf(nntpout, "%s\r\n", last_command);
 	    fflush(nntpout);
 	    r = nntpreply();
@@ -193,7 +194,7 @@ extern struct state _res;
  * returns 200 for posting allowed, 201 for read-only;
  * if connection failed, return 0
  */
-int nntpconnect( const struct serverlist * upstream ) {
+int nntpconnect(const struct serverlist * upstream) {
     struct hostent *hp;
     static struct servent *sp;
     struct servent sp_def;
@@ -205,7 +206,7 @@ int nntpconnect( const struct serverlist * upstream ) {
     if (upstream->port == 0) {
 	sp = getservbyname("nntp", "tcp");
 	if (sp == NULL) {
-	    ln_log(LNLOG_ERR, "unable to find service NNTP" );
+	    ln_log(LNLOG_ERR, "unable to find service NNTP");
 	    return FALSE;
 	}
     } else {
@@ -214,11 +215,12 @@ int nntpconnect( const struct serverlist * upstream ) {
     }
 
     /* Fetch the ip addresses of the given host. */
-    hp = gethostbyname( upstream->name );
+    hp = gethostbyname(upstream->name);
     if (hp) {
-
 	/* Try to make connection to each of the addresses in turn. */
 	for (i = 0; (int *)(hp->h_addr_list)[i]; i++) {
+	    int infd;
+
 	    s_in.sin_family = hp->h_addrtype;
 	    s_in.sin_port = sp->s_port;
 	    s_in.sin_addr = incopy(hp->h_addr_list[i]);
@@ -233,7 +235,7 @@ int nntpconnect( const struct serverlist * upstream ) {
 	    }
 
 	    (void) signal(SIGALRM, timer);
-	    (void) alarm((unsigned) upstream->timeout );
+	    (void) alarm((unsigned) upstream->timeout);
 	    if (connect(sock, (struct sockaddr *)&s_in, sizeof(s_in)) < 0)
 		break;
 	    (void) alarm((unsigned)0);
@@ -242,32 +244,45 @@ int nntpconnect( const struct serverlist * upstream ) {
 	    if (nntpout == NULL)
 		break;
 
-	    nntpin  = fdopen(dup(sock), "r");
+	    infd=dup(sock);
+
+	    if(infd < 0) {
+		ln_log(LNLOG_ERR, "cannot dup: %s", strerror(errno));
+		break;
+	    }
+
+	    nntpin  = fdopen(infd, "r");
 	    if (nntpin == NULL)
 		break;
 
             reply = nntpreply();
-	    if ( reply == 200 || reply == 201 ) {
-		ln_log(LNLOG_INFO, "connected to %s: %d",
-			inet_ntoa( s_in.sin_addr ), reply );
+	    if (reply == 200 || reply == 201) {
+                /* FIXME: IPv6 */
+		ln_log(LNLOG_INFO, "%s: connected to %s:%u, response: %d", 
+		       upstream->name,
+		       inet_ntoa(s_in.sin_addr), htons(s_in.sin_port), reply);
 		return reply;
 	    }
-	    shutdown(fileno(nntpout), 0);
+	    shutdown(fileno(nntpout), 0); 
+	    shutdown(fileno(nntpin), 1);	    
 	}/* end of IP-addresses for loop */
+    } else {
+	ln_log(LNLOG_ERR, "cannot resolve %s: %s", upstream->name,
+	       my_h_strerror(h_errno));
     }
-    return FALSE;
+    return 0;
 }/* end of connect function */
 
 /*
  * disconnect from upstream server
  */
-void nntpdisconnect( void ) {
-    if ( nntpin ) {
-	fclose( nntpin );
+void nntpdisconnect(void) {
+    if (nntpin) {
+	fclose(nntpin);
 	nntpin = NULL ;
     }
-    if ( nntpout ) {
-	fclose( nntpout );
+    if (nntpout) {
+	fclose(nntpout);
 	nntpout = NULL ;
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.4 2000/11/15 05:23:37 emma Exp $ */
+/* $Id: leafnode.h,v 1.5 2000/11/22 13:55:19 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -49,11 +49,11 @@ char * strdup (const char *);
 #include <dirent.h>     /* DIR */
 
 #ifndef HAVE_SNPRINTF
-int snprintf( char *str, size_t n, const char *format, ... );
+int snprintf(char *str, size_t n, const char *format, ...);
 #endif
 
 #ifndef HAVE_VSNPRINTF
-int vsnprintf( char *str, size_t n, const char *format, va_list ap );
+int vsnprintf(char *str, size_t n, const char *format, va_list ap);
 #endif
 
 #ifdef HAVE_LIBPCRE
@@ -62,22 +62,22 @@ int vsnprintf( char *str, size_t n, const char *format, va_list ap );
 #include "pcre/pcre.h"
 #endif
 
-#define SECONDS_PER_DAY ( 24 * 60 * 60 )
+#define SECONDS_PER_DAY (24 * 60 * 60)
 
 /* initialize global variables */
-int initvars( char *progname );
+int initvars(char *progname);
 /* get configuration file */
-char * getoptarg( char option, int argc, char * argv[] );
-int findopt( char option, int argc, char *argv[] );
-int parseopt( char *progname, char option, char * optarg, char *conffile );
+char * getoptarg(char option, int argc, char * argv[]);
+int findopt(char option, int argc, char *argv[]);
+int parseopt(char *progname, char option, char * optarg, char *conffile);
 
 /* converts a message-id to a file name, the return value points into
    a static array */
-const char * lookup ( const char *msgid );
+const char * lookup (const char *msgid);
 
 /* handling of misc. lines */
 char * getaline(FILE *f);	/* reads one line, regardless of length */
-int parse_line ( char *l, char * param, char * value ) ;
+int parse_line (char *l, char * param, char * value) ;
 				/* parse a line of form "param = value" */
 #define TOKENSIZE 80		/* needed for parsing */
 
@@ -85,8 +85,8 @@ int parse_line ( char *l, char * param, char * value ) ;
 int chdirgroup(const char *group, int creatdir);
 
 /* is the group an interesting one? */
-int isinteresting( const char * groupname );
-void checkinteresting( void );
+int isinteresting(const char * groupname);
+void checkinteresting(void);
 
 /*
  * newsgroup management
@@ -104,13 +104,13 @@ struct newsgroup {
 };
 
 void insertgroup(const char * name, long unsigned first,
-	long unsigned last, int date, char * desc );
-void changegroupdesc( const char * groupname, char * desc );
-void mergegroups( void );
-struct newsgroup * findgroup( const char* name );
-void readactive( void );
-void writeactive( void );
-void fakeactive( void );
+	long unsigned last, int date, char * desc);
+void changegroupdesc(const char * groupname, char * desc);
+void mergegroups(void);
+struct newsgroup * findgroup(const char* name);
+void readactive(void);
+void writeactive(void);
+void fakeactive(void);
 
 /*
  * local groups
@@ -124,9 +124,9 @@ extern struct newsgroup * active;
 
 /* translation from message-id to article number, used in fetch and expire */
 
-void clearidtree( void );
-void insertmsgid( const char * msgid, unsigned long art );
-int findmsgid( const char* msgid );
+void clearidtree(void);
+void insertmsgid(const char * msgid, unsigned long art);
+int findmsgid(const char* msgid);
 
 /* -----------here starts the new stuff-----------------*/
 
@@ -137,16 +137,16 @@ struct stringlist {
     struct stringlist * next;
     char string[1] ;
 };
-void appendtolist( struct stringlist ** list, struct stringlist ** lastentry,
-    char *newentry );
+void appendtolist(struct stringlist ** list, struct stringlist ** lastentry,
+    char *newentry);
 	/* append "newentry" to "list". "lastentry" points to the last
 	   entry in "list" and must be supplied. */
-char * findinlist( struct stringlist * haystack, char * needle ) ;
+char * findinlist(struct stringlist * haystack, char * needle) ;
 	/* find a string in a stringlist by doing a linear search */
-void freelist( struct stringlist * list ) ;
+void freelist(struct stringlist * list) ;
 	/* free memory occupied by a stringlist */
-int stringlistlen( const struct stringlist *list );
-struct stringlist * cmdlinetolist( const char *cmdline ) ;
+int stringlistlen(const struct stringlist *list);
+struct stringlist * cmdlinetolist(const char *cmdline) ;
         /* convert a space separated string into a stringlist */
 	
 /*
@@ -194,10 +194,10 @@ struct filterlist {
 
 extern struct filterlist * filter;      /* all expressions precompiled */
 
-int readfilter( char *filterfile ) ;
-int killfilter( struct filterlist *f, char *hdr ) ;
-struct filterlist * selectfilter ( char * groupname );
-void freefilter( struct filterlist *f );
+int readfilter(char *filterfile) ;
+int killfilter(struct filterlist *f, char *hdr) ;
+struct filterlist * selectfilter (char * groupname);
+void freefilter(struct filterlist *f);
 
 /*
  * artutil -- handling article files
@@ -206,21 +206,21 @@ void freefilter( struct filterlist *f );
 /*
  * store articles
  */
-void storearticle ( char * filename, char * msgid, char * newsgroups ) ;
-void store( const char * filename, FILE * filehandle, char * newsgroups,
-	    const char *msgid );
+void storearticle (char * filename, char * msgid, char * newsgroups) ;
+void store(const char * filename, FILE * filehandle, char * newsgroups,
+	    const char *msgid);
 
 /*
  * find a certain header in an article and return it
  */
-char * getheader( const char * filename, const char * header );
-char * fgetheader( FILE *f, const char * header );
-char *mgetheader ( const char *hdr, char *buf ) ;
+char * getheader(const char * filename, const char * header);
+char * fgetheader(FILE *f, const char * header);
+char *mgetheader (const char *hdr, char *buf) ;
 
 /*
  * various functions in artutil.c
  */
-void supersede( const char * msgid );
+void supersede(const char * msgid);
 
 /*
  * xover stuff -- for nntpd.c
@@ -235,11 +235,11 @@ extern struct xoverinfo * xoverinfo;
 extern unsigned long xfirst;
 extern unsigned long xlast;
 
-long findxover( unsigned long article );
+long findxover(unsigned long article);
 		  /* find index number for an article, return -1 on error */
-int getxover( void );	/* set xoverinfo, return 0 on error, nonzero else */
-void fixxover( void );	/* repair all .overview files */
-void gfixxover( char * g ); /* repair .overview in groups g */
+int getxover(void);	/* set xoverinfo, return 0 on error, nonzero else */
+void fixxover(void);	/* repair all .overview files */
+void gfixxover(char * g); /* repair .overview in groups g */
 
 /*
  * the strings in config.c
@@ -320,16 +320,16 @@ extern int debug;		/* debug level */
 /*
  * misc prototypes
  */
-int lockfile_exists( int silent, int block );
-void putaline( const char *fmt, ... );
-void retry( void );
-void readexpire( void );
-void free_expire( void );
-int readconfig( char * configfile );
-void whoami( void );
-void lowercase( char *string );
+int lockfile_exists(int silent, int block);
+void putaline(const char *fmt, ...);
+void retry(void);
+void readexpire(void);
+void free_expire(void);
+int readconfig(char * configfile);
+void whoami(void);
+void lowercase(char *string);
 int ngmatch(const char* pattern, const char* string);
-void copyfile( FILE * infile, FILE * outfile, long n );
+void copyfile(FILE * infile, FILE * outfile, long n);
 
 int rename(const char *oldname, const char *newname);
 				/* to avoid barfing of Digital Unix */
@@ -337,11 +337,11 @@ int rename(const char *oldname, const char *newname);
 /*
  * stuff from nntputil.c
  */
-int authenticate( void );	/* authenticate ourselves at a server */
-int nntpreply( void );		/* decode an NNTP reply number */
-int nntpconnect( const struct serverlist * upstream );
+int authenticate(void);	/* authenticate ourselves at a server */
+int nntpreply(void);		/* decode an NNTP reply number */
+int nntpconnect(const struct serverlist * upstream);
 				/* connect to upstream server */
-void nntpdisconnect( void );	/* disconnect from upstream server */
+void nntpdisconnect(void);	/* disconnect from upstream server */
 
 const char* rfctime(void);	/* An rfc type date */
 

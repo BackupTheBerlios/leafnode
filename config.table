@@ -1,11 +1,5 @@
-%{
-#include "config_defs.h"
-#include "configparam.h"
-%}
-struct configparam { const char *name; int code; }
-%%
 authenticate,CP_AUTH
-avoidxover,CP_AVOIDXOVER
+preferxhdr,CP_AVOIDXOVER
 create_all_links,CP_LINKS
 debugmode,CP_DEBUG
 delaybody,CP_DELAY
@@ -35,4 +29,3 @@ timeout_active,CP_TOACTIVE
 timeout_long,CP_TOLONG
 timeout_short,CP_TOSHORT
 username,CP_USER
-%%
