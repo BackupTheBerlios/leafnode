@@ -70,6 +70,8 @@ urgence:
 
 2.2 Create rpost/inews
 
+2.2 progress displays on terminals for fetchnews and texpire
+
 2.2 Fix and amend copyright statements and licenses.
 
 2.2 groupinfo is not updated for local groups (article low/high marks)
