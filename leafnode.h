@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.88 2003/10/12 15:37:58 emma Exp $ */
+/* $Id: leafnode.h,v 1.89 2003/10/20 23:42:33 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -570,8 +570,8 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
  * stuff from nntputil.c
  */
     bool authenticate(void);	/* authenticate ourselves at a server */
-    int nntpreply(void);	/* decode an NNTP reply number */
-    int newnntpreply(/*@null@*/ /*@out@*/ char **);	/* decode an NNTP reply number */
+    int nntpreply(const struct serverlist *s);	/* decode an NNTP reply number */
+    int newnntpreply(const struct serverlist *s, /*@null@*/ /*@out@*/ char **);	/* decode an NNTP reply number */
     int nntpconnect(const struct serverlist *upstream);
 
     /* connect to upstream server */

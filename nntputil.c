@@ -76,7 +76,7 @@ authenticate(void)
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 	       ">AUTHINFO USER %s", current_server->username);
     if (fflush(nntpout)) return FALSE;
-    reply = nntpreply();
+    reply = nntpreply(current_server);
     if (reply == 281) {
 	return TRUE;
     } else if (reply != 381) {
@@ -96,7 +96,7 @@ authenticate(void)
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 	       ">AUTHINFO PASS [password not shown]");
     if (fflush(nntpout)) return FALSE;
-    reply = nntpreply();
+    reply = nntpreply(current_server);
     if (reply != 281) {
 	ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
 	       "authenticate: password failed: %03d", reply);
@@ -114,7 +114,8 @@ authenticate(void)
  * - status code from server otherwise.
  */
 int
-newnntpreply(/*@null@*/ /*@out@*/ char **resline
+newnntpreply(const struct serverlist *s,
+	/*@null@*/ /*@out@*/ char **resline
 	     /** If non-NULL, stores pointer to line here. */)
 {
     char *response;
@@ -127,7 +128,8 @@ newnntpreply(/*@null@*/ /*@out@*/ char **resline
 	response = mgetaline(nntpin);
 	if (!response) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "NNTP server went away while waiting for response");
+		   "%s NNTP server disconnected or timed out while waiting for response", 
+		   s->name);
 	    if (resline) *resline = NULL;
 	    return -1;
 	}
@@ -165,9 +167,9 @@ newnntpreply(/*@null@*/ /*@out@*/ char **resline
  * discards the rest of the status line.
  */
 int
-nntpreply(void)
+nntpreply(const struct serverlist *s)
 {
-    return newnntpreply(0);
+    return newnntpreply(s, 0);
 }
 
 /** Create a socket and connect it to a remote address.
@@ -379,7 +381,7 @@ nntpconnect(const struct serverlist *upstream)
 	return 0;
     }
 
-    reply = newnntpreply(&line);
+    reply = newnntpreply(upstream, &line);
     if (reply == 200 || reply == 201) {
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: connected (%d), banner: \"%s\"",

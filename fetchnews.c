@@ -385,7 +385,7 @@ isgrouponserver(char *newsgroups)
 	    *q++ = '\0';
 	if (gs_match(current_server -> group_pcre, p)) {
 	    putaline(nntpout, "GROUP %s", p);
-	    if (nntpreply() == 211)
+	    if (nntpreply(current_server) == 211)
 		retval = TRUE;
 	}
 	p = q;
@@ -509,7 +509,7 @@ fn_donewnews(struct newsgroup *g, time_t lastrun)
     ln_log(LNLOG_SINFO, LNLOG_CGROUP, "doing NEWNEWS %s %s",
 	   g->name, timestr + 2);
     putaline(nntpout, "NEWNEWS %s %s", g->name, timestr + 2);
-    if (nntpreply() != 230) {
+    if (nntpreply(current_server) != 230) {
 	/* FIXME: if the upstream uses NNTPcache v2.4.0b5, it may send a
 	 * line with a single dot after a 502 reply in violation of
 	 * RFC-977 */
@@ -1351,7 +1351,7 @@ nntpactive(int fa)
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
 	strftime(timestr, 64, "%Y%m%d %H%M%S", gmtime(&last_update));
 	putaline(nntpout, "NEWGROUPS %s GMT", timestr + 2);
-	if (nntpreply() != 231) {
+	if (nntpreply(current_server) != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
 	    mastr_delete(s);
 	    return;
@@ -1385,7 +1385,7 @@ nntpactive(int fa)
 	while (count && helpptr != NULL && current_server->descriptions) {
 	    error = 0;
 	    putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
-	    reply = nntpreply();
+	    reply = nntpreply(current_server);
 	    if (reply == 215) {
 		l = getaline(nntpin);
 		if (l && *l != '.') {
@@ -1412,7 +1412,7 @@ nntpactive(int fa)
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		"%s: getting newsgroups list", current_server->name);
 	putaline(nntpout, "LIST");
-	if (nntpreply() != 215) {
+	if (nntpreply(current_server) != 215) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
 		    "%s: reading all newsgroups failed", current_server->name);
 	    mastr_delete(s);
@@ -1514,7 +1514,7 @@ post_FILE(FILE * f, char **line)
 
     rewind(f);
     putaline(nntpout, "POST");
-    r = newnntpreply(line);
+    r = newnntpreply(current_server, line);
     if (r != 340)
 	return 0;
     while ((l = getaline(f))) {
@@ -1856,7 +1856,7 @@ do_server(int forceactive)
 
     /* get the nnrpd on the phone */
     putaline(nntpout, "MODE READER");
-    reply = newnntpreply(&e);
+    reply = newnntpreply(current_server, &e);
     if (reply != 200 && reply != 201) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
 		"%s: error: \"%s\"",
@@ -1864,7 +1864,7 @@ do_server(int forceactive)
 	goto out;
     }
 
-    check_date(current_server->name);
+    check_date(current_server);
 
     /* post articles */
     if (action_method & FETCH_POST) {

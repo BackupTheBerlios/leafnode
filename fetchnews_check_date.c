@@ -9,7 +9,7 @@
  * more than 15 minutes apart.
  */
 void
-check_date(const char *servername)
+check_date(const struct serverlist *server)
 {
     int reply;
     struct tm tm;
@@ -19,13 +19,13 @@ check_date(const char *servername)
     char *lastline;
 
     putaline(nntpout, "DATE");
-    reply = newnntpreply(&lastline);
+    reply = newnntpreply(server, &lastline);
     if (reply != 111) {
 	/* upstream does not support the DATE command, so ignore */
 	if ((debugmode & debugmask) == debugmask) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
 		    "check_date: %s does not support DATE, "
-		    "reply %d, expected 111", servername, reply);
+		    "reply %d, expected 111", server->name, reply);
 	}
 	return;
     }
@@ -37,7 +37,7 @@ check_date(const char *servername)
 	/* too few fields */
 	if ((debugmode & debugmask) == debugmask) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CSERVER, "check_date: %s: too few fields in DATE reply "
-		    "\"%s\"", servername, lastline);
+		    "\"%s\"", server->name, lastline);
 	}
 	return;
     }
@@ -50,7 +50,7 @@ check_date(const char *servername)
     if (t == (time_t) - 1) {
 	/* error, ignore */
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "check_date: %s: upstream sends unparsable reply "
-		"to DATE, mktime failed. \"%s\"", servername, lastline);
+		"to DATE, mktime failed. \"%s\"", server->name, lastline);
 	return;
     }
 
@@ -58,11 +58,11 @@ check_date(const char *servername)
     t += gmtoff(t);
 
     if (labs(t - time(&to)) > tolerate * 60) {
-	ln_log(LNLOG_SERR, LNLOG_CSERVER, "check_date: %s: clocks of upstream and this computer are more than %d minutes apart. Check your system clock.", servername, tolerate);
+	ln_log(LNLOG_SERR, LNLOG_CSERVER, "check_date: %s: clocks of upstream and this computer are more than %d minutes apart. Check your system clock.", server->name, tolerate);
     } else {
 	if ((debugmode & debugmask) == debugmask) {
 	ln_log(LNLOG_SDEBUG, LNLOG_CSERVER, "check_date: %s: server time %ld, our time %ld",
-		servername, t, to);
+		server->name, t, to);
 	}
     }
 }

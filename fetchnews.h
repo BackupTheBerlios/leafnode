@@ -1,6 +1,7 @@
 #ifndef FETCHNEWS_H
 #define FETCHNEWS_H
 
-void check_date(const char *);
+#include "leafnode.h"
+void check_date(const struct serverlist *);
 
 #endif
