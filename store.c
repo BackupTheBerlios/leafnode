@@ -331,6 +331,11 @@ store_stream(FILE * in /** input file */ ,
 		(void)chdirgroup(name, TRUE);
 		if (touch_truncate(LASTPOSTING))
 		    BAIL(-1, "cannot touch " LASTPOSTING);
+
+		/* advance pointer when it was a pseudo article */
+		if (g->last < g->first)
+		    g->last = g->first;
+
 		for (;;) {
 		    str_ulong(nb, ++g->last);
 		    /* we use sync_link on the always-open file below */

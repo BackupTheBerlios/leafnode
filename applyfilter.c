@@ -278,6 +278,10 @@ main(int argc, char *argv[])
     }
     closedir(d);
     free(l);
+    if (g->first > g->last) {
+	/* group is empty */
+	g->first = g->last + 1;
+    }
     writeactive();
     unlink(lockfile);
     printf("%d articles deleted, %d kept.\n", deleted, kept);

@@ -586,7 +586,8 @@ xgetxover(
 
     if (g) {
 	g->first = xfirst;
-	g->last = xlast;
+	if (xlast > g->last)
+	    g->last = xlast;
 	g->count = current;
     }
 
