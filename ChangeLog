@@ -1,8 +1,13 @@
 2002-04-26  Matthias Andree  <matthias.andree@gmx.de>
 
+	* autobootstrap.sh: New quick and dirty file to regenerate
+	Makefile.in and configure when the source has been checked out
+	from CVS.
+
 	* nntpd.c: Deescalate EOF-from-client syslog message from WARNING
 	to DEBUG. It seems to be totally normal for NNTP clients to just
 	disconnect without saying QUIT.
+
 	* xoverutil.c: Allow STOP_AT_MESSAGEID to raise a SIGSTOP in
 	store_stream.
 
