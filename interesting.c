@@ -75,14 +75,12 @@ killlastposting(const char *group)
 void
 expireinteresting(void)
 {
-    time_t now;
     struct dirent *de;
     struct stat st;
     DIR *d;
 
     ln_log(LNLOG_SDEBUG, LNLOG_CGROUP, "expiring interesting.groups");
 
-    now = time(NULL);
     if (chdir(spooldir) || chdir("interesting.groups")) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "unable to chdir to %s/interesting.groups: %m", spooldir);
