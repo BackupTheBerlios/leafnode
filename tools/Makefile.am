@@ -1,11 +1,18 @@
-sbin_SCRIPTS= sendbatch.bash
-sysconf_DATA = uucp
+sbin_SCRIPTS=	sendbatch.bash
+dist_bin_SCRIPTS=	lsmac.pl
+sysconf_DATA=	uucp
+man_MANS=	lsmac.1
 
-EXTRA_DIST= \
-	archivefaq.pl \
-	lsmac.pl \
-	make_pass.pl \
-	newsq.pl \
-	sendbatch.bash.in \
-	simple-batcher.sh \
-	uucp
+GENERATED_DOCS=	$(man_MANS)
+CLEANFILES=	$(GENERATED_DOCS)
+
+EXTRA_DIST=	archivefaq.pl \
+		make_pass.pl \
+		newsq.pl \
+		sendbatch.bash.in \
+		simple-batcher.sh \
+		uucp \
+		$(GENERATED_DOCS)
+
+lsmac.1: lsmac.pl
+	pod2man $< >$@ || rm -f $@
