@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.17 2002/07/04 22:30:06 ralf Exp $
+<P>Version ID of this document: $Id: README.html,v 1.18 2002/07/08 13:58:12 emma Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -167,10 +167,14 @@ FILE by a file name):
 			  flag. For example, if you want to install leafnode in
 			  /usr/sbin, use --prefix=/usr
 
---sysconfdir=DIR          Default path for configuration is /etc/leafnode when
+--sysconfdir=DIR          Default path for configuration is /etc when
 			  --prefix is not used or set to /usr, and PREFIX/etc
 			  otherwise.  You can use this to change the config file
 			  location from its default.
+			  IMPORTANT NOTE: leafnode will automatically
+			  append "leafnode" to the sysconfdir, so if you
+			  want your configuration in
+			  /etc/news/leafnode/, use --sysconfdir=/etc/news
 
 --with-dmalloc            Lets leafnode include dmalloc header files and link
 			  against libdmalloc. Only useful for debugging, not
@@ -178,8 +182,6 @@ FILE by a file name):
 			  dmalloc, available from http://dmalloc.com/.
 
 --with-runas-user=USER    Lets leafnode run as user USER, defaults to "news".
-
---with-runas-group=GROUP  Lets leafnode run as group GROUP, defaults to "news".
 </pre>
 
 <strong>BEWARE:</strong> Former versions always defaulted their sysconfdir to
