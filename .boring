@@ -1,0 +1,17 @@
+\.tar$
+\.tar\.bz2$
+\.tar\.gz$
+^\.boring$
+^\.deps$
+\.[o158]$
+^\.[^/]
+Makefile$
+Makefile\.in$
+^aclocal\.m4$
+^autom4te\.cache$
+^config\.h(\.in)?$
+^config\.(cache|log|status)$
+^configure$
+^leafnode\.spec$
+^stamp-h
+^tools/sendbatch\.bash$
