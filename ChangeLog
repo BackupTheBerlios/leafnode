@@ -1,5 +1,10 @@
 2001-12-20  Matthias Andree  <matthias.andree@gmx.de>
 
+	=== RELEASE 2.0b8_ma8rc3 ===
+	* store.c: Fix brown-paperbag-bug in store.c which ALWAYS
+	segfaulted.
+
+	=== RELEASE 2.0b8_ma8rc2 ===
 	* configure.in: Add string.h and strings.h, switch echo -n to
 	printf.
 
