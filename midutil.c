@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-/* no good but this server isn't going to be scalable so shut up */
+/* WARNING: THIS FUNCTION RETURNS A VALUE FROM A STATIC BUFFER */
 /*@dependent@*/ char *
 lookup(/*@null@*/ const char *msgid)
 {
