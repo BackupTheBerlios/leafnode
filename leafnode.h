@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.73 2002/09/02 00:23:59 emma Exp $ */
+/* $Id: leafnode.h,v 1.74 2002/09/02 00:32:56 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -394,8 +394,6 @@ extern "C" {
     int xgetxover(const int, /*@null@*/ struct newsgroup *g);
 	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
     int getxover(const int);	/* set xoverinfo, return 0 on error, nonzero else */
-    void fixxover(void);	/* repair all .overview files */
-    void gfixxover(const char *g);	/* repair .overview in groups g */
     void freexover(void);	/* free xoverinfo structure */
 
 /*
