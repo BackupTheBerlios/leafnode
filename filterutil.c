@@ -411,23 +411,29 @@ killfilter(const struct filterlist *f, const char *hdr)
     const char *p;
 
     if (!f) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: no filter list");
-	return FALSE;
+         if (debugmode & DEBUG_FILTER) {
+             ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: no filter list");
+         }
+         return FALSE;
     }
     score = 0;
     match = -1;
     for (; f; f = f->next) {
 	g = f->entry;
-	ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: trying filter for %s",
-	       g->newsgroup);
+	if (debugmode & DEBUG_FILTER) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CALL, "killfilter: trying filter for %s",
+	           g->newsgroup);
+	}
 	if ((g->limit == -1) && (g->expr)) {
 	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
 #ifdef NEW_PCRE_EXEC
 			      0,
 #endif
 			      0, NULL, 0);
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "regexp filter: /%s/ returned %d", g->cleartext, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "regexp filter: /%s/ returned %d", g->cleartext, match);
+	    }
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
 	    p = findinheaders("Date:", hdr);
@@ -437,9 +443,11 @@ killfilter(const struct filterlist *f, const char *hdr)
 		match = 0;	/* limit has been hit */
 	    else
 		match = PCRE_ERROR_NOMATCH;	/* don't match by default */
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "maxage filter: age is %ld, limit %ld, returned %d", a,
-		   g->limit, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "maxage filter: age is %ld, limit %ld, returned %d", a,
+	               g->limit, match);
+	    }
 	} else if (strcasecmp(g->cleartext, "maxlines") == 0) {
 	    long l = -1;
 	    p = findinheaders("Lines:", hdr);
@@ -449,9 +457,11 @@ killfilter(const struct filterlist *f, const char *hdr)
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "maxlines filter: lines is %ld, limit %ld, returned %d",
-		   l, g->limit, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "maxlines filter: lines is %ld, limit %ld, returned %d",
+	               l, g->limit, match);
+	    }
 	} else if (strcasecmp(g->cleartext, "minlines") == 0) {
 	    long l = -1;
 	    p = findinheaders("Lines:", hdr);
@@ -461,9 +471,11 @@ killfilter(const struct filterlist *f, const char *hdr)
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "minlines filter: lines is %ld, limit %ld, returned %d",
-		   l, g->limit, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "minlines filter: lines is %ld, limit %ld, returned %d",
+	               l, g->limit, match);
+	    }
 	} else if (strcasecmp(g->cleartext, "maxbytes") == 0) {
 	    long l = -1;
 	    p = findinheaders("Bytes:", hdr);
@@ -473,9 +485,11 @@ killfilter(const struct filterlist *f, const char *hdr)
 		else
 		    match = PCRE_ERROR_NOMATCH;
 	    }
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "maxbytes filter: bytes is %ld, limit %ld, returned %d",
-		   l, g->limit, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "maxbytes filter: bytes is %ld, limit %ld, returned %d",
+	               l, g->limit, match);
+	    }
 	} else if (strcasecmp(g->cleartext, "maxcrosspost") == 0) {
 	    long l = 1;
 	    p = findinheaders("Newsgroups:", hdr);
@@ -489,9 +503,11 @@ killfilter(const struct filterlist *f, const char *hdr)
 		match = 0;
 	    else
 		match = PCRE_ERROR_NOMATCH;
-	    ln_log(LNLOG_SDEBUG, LNLOG_CALL,
-		   "maxcrosspost filter: newsgroups %ld, limit %ld, "
-		   "returned %d", l, g->limit, match);
+	    if (debugmode & DEBUG_FILTER) {
+	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
+	               "maxcrosspost filter: newsgroups %ld, limit %ld, "
+	               "returned %d", l, g->limit, match);
+	    }
 	}
 
 	if (match == 0) {
