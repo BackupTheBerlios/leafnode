@@ -99,13 +99,20 @@ main(int argc, char **argv)
     int ret = 0;
     long c;
     mastr *s = mastr_new(LN_PATH_MAX);
+    const char *const myname = "newsq";
 
-    while ((option = getopt(argc, argv, "VD:")) != -1) {
-	if (!parseopt("newsq", option, NULL, NULL)) {
+    if (!initvars(argv[0], 0))
+	init_failed(myname);
+
+    while ((option = getopt(argc, argv, GLOBALOPTS)) != -1) {
+	if (!parseopt(myname, option, optarg, NULL)) {
 	    usage();
 	    exit(EXIT_FAILURE);
 	}
     }
+
+    if (!init_post())
+	init_failed(myname);
 
     printf("Articles awaiting post to upstream servers:\n"
 	   "-------------------------------------------\n");
