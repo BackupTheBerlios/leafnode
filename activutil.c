@@ -389,8 +389,7 @@ readactive(void)
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
 		mastr_str(s));
 	mastr_delete(s);
-	active = (struct newsgroup *)critmalloc(sizeof(struct newsgroup),
-		"readactive");
+	active = NULL;
 	activesize = 0;
 	return;
     }
