@@ -1,5 +1,11 @@
+2004-09-30  Matthias Andree <matthias.andree@gmx.de>
+
+	* texpire.c: Fix 'kept' counters in texpire -a mode. Reported by
+	Robert Marshall.
+
 2004-09-28  Matthias Andree <matthias.andree@gmx.de>
 
+	* NEWS: Reformat version headers to Prereq: for patch would work.
 	* texpire.8.in, texpire.c: Add texpire -a option to expire
 	article-based rather than thread-based.
 
