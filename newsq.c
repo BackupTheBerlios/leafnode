@@ -70,14 +70,16 @@ show_queue(const char *s)
 		filesize = st.st_size;
 		count++;
 		if (fr != NULL && ng != NULL && su != NULL) {
-		    printf("%s: %8lu bytes, spooled %s"
+		    printf("%s: %8lu bytes, %sspooled %s"
 			   "\tFrom: %-.66s\n"
 			   "\tNgrp: %-.66s\n"
 			   "\tDate: %-.66s\n"
 			   "\tSubj: %-.66s\n"
 			   "\tM-ID: %-.66s\n",
 			   de->d_name, (unsigned long)filesize,
-			   ctime(&st.st_mtime), fr, ng, da, su, mi);
+			   S_IXUSR & st.st_mode ? "posted, " : "",
+			   ctime(&st.st_mtime),
+			   fr, ng, da, su, mi);
 		} else {
 		    fprintf(stderr, "Header missing in file %s\n", de->d_name);
 		}
