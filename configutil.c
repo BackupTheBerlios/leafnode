@@ -28,7 +28,6 @@
 #endif
 
 #define COREFILESIZE 1024*1024*4
-#define TOKENSIZE 80
 /*
  * misc. global variables, documented in leafnode.h
  */
