@@ -198,7 +198,7 @@ add_fetchgroups(void)
  * - -1 for failure
  */
 static int
-process_options(int argc, char *argv[], int *forceactive)
+process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
     char *p;
@@ -211,8 +211,9 @@ process_options(int argc, char *argv[], int *forceactive)
     int servers_limited = 0;
 
     while ((option = getopt(argc, argv, GLOBALOPTS "HBPRS:N:M:fnx:p:t:")) != -1) {
-	if (parseopt("fetchnews", option, optarg, NULL))
+	if (parseopt(argv[0], option, optarg, conffile))
 	    continue;
+
 	switch (option) {
 	case 't':
 	    throttling = strtoul(optarg, &p, 10);
@@ -321,7 +322,7 @@ print_fetchnews_mode(/*@observer@*/ const char *myname)
 	    mastr_cat(s,  ", ");
 	mastr_cat(s,  "get messages by ID");
     }
-    ln_log(LNLOG_SINFO, LNLOG_CTOP, mastr_str(s));
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s", mastr_str(s));
     mastr_delete(s);
 }
 
@@ -2005,7 +2006,7 @@ int
 main(int argc, char **argv)
 {
     int reply;
-    char *t, *conffile = NULL;
+    char *conffile = NULL;
     volatile int err;
     volatile int rc = 0;
     volatile int postonly;
@@ -2016,16 +2017,16 @@ main(int argc, char **argv)
     struct serverlist *current_server;
 
     verbose = 0;
-    ln_log_open("fetchnews");
-    if (!initvars(myname, 0))
-	exit(EXIT_FAILURE);
+    ln_log_open(myname);
+    if (!initvars(argv[0], 0))
+	init_failed(myname);
 
     starttime = time(NULL);
     now = time(NULL);
     umask(2);
 
-    if ((t = getoptarg('F', argc, argv)) != NULL)
-	conffile = critstrdup(t, myname);
+    if (process_options(argc, argv, &forceactive, &conffile) != 0)
+	exit(EXIT_FAILURE);
 
     if ((reply = readconfig(conffile)) != 0) {
 	printf("Reading configuration failed (%s).\n", strerror(reply));
@@ -2034,8 +2035,8 @@ main(int argc, char **argv)
     if (conffile)
 	free(conffile);
 
-    if (process_options(argc, argv, &forceactive) != 0)
-	exit(EXIT_FAILURE);
+    if (!init_post())
+	init_failed(myname);
 
     if (!servers) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
@@ -2080,7 +2081,7 @@ main(int argc, char **argv)
 	if (!checkforpostings())
 	    exit(EXIT_SUCCESS);
     } else {
-	if (lockfile_exists(LOCKWAIT)) {
+	if (attempt_lock(LOCKWAIT)) {
 	    fprintf(stderr, "%s: lockfile %s exists, abort\n",
 		    myname, lockfile);
 	    exit(EXIT_FAILURE);
