@@ -27,11 +27,11 @@
 
 #define GROUPINFO "/leaf.node/groupinfo"
 
-size_t activesize = 0;
-time_t activetime = 0;
-ino_t activeinode = 0;
-time_t localmtime = 0;
-ino_t localinode = 0;
+static size_t activesize = 0;
+static time_t activetime = 0;
+static ino_t activeinode = 0;
+static time_t localmtime = 0;
+static ino_t localinode = 0;
 
 struct newsgroup *active = NULL;
 
