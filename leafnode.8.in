@@ -1,4 +1,4 @@
-.TH leafnode 8 "@VERSION@" leafnode Leafnode \" -*- nroff -*-
+.TH leafnode 8 @VERSION@ leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
+.\" $Id: leafnode.8.in,v 1.2 2001/01/03 05:07:05 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -14,7 +14,7 @@ leafnode \- NNTP server for small (dialup) sites
 
 .SH SYNOPSIS
 .B leafnode -V
-.br
+br
 .B leafnode [-D] [-F configfile]
 
 .SH DESCRIPTION
@@ -49,7 +49,7 @@ problems with your upstream server(s). If debug mode has already been
 set in the config file, increase verbosity.
 .TP
 .I -F configfile
-Read configuration from an alternative file instead of @sysconfdir@/config.
+Read configuration from an alternative file instead of @LIBDIR@/config.
 .TP
 .I -V
 Report leafnode version and exit.
@@ -66,7 +66,7 @@ All these files and directories
 .I must
 be writable by user "news".
 .PP
-.I @sysconfdir@/config
+.I @LIBDIR@/config
 contains the configuration parameters for
 .B leafnode.
 See CONFIGURATION below.
@@ -140,7 +140,7 @@ as user news.
 
 .SH CONFIGURATION
 All configuration is done using the file
-.I @sysconfdir@/config.
+.I @LIBDIR@/config.
 There is no GUI configuration tool yet.
 .PP
 The file has a rather standard Unix format: one line per argument, comments
@@ -195,6 +195,14 @@ By default, leafnode tries to connect to its upstream news servers on the
 NNTP port (119). If your servers run on a different port, you can specify
 those here. This field may occur multiple times, once after each server
 definition.
+.TP
+usexhdr = 1
+fetchnews will usually use XOVER to retrieve header information from the
+remote server. Under special circumstances, it may be faster to have it
+use XHDR instead. This line will try to enforce XHDR, but fetchnews will
+still fall back to XOVER if you also want to use filters in a group or
+if you work with "delaybody" set (because in these cases it will always
+be faster to use XOVER).
 
 .PP
 .B GENERAL OPTIONAL PARAMETERS
@@ -243,7 +251,7 @@ possible to specify
 (7)-like wildcard expressions.
 .TP
 .TP
-filterfile = @sysconfdir@/filters
+filterfile = @LIBDIR@/filters
 Leafnode can filter the input headers for arbitrary regular expressions.
 These are stored in a file designated "filterfile". The format of "filterfile"
 is described in

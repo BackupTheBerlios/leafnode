@@ -1,6 +1,6 @@
 /*
     getaline - fetch a single line from a stdio stream, arbitrary length
-    Copyright (C) 2000 Matthias Andree
+    Copyright (C) 2000 Matthias Andree <matthias.andree@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

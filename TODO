@@ -10,8 +10,14 @@ SHOWSTOPPERS:
 
 BUGS:
 ====
-
+- recently reported problems on mailing list and
+  de.comm.software.newsserver
+- authinfo handling in nntpd.c proper? (just user gives ACCEPT)
+- run everything through various static and dynamic checkers
+  (efence, dmalloc, lclint)
+- localgroups paths and dir vs. file inconsistent?
 - can't find /usr/local-installed PCRE on FreeBSD 4.0
+  CFLAGS/LDFLAGS required
 - Two reports of Llyod Zusman Dec-17 on leafnode mailing list.
 - "Das ist eine Macke von Leafnode. Wird von einem Server die komplette
   Gruppenliste geholt, so werden neu hinzugekommene Gruppen bei
@@ -51,10 +57,16 @@ general:
   draft-ietf-usefor-article-01.txt (chapter 5.5.) which is not very
   helpful either.
 
+xoverutil:
+=========
+
+- check whether tabs may be incorporated into .overview file
+
 fetchnews:
 =========
 
 - implement NEWNEWS for broken Demon.co.uk servers (Carl Inglis)
+- don't supersede() articles unconditionally
 - groupinfo wird nach timeout und anschliessendem sigint nicht upgedated!
 - wenn connection nicht erfolgreich ist, haengt der rechner
 - problems with timeout. If timeout occurs, fetchnews should send itself

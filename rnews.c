@@ -26,14 +26,13 @@
 #include <unistd.h>
 #include <errno.h>
 
-#define GZIP "/bin/gzip"
 #define TEMPLATE "/tmp/rnews.XXXXXX"
 
 extern int optind;
 
 int debug = 0;
 
-int processfile (char * filename);
+static int processfile (char * filename);
 
 
 static void usage(void) {
@@ -55,33 +54,34 @@ static void usage(void) {
 static int processbatch(char * filename) {
     FILE * f, * artfile;
     char * l;
-    char *artname = TEMPLATE; /* clobbered by mkstemp */
-    int afd;
+    char * artname = TEMPLATE;	/* clobbered by mkstemp() */
+    int  afd;
     long bytes;
 
-    f = fopen(filename, "r");
-    if (!f) {
-	fprintf(stderr, "unable to open batchfile %s: %s\n", 
-		 filename, strerror(errno));
+    f = fopen( filename, "r" );
+    if ( !f ) {
+	fprintf( stderr, "unable to open batchfile %s (%s) -- abort\n",
+		 filename, strerror(errno) );
 	return 0;
     }
 
-    afd = mkstemp(artname);
-    if(afd < 0) {
-	fprintf(stderr, "unable to create temporary article: %s\n",
-		 strerror(errno));
-	fclose(f);
+    afd = mkstemp( artname );
+    if ( afd < 0 ) {
+	fprintf( stderr, "unable to create temporary article: %s\n",
+		 strerror(errno) );
+	if(0 != fclose(f)) fprintf(stderr, "unable to close file: %s\n",
+			      strerror(errno));
 	return 0;
     }
 
     while (( l = getaline( f) ) ) {
 	const char tomatch[]="#! rnews ";
-	if(strncmp(l, tomatch, strlen(tomatch))) {
+	if(0 != strncmp(l, tomatch, strlen(tomatch))) {
 		fprintf(stderr, "expected `#! rnews', got `%-.40s[...]'", 
 			l);
 		goto pb_bail;
 	}
-	if(!get_long(l+strlen(tomatch),&bytes)) {
+	if(0 == get_long(l+strlen(tomatch),&bytes)) {
 		fprintf(stderr, "cannot extract article length from `%-.40s[...]'\n", l);
 		goto pb_bail;
 	}
@@ -92,7 +92,11 @@ static int processbatch(char * filename) {
 	    goto pb_bail;
 	}
 	copyfile(f, artfile, bytes);
-	fclose(artfile);
+	if(fclose(artfile)) {
+	    fprintf(stderr, "cannot close file: %s", 
+		    strerror(errno));
+	    return 0;
+	}
 	processfile(artname);
     }
     unlink(artname);
@@ -105,49 +109,56 @@ static int processbatch(char * filename) {
 
 /*
  * copy a compressed newsbatch to tmp
- * return NULL if unsuccessful, otherwise name of compressed file 
- * without suffix
+ * return NULL if unsuccessful,
+ * otherwise name of compressed file without suffix
  */
 static char * makecompressedfile(FILE * infile) {
     FILE * outfile ;
     char * buf;
-    char *c = TEMPLATE;
+    char * c = TEMPLATE;	/* will be munged by mkstemp */
+    char * rc = c;
     size_t i;
     int cfd;
     int ofd;
 
     cfd = mkstemp(c);
-    if (cfd < 0) {
-	fprintf(stderr, "unable to create temporary file: %s\n",
-		 strerror(errno));
+    if ( cfd < 0 ) {
+	fprintf( stderr, "unable to create temporary file: %s\n",
+		 strerror(errno) );
 	return NULL;
     }
-    sprintf(s, "%s.gz", c);
+    sprintf( s, "%s.gz", c );	/* FIXME: this is insecure */
     ofd = open(s, O_WRONLY|O_EXCL|O_CREAT);
-    if(ofd < 0) {
-	fprintf(stderr, "unable to create temporary file %s: %s\n",
-		 s, strerror(errno));
+    if (ofd < 0) {
+	fprintf( stderr, "unable to create temporary file %s: %s\n",
+		 s, strerror(errno) );
+	close(cfd);
 	return NULL;
     }
     outfile = fdopen(ofd, "w");
     if (!outfile) {
-	fprintf(stderr, "unable to fdopen filedes %d: %s\n",
-		 ofd, strerror(errno));
+	fprintf( stderr, "unable to fdopen filedescriptor %d: %s\n",
+		 ofd, strerror(errno) );
+	close(cfd);
 	close(ofd);
 	return NULL;
     }
-    buf = critmalloc(BLOCKSIZE+1, "Allocating memory");
+    buf = critmalloc((size_t)BLOCKSIZE+1, "Allocating memory");
     do {
 	i = fread(buf, sizeof(char), BLOCKSIZE, infile);
 	if (i < BLOCKSIZE && !feof( infile) ) {
 	    fprintf(stderr, "read error on compressed batch\n");
 	    clearerr(infile);
 	}
-	fwrite(buf, sizeof(char), i, outfile);
+	if(fwrite(buf, sizeof(char), i, outfile) < i) {
+	    fprintf(stderr, "write error on %s: %s\n", s, strerror(errno));
+	    c = 0;
+	    break;
+	}
     } while (i == BLOCKSIZE);
     free(buf);
     fclose(outfile);
-    return strdup(c);
+    return strdup(rc);
 }
 
 /*
@@ -173,15 +184,18 @@ static int uncompressfile(char * filename) {
 	}
 	default: break;
     }
-    waitpid(pid, &statloc, 0);
+    if(waitpid(pid, &statloc, 0) == -1) {
+	fprintf(stderr, "Decompressing failed: waitpid returned error: %s\n",
+		strerror(errno));
+    }
 
     if (WIFEXITED( statloc) == 0 ) {
 	fprintf(stderr, "Decompressing failed: child crashed.\n");
 	unlink(s);
 	return 0;
-    } else if (WEXITSTATUS( statloc) == 99 ) {
-	fprintf(stderr, "Decompressing failed: " GZIP " crashed.\n");
-	unlink(s);
+    } else if ( WEXITSTATUS( statloc ) == 99 ) {
+	fprintf( stderr, "Decompressing failed: gzip crashed.\n" );
+	unlink( s );
 	return 0;
     } else if (WEXITSTATUS( statloc) ) {
 	fprintf(stderr, "Decompressing failed.\n");
@@ -197,7 +211,7 @@ static int uncompressfile(char * filename) {
  */
 static int fprocessfile (FILE * f, char * filename) {
     char * l;
-    char * tempfilename ;
+    char * tempfilename = 0;
     int  i;
     
     debug = 0;
@@ -222,10 +236,13 @@ static int fprocessfile (FILE * f, char * filename) {
 		    (strncmp( c, "zunbatch", 8) == 0 ) ) {
 	    tempfilename = makecompressedfile(f);
 	    fclose(f);
-	    if (!uncompressfile( tempfilename) )
+	    if (!uncompressfile( tempfilename) ) {
+		free(tempfilename);
 		return 0;
+	    }
 	    i = processfile(tempfilename);
 	    unlink(tempfilename);
+	    free(tempfilename);
 	    return i;
 	} else {
 	    fclose(f);
@@ -237,6 +254,7 @@ static int fprocessfile (FILE * f, char * filename) {
     storearticle(filename, fgetheader( f, "Message-ID:"),
 		  fgetheader(f, "Newsgroups:") );
     fclose(f);
+    free(tempfilename);
     return 1;
 }
 
@@ -244,12 +262,12 @@ static int fprocessfile (FILE * f, char * filename) {
  * process any file
  * return 0 if failed, 1 otherwise
  */
-int processfile (char * filename) {
+static int processfile (char * filename) {
     FILE * f;
 
-    if (( f = fopen( filename, "r") ) == NULL ) {
-        fprintf(stderr, "unable to open %s: %s\n", filename,
-		 strerror(errno));
+    if ( ( f = fopen( filename, "r" ) ) == NULL ) {
+        fprintf( stderr, "unable to open %s: %s\n", filename,
+		 strerror(errno) );
         return 0;
     }
     return fprocessfile(f, filename);	/* f is closed in fprocessfile */
@@ -260,13 +278,14 @@ static void processdir (char * pathname) {
     struct dirent * d;
     char *procdir;
 
-    if (chdir(pathname) < 0) {
-	fprintf(stderr, "cannot chdir to %s\n", pathname);
+    if ( chdir(pathname) < 0 ) {
+	fprintf( stderr, "cannot chdir to %s: %s\n", pathname,
+		 strerror(errno) );
 	return;
     }
-    procdir = getcwd(NULL, 0);
-    if (( dir = opendir( ".") ) == NULL ) {
-	fprintf(stderr, "cannot open %s\n", pathname);
+    procdir = getcwd( NULL, 0 );
+    if ( ( dir = opendir( "." ) ) == NULL ) {
+	fprintf( stderr, "cannot open %s: %s\n", pathname, strerror(errno) );
 	return;
     }
     while (( d = readdir( dir) ) != NULL ) {
@@ -276,7 +295,8 @@ static void processdir (char * pathname) {
 	    /* storearticle uses chdir! */
 	    if (chdir( procdir) < 0 ) {
 		/* Yes, I'm paranoid */
-		fprintf(stderr, "cannot chdir to %s\n", pathname);
+		fprintf( stderr, "cannot chdir to %s: %s\n", pathname,
+			 strerror(errno) );
 		return;
 	    }
 	}

@@ -97,7 +97,7 @@ void readlocalgroups(void) {
     if (!(f = fopen( s, "r"))) {
 	/* not very dramatic because the user probably just
 	   does not want local groups */
-	ln_log(LNLOG_DEBUG, "unable to open %s: %s", s, strerror(errno));
+	ln_log(LNLOG_DEBUG, "unable to open %s: %m", s);
 	return;
     }
 
@@ -112,8 +112,13 @@ void readlocalgroups(void) {
 	    *p++ = '\0';
 
 	/* l points to group name, p to description */
-	insertgroup(l, 0, 0, time(NULL), p);
-	insertlocal(l);
+	if ( strlen(l) ) {
+	    if ( strlen(p) )
+		insertgroup( l, 0, 0, time(NULL), p );
+	    else
+		insertgroup( l, 0, 0, time(NULL), "local group" );
+	    insertlocal( l );
+	}
     }
 
     debug = debugmode;
@@ -148,8 +153,8 @@ int islocalgroup(const char *groupname) {
 /*
  * find whether a comma-separated list of groups contains only local ones
  */
-int islocal(const char * grouplist) {
-    char * p, * q;
+int islocal( const char * grouplist ) {
+    char *p, *q;
     int retval = TRUE;	/* assume that all groups are local */
 
     p = strdup(grouplist);

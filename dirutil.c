@@ -9,8 +9,7 @@ DIR *log_open_dir(const char *name) {
     DIR *d;
     d=opendir(name);
     if(!d) {
-	ln_log(LNLOG_ERR, "Unable to opendir %s: %s", 
-	      spooldir, strerror(errno));
+	ln_log(LNLOG_ERR, "Unable to opendir %s: %m", spooldir);
 	return 0;
     }
     return d;

@@ -1,4 +1,4 @@
-.TH fetchnews 8 "@VERSION" leafnode Leafnode \" -*- nroff -*-
+.TH fetchnews 8 @VERSION@ leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995-96 Troll
 .\" Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8.in,v 1.1 2000/11/15 05:23:37 emma Exp $
+.\" $Id: fetchnews.8.in,v 1.2 2001/01/03 05:07:05 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -48,7 +48,7 @@ set in the config file, increase verbosity.
 .TP
 .I -F configfile
 Read configuration from an alternate config file instead of
-@sysconfdir@/config.
+@LIBDIR@/config.
 .TP
 .I -f
 Force rereading of whole active file from all upstream servers. This is
@@ -145,9 +145,8 @@ ACTIVE and LIST NEWSGROUPS) is merged into
 .PP
 Third,
 .B fetchnews
-iterates over the list of newsgroups, performing a GROUP, an XHDR
-Message-ID and a number of HEAD and BODY commands for each group which
-has been read recently.
+iterates over the list of newsgroups, performing a GROUP, an XOVER
+and a number of ARTICLE commands for each group which has been read recently.
 
 .SH NOTES
 .B Fetchnews

@@ -1,3 +1,12 @@
+#include "config.h"
+
+#ifndef HAVE_INET_NTOP
+
+/*
+ * inet_ntop
+ * written by Matthias Andree
+ */
+
 #include "leafnode.h"
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -6,7 +15,6 @@
 #include <errno.h>
 #include <string.h>
 
-#ifndef HAVE_INET_NTOP
 const char *inet_ntop(int af, const void *s, char *dst, int x) {
     switch(af) {
 	case AF_INET:
@@ -22,3 +30,8 @@ const char *inet_ntop(int af, const void *s, char *dst, int x) {
 }  
 
 #endif
+
+/* ANSI C forbids an empty source file... */
+static void dummy_func( void ) {
+   dummy_func();
+}

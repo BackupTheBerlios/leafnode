@@ -1,8 +1,9 @@
+ *** GENERATED FILE, DO NOT EDIT *** 
 
-                                  LEAFNODE
-                                      
-                             Table of Contents
-                                      
+                                   LEAFNODE
+                                       
+Table of Contents
+
     1. Overview
     2. Installation
     3. Update from previous versions
@@ -18,8 +19,8 @@
     8. Copyright
      _________________________________________________________________
    
-                                1. OVERVIEW
-                                      
+1. OVERVIEW
+
    Leafnode is a USENET software package designed for small sites, with a
    few tens of readers and only a slow link to the net. It is developed
    on Linux, but has been reported to compile and run also under any BSD
@@ -72,34 +73,39 @@
      * Due to its open architecture, Leafnode scales very badly.
        
    The current version of leafnode is available from
-   http://www.leafnode.org/ .
+   [1]http://www.leafnode.org/.
    
    There is also a leafnode mailing list. Send mail to
-   
-                 leafnode-list@wpxx02.toxi.uni-wuerzburg.de
-   
-   with "Subscribe" in the Subject: to subscribe.
+   [2]leafnode-list@wpxx02.toxi.uni-wuerzburg.de with subscribe in the
+   Subject: to subscribe.
      _________________________________________________________________
    
-                              2. INSTALLATION
-                                      
+2. INSTALLATION
+
     1. Leafnode uses GNU autoconf to determine the configuration of the
-       machine it will be compiled on. Type
+       machine it will be compiled on. You don't need to have autoconf
+       installed unless you want to hack leafnode. Type
          sh ./configure
-       to coreate an appropriate Makefile and config.h .
+       to create an appropriate Makefile and config.h.
+       On some machines that have PCRE installed as package (e. g.
+       FreeBSD 4), you must give configure the paths to pass to the
+       compiler so it can find pcre.h and libpcre.a or .so:
+    env CFLAGS=-I/usr/local/include LDFLAGS=-L/usr/local/lib \
+    sh ./configure
        The configure script can take some flags:
---with-ipv6       use this if you have and want to use IPV6
---prefix=[dir]    Leafnode installs itself normally in the /usr/local/sbin
-                  directory. If you want to use another directory, use this
-                  flag. For example, if you want to install leafnode in
-                  /usr/sbin, use --prefix=/usr/sbin .
+       
+        --with-ipv6
+                use this if you have and want to use IPV6
+                
+        --prefix=<dir>
+                Leafnode installs itself normally in the /usr/local/sbin
+                directory. If you want to use another directory, use this
+                flag. For example, if you want to install leafnode in
+                /usr/sbin, use --prefix=/usr/sbin.
+                
     2. Type
           make
-       There should be no errors. Dependent on your compiler, you might
-       get the warning:
-    /fetchnews.c: In function `nntpactive':
-    /fetchnews.c:1062: warning: `%y' yields only last 2 digits of year
-       Don't worry about it.
+       There should be no errors and no warnings.
     3. Create a user "news" if you don't have one.
     4. Type
           make install
@@ -173,10 +179,10 @@ leafnode: 127.0.0.1
        want to read.
      _________________________________________________________________
    
-                      3. UPDATE FROM PREVIOUS VERSIONS
-                                      
-                       3.1 Update from versions < 2.0
-                                      
+3. UPDATE FROM PREVIOUS VERSIONS
+
+  3.1 Update from versions < 2.0
+  
    From 1.9.x to 2.0 there were some changes to options in the main
    configuration file. The options "maxage", "maxlines", "minlines",
    "maxbytes" and "maxcrosspost" have become obsolete in the main
@@ -193,8 +199,8 @@ action = kill
    The leafnode programs will issue warnings if they encounter obsolete
    specifications in the main config file.
    
-                      3.2 Update from versions < 1.9.3
-                                      
+  3.2 Update from versions < 1.9.3
+  
    From version 1.9.3 on, the groupinfo file is sorted in a
    case-insensitive manner. To update correctly, do a "make update" as
    root after you have successfully completed "make install". This will
@@ -203,8 +209,8 @@ action = kill
    change your main config file manually as described in the last
    section.
    
-                       3.3 Update from versions < 1.6
-                                      
+  3.3 Update from versions < 1.6
+  
    Between leafnode-1.6alpha and leafnode-1.6, the format of the
    groupinfo file changed and some files moved to other places. To update
    correctly, do a "make update" as root after you have successfully
@@ -215,8 +221,8 @@ action = kill
    section "Update from versions < 2.0".
      _________________________________________________________________
    
-                          4. FILES AND DIRECTORIES
-                                      
+4. FILES AND DIRECTORIES
+
    Leafnode puts its files in three separate directories: The spool
    directory, the library directory, and the binaries directory. All
    directories can be changed at compile time.
@@ -235,13 +241,165 @@ action = kill
    The user directory, /usr/local/bin by default, contains the newsq
    program.
    
-                      4.1. The main configuration file
-                                      
-                            4.2. The filter file
+  4.1. The main configuration file
+  
+   The main configuration file contains settings important for all
+   programs of the leafnode suite. It defaults to /etc/leafnode/config,
+   but several configuration files can be used at once by employing the
+   -F switch of the programs.
+   
+   The file contains two mandatory and a number of optional parameters.
+   
+    Mandatory parameters
+    
+     server = news02.bigprovider.com
+     
+   You have to specify at least one server (except if you want leafnode
+   to serve as a local server only). Usually, this will be the news
+   server of your provider. You can specify more than one server, and
+   fetchnews will retrieve news from all of them, taking care not to
+   transfer articles multiple times to your machine. Servers will be
+   queried in the order specified in the config file.
+   
+     expire = 5
+     
+   This parameter determines how many days threads are kept on your hard
+   disk. texpire will delete whole threads, not just single articles.
+   
+    Server-specific optional parameters
+    
+   To configure interaction with the server somewhat, you can change the
+   behaviour of fetchnews by setting several server-specific optional
+   parameters. They have to be specified directly after the corresponding
+   "server" statement. A new server statement in the config file will
+   also allow new optional parameters.
+   
+     username = myname
+     password = mypasswd
+     
+   If your upstream server requires a form of authentication, you can set
+   your username and password here.
+   
+     timeout = 30
+     
+   It may happen that, due to a bad connection or other reasons, the
+   server stops talking to you while you fetch news. The "timeout"
+   parameter determines the number of seconds fetchnews is supposed to
+   wait for a response from the server before giving up.
+   
+     nodesc = 1
+     
+   Some servers are unable to deliver descriptions of new newsgroups
+   correctly. When fetchnews encounters such a server, it will print the
+   warning
+   
+     server.name does not process LIST NEWSGROUPS news.group.name
+     correctly: use nodesc
+     
+   To allow for shorter download times, you should in this case set
+   "nodesc = 1" for that particular server in the configuration file.
+   
+     port = 8000
+     
+   Normally, fetchnews will try to retrieve news from port 119 (the
+   standard nntp port) of your upstream server. If the upstream server
+   runs on a different port, you can specify it with this option.
+   
+    General optional parameters
+    
+     hostname = host.domain.country
+     
+   If the postings that you write do not have message IDs (generated by
+   the newsreader), leafnode will generate a message ID for you. (It will
+   never overwrite an already existing message ID.) Message IDs generated
+   by leafnode feature ".ln" before the @ sign. The message ID contains
+   the fully qualified hostname of your machine which may not always be
+   what you want. In that case, you can override the use of the hostname
+   by using the "hostname" option.
+   
+     create_all_links = 1
+     
+   Usually fetchnews will store articles only in the newsgroups which you
+   consider interesting. Unfortunately, this makes it difficult to score
+   for the number of newsgroups a message is posted to because the
+   Newsgroups: header is not featured in the overview information;
+   therefore you can determine the number of newsgroups an article is
+   crossposted to only from the Xref: header. If "create_all_links" is
+   set to 1, fetchnews will store articles in all newsgroups which they
+   are posted to, making all these newsgroups turn up in the Xref:
+   header.
+   
+     maxfetch = 1000
+     
+   This makes fetchnews fetch at most 1000 articles per newsgroup per
+   server. It is not really sensible (because you won't see all the
+   traffic in a group), but retained for compatibility reasons.
+   
+     initialfetch = 100
+     
+   If you subscribe to a new group, fetchnews will try to fetch all
+   articles in that group which are on your upstream server. Obviously,
+   this may cause a lot of traffic if the group is very busy. Therefore
+   you can restrict the maximal number of articles to fetch in the first
+   run with this option.
+   
+     groupexpire a.news.group = 20
+     
+   As outlined above, texpire will expire threads after "expire" days. If
+   you want to adjust expiry times for certain groups, you may use the
+   "groupexpire" parameter to do just that. You can specify groups or use
+   wildcards; for example
+   
+     groupexpire *.announce = 20
+     
+   will affect expiry times of all groups ending with ".announce".
+   
+     filterfile = /etc/leafnode/filters
+     
+   If you want to employ filtering on incoming messages, you have to
+   specify the path where the filterfile can be found. The format of the
+   filterfile is described in the next chapter.
+   
+     timeout_short = 2
+     timeout_long = 5
+     
+   These two parameters determine how quickly a group is unsubscribed by
+   leafnode after you have stopped reading it. If you have looked into
+   the group only once, subscription is stopped after "timeout_short"
+   days; if you have read it more regularly, subscription is stopped
+   after "timeout_long" days. (You can stop subscription immediately by
+   removing the corresponding file in
+   /var/spool/news/interesting.groups/).
+   
+     timeout_active = 90
+     
+   By default, fetchnews will re-read active files from the upstream
+   server every 90 days. This interval can be changed by setting
+   "timeout_active" to a different value. Re-reading the active file
+   frequently will keep it a little bit smaller but will increase the
+   on-line time.
+   
+     delaybody = 1
+     
+   This option switches fetchnews into a mode where only the headers of
+   articles are fetched for visual inspection. Only the articles read in
+   the newsreader will be retrieved the next time fetchnews is called.
+   This can save a huge amount of disk space and download time but
+   requires more manual intervention on the user side.
+   
+     debugmode = 1
+     
+   This option forces the leafnode programs into logging lots of
+   information via the syslog daemon. It is only useful if you want to
+   hunt down bugs.
+   
+  4.2. The filter file
+  
+   FIXME: to be written
      _________________________________________________________________
    
-                            5. LOCAL NEWSGROUPS
-                                      
+5. LOCAL NEWSGROUPS
+
    From version 2.0 on, Leafnode is able to handle local newsgroups.
    Local newsgroups are groups that exist only on your local server but
    not on upstream servers.
@@ -275,8 +433,8 @@ action = kill
    it using your newsreader of choice.
      _________________________________________________________________
    
-                             6. DEINSTALLATION
-                                      
+6. DEINSTALLATION
+
    If you want to uninstall leafnode (e.g. because you want to replace it
    with another newsserver) and have a Makefile available, you can
    achieve this by doing "make uninstall". This will remove the
@@ -288,13 +446,13 @@ action = kill
    updating.
      _________________________________________________________________
    
-                       7. FREQUENTLY ASKED QUESTIONS
-                                      
+7. FREQUENTLY ASKED QUESTIONS
+
    See the file FAQ.
      _________________________________________________________________
    
-                                8. COPYRIGHT
-                                      
+8. COPYRIGHT
+
    Leafnode versions through 1.4 were written by Arnt Gulbrandsen
    <agulbra@troll.no> and are copyright 1995 Troll Tech AS, Postboks 6133
    Etterstad, 0602 Oslo, Norway, fax +47 22646949.
@@ -306,7 +464,7 @@ action = kill
    Randolf Skerka <Randolf.Skerka@gmx.de>
    Kent Robotti <robotti@erols.com>
    Markus Enzenberger <enz@cip.physik.uni-muenchen.de>
-   Matthias Andree <mandree@dosis.uni-dortmund.de>
+   Matthias Andree <matthias.andree@gmx.de>
    Jörg Dietrich <joerg@dietrich.net>
    
    Permission is hereby granted, free of charge, to any person obtaining
@@ -327,3 +485,57 @@ action = kill
    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   
+   The wildmat() routine is Copyright (c) 1986-1991 Rich $alz
+   <rsalz@osf.org>. The original copyright notice, taken from INN 2.2.2,
+   follows:
+   
+     Redistribution and use in any form are permitted provided that the
+     following restrictions are met:
+    1. Source distributions must retain this entire copyright notice and
+       comment.
+    2. Binary distributions must include the acknowledgement ``This
+       product includes software developed by Rich Salz'' in the
+       documentation or other materials provided with the distribution.
+       This must not be represented as an endorsement or promotion
+       without specific prior written permission.
+    3. The origin of this software must not be misrepresented, either by
+       explicit claim or by omission. Credits must appear in the source
+       and documentation.
+    4. Altered versions must be plainly marked as such in the source and
+       documentation and must not be misrepresented as being the original
+       software.
+       
+     THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+     IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+     
+   The replacement vsnprintf() function was written by Theo de Raadt and
+   is Copyright (c) 1997 under the following restrictions:
+   
+     Redistribution and use in source and binary forms, with or without
+     modification, are permitted provided that the following conditions
+     are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+       
+     THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+     OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+     DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+     DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+     GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+     INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+References
+
+   1. http://www.leafnode.org/
+   2. mailto:leafnode-list@wpxx02.toxi.uni-wuerzburg.de?Subject=subscribe

@@ -1,24 +1,9 @@
 /*
-texpire -- expire old articles
+  texpire -- expire old articles
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1998, 1999.
-Modified by Kazushi (Jam) Marukawa <jam@pobox.com>.
-Copyright of the modifications 1998, 1999.
-Modified by Joerg Dietrich <joerg@dietrich.net>.
-Copyright of the modifications 1999.
-
-See README for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
@@ -208,11 +193,10 @@ static int legalxoverline (char * xover, unsigned long artno) {
     }
     while (p != q && *p != '>' && *p != ' ')
 	p++;
-    if ((*p != '>') 
-	|| (++p != q)) {
-	if (debugmode)
-	    ln_log(LNLOG_DEBUG,
-		    "%lu xover error: Message-ID does not end with >.", artno);
+    if ( (*p != '>') || (++p != q) ) {
+	if ( debugmode )
+	    ln_log( LNLOG_DEBUG,
+		    "%lu xover error: Message-ID does not end with >.", artno );
 	return 0;
     }
 
@@ -332,7 +316,7 @@ static void dogroup(struct newsgroup* g) {
 
     d = opendir(".");
     if (!d) {
-	ln_log(LNLOG_ERR, "opendir in %s: %s", gdir, strerror(errno));
+	ln_log(LNLOG_ERR, "opendir in %s: %m", gdir);
 	return;
     }
 
@@ -384,11 +368,11 @@ static void dogroup(struct newsgroup* g) {
 
     if (stat(".overview", &st) == 0) {
 	/* could use mmap() here but I don't think it would help */
-	overview = critmalloc((size_t)st.st_size + 1, "Reading article overview info");
+	overview = critmalloc((size_t)st.st_size + 1,
+			      "Reading article overview info");
 	if ((fd = open(".overview", O_RDONLY)) < 0 ||
 	    (read(fd, overview, (size_t)st.st_size) < (ssize_t)st.st_size)) {
-	    ln_log(LNLOG_ERR, "can't open/read %s/.overview: %s", gdir,
-		   strerror(errno));
+	    ln_log(LNLOG_ERR, "can't open/read %s/.overview: %m", gdir);
 	    *overview = '\0';
 	    if (fd > -1)
 		close(fd);
@@ -402,7 +386,7 @@ static void dogroup(struct newsgroup* g) {
 	    while (p && isspace((unsigned char)*p))
 		p++;
 	    art = strtoul(p, NULL, 10);
-	    if (art >= first && art <= last &&
+	    if (art >= first && art <= last && current < acount &&
 		!articles[current].xover) {
 		articles[current].xover = p;
 		articles[current].artno = art;
@@ -421,27 +405,37 @@ static void dogroup(struct newsgroup* g) {
     /* check the syntax of the .overview info, and delete all 
        illegal stuff */
     
-    for(current = 0; current < acount; current++) {
-	if (!legalxoverline(articles[current].xover, 
-			     articles[current].artno)) 
+    for( current = 0; current < acount; current++ ) {
+	/* by default, kill all articles */
+	articles[current].kill = 1;
+	if (!legalxoverline(articles[current].xover, articles[current].artno)) 
 	    articles[current].xover = NULL;	/* memory leak */
+	else {
+	    /* clear "kill" for new or read articles */
+	    sprintf( artfile, "%lu", articles[current-1].artno );
+	    if ( stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
+		 ((st.st_mtime > expire) ||
+		  (use_atime && (st.st_atime > expire)))) {
+		articles[current].kill = 0;
+	    }
+	}
     }
 
     /* insert articles in tree, and clear 'kill' for new or read articles */
 
-    for(current = acount; current > 0; current--) {
-	articles[current-1].kill = 1;	/* by default, kill all articles */
-	str_ulong(artfile, articles[current-1].artno);
+    /* check whether file entries are legal */
+    /* save threads if an article in the thread is not killed */
+    for ( current = acount; current > 0; current-- ) {
+	sprintf( artfile, "%lu", articles[current-1].artno );
 	if (stat(artfile, &st) == 0 && (S_ISREG(st.st_mode)) &&
 	    ((st.st_mtime > expire) ||
 	     (use_atime && (st.st_atime > expire)))) {
-	    articles[current-1].kill = 0;
-	    refs = xoverextract(articles[current-1].xover, REFERENCES);
-	    msgid = xoverextract(articles[current-1].xover, MESSAGEID);
+	    refs = xoverextract( articles[current-1].xover, REFERENCES );
+	    msgid = xoverextract( articles[current-1].xover, MESSAGEID );
 
-	    if (refs) {
-		savethread(articles, refs, acount);
-		free(refs);
+	    if ( refs ) {
+		savethread( articles, refs, acount );
+		free( refs );
 		refs = NULL;
 	    }
 	    if (msgid) {
@@ -456,9 +450,8 @@ static void dogroup(struct newsgroup* g) {
 				articles[current-1].kill = 1;
 			    else
 				ln_log(LNLOG_ERR, 
-				       "relink of %s failed: %s (%s)",
-				       msgid, 
-				       lookup(msgid), strerror(errno));
+				       "relink of %s failed: %s (%m)",
+				       msgid, lookup(msgid));
 			}
 			else
 			    ln_log(LNLOG_INFO, "relinked message %s", msgid);
@@ -500,8 +493,8 @@ static void dogroup(struct newsgroup* g) {
 		/* if file was deleted already or it was not a file */
 		/* but a directory, skip error message */
 		kept++;
-		ln_log(LNLOG_ERR, "unlink %s/%lu: %s", 
-			gdir, articles[art].artno, strerror(errno));
+		ln_log(LNLOG_ERR, "unlink %s/%lu: %m", 
+			gdir, articles[art].artno);
 	    } else {
 		/* deleted by someone else */
 	    }
@@ -522,8 +515,7 @@ static void dogroup(struct newsgroup* g) {
 
     if (!kept) {
 	if (unlink(".overview") < 0)
-	    ln_log(LNLOG_ERR, "unlink %s/.overview: %s", gdir, 
-		   strerror(errno));
+	    ln_log(LNLOG_ERR, "unlink %s/.overview: %m", gdir);
 	if (!chdir("..") && (isinteresting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
@@ -568,30 +560,25 @@ char *xoverextract(char *xover, unsigned int field) {
  * this is rather slow because all articles are searched, and in groups
  * with many short threads, this will be done very repetitively.
  */
-void savethread(struct exp *articles, char *refs, unsigned long acount) {
-    char *p, *q;
+void savethread( struct exp *articles, char *refs, unsigned long acount ) {
+    char *p;
     unsigned long i;
     unsigned int n = 0;
-  
-    p = refs;
-    while((q = strchr(p, ' ')) && n < THREADSAFETY) {
-	if (p && q)
-	    *q = '\0';
-	for(i = 0; i < acount; i++) {
-	    if (articles[i].xover && articles[i].kill) {
-		if (strstr(articles[i].xover, p)) {
-		    if (debugmode)
-			ln_log(LNLOG_DEBUG, "rescued thread %lu", 
-			       articles[i].artno);
-		    articles[i].kill = 0;
-		}
+
+    while ( refs && ( p = strchr(refs, '<') ) && ( refs = strchr(p, '>') ) &&
+	    (n++ < THREADSAFETY) ) {
+	if ( *++refs )
+	    *refs++ = '\0';
+	for ( i = 0; i < acount; i++ ) {
+	    if ( articles[i].kill && articles[i].xover &&
+		 strstr(articles[i].xover, p) ) {
+		if ( debugmode )
+		    ln_log(LNLOG_DEBUG, "rescued thread %lu", 
+			   articles[i].artno);
+		articles[i].kill = 0;
 	    }
 	}
-	p = q;
-	p++;
-	n++;
     }
-    return;
 }
 
 static void expiregroup(struct newsgroup* g) {
@@ -623,7 +610,7 @@ static void expiremsgid(void)
 	    if (errno == ENOENT)
 		mkdir(s, 0755); /* FIXME: this does not belong here */
 	    if (chdir(s)) {
-		ln_log(LNLOG_ERR, "chdir %s: %s", s, strerror(errno));
+		ln_log(LNLOG_ERR, "chdir %s: %m", s);
 		continue;
 	    }
 	}
@@ -669,7 +656,7 @@ int main(int argc, char** argv) {
 			   "Allocating space for configuration file name");
     sprintf(conffile, "%s/config", libdir);
 
-    if (!initvars(argv[0]))
+    if ( !initvars(argv[0]) )
 	exit(EXIT_FAILURE);
 
     ln_log_open("texpire");
@@ -688,8 +675,8 @@ int main(int argc, char** argv) {
     expire = 0;
     expire_base = NULL;
     if ((reply = readconfig(conffile)) != 0) {
-	ln_log(LNLOG_ERR, "Reading configuration from %s failed (%s).\n",
-	       conffile, strerror(reply));
+	ln_log(LNLOG_ERR, "Reading configuration from %s failed (%m).\n",
+	       conffile);
 	unlink(lockfile);
 	exit(2);
     }

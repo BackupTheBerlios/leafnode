@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.7 2001/01/02 18:34:35 emma Exp $ */
+/* $Id: leafnode.h,v 1.8 2001/01/03 05:07:05 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -21,6 +21,10 @@
 #define BLOCKSIZE 16384
 
 #include "config.h"	/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
+
+#ifndef HAVE_SOCKLEN_T
+typedef unsigned int socklen_t;
+#endif
 
 #ifdef HAVE_AP_CONFIG_H
 #define AP_CONFIG_H
@@ -53,7 +57,11 @@ int snprintf(char *str, size_t n, const char *format, ...);
 #endif
 
 #ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, size_t n, const char *format, va_list ap);
+int vsnprintf( char *str, size_t n, const char *format, va_list ap );
+#endif
+
+#ifndef HAVE_MKSTEMP
+int mkstemp( char *template );
 #endif
 
 #ifdef HAVE_LIBPCRE
@@ -62,14 +70,22 @@ int vsnprintf(char *str, size_t n, const char *format, va_list ap);
 #include "pcre/pcre.h"
 #endif
 
-#define SECONDS_PER_DAY (24 * 60 * 60)
+/*
+ * end of actions due to autoconf
+ */
+
+/*
+ * various constants
+ */
+#define SECONDS_PER_DAY ( 24 * 60 * 60 )
+#define FQDN_SIZE 256
 
 /* initialize global variables */
 int initvars(char *progname);
 /* get configuration file */
-char * getoptarg(char option, int argc, char * argv[]);
-int findopt(char option, int argc, char *argv[]);
-int parseopt(char *progname, char option, char * optarg, char *conffile);
+char * getoptarg( char option, int argc, char * argv[] );
+int findopt( char option, int argc, char *argv[] );
+int parseopt( char *progname, int option, char * optarg, char *conffile );
 
 /* converts a message-id to a file name, the return value points into
    a static array */
@@ -262,6 +278,7 @@ extern const char * libdir;
 extern const char * bindir;
 extern const char * version;
 extern const char * lockfile;
+extern const char * GZIP;
 
 /*
  * global variables from config file. These are defined in configutil.c
@@ -274,6 +291,7 @@ struct expire_entry {
 
 struct serverlist {
     int port ;
+    int usexhdr ;		/* use XHDR instead of XOVER if sensible */
     int descriptions ;		/* download descriptions as well */
     int timeout ;		/* timeout in seconds before we give up */
     struct serverlist * next;
@@ -325,10 +343,11 @@ extern FILE *nntpin;
 extern FILE *nntpout;
 
 #define FQDN_SIZE 256
+/* defined in miscutil.c */
 extern char s[];
 extern char fqdn[];		/* my name, and my naming myself */
-
 extern int verbose;		/* verbosity level, for fetch and texpire */
+
 extern int debug;		/* debug level */
 
 /*

@@ -6,23 +6,22 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: fetchnews.8,v 1.2 2000/11/12 18:05:49 emma Exp $
+.\" $Id: fetchnews.8,v 1.3 2001/01/03 05:07:06 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH BEZEICHNUNG
 fetchnews - hole und sende News via NNTP
 
 .SH SYNTAX
-.B fetchnews [-v] [-x Zahl] [-l] [-n] [-f] [-P] 
-	
+.B fetchnews [-v] [-x Zahl] [-l] [-n] [-f] [-P]
 .SH BESCHREIBUNG
-.B Leafnode 
+.B Leafnode
 ist ein USENET-Software-Paket, das für kleine Sites
 gedacht ist, wo es wenige User und nur geringe
 Festplatten-Kapazität gibt, aber trotzdem eine große Zahl von
 Gruppen gewünscht wird.
 .PP
-.B Leafnode 
+.B Leafnode
 ist so designt, daß es Fehler selbständig reparieren
 und keinerlei manuelle Pflege benötigen soll.
 .PP
@@ -30,91 +29,90 @@ und keinerlei manuelle Pflege benötigen soll.
 (das bis Version 1.9.2 "fetch" hieß)
 ist das Programm, das neue Artikel vom Upstream-Server
 lädt und lokal geschriebene Artikel an diesen weiterreicht.
-	
 .SH PARAMETER
 .TP
-.I -v 	
-(verbose = wortreich) Veranlaßt 
-.B fetch
-, mehr Ausgaben zu produzieren. Maximal vier 
 .I -v
-\'s können angegeben werden, je mehr 
+(verbose = wortreich) Veranlaßt
+.B fetch
+, mehr Ausgaben zu produzieren. Maximal vier
+.I -v
+\'s können angegeben werden, je mehr
 .I -v
 \'s, desto mehr Text wird ausgegeben.
 .TP
-.I -v 
+.I -v
 Zeigt unkritische Fehler an.
 .TP
-.I -vv	
+.I -v
 Zeigt alle Gruppen-Befehle an
 .TP
-.I -vvv 
+.I -vvv
 Zeigt alle Artikel-Befehle an.
 .TP
 .I -vvvv
-Für Debugging-Zwecke. Erwarten Sie nicht, daß die zusätzlichen Ausgaben 
+Für Debugging-Zwecke. Erwarten Sie nicht, daß die zusätzlichen Ausgaben
 Sinn ergeben.
 .TP
-.I "-x Zahl" 
-Gehe Zahl Artikel zurück und lade fehlende vom 
+.I "-x Zahl"
+Gehe Zahl Artikel zurück und lade fehlende vom
 Upstream-Server.
 .TP
 .I -l
 (l = local) Verwende nur den primären Upstream-Server. Dies erhöht
 die Geschwindigkeit des Vorganges erheblich.
 .TP
-.I -n	
+.I -n
 Lösche die Verknüpfungen im Verzeichnis
-.I /var/spool/news/interesting.groups 
+.I /var/spool/news/interesting.groups
 nicht. So kann das automatische Abbestellen von Newsgruppen unterbunden
 werden.
 .TP
 .I -f
 (force) Lade die Liste der verfügbaren Newsgruppen vom
 Upstream-Server. Dies sollte nur selten geschehen, da
-es einige Zeit benötigt.	
+es einige Zeit benötigt.
 .TP
 .I -P
 Sende nur die Artikel, die sich in
-.I /var/spool/news/out.going 
+.I /var/spool/news/out.going
 befinden und lade keine neuen Artikel vom Server.
-		
+
 .SH DATEIEN UND KONFIGURATION
 
-Bitte lesen sie in 
+Bitte lesen sie in
 .B leafnode
 (8) nach, um eine Aufstellung der
 betroffenen Dateien und der Konfigurationsmöglichkeiten von
 fetch zu erhalten.
-	
+
 .SH ALGORITHMUS
 
-Dies ist eine kurze Beschreibung dessen, was 
-.B fetchnews 
+Dies ist eine kurze Beschreibung dessen, was
+.B fetchnews
 tut.
 .PP
-Zuerst sendet 
+Zuerst sendet
 .B fetchnews
 , nachdem eine Verbindung mit dem
 Upstream-Server hergestellt wurde, alle Artikel, die sich in
-.I /var/spool/news/out.going 
-befinden mittels 
+.I /var/spool/news/out.going
+befinden mittels
 .B Post
 . Schlägt
 dieses Kommando fehl, wird der betreffende Artikel in das
-Verzeichnis 
-.I /var/spool/news/failed.postings 
+Verzeichnis
+.I /var/spool/news/failed.postings
 verschoben, das
 der Systemadministrator von Zeit zu Zeit aufräumen sollte. Die
-Dateien zurück nach 
-.I /var/spool/news/out.going 
+Dateien zurück nach
+.I /var/spool/news/out.going
 zu verschieben
 reicht aus, um die entsprechenden Artikel beim nächsten Lauf
-von 
-.B fetchnews 
+von
+.B fetchnews
 zu versenden.
 .PP
-Als nächstes empfängt 
+Als nächstes empfängt
 .B fetchnews
 die Liste der vorrätigen
 Gruppen des Upstream-Servers mittels "LIST ACTIVE" und "LIST

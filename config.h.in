@@ -57,6 +57,9 @@
 /* Define if tm_gmtoff is present in struct tm */
 #undef HAVE_GMTOFF
 
+/* Define if socklen_t is defined */
+#undef HAVE_SOCKLEN_T
+
 /* Define if off_t is 8 bytes */
 #undef HAVE_OFFT_8
 

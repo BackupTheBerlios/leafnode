@@ -1,17 +1,10 @@
 /*
- libutil -- deal with active file
-
- Written by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
- Copyright 2000.
- Reused some old code written by Arnt Gulbrandsen <agulbra@troll.no>,
- copyright 1995, modified by (amongst others) Cornelius Krasel
- <krasel@wpxx02.toxi.uni-wuerzburg.de>, Randolf Skerka
- <Randolf.Skerka@gmx.de>, Kent Robotti <robotti@erols.com> and
- Markus Enzenberger <enz@cip.physik.uni-muenchen.de>. Copyright
- for the modifications 1997-1999.
-
- See README for restrictions on the use of this software.
- */
+  libutil -- deal with active file
+ 
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
+*/
 
 #include "leafnode.h"
 #include "critmem.h"
@@ -97,7 +90,7 @@ void changegroupdesc(const char * groupname, char * description) {
  */
 void mergegroups(void) {
     struct nglist * l, *la;
-    int count = 0;
+    size_t count = 0;
     
     l = newgroup;
     while (l) {
@@ -119,8 +112,8 @@ void mergegroups(void) {
 	active[count].age   = (l->entry)->age  ;
 	active[count].desc  = (l->entry)->desc ;
 	l = l->next;
-	count ++;
-	free(la);	/* clean up */
+	count++;
+	free( la );	/* clean up */
     }
     newgroup = NULL;
     active[count].name = NULL;
@@ -176,8 +169,7 @@ void writeactive(void) {
     strcat(s, "/leaf.node/groupinfo.new");
     a = fopen(s, "w");
     if (!a) {
-	ln_log_sys(LNLOG_ERR, "cannot open new groupinfo file: %s", 
-		    strerror(errno));
+	ln_log_sys(LNLOG_ERR, "cannot open new groupinfo file: %m");
 	return;
     }
 
@@ -211,7 +203,7 @@ void writeactive(void) {
     }
     strcpy(c, spooldir);
     strcat(c, "/leaf.node/groupinfo");
-    rename(s, c);
+    rename( s, c );
 }
 
 /*
@@ -254,7 +246,7 @@ void readactive(void) {
     strcpy(s, spooldir);
     strcat(s, "/leaf.node/groupinfo");
     if (stat( s, &st) ) {
-    	ln_log_sys(LNLOG_ERR, "can't stat %s: %s", s, strerror(errno));
+    	ln_log_sys(LNLOG_ERR, "can't stat %s: %m", s);
 	return;
     } else if (!S_ISREG( st.st_mode) ) {
     	ln_log_sys(LNLOG_ERR, "%s not a regular file", s);
@@ -271,7 +263,7 @@ void readactive(void) {
 	fclose(f);
     }
     else {
-     	ln_log_sys(LNLOG_ERR, "unable to open %s: %s", s, strerror(errno));
+     	ln_log_sys(LNLOG_ERR, "unable to open %s: %m", s);
 	return;
     }
 
@@ -389,8 +381,7 @@ void fakeactive(void) {
     strcat(s, "/interesting.groups");
     d = opendir(s);
     if (!d) {
-	ln_log(LNLOG_ERR, "cannot open directory %s: %s", s, 
-	       strerror(errno));
+	ln_log(LNLOG_ERR, "cannot open directory %s: %m", s);
 	return;
     }
 
@@ -437,8 +428,7 @@ void fakeactive(void) {
     strcat(s, "/local.groups");
     d = opendir(s);
     if (!d) {
-	ln_log_sys(LNLOG_ERR, "cannot open directory %s: %s", s,
-		   strerror(errno));
+	ln_log_sys(LNLOG_ERR, "cannot open directory %s: %m", s);
 	return;
     }
 

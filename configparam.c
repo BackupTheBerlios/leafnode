@@ -8,7 +8,9 @@ static int comp(const void *a, const void *b) {
 
 const struct configparam *find_configparam(register const char *name)
 {
-    return bsearch(name, configparam, count_configparam, 
+    return 
+	(struct configparam *)
+	bsearch(name, configparam, count_configparam, 
 		   sizeof(struct configparam), comp);
 }
     

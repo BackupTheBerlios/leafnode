@@ -10,9 +10,9 @@ Copyright: see COPYING
 Group: Applications/News
 Source: ftp://wpxx02.toxi.uni-wuerzburg.de/pub/leafnode-%version.tar.gz
 
-Prefix: /usr
+%define prefix   /usr
 %define spooldir /var/spool/news
-%define confdir /etc/leafnode
+%define confdir  /etc/leafnode
 %define lockfile /var/lock/fetchnews.lck
 
 # Distribution: ${DISTRIBUTION}
@@ -40,22 +40,25 @@ CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix --mandir=%_mandir \
 make
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT install-strip
+make INSTALLROOT=$RPM_BUILD_ROOT install-strip
 
 %files
-%attr(640,root,root) %confdir/config.example
-%defattr(755,root,root)
-%prefix/bin/newsq
-%defattr(750,root,root)
-%prefix/sbin/*
 %defattr(644,root,root)
+%attr(640,root,root) %confdir/config.example
+%attr(755,root,root) %{prefix}/bin/newsq
+%attr(750,root,root) %{prefix}/sbin/applyfilter
+%attr(750,root,root) %{prefix}/sbin/checkgroups
+%attr(750,root,root) %{prefix}/sbin/leafnode
+%attr(750,root,root) %{prefix}/sbin/rnews
+%attr(4750,news,news) %{prefix}/sbin/fetchnews
+%attr(4750,news,news) %{prefix}/sbin/texpire
 %doc %_mandir/man1/*
+%doc %_mandir/man5/*
 %doc %_mandir/man8/*
-%doc ChangeLog COPYING CREDITS FAQ INSTALL README TODO 
-%doc CHANGES README-MAINTAINER
+%doc ChangeLog AUTHORS CREDITS FAQ INSTALL README TODO 
+%doc README.html
 %doc tools/*.pl
-%defattr(2755,news,news)
-%spooldir
+%attr(2755,news,news) %spooldir
 
 %clean
 rm -rf $RPM_BUILD_ROOT

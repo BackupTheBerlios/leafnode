@@ -1,6 +1,6 @@
 /*
     getline - fetch a single line from a stdio stream, arbitrary length
-    Copyright (C) 2000 Matthias Andree
+    Copyright (C) 2000 Matthias Andree <matthias.andree@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,27 +29,29 @@
  */
 static ssize_t _getline(char *to, size_t size, FILE *stream)
 {
-    int i=0;
+    ssize_t i=0;
     int c;
-    if(!size) return -1;
+    if(1 > size) return -1;
     size--;
-    while(size-- && ((c = getc(stream)) != EOF)) {
+    while(size > 0 && ((c = getc(stream)) != EOF)) {
 	*to=(unsigned char)c; 
 	to++;
 	i++;
-	if(c == '\n') break;
+	if(c == (int)'\n') break;
+	size --;
     }
-    *to=0;
+    *to = '\0';
     if(ferror(stream)) return -1;
     return i;
 }	
 
 /* this is a rewritten-from-scratch glibc2 getline() replacement 
    returns characters read or -1 for EOF/error */
+ssize_t getline(char **pto, size_t *size, FILE *stream);
 ssize_t getline(char **pto, size_t *size, FILE *stream) {
     ssize_t i=0, cur=0, off=0;
 
-    if(!*size && !*pto) {
+    if(!(*size) && !(*pto)) {
 	*size=256;
 	*pto=critmalloc(*size, "fgetline");
     }

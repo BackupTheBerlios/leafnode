@@ -1,20 +1,9 @@
 /*
-libutil -- read config file
+  libutil -- read config file
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1998, 1999.
-
-See README for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"

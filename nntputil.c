@@ -1,20 +1,9 @@
 /*
-libutil -- misc nntp-related stuff. Only used by fetch.
+  nntputil -- misc nntp-related stuff. Only used by fetch.
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1998, 1999.
-
-See README for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
@@ -60,9 +49,9 @@ static void timer(int sig) {
 }
 
 /*
-05/26/97 - T. Sweeney - Send a string out, keeping a copy in reserve.
-*/
-void putaline(const char *fmt, ...) {
+ * 05/26/97 - T. Sweeney - Send a string out, keeping a copy in reserve.
+ */
+void putaline( const char *fmt, ... ) {
     char lineout[1025];
     va_list args;
 
@@ -247,11 +236,10 @@ int nntpconnect(const struct serverlist * upstream) {
 	    infd=dup(sock);
 
 	    if(infd < 0) {
-		ln_log(LNLOG_ERR, "cannot dup: %s", strerror(errno));
+		ln_log(LNLOG_ERR, "cannot dup: %m");
 		break;
 	    }
-
-	    nntpin  = fdopen(infd, "r");
+	    nntpin  = fdopen( infd, "r" );
 	    if (nntpin == NULL)
 		break;
 
@@ -263,8 +251,8 @@ int nntpconnect(const struct serverlist * upstream) {
 		       inet_ntoa(s_in.sin_addr), htons(s_in.sin_port), reply);
 		return reply;
 	    }
-	    shutdown(fileno(nntpout), 0); 
-	    shutdown(fileno(nntpin), 1);	    
+	    shutdown(fileno(nntpout), 0);
+	    shutdown(fileno(nntpin), 1);
 	}/* end of IP-addresses for loop */
     } else {
 	ln_log(LNLOG_ERR, "cannot resolve %s: %s", upstream->name,

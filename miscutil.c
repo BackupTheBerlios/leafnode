@@ -1,22 +1,9 @@
 /*
-libutil -- miscellaneous stuff
+  miscutil -- miscellaneous stuff
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1998, 1999.
-Modified by Joerg Dietrich <joerg@dietrich.net>
-Copyright of the modifications 2000.
-
-See file COPYING for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See file COPYING for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
@@ -29,7 +16,6 @@ See file COPYING for restrictions on the use of this software.
 #include <sys/param.h>
 #include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -182,10 +168,10 @@ char * getoptarg(char option, int argc, char * argv[]) {
 /*
  * parse options global to all leafnode programs
  */
-int parseopt(char *progname, char option, char * optarg, char * conffile) {
-    if (option == 'V') {
-	printf("%s %s\n", progname, version);
-	exit(0);
+int parseopt( char *progname, int option, char * optarg, char * conffile ) {
+    if ( option == 'V' ) {
+	printf( "%s %s\n", progname, version );
+	exit( 0 );
     }
     else if (option == 'v') {
 	verbose++;
@@ -216,15 +202,15 @@ void checkinteresting(void) {
 
     now = time(NULL);
     if (chdir( spooldir) || chdir( "interesting.groups" ) ) {
-	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %s",
-	       spooldir, strerror(errno));
+	ln_log(LNLOG_ERR, "unable to chdir to %s/interesting.groups: %m",
+	       spooldir);
 	return;
     }
 
     d = opendir(".");
     if (!d) {
-	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %s",
-		spooldir, strerror(errno));
+	ln_log(LNLOG_ERR, "unable to opendir %s/interesting.groups: %m",
+		spooldir);
 	return;
     }
 
@@ -263,8 +249,8 @@ int lockfile_exists(int silent, int block) {
 	if (!silent)
 	    printf("Could not open lockfile %s for writing, "
 		    "abort program ...\n", lockfile);
-	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %s",
-		lockfile, strerror(errno));
+	ln_log(LNLOG_ERR, "Could not open lockfile %s for writing: %m",
+		lockfile);
 	return 1;
     }
     fl.l_type = F_WRLCK;
@@ -283,8 +269,7 @@ int lockfile_exists(int silent, int block) {
 	    if (!silent)
 		printf(" locking %s failed: %s, abort ...\n"
 			, lockfile, strerror(errno) );
-	    ln_log(LNLOG_ERR, "locking %s failed: %s, abort", lockfile,
-		   strerror(errno));
+	    ln_log(LNLOG_ERR, "locking %s failed: %m, abort", lockfile);
 	    return 1;
 	}
     } else {
@@ -311,8 +296,7 @@ int isinteresting(const char *groupname) {
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
     if (!d) {
-    	ln_log(LNLOG_ERR, "Unable to open directory %s: %s", s,
-	       strerror(errno));
+    	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s);
 	return FALSE;
     }
 
@@ -374,7 +358,8 @@ const char * lookup (const char *msgid) {
     return name;
 }
 
-static int makedir(char * d) {
+
+static int makedir( char * d ) {
     char * p;
     char * q;
 
@@ -391,11 +376,11 @@ static int makedir(char * d) {
 	    continue; /* ok, I do use it sometimes :) */
 	if (errno==ENOENT)
 	    if (mkdir(p, 0775)) {
-		ln_log(LNLOG_ERR, "mkdir %s: %s", d, strerror(errno));
+		ln_log(LNLOG_ERR, "mkdir %s: %m", d);
 		exit(EXIT_FAILURE);
 	    }
 	if (chdir(p)) {
-	    ln_log(LNLOG_ERR, "chdir %s: %s", d, strerror(errno));
+	    ln_log(LNLOG_ERR, "chdir %s: %m", d);
 	    exit(EXIT_FAILURE);
 	}
     } while (q);
@@ -433,13 +418,13 @@ void whoami(void) {
     struct hostent * he;
 
     if (!gethostname(fqdn, FQDN_SIZE-1) && (he = gethostbyname(fqdn))!=NULL) {
-	strncpy(fqdn, he->h_name, FQDN_SIZE-1);
+	strncpy( fqdn, he->h_name, FQDN_SIZE-1 );
 	if (strchr(fqdn, '.') == NULL) {
 	    char ** alias;
 	    alias = he->h_aliases;
 	    while(alias && *alias)
 		if (strchr(*alias, '.') && (strlen(*alias)>strlen(fqdn)))
-		    strncpy(fqdn, *alias, FQDN_SIZE-1);
+		    strncpy( fqdn, *alias, FQDN_SIZE-1 );
 		else
 		    alias++;
 	    }
@@ -716,7 +701,7 @@ void copyfile(FILE * infile, FILE * outfile, long n) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.9 $
+/*  $Revision: 1.10 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"

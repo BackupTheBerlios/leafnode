@@ -1,4 +1,4 @@
-.TH rnews 8 "19 Jan 1999" "" \" -*- nroff -*-
+.TH rnews 8 @VERSION@ leafnode Leafnode \" -*- nroff -*-
 .\"
 .\" Written and copyright 1999 by Cornelius Krasel
 .\" <krasel@wpxx02.toxi.uni-wuerzburg.de>
@@ -10,7 +10,7 @@ rnews \- sort batch files into spool
 
 .SH SYNOPSIS
 .B rnews -V
-.br
+br
 .B rnews [-v|D] [file|directory]
 
 .SH DESCRIPTION

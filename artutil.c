@@ -36,11 +36,12 @@ char *mgetheader (const char *hdr, char *buf) {
 	    p += strlen(hdr)+1;
 	    while (isspace((unsigned char)*p))
 		p++;
-	    q = strchr(p, '\n');
-	    if (p && q) {
-		value = critmalloc((size_t)(q-p+2), "Allocating space for header value");
-		memset(value, 0, (size_t)(q-p+2));
-		strncpy(value, p, (size_t)(q-p));
+	    q = strchr( p, '\n' );
+	    if ( p && q ) {
+		value = critmalloc( (size_t)(q-p+2),
+				    "Allocating space for header value" );
+		memset( value, 0, (size_t)(q-p+2) );
+		strncpy( value, p, (size_t)(q-p) );
 	     }
 	} else {
 	     q = strchr(p, '\n');
@@ -170,8 +171,8 @@ void storearticle (char * filename, char * msgid, char * newsgroups) {
 			errno = 0;
 		    } while (link( outname, tmp)<0 && errno==EEXIST );
 		    if (errno)
-			ln_log(LNLOG_ERR, "error linking %s into %s/%s: %s",
-				outname, p, tmp, strerror(errno));
+			ln_log(LNLOG_ERR, "error linking %s into %s/%s: %m",
+				outname, p, tmp);
 		    else if (verbose)
 			fprintf(stderr, "storing %s as %s in %s\n",
 				 outname, tmp, p);
@@ -190,9 +191,9 @@ void storearticle (char * filename, char * msgid, char * newsgroups) {
 
     debug = 0;
     /* copy rest of article */
-    while(( l = getaline( infile) ) &&
-	   !(( *l)=='.' && ( strlen( l )==1 ) ) ) {
-	fprintf(outfile, "%s\n", l);
+    while( ( (l = getaline(infile)) ) &&
+	   !( (*l)=='.' && (strlen(l) == 1) ) ) {
+	fprintf( outfile, "%s\n", l );
     }
     debug = debugmode;
     fclose(infile);
@@ -259,8 +260,7 @@ void supersede(const char *msgid) {
 	    if (q)
 		*q++ = '\0';
             if (unlink(p)) {
-                ln_log(LNLOG_ERR, "Failed to unlink %s: %s: %s", r, p,
-		       strerror(errno));
+                ln_log(LNLOG_ERR, "Failed to unlink %s: %s: %m", r, p);
             } else {
 		ln_log(LNLOG_INFO, "Superseded %s in %s", p, r);
             }
@@ -275,14 +275,12 @@ void supersede(const char *msgid) {
     
     /* unlink the message-id hardlink */
     if (stat( filename, &st) )
-        ln_log_sys(LNLOG_ERR, "cannot stat %s: %s", filename, 
-		   strerror(errno));
+        ln_log_sys(LNLOG_ERR, "cannot stat %s: %m", filename);
     else if (st.st_nlink > 1)
         ln_log_sys(LNLOG_ERR, "%s: link count is %ld", filename, 
 		   (long)st.st_nlink);
     else if (unlink( filename) )
-        ln_log_sys(LNLOG_ERR, "Failed to unlink %s: %s", filename,
-		    strerror(errno));
+        ln_log_sys(LNLOG_ERR, "Failed to unlink %s: %m", filename);
     else {
         ln_log(LNLOG_INFO, "Superseded %s", filename);
     }
@@ -330,8 +328,8 @@ void store(const char * filename, FILE * filehandle, char * newsgroups,
 			       cg->last, cg->name);
 		} while (link( filename, tmp)<0 && errno==EEXIST );
 		if (errno)
-		    ln_log(LNLOG_ERR, "error linking %s into %s: %s",
-			    filename, p, strerror(errno));
+		    ln_log(LNLOG_ERR, "error linking %s into %s: %m",
+			   filename, p);
 		else {
 		    sprintf(x, " %s:%lu", cg->name, cg->last);
 		    x += strlen(x);

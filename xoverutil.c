@@ -1,20 +1,9 @@
 /*
-libutil -- handling xover records
+  xoverutil -- handling xover records
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>.
-Copyright of the modifications 1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
-Copyright of the modifications 1998, 1999.
-
-See README for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
@@ -256,18 +245,16 @@ int getxover(void) {
 
     d = opendir(".");
     if (!d) {
-	ln_log(LNLOG_ERR, "opendir: %s", strerror(errno));
+	ln_log(LNLOG_ERR, "opendir: %m");
 	return 0;
     }
 
     /* read .overview file into memory */
-    if (
-	((fd=open(".overview", O_RDONLY)) >= 0)
-	&& (fstat(fd, &st) == 0) 
-	&& (overview=(char *)realloc(overview, (size_t)st.st_size + 1)) 
-	&& (read(fd, overview, (size_t)st.st_size) == (ssize_t)st.st_size )
-	) {
-	close(fd);
+    if ( ( (fd=open( ".overview", O_RDONLY)) >= 0) &&
+	 ( fstat(fd, &st) == 0 ) &&
+	 ( (overview = (char*)realloc(overview, (size_t)st.st_size+1)) != NULL ) &&
+	 ( read( fd, overview, st.st_size ) == st.st_size ) ) {
+	close( fd );
 	overview[st.st_size] = '\0';
     } else {
 	/* .overview file not present: make a new one */
@@ -347,8 +334,7 @@ int getxover(void) {
     /* compare .overview contents with files on disk */
     d = opendir(".");
     if (!d) {
-	ln_log(LNLOG_ERR, "opendir %s: %s", getcwd(s, 1024),
-	       strerror(errno));
+	ln_log(LNLOG_ERR, "opendir %s: %m", getcwd(s, 1024));
 	return 0;
     }
     while ((de = readdir(d)) != NULL) {
@@ -417,22 +403,11 @@ void writexover(void) {
     int wfd, vi, vc, va;
     unsigned long art;
 
-    strcpy(newfile, ".overview.XXXXXX");
-    strcpy(lineend, "\n");
-#ifdef HAVE_MKSTEMP
-    if ((wfd=mkstemp(newfile)) == -1) {
-	ln_log(LNLOG_ERR, "mkstemp of new .overview failed: %s",
-	       strerror(errno));
+    strcpy( newfile, ".overview.XXXXXX" );
+    if ( (wfd=mkstemp(newfile)) == -1) {
+	ln_log( LNLOG_ERR, "mkstemp of new .overview failed: %m" );
 	return;
     }
-#else
-    if (!( wfd=open( mktemp(newfile), O_WRONLY|O_CREAT|O_EXCL, 0664) ) ) {
-	ln_log(LNLOG_ERR,
-		"open(O_WRONLY|O_CREAT|O_EXCL) of new .overview failed: %s",
-	       strerror(errno));
-	return;
-    }
-#endif
 
     vi = vc = va = 0;
     for (art=0; art < xcount; art++) {
@@ -444,8 +419,7 @@ void writexover(void) {
 	    oooh[vi++].iov_len = 1;
 	    if (vi >= (UIO_MAXIOV - 1)) {
 		if (writev( wfd, oooh, vi) != vc ) {
-		    ln_log(LNLOG_ERR, "writev() for .overview failed: %s",
-			   strerror(errno));
+		    ln_log(LNLOG_ERR, "writev() for .overview failed: %m");
 		    art = xlast+1;	/* so the loop will stop */
 		}
 		vi = vc = 0;
@@ -455,8 +429,7 @@ void writexover(void) {
     }
     if (vi) {
 	if (writev( wfd, oooh, vi) != vc )
-	    ln_log(LNLOG_ERR, "writev() for .overview failed: %s",
-		   strerror(errno));
+	    ln_log(LNLOG_ERR, "writev() for .overview failed: %m");
 	else
 	    va = 1;
     }
@@ -465,12 +438,10 @@ void writexover(void) {
     if (va) {
 	if (rename( newfile, ".overview") ) {
 	    if (unlink( newfile) )
-		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %s",
-		       strerror(errno));
+		ln_log(LNLOG_ERR, "rename() and unlink() both failed: %m");
 	    else
-		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %s",
-		       getcwd(s, 1024), newfile,
-		       strerror(errno));
+		ln_log(LNLOG_ERR, "rename(%s/%s, .overview) failed: %m",
+		       getcwd(s, 1024), newfile);
 	}
 	else {
 	    if (debugmode)
@@ -512,8 +483,7 @@ void fixxover(void) {
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
     if (!d) {
-	ln_log(LNLOG_ERR, "opendir %s: %s", s,
-	       strerror(errno));
+	ln_log(LNLOG_ERR, "opendir %s: %m", s);
 	return;
     }
 

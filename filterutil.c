@@ -198,8 +198,7 @@ int readfilter(char *filterfile) {
 
     ff = fopen(filterfile, "r");
     if (!ff) {
-	ln_log(LNLOG_WARNING, "Unable to open filterfile %s: %s", filterfile,
-	       strerror(errno));
+	ln_log(LNLOG_WARNING, "Unable to open filterfile %s: %m", filterfile);
 	return FALSE;
     }
     debug = 0;
@@ -349,9 +348,11 @@ int killfilter(struct filterlist *f, char *hdr) {
 	g = f->entry;
 	if ((g->limit == -1) && (g->expr)) {
 #ifdef NEW_PCRE_EXEC
-	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr), 0, 0, NULL, 0);
+	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr),
+			       0, 0, NULL, 0 );
 #else
-	    match = pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr), 0, NULL, 0);
+	    match = pcre_exec( g->expr, NULL, hdr, (int)strlen(hdr),
+			       0, NULL, 0 );
 #endif
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    p = findinheaders("Date:", hdr);

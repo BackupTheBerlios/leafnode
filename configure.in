@@ -1,12 +1,11 @@
-dnl autoconf script for leafnode -*- m4 -*-
-dnl written by Cornelius Krasel, 1999
-dnl enhanced by Matthias Andree, 2000
+dnl autoconf script for leafnode
+dnl written by Cornelius Krasel & Matthias Andree, 1999-2000
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(leafnode.h)
 AC_CONFIG_HEADER(config.h)
 
-dnl version information
-VERSION="2.0b5_ma8"
+dnl Version information
+VERSION="2.0b6_ma1"
 AC_SUBST(VERSION)
 
 dnl Checks for programs.
@@ -15,17 +14,19 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_CHECK_PROG( AR, ar, ar )
+AC_PATH_PROG( LYNX, lynx )
+AC_PATH_PROG( RPM, rpm )
+AC_PATH_PROG( GZIP, gzip, false )
+AC_PATH_PROG( BZIP2, bzip2, false )
 
 dnl If we're using gcc, enable some warnings
 if test "$GCC" = yes
 then
-GCC_FLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
+GCC_FLAGS="-Wall -W -Wstrict-prototypes -Wmissing-prototypes"
+else
+GCC_FLAGS=""
 fi
-
-AC_CHECK_PROG(AR, ar, ar)
-AC_PATH_PROG(LYNX, lynx)
-AC_PATH_PROG(RPM, rpm)
-AC_PATH_PROG(SED, sed)
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
@@ -36,11 +37,12 @@ AC_CHECK_HEADERS([errno.h fcntl.h limits.h sys/time.h syslog.h unistd.h])
 dnl Check whether all necessary include files are there
 AC_MSG_CHECKING(for system include files)
 AC_CACHE_VAL(cf_cv_sysheaders, AC_TRY_COMPILE([
+#include <sys/types.h>
 #include <sys/param.h>],[
-    return 0;],
-  [cf_cv_sysheaders="yes"],
-  [cf_cv_sysheaders="no"])
- )
+     return 0;],
+   [cf_cv_sysheaders="yes"],
+   [cf_cv_sysheaders="no"])
+  )
 if test "$cf_cv_sysheaders" = "yes"
 then
   AC_MSG_RESULT(yes)
@@ -57,6 +59,24 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
+
+dnl Check whether socklen_t is defined in /usr/include/sys/socket.h
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(cf_cv_socklen_t, AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>],[
+    socklen_t fodder;
+    return fodder;],
+   [cf_cv_socklen_t="yes"],
+   [cf_cv_socklen_t="no"])
+  )
+if test "$cf_cv_socklen_t" = "yes"
+then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_SOCKLEN_T)
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl check where to put the spooldir
 AC_MSG_CHECKING(spooldir)
@@ -107,13 +127,14 @@ AC_MSG_RESULT($LOCKFILE)
 AC_SUBST(LOCKFILE)
 
 dnl check for rpm build dir
+dnl Check for rpm build dir
 AC_MSG_CHECKING(rpm build dir)
 d=/usr/src/packages
-test -d ${d}/SPECS || d=/usr/src/redhat dnl red hat 
+test -d ${d}/SPECS || d=/usr/src/redhat dnl RedHat
 test -d ${d}/SPECS || d=none
 RPMSRC=${d}
 AC_MSG_RESULT(${RPMSRC})
-test "${RPMSRC}" = "none" || AC_SUBST(RPMSRC) 
+test "${RMPSRC}" = "none" || AC_SUBST(RPMSRC)
 
 dnl Check for libcrypt
 AC_CHECK_LIB(crypt, crypt, [CRYPTLIB="-lcrypt"])
@@ -129,21 +150,8 @@ then
   # do not add this to LIBS
   AC_CHECK_LIB(pcre, pcre_compile, LINKPCRELIB="-lpcre")
 fi
-if test "$ac_cv_lib_pcre_pcre_compile" != yes
+if test "$ac_cv_lib_pcre_pcre_compile" = yes
 then
-  echo "*** error: you do not have PCRE installed. You must install PCRE"
-  echo "*** before you can install leafnode."
-  echo  
-  if test -d pcre ; then
-    echo "*** Please install PCRE. To do so, become root and do:"
-    echo "*** cd `pwd`/pcre && ./configure && make install"
-  else
-    echo "*** Please download PCRE 3.4 from http://www.pcre.org/"
-    echo "*** and install it, preferably as shared version."
-    echo "*** Then, reconfigure leafnode."
-  fi
-  AC_ERROR(PCRE missing)
-else
   AC_DEFINE(HAVE_LIBPCRE)
   AC_MSG_CHECKING(for pcre_compile version)
   AC_CACHE_VAL(cf_cv_new_pcre_compile,[AC_TRY_COMPILE([
@@ -185,6 +193,23 @@ else
     AC_MSG_RESULT(2.05)
   fi
 fi
+
+if test "$ac_cv_lib_pcre_pcre_compile" != "yes"
+then
+  echo "*** I cannot find PCRE. leafnode depends on it."
+  if test -d ${srcdir}/pcre ; then
+    echo "*** Trying to use PCRE from ${srcdir}/pcre"
+    LINKPCRELIB="libpcre.a"
+    PCRELIB="libpcre.a"
+    AC_DEFINE(NEW_PCRE_COMPILE)
+  else
+    echo
+    echo "*** Please download PCRE 3.4 or newer from http://www.pcre.org/"
+    echo "*** and install it, preferably as shared version."
+    echo "*** Then, reconfigure leafnode."
+  fi
+fi
+
 AC_SUBST(PCRELIB)
 AC_SUBST(LINKPCRELIB)
 
@@ -198,7 +223,7 @@ AC_CACHE_VAL(cf_cv_have_gmtoff,[AC_TRY_COMPILE([
 	now = time(0);
 	gmt = *(gmtime(&now));
 	gmtoff = gmt.tm_gmtoff;],
-   [cf_cv_have_gmtoff="yes"], [ cf_cv_have_gmtoff="no" ])
+   [cf_cv_have_gmtoff="yes"], [cf_cv_have_gmtoff="no"])
 ])
 if test $cf_cv_have_gmtoff = "yes"
 then
@@ -252,4 +277,4 @@ AC_ARG_WITH(ipv6,
 AC_SUBST(PCRE_DEFINES)
 AC_SUBST(GCC_FLAGS)
 
-AC_OUTPUT(stamp-h Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8)
+AC_OUTPUT(stamp-h Makefile leafnode.spec leafnode.8 newsq.1 applyfilter.8 fetchnews.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8 pcre/Makefile)

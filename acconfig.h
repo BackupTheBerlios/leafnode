@@ -10,6 +10,9 @@
 /* Define if tm_gmtoff is present in struct tm */
 #undef HAVE_GMTOFF
 
+/* Define if socklen_t is defined */
+#undef HAVE_SOCKLEN_T
+
 /* Define if syslog is BSD 4.2 (i.e. old-style) */
 #undef HAVE_OLD_SYSLOG
 

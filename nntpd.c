@@ -1,25 +1,9 @@
 /*
-nntpd -- the NNTP server
+  nntpd -- the NNTP server
 
-Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
-Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
-22646949.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Randolf Skerka <Randolf.Skerka@gmx.de>. Copyright of the modifications
-1997.
-Modified by Kent Robotti <robotti@erols.com>. Copyright of the
-modifications 1998.
-Modified by Markus Enzenberger <enz@cip.physik.uni-muenchen.de>.
-Copyright of the modifications 1998.
-Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
-and Kazushi (Jam) Marukawa <jam@pobox.com>. Copyright of the modifications
-1998, 1999.
-Modified by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>
-Copyright of the modifications 1999.
-Modified By Joerg Dietrich <joerg@dietrich.net>
-Copyright of the modifications 2000.
-
-See README for restrictions on the use of this software.
+  See AUTHORS for copyright holders and contributors.
+  
+  See README for restrictions on the use of this software.
 */
 
 #include "leafnode.h"
@@ -69,7 +53,7 @@ int hash (const char *);
 FILE * fopenart(const char *);
 FILE * buildpseudoart(const char * grp);
 FILE * fopenpseudoart(const char * arg, const unsigned long article_num);
-void list(struct newsgroup * ng, int what, char * pattern);
+void list(struct newsgroup * ng, int what, char * pattern );
 void rereadactive(void);
 
 void parser(void);
@@ -141,7 +125,7 @@ static time_t gmtoff(void) {
     putenv(oldzone);
     free(oldzone);
 
-    return(gmtsec - localsec);
+    return( localsec - gmtsec );
 }
 
 /*
@@ -305,7 +289,7 @@ void parser(void) {
 	}
 	fflush(stdout);
     }
-    nntpprintf("421 Network error: %s", strerror(errno));
+    nntpprintf("400 service discontinued: %s", strerror(errno));
 }
 
 /*
@@ -316,8 +300,9 @@ static void fprintpseudobody(FILE * pseudoart, const char * groupname) {
     FILE * f;
     char * l, * cl, *c;
 
-    if (pseudofile && ((f = fopen(pseudofile, "r")) != NULL)) {
-	while ((l = getaline(f)) != NULL) {
+    if ( pseudofile && (( f = fopen( pseudofile, "r" )) != NULL ) ) {
+	debug = 0;
+	while (( l = getaline(f) ) != NULL ) {
 	    cl = l;
 	    while ((c = strchr(cl, '%')) != NULL) {
 		if (strncmp(c, "%%", 2) == 0) {
@@ -351,8 +336,8 @@ static void fprintpseudobody(FILE * pseudoart, const char * groupname) {
 	fclose(f);
     } else {
 	if (pseudofile)
-	    ln_log(LNLOG_NOTICE, "Unable to read pseudoarticle from %s: %s",
-		    pseudofile, strerror(errno));
+	    ln_log(LNLOG_NOTICE, "Unable to read pseudoarticle from %s: %m",
+		    pseudofile);
 	fprintf(pseudoart,
 	  "This server is running leafnode, which is a dynamic NNTP proxy.\n"
 	  "This means that it does not retrieve newsgroups unless someone is\n"
@@ -627,7 +612,7 @@ void markinterest(void) {
 	if (f)
 	    fclose(f);
 	else
-	    ln_log(LNLOG_ERR, "Could not create %s: %s", s, strerror(errno));
+	    ln_log(LNLOG_ERR, "Could not create %s: %m", s);
     }
 }
     
@@ -644,21 +629,28 @@ void dogroup(const char *arg) {
     g = findgroup(arg);
     if (g) {
 	group = g;
-	if (isinteresting(group->name))
+	if ( isinteresting( g->name ) )
 	    markinterest();
 	if (chdirgroup(g->name, FALSE)) {
 	    if (g->count == 0) {
 		g->count = (g->last >= g->first ? g->last-g->first+1 : 0) ;
 		/* count articles in group */
 		i = 0;
-		if ((d = opendir(".")) != NULL) {
-		    while ((de = readdir(d)) != NULL)
-		        i++;
-		    g->count = i - 2;	/* for "." and ".." */
+		if ( (d = opendir( "." )) != NULL ) {
+		    while ( ( de = readdir(d) ) != NULL ) {
+			if ( de->d_name[0] != '.' )
+			    i++;
+		    }
+		    g->count = i;
+		    closedir(d);
 		}
 	    }
-	    nntpprintf("211 %lu %lu %lu %s",
-		   g->count, g->first, g->last, g->name);
+	    if ( g->count == 0 ) {
+		nntpprintf("211 0 0 0 %s group selected", g->name );
+	    } else {
+		nntpprintf("211 %lu %lu %lu %s group selected", 
+			    g->count, g->first, g->last, g->name);
+	    }
 	    pseudogroup = FALSE;
 	} else {
 	    nntpprintf("211 1 1 1 %s",
@@ -907,8 +899,7 @@ void donewnews(char *arg) {
     sprintf(s, "%s/interesting.groups", spooldir);
     d = opendir(s);
     if (!d) {
-	ln_log(LNLOG_ERR, "Unable to open directory %s: %s", s,
-	       strerror(errno));
+	ln_log(LNLOG_ERR, "Unable to open directory %s: %m", s);
 	printf(".\r\n");
 	return;
     }
@@ -1051,25 +1042,26 @@ char * generateMessageID(void) {
 	*p++ = ALPHABET[(int)(n & 31)];
 	n >>= 5;
     }
-    sprintf(p, ".ln@%s>", fqdn);
-    return buff;
+    sprintf( p, ".ln@%s>", fqdn );
+    return(strdup(buff));
 }
 
 /* the end of what I stole from rsalz and then mangled */
 
 
-void dopost(void) {
-    char * line;
+void dopost( void ) {
+    char *line, *msgid;
     int havefrom = 0;
     int havepath = 0;
     int havedate = 0;
+    int havebody = 0;
     int havenewsgroups = 0;
     int havemessageid = 0;
     int havesubject = 0;
     int err = 0;
+    int duplicate = FALSE;
     int hdrtoolong = FALSE;
-    size_t i;
-    size_t len;
+    size_t i, len;
     int out;
     char outname[80];
     static int postingno; /* starts as 0 */
@@ -1080,14 +1072,14 @@ void dopost(void) {
 
     out = open(outname, O_WRONLY|O_EXCL|O_CREAT, 0444);
     if (out < 0) {
-	char *error = strerror(errno);
-	ln_log_so(LNLOG_ERR, "441 Unable to open spool file %s: %s",
-		outname, error);
+	ln_log_so(LNLOG_ERR, "441 Unable to open spool file %s: %m",
+		outname);
 	return;
     }
 
-    nntpprintf("340 Go ahead.");
-    fflush(stdout);
+    msgid = generateMessageID();
+    nntpprintf( "340 Ok, recommended ID %s", msgid );
+    fflush( stdout );
 
     /* get headers */
     do {
@@ -1099,6 +1091,7 @@ void dopost(void) {
 	    unlink(outname);
 	    exit(0);
 	}
+	if (!strcmp(line, ".")) break;
 	if (!strncasecmp(line, "From:", 5)) {
 	    if (havefrom)
 		err = TRUE;
@@ -1114,8 +1107,18 @@ void dopost(void) {
 	if (!strncasecmp(line, "Message-ID:", 11)) {
 	    if (havemessageid)
 		err = TRUE;
-	    else
+	    else {
 		havemessageid = TRUE;
+		free( msgid );
+		msgid = mgetheader( "Message-ID:", line );
+#ifdef FIXME
+/* we don't look for duplicates yet because it would break my local setup */
+		if ( stat( lookup( msgid ), &st ) == 0 ) {
+		    err = TRUE;
+		    duplicate = TRUE;
+		}
+#endif
+	    }
 	}
 	if (!strncasecmp(line, "Subject:", 8)) {
 	    if (havesubject)
@@ -1175,45 +1178,47 @@ void dopost(void) {
 		write(out, "\r\n", 2);
 	    }
 	    if (!havemessageid) {
-		char tmp[80];
-		sprintf(tmp, "Message-ID: %s\r\n",
-			 generateMessageID());
-		write(out, tmp, strlen(tmp));
+		char tmp[800];
+		snprintf( tmp, sizeof(tmp), "Message-ID: %s\r\n", msgid );
+		write( out, tmp, strlen( tmp ) );
 	    }
 	}
 	write(out, "\r\n", 2);
     } while (*line);
 
     /* get bodies */
-    do {
-	debug = 0;
-	line = getaline(stdin);
-	debug = debugmode;
-	if (!line) {
-	    unlink(outname);
-	    exit(EXIT_FAILURE);
-	}
-
-	len = strlen(line);
-	if (len && line[len-1]=='\n')
-	    line[--len] = '\0';
-	if (len && line[len-1]=='\r')
-	    line[--len] = '\0';
-	if (len && line[len-1]=='\r')
-	    line[--len] = '\0';
-	if (line[0] == '.') {
-	    if (len > 1) {
-		write(out, line+1, len-1);
+    if(strcmp(line, ".")) { /* skip if header contained a single dot line */
+	havebody = TRUE;
+	do {
+	    debug = 0;
+	    line = getaline(stdin);
+	    debug = debugmode;
+	    if (!line) {
+		unlink(outname);
+		exit(EXIT_FAILURE);
+	    }
+	    
+	    len = strlen(line);
+	    if (len && line[len-1]=='\n')
+		line[--len] = '\0';
+	    if (len && line[len-1]=='\r')
+		line[--len] = '\0';
+	    if (len && line[len-1]=='\r')
+		line[--len] = '\0';
+	    if (line[0] == '.') {
+		if (len > 1) {
+		    write(out, line+1, len-1);
+		    write(out, "\r\n", 2);
+		}
+	    }
+	    else {
+		write(out, line, len);
 		write(out, "\r\n", 2);
 	    }
-	}
-	else {
-	    write(out, line, len);
-	    write(out, "\r\n", 2);
-	}
-    } while (line[0] != '.' || line[1] != '\0');
-    close(out);
-
+	} while (line[0] != '.' || line[1] != '\0');
+	close(out);
+    }
+    
     if (havefrom && havesubject && havenewsgroups && !err) {
 	FILE * f;
 	char * mid;
@@ -1226,13 +1231,16 @@ void dopost(void) {
 	fclose(f);
 	switch (fork()) {
 	case -1: {
-	    ln_log(LNLOG_ERR, "fork: %s",strerror(errno));
+	    ln_log(LNLOG_ERR, "fork: %m");
 	    nntpprintf("503 Could not store article in newsgroups");
 	    unlink(outname);
 	    break;
 	}
 	case 0: {
-	    if (lockfile_exists(TRUE, TRUE)) {
+	    fclose(stdin);
+	    fclose(stdout);
+	    fclose(stderr);
+	    if ( lockfile_exists( TRUE, TRUE ) ) {
 		/* Something is really wrong. Move the article 
 		   to failed.postings */
 		ln_log(LNLOG_ERR, "Could not store article %s." 
@@ -1242,8 +1250,8 @@ void dopost(void) {
 		sprintf(s, "%s/failed.postings/%s", spooldir, outbasename);
 		if (link(outname, s))
                     ln_log(LNLOG_ERR, 
-			   "unable to move failed posting to %s: %s",
-			   s, strerror(errno));
+			   "unable to move failed posting to %s: %m",
+			   s);
 		unlink(outname);
 		_exit(EXIT_FAILURE);
 	    }
@@ -1271,15 +1279,19 @@ void dopost(void) {
 	return;
     }
 
-    unlink(outname);
-    if (!havefrom)
-	nntpprintf("441 From: header missing, article not posted");
-    else if (!havesubject)
-	nntpprintf("441 Subject: header missing, article not posted");
-    else if (!havenewsgroups)
-	nntpprintf("441 Newsgroups: header missing, article not posted");
-    else if (hdrtoolong)
-	nntpprintf("441 Header too long, article not posted");
+    unlink( outname );
+    if ( !havefrom )
+	nntpprintf( "441 From: header missing, article not posted" );
+    else if ( !havesubject )
+	nntpprintf( "441 Subject: header missing, article not posted" );
+    else if ( !havenewsgroups )
+	nntpprintf( "441 Newsgroups: header missing, article not posted" );
+    else if ( hdrtoolong )
+	nntpprintf( "441 Header too long, article not posted" );
+    else if ( duplicate )
+	nntpprintf( "441 435 Duplicate, article not posted" );
+    else if ( !havebody )
+	nntpprintf("441 Article has no body, not posted" );
     else
 	nntpprintf("441 Formatting error, article not posted");
 }
@@ -1646,6 +1658,7 @@ void doxover(const char *arg) {
 
 void dolistgroup(const char * arg) {
     struct newsgroup * g;
+    int emptygroup = FALSE;
     long int index;
     unsigned long art;
 
@@ -1665,20 +1678,33 @@ void dolistgroup(const char * arg) {
 	return;
     }
     
-    markinterest();
     group = g;
-    if (!chdirgroup(g->name, FALSE))
+    if ( !chdirgroup( g->name, FALSE ) ) {
+	/* group has not been visited before */
 	pseudogroup = TRUE;
-    else if ((xovergroup != group) && !getxover())
-	pseudogroup = TRUE;
-    else {
+	markinterest();
+    }
+    else if ( ( xovergroup != group ) && !getxover() ) {
+	if ( isinteresting(g->name) ) {
+	    /* group has already been marked as interesting but is empty */
+	    pseudogroup = FALSE;
+	    emptygroup = TRUE;
+	}
+	else {
+	    /* can this happen? */
+	    pseudogroup = TRUE;
+	}
+    } else {
 	pseudogroup = FALSE;
 	xovergroup = group;
     }
+    markinterest();
 
-    if (pseudogroup) {
-	nntpprintf("211 Article list for %s follows (pseudo)", g->name);
-	printf("%lu \r\n", g->last ? g->last : 1);
+    if ( pseudogroup ) {
+	nntpprintf( "211 Article list for %s follows (pseudo)", g->name );
+	printf( "%lu \r\n", g->last ? g->last : 1 );
+    } else if ( emptygroup ) {
+	nntpprintf( "211 No articles in %s", g->name );
     } else {
 	nntpprintf("211 Article list for %s (%lu-%lu) follows",
 		    g->name, xfirst, xlast);
@@ -1707,7 +1733,7 @@ static int readpasswd(void) {
     sprintf(s, "%s/users", libdir);
     if ((f = fopen(s, "r")) == NULL) {
 	error = errno;
-	ln_log(LNLOG_ERR, "unable to open %s: %s", s, strerror(errno));
+	ln_log(LNLOG_ERR, "unable to open %s: %m", s);
 	return error;
     }
     while ((l = getaline(f)) != NULL) {
@@ -1729,8 +1755,8 @@ int isauthorized(void) {
 void doauthinfo(const char *arg) {
     char cmd[MAXLINELENGTH] = "";
     char param[MAXLINELENGTH] = "";
-#ifdef TODO
-    char salt[3] = { 0, 0, 0 };
+#ifdef FIXME
+    char salt[3] = "\0\0\0";
 #endif
     static char * user = NULL;
     char * p;
@@ -1757,9 +1783,9 @@ void doauthinfo(const char *arg) {
     else if (!strcasecmp(cmd, "pass")) {
 	if (authentication == AM_NAME)
 	    result = P_SYNTAX_ERROR;
-	else if (authentication == AM_FILE) {
-	    if ((p = findinlist(users, user)) != NULL) {
-#ifdef TODO
+	else if ( authentication == AM_FILE ) {
+	    if ( ( p = findinlist( users, user ) ) != NULL ) {
+#ifdef FIXME
 	/* for some reason the line returned by findinlist() cannot be
 	   parsed by the following code
 	 */
@@ -1789,33 +1815,27 @@ void doauthinfo(const char *arg) {
 	result = P_SYNTAX_ERROR;
 
     switch (result) {
-	case P_ACCEPTED: {
+	case P_ACCEPTED: 
 	    nntpprintf("%d Authentication accepted", result);
 	    authflag = 1;
 	    break;
-	}
-	case P_CONTINUE: {
+	case P_CONTINUE: 
 	    nntpprintf("%d More authentication required", result);
 	    break;
-	}
-	case P_REJECTED: {
+	case P_REJECTED: 
 	    nntpprintf("%d Authentication rejected", result);
 	    authflag = 0;
 	    break;
-	}
-	case P_SYNTAX_ERROR: {
+	case P_SYNTAX_ERROR: 
 	    nntpprintf("%d Authentication method not supported", result);
 	    break;
-	}
-	case P_NOT_SUPPORTED: {
+	case P_NOT_SUPPORTED: 
 	    nntpprintf("%d Authentication not supported", result);
 	    break;
-	}
-	default: {
+	default: 
 	    nntpprintf("%d This should not happen: %d",
 			P_SYNTAX_ERROR, result);
 	    break;
-	}
     }	/* switch */
 }
 
@@ -1840,7 +1860,7 @@ int main(int argc, char ** argv) {
 			   "Allocating space for configuration file name");
     sprintf(conffile, "%s/config", libdir);
 
-    if (!initvars(NULL))
+    if ( !initvars( argv[0] ) )
 	exit(EXIT_FAILURE);
 
     ln_log_open("leafnode");
@@ -1848,8 +1868,7 @@ int main(int argc, char ** argv) {
     /* have stderr discarded */
     se=freopen("/dev/null", "w+", stderr);
     if(!se) {
-	ln_log_so(LNLOG_ERR, "503 Failure: cannot open /dev/null: %s",
-	       strerror(errno));
+	ln_log_so(LNLOG_ERR, "503 Failure: cannot open /dev/null: %m");
 	exit(EXIT_FAILURE);
     }     
 
@@ -1863,8 +1882,8 @@ int main(int argc, char ** argv) {
     }
 
     if ((reply = readconfig(conffile)) != 0) {
-	ln_log_so(LNLOG_ERR, "503 Unable to read configuration from %s: %s",
-		conffile, strerror(reply));
+	ln_log_so(LNLOG_ERR, "503 Unable to read configuration from %s: %m",
+		conffile);
 	exit(EXIT_FAILURE);
     }
 
@@ -1872,31 +1891,32 @@ int main(int argc, char ** argv) {
 	strncpy(fqdn, owndn, FQDN_SIZE-1);
     } else {
 	fodder = sizeof(sa);
-	if (getsockname(0, (struct sockaddr *)&sa, &fodder)) {
+	if (getsockname(0, (struct sockaddr *)&sa, (socklen_t *)&fodder)) {
 	    if(errno != ENOTSOCK)
-		ln_log(LNLOG_NOTICE, "cannot getsockname: %s", strerror(errno));
+		ln_log(LNLOG_NOTICE, "cannot getsockname: %m");
 	    /* FIXME: bail out? */
 	    strcpy(fqdn, "localhost");
 	} else {
 #ifdef HAVE_IPV6
-	    he = gethostbyaddr((char *)&sa.sin6_addr,
+	    he = gethostbyaddr( (char *)&sa.sin6_addr,
 				sizeof(sa.sin6_addr),
 				AF_INET6);
 #else
-	    he = gethostbyaddr((char *)&sa.sin_addr.s_addr,
+	    he = gethostbyaddr( (char *)&sa.sin_addr.s_addr,
 				sizeof(sa.sin_addr.s_addr),
 				AF_INET);
 #endif
 	    if(!he) ln_log(LNLOG_NOTICE, "cannot gethostbyaddr: %d",
 			   h_errno);
 #ifdef HAVE_IPV6
-	    inet_ntop(AF_INET6, &sa.sin6_addr, peername, sizeof(peername));
+	    inet_ntop( AF_INET6, &sa.sin6_addr, peername, sizeof(peername) );
 #else
-	    inet_ntop(AF_INET, &sa.sin_addr, peername, sizeof(peername));
+	    inet_ntop( AF_INET, &sa.sin_addr, peername, sizeof(peername) );
 #endif
 
-	    strncpy(fqdn, he && he->h_name ? he->h_name : peername, 
-		    FQDN_SIZE-1); }
+	    strncpy( fqdn, he && he->h_name ? he->h_name : peername,
+		     FQDN_SIZE-1 );
+	}
     }
     if (!strcasecmp(fqdn, "localhost"))
 	whoami();
@@ -1905,12 +1925,13 @@ int main(int argc, char ** argv) {
     verbose = 0;
     umask((mode_t)02);
 
-    fodder=sizeof(peer);
-    if (getpeername(0, (struct sockaddr *)&peer, &fodder)) {
-	if (errno != ENOTSOCK) {
-	    ln_log(LNLOG_ERR, "Cannot getpeername: %s, aborting.", 
-		       strerror(errno));
-	    exit(1);
+    fodder = sizeof(peer);
+    if ( getpeername(0, (struct sockaddr *)&peer, (socklen_t *)&fodder) ) {
+	if ( errno != ENOTSOCK ) {
+	    ln_log( LNLOG_ERR, "Connect from unknown client: %m" );
+	    printf( "503 Cannot getpeername (%s), aborting\r\n",
+		    strerror(errno) );
+	    exit( EXIT_FAILURE );
 	}
     } else {
 	ln_log(LNLOG_INFO, "Connect from %s", 
@@ -1926,10 +1947,7 @@ int main(int argc, char ** argv) {
 /* #endif */
 
     if (authentication && (reply = readpasswd()) > 0) {
-	printf("503 Unable to read user list, exiting (%s)\r\n",
-		strerror(reply));
-	ln_log(LNLOG_NOTICE, ">503 Unable to read user list, exiting (%s)",
-		strerror(reply));
+	ln_log_so(LNLOG_NOTICE, "503 Unable to read user list, exiting (%m)");
 	exit(EXIT_FAILURE);
     }
 
