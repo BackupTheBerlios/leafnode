@@ -46,7 +46,7 @@ mastr_new(long size)
     if (!(n->dat = malloc(n->bufsize))) {
 	free(n);
 	mastr_oom();
-	/*@notreached@*/ return 0;
+	/*@notreached@*/ return NULL;
     }
     n->dat[0] = '\0';
     n->len = 0;
@@ -61,10 +61,10 @@ mastr_newstr(const char *s)
     mastr *n;
 
     if (!s)
-	return 0;
-    n = mastr_new((l = strlen(s)) + 1);
+	return NULL;
+    n = mastr_new((l = strlen(s)));
     if (!n)
-	return 0;
+	return NULL;
     strcpy(n->dat, s);
     n->len = l;
     return n;
@@ -181,6 +181,7 @@ mastr_resizekeep(mastr * m, long l)
 	return 0;
     n = realloc(m->dat, l + 1);
     if (!n) {
+	free(m->dat);
 	mastr_oom();
 	/*@notreached@*/ return 0;
     }
@@ -226,7 +227,7 @@ mastr_trimr(mastr * m)
 	return;
     p = m->dat + m->len;
     /*@-whileempty@*/
-    while (--p >= m->dat && *p && isspace((unsigned char)*p));
+    while (--p >= m->dat && isspace((unsigned char)*p));
     /*@=whileempty@*/
     *++p = '\0';
     m->len = p - m->dat;
