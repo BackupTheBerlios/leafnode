@@ -1,3 +1,11 @@
+2002-06-30  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* miscutil.c: rfctime: use portable part of strftime for Date:
+	header.
+	* nntpd.c: dopost: On premature EOF after POST, exit with failure
+	and logging for both header and body part.  Remove redundant \r\n
+	stripping from input -- done in getaline.
+
 2002-06-29  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* fetchnews.c, lockfile.c, lsort.c, xoverutil.c: Replace all strcat.
