@@ -1269,7 +1269,7 @@ dopost(void)
 	    /* client died */
 	    log_unlink(inname);
 	    nntpprintf("400 Premature end of input. Exiting.");
-	    exit(0);
+	    exit(EXIT_FAILURE);
 	}
 
 	/* premature end (no body) */
@@ -1341,10 +1341,6 @@ dopost(void)
 	    hdrtoolong = TRUE;
 	    err = TRUE;
 	}
-	if (len && line[len - 1] == '\n')
-	    line[--len] = '\0';
-	if (len && line[len - 1] == '\r')
-	    line[--len] = '\0';
 	if (len) {
 	    /* regular header line, write it */
 	    write(out, line, len);
@@ -1379,30 +1375,28 @@ dopost(void)
     /* get bodies */
     if (strcmp(line, ".")) {	/* skip if header contained a single dot line */
 	havebody = TRUE;
-	do {
+	for (;;) {
 	    debug = 0;
 	    line = getaline(stdin);
 	    debug = debugmode;
 	    if (!line) {
 		log_unlink(inname);
+		nntpprintf("400 Premature end of input. Exiting.");
 		exit(EXIT_FAILURE);
 	    }
-	    len = strlen(line);
-	    if (len && line[len - 1] == '\n')
-		line[--len] = '\0';
-	    if (len && line[len - 1] == '\r')
-		line[--len] = '\0';
 	    if (line[0] == '.') {
 		/* escape or skip if single dot */
-		if (len > 1) {
-		    write(out, line + 1, len - 1);
+		if (line[1]) {
+		    writes(out, line + 1);
 		    writes(out, "\r\n");
+		} else {
+		    break;	/* end of article */
 		}
 	    } else {
-		write(out, line, len);
+		writes(out, line);
 		writes(out, "\r\n");
 	    }
-	} while (strcmp(line, "."));
+	}
 	/* safely write to disk before reporting success */
 	if (log_fsync(out))
 	    err = 1;
