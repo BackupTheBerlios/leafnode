@@ -1965,7 +1965,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 	g = findgroup(arg, active, -1);
 	if (!g) {
 	    nntpprintf("411 No such group: %s", arg);
-	    return 0;
+	    return group;
 	} else {
 	    group = g;
 	    *artno = g->first;
