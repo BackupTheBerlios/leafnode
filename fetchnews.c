@@ -53,7 +53,7 @@ time_t now;
 
 /* Variables set by command-line options which are specific for fetch */
 unsigned long extraarticles = 0;
-int windowsize = 5;	/* number of NNTP commands to pipeline */
+unsigned int windowsize = 5;	/* number of NNTP commands to pipeline */
 int throttling = 0;	/* the higher the value, the less bandwidth is used */
 int postonly = 0;	/* if 1, don't read files from upstream server */
 int noexpire = 0;	/* if 1, don't automatically unsubscribe newsgroups */
@@ -70,8 +70,7 @@ unsigned long getgroup ( struct newsgroup *g , unsigned long server );
 int postarticles( void );
 
 static void _ignore_answer( FILE * f ) {
-    char * l;
-    l = NULL;
+    char * l=0;
     while ( ((l=getaline(f)) != NULL) && strcmp(l, ".") )
 	;
 }
@@ -169,14 +168,14 @@ static int checkforpostings( void ) {
     while ( (de=readdir( d )) != NULL ) {
 	/* filenames of articles to post begin with digits */
 	if ( isdigit( (unsigned char )de->d_name[0] ) )
-	    return TRUE;
+	    return 1;
     }
     return FALSE;
 }
 
 /*
  * check whether any of the newsgroups is on server
- * return TRUE if yes, FALSE otherwise
+ * return 1 if yes, FALSE otherwise
  */
 int isgrouponserver( char * newsgroups ) {
     char * p, *q;
@@ -193,7 +192,7 @@ int isgrouponserver( char * newsgroups ) {
 	    *q++ = '\0';
 	putaline( "GROUP %s", p );
 	if ( nntpreply() == 211 )
-	    retval = TRUE;
+	    retval = 1;
 	p = q;
 	while ( p && *p && isspace((unsigned char)*p) )
 	    p++;
@@ -204,22 +203,22 @@ int isgrouponserver( char * newsgroups ) {
 
 /*
  * check whether message-id is on server
- * return TRUE if yes, FALSE otherwise
+ * return 1 if yes, FALSE otherwise
  *
  * Since the STAT implementation is buggy in some news servers (esp.
  * nntpcache), we use HEAD instead, although this causes more traffic.
  */
 int ismsgidonserver( char * msgid ) {
     char *l;
-    int a;
+    long a;
 
     if ( !msgid )
         return FALSE;
     putaline( "HEAD %s", msgid );
     l = getaline( nntpin );
-    if ( sscanf( l, "%3d", &a ) == 1 && a == 221 ) {
+    if ( get_long( l, &a ) == 1 && a == 221 ) {
 	_ignore_answer( nntpin );
-	return TRUE;
+	return 1;
     }
     else {
 	return FALSE;
@@ -265,7 +264,7 @@ void delposted( time_t before ) {
 static int getbymsgid( char *msgid ) {
     putaline( "ARTICLE %s", msgid );
     if ( getarticle( NULL ) > 0 )	/* no filtering */
-	return TRUE;
+	return 1;
     else
 	return FALSE;
 }
@@ -291,7 +290,7 @@ static void getmarked( struct newsgroup* group ) {
 	return;
     }
 
-    while ( ( l = getaline( f ) ) != NULL ) {
+    while ( ( l = getaline( f ) ) ) {
 	putaline( "ARTICLE %s", l );
 	if ( !getarticle( NULL ) )
 	    appendtolist( &failed, &ptr, l );
@@ -372,7 +371,7 @@ static FILE * fopenmsgid( const char * filename, int overwrite ) {
 static int getfirstlast( struct newsgroup *g, unsigned long *first,
     unsigned long *last ) {
     unsigned long h, window;
-    int n;
+    long n;
     char * l;
 
     putaline( "GROUP %s", g->name );
@@ -380,19 +379,19 @@ static int getfirstlast( struct newsgroup *g, unsigned long *first,
     if ( !l )
 	return FALSE;
 
-    if ( sscanf( l, "%3d", &n ) && n == 480 ) {
+    if ( get_long( l, &n ) && n == 480 ) {
 	if ( authenticate() )
 	    putaline( "GROUP %s", g->name );
 	else
 	    return -1;
     }
 
-    if ( sscanf( l, "%3d", &n ) && n == 411 ) {
+    if ( get_long( l, &n ) && n == 411 ) {
 	/* group not available on server */
 	return -1;
     }
 
-    if (sscanf(l, "%3d %lu %lu %lu ", &n, &h, &window, last) < 4 || n != 211 )
+    if (sscanf(l, "%3ld %lu %lu %lu ", &n, &h, &window, last) < 4 || n != 211 )
 	return FALSE;
 
     if ( *last == 0 ) {		/* group available but no articles on server */
@@ -469,15 +468,15 @@ static int getfirstlast( struct newsgroup *g, unsigned long *first,
 static int doxover( struct stringlist ** stufftoget,
 		    unsigned long first, unsigned long last,
 		    struct filterlist * filter, char * groupname ) {
-    unsigned char * l;
+    char * l;
     unsigned long count = 0;
     const char *c;
-    int reply = 0;
+    long reply;
     struct stringlist * helpptr = NULL;
 
     putaline( "XOVER %lu-%lu", first, last );
     l = getaline( nntpin );
-    if ( ( sscanf( l, "%d ", &reply ) != 1 ) || ( reply != 224 ) ) {
+    if ( (!get_long(l, &reply )) || ( reply != 224 ) ) {
 	syslog( LOG_NOTICE, "Unknown reply to XOVER command: %s", l );
 	printf( "Unknown reply to XOVER command: %s\n", l );
 	return -1;
@@ -485,16 +484,16 @@ static int doxover( struct stringlist ** stufftoget,
     debug = 0;
     while ( (l = getaline( nntpin )) && strcmp( l, "." ) ) {
 	int xoverlen;
-	unsigned char * artno;
-	unsigned char * subject;
-	unsigned char * from;
-	unsigned char * date;
-	unsigned char * messageid;
-	unsigned char * references;
-	unsigned char * lines;
-	unsigned char * bytes;
-	unsigned char * newsgroups = NULL;
-	unsigned char * p, * q;
+	char * artno;
+	char * subject;
+	char * from;
+	char * date;
+	char * messageid;
+	char * references;
+	char * lines;
+	char * bytes;
+	char * newsgroups = NULL;
+	char * p, * q;
 
 	/* format of an XOVER line is usually:
 	   article number, subject, author, date, message-id, references,
@@ -613,7 +612,7 @@ static int doxover( struct stringlist ** stufftoget,
 			  "Newsgroups: %s\n",
 			  from, subject, messageid, references, date, lines,
 			  bytes, newsgroups );
-	    if ( killfilter( filter, hdr, strtoul(artno, NULL, 10) ) ) {
+	    if ( killfilter(filter, hdr) ) {
 		groupkilled++;
 		/* filter pseudoheaders */
 		free( hdr );
@@ -632,7 +631,7 @@ static int doxover( struct stringlist ** stufftoget,
 		    fprintf( f, "%s", hdr );
 		    fprintf( f, "\n[ Thread has been marked for download ]\n" );
 		    fclose( f );
-		    store( c, f, 0, newsgroups, "", "", "", messageid, "", "" );
+		    store( c, f, newsgroups, messageid );
 		}
 	    }
 	    else {
@@ -659,17 +658,16 @@ static int doxover( struct stringlist ** stufftoget,
  * since only message-IDs are transmitted, but you lose some features
  */
 static int doxhdr( struct stringlist ** stufftoget,
-                   unsigned long first, unsigned long last,
-                   char * groupname ) {
-    unsigned char * l;
+                   unsigned long first, unsigned long last ) {
+    char * l;
     unsigned long count = 0;
     const char * c;
-    int reply = 0;
+    long reply;
     struct stringlist * helpptr = NULL;
 
     putaline( "XHDR message-id %lu-%lu", first, last );
     l = getaline( nntpin );
-    if ( ( sscanf( l, "%d ", &reply ) != 1 ) || ( reply != 221 ) ) {
+    if ( ( !get_long( l, &reply )) || ( reply != 221 ) ) {
         syslog( LOG_NOTICE, "Unknown reply to XHDR command: %s", l );
         printf( "Unknown reply to XHDR command: %s\n", l );
         return -1;
@@ -711,7 +709,7 @@ static int doxhdr( struct stringlist ** stufftoget,
  */
 
 /*
- * Check whether the relevant headers are present. Return TRUE if yes,
+ * Check whether the relevant headers are present. Return 1 if yes,
  * FALSE if not
  */
 static int legalheaders( char * hdr, unsigned long artno ) {
@@ -722,13 +720,13 @@ static int legalheaders( char * hdr, unsigned long artno ) {
     p = hdr;
     while ( p && *p && ( (q = strchr( p, '\n' )) != NULL) ) {
 	if ( !havepath && strncasecmp( p, "Path:", 5 ) == 0 )
-	    havepath = TRUE;
+	    havepath = 1;
 	if ( !havemsgid && strncasecmp( p, "Message-ID:", 11 ) == 0 )
-	    havemsgid = TRUE;
+	    havemsgid = 1;
 	if ( !havefrom && strncasecmp( p, "From:", 5 ) == 0 )
-	    havefrom = TRUE;
+	    havefrom = 1;
 	if ( !haveng && strncasecmp( p, "Newsgroups:", 11 ) == 0 )
-	    haveng = TRUE;
+	    haveng = 1;
 	p = q + 1;
     }
     if ( !havepath )
@@ -786,7 +784,7 @@ unsigned long getarticle( struct filterlist *filter ) {
     debug = debugmode;
 
     if ( !legalheaders(h, artno) ||
-	 ( (FM_HEAD & filtermode) && killfilter(filter, h, artno) ) ) {
+	 ( (FM_HEAD & filtermode) && killfilter(filter, h) ) ) {
 	_ignore_answer( nntpin );
 	free( h );
 	groupkilled++;
@@ -814,7 +812,7 @@ unsigned long getarticle( struct filterlist *filter ) {
     free( h );
 
     /* create Xref: headers and crossposts */
-    store( filename, f, 0, newsgroups, NULL, NULL, NULL, msgid, NULL, NULL );
+    store( filename, f, newsgroups, msgid );
     fprintf( f, "\n" );	/* empty line between header and body */
 
     debug = 0;
@@ -847,7 +845,7 @@ unsigned long getarticle( struct filterlist *filter ) {
  * get all articles in a group, with overlapping NNTP commands
  */
 static unsigned long getarticles( struct stringlist * stufftoget,
-unsigned long n, struct filterlist *f ) {
+				  unsigned long n, struct filterlist *f ) {
     struct stringlist * p;
     unsigned long sent, recd, window;
     unsigned long server = 0;
@@ -910,7 +908,7 @@ unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
 	first = 1;
     if ( g->first > g->last )
 	g->last = g->first ;
-    (void) chdirgroup( g->name, TRUE );	/* to create the directory */
+    (void) chdirgroup( g->name, 1 );	/* to create the directory */
 
     x = getfirstlast( g, &first, &last );
     switch ( x ) {
@@ -932,7 +930,7 @@ unsigned long getgroup( struct newsgroup * g, unsigned long first ) {
     if ( f || delaybody )
 	outstanding = doxover( &stufftoget, first, last, f, g->name );
     else
-	outstanding = doxhdr( &stufftoget, first, last, g->name );
+	outstanding = doxhdr( &stufftoget, first, last );
 
     switch ( outstanding ) {
 	case -1: { return first; break; }	/* error; consider again */
@@ -1388,7 +1386,7 @@ static int getparam( char *arg ) {
 }
 
 /*
- * works current_server. Returns TRUE if no other servers have to be queried,
+ * works current_server. Returns 1 if no other servers have to be queried,
  * FALSE otherwise
  */
 static int do_server( char *msgid, time_t lastrun ) {
@@ -1412,7 +1410,7 @@ static int do_server( char *msgid, time_t lastrun ) {
 	    /* if retrieval of the message id is successful at one
 	       server, we don't have to check the others */
 	    if ( getbymsgid( msgid ) ) {
-		return TRUE;
+		return 1;
 	    }
 	}
 	else {
@@ -1441,7 +1439,7 @@ int main( int argc, char ** argv ) {
     time_t starttime;
     volatile time_t lastrun;
     char * conffile;
-    char * msgid = NULL;
+    static char * msgid = NULL;
     char * newsgroup = NULL;
 
     verbose = 0;
@@ -1496,11 +1494,11 @@ int main( int argc, char ** argv ) {
 		    sl->active = FALSE;
 		    sl = sl->next;
 		}
-	        flag = TRUE;
+	        flag = 1;
 	    }
 	    sl = findserver(optarg);
 	    if ( sl ) {
-		sl->active = TRUE;
+		sl->active = 1;
 	    }
 	    else {
 		/* insert a new server in serverlist */
@@ -1511,7 +1509,7 @@ int main( int argc, char ** argv ) {
 		if ( ( p = strchr( sl->name, ':' ) ) != NULL ) {
 		    *p = '\0';
 		}
-		sl->descriptions = TRUE;
+		sl->descriptions = 1;
 		sl->next = servers;
 		sl->timeout = 30;	/* default 30 seconds */
 		sl->port = 0;		/* default port */
@@ -1524,7 +1522,7 @@ int main( int argc, char ** argv ) {
 		}
 		sl->username = NULL;
 		sl->password = NULL;
-		sl->active = TRUE;
+		sl->active = 1;
 		servers = sl;
 	    }
 	} else if ( ( option == 'N' ) && optarg && strlen( optarg ) ) {
@@ -1615,7 +1613,7 @@ int main( int argc, char ** argv ) {
 	    exit( EXIT_FAILURE );
 	}
 	alarm( 5 );
-	if ( lockfile_exists( FALSE, TRUE ) )
+	if ( lockfile_exists( FALSE, 1 ) )
 	    exit( EXIT_FAILURE );
 	alarm( 0 );
 

@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.1 2000/11/12 17:40:35 emma Exp $ */
+/* $Id: leafnode.h,v 1.2 2000/11/12 18:05:49 emma Exp $ */
 
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
@@ -19,6 +19,8 @@
 #endif
 
 #include "config.h"	/* FreeSGI barfs on #ifdef HAVE_CONFIG_H */
+
+#include "get.h"
 
 #ifdef HAVE_AP_CONFIG_H
 #define AP_CONFIG_H
@@ -201,7 +203,7 @@ struct filterlist {
 extern struct filterlist * filter;      /* all expressions precompiled */
 
 int readfilter( char *filterfile ) ;
-int killfilter( struct filterlist *f, char *hdr, unsigned long artno ) ;
+int killfilter( struct filterlist *f, char *hdr ) ;
 struct filterlist * selectfilter ( char * groupname );
 void freefilter( struct filterlist *f );
 
@@ -213,16 +215,8 @@ void freefilter( struct filterlist *f );
  * store articles
  */
 void storearticle ( char * filename, char * msgid, char * newsgroups ) ;
-void store( const char * filename,
-	    FILE * filehandle,
-	    const size_t bytes,
-	    char * newsgroups,
-	    const char * subject,
-	    const char * from,
-	    const char * date,
-	    const char * msgid,
-	    const char * references,
-	    const char * lines);
+void store( const char * filename, FILE * filehandle, char * newsgroups,
+	    const char *msgid );
 
 /*
  * find a certain header in an article and return it
@@ -249,7 +243,7 @@ extern struct xoverinfo * xoverinfo;
 extern unsigned long xfirst;
 extern unsigned long xlast;
 
-int findxover( int article );
+long findxover( unsigned long article );
 		  /* find index number for an article, return -1 on error */
 int getxover( void );	/* set xoverinfo, return 0 on error, nonzero else */
 void fixxover( void );	/* repair all .overview files */
@@ -346,7 +340,7 @@ char * critrealloc(char *a, size_t size, const char* message);
 int ngmatch(const char* pattern, const char* string);
 void copyfile( FILE * infile, FILE * outfile, long n );
 
-int rename(const char *old, const char *new);
+int rename(const char *oldname, const char *newname);
 				/* to avoid barfing of Digital Unix */
 
 /*

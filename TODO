@@ -10,6 +10,9 @@ BUGS:
 general:
 =======
 
+- get rid of _all_ sscanf (Matthias Andree)
+- preprocess manual pages with config.status (Matthias Andree)
+  (already in 1.9.17ma3)
 - apply all the patches :-)
 - determine interesting groups from .newsrc
 - how to make newsgroup names 8-bit compliant? E.g., how to produce

@@ -196,9 +196,9 @@ char * getxoverline( const char * filename ) {
 /*
  * find xover line in sorted array, recursively
  */
-static int helpfindxover( unsigned long article,
+static long helpfindxover( unsigned long article,
     unsigned long low, unsigned long high ) {
-    unsigned long new;
+    unsigned long mid;
 
     if ( low > high )
 	return -1;
@@ -206,19 +206,23 @@ static int helpfindxover( unsigned long article,
 	return low;
     if ( article == xoverinfo[high].artno )
 	return high;
-    new = (high-low)/2+low;
-    if ( article == xoverinfo[new].artno )
-	return new;
-    if ( article < xoverinfo[new].artno )
-	return helpfindxover( article, low, new-1 );
+    mid = (high-low)/2+low;
+    if ( article == xoverinfo[mid].artno )
+	return mid;
+    if ( article < xoverinfo[mid].artno ) {
+	if ( mid == 0 )
+	    return -1;
+	else
+	    return helpfindxover( article, low, mid-1 );
+    }
     else
-	return helpfindxover( article, new+1, high );
+	return helpfindxover( article, mid+1, high );
 }
 
 /*
  * return xover record of "article". -1 means failure.
  */
-int findxover( int article ) {
+long findxover( unsigned long article ) {
     return( helpfindxover( article, 0, xcount-1 ) );
 }
 
@@ -402,11 +406,13 @@ int getxover( void ) {
  */
 void writexover( void ) {
     char newfile[20];
+    char lineend[3];
     struct iovec oooh[UIO_MAXIOV];
     int wfd, vi, vc, va;
     unsigned long art;
 
     strcpy( newfile, ".overview.XXXXXX" );
+    strcpy(lineend, "\n");
 #ifdef HAVE_MKSTEMP
     if ( (wfd=mkstemp(newfile)) == -1) {
 	syslog( LOG_ERR, "mkstemp of new .overview failed: %m" );
@@ -426,7 +432,7 @@ void writexover( void ) {
 	    oooh[vi].iov_base = xoverinfo[art].text;
 	    oooh[vi].iov_len = strlen( xoverinfo[art].text );
 	    vc += oooh[vi++].iov_len + 1;
-	    oooh[vi].iov_base = "\n";
+	    oooh[vi].iov_base = lineend;
 	    oooh[vi++].iov_len = 1;
 	    if ( vi >= (UIO_MAXIOV - 1) ) {
 		if ( writev( wfd, oooh, vi ) != vc ) {

@@ -76,7 +76,7 @@ void putaline( const char *fmt, ... ) {
 
 /*
  * Authenticate ourselves at a remote server.
- * Returns TRUE if authentication succeeds, FALSE if it does not.
+ * Returns 1 if authentication succeeds, FALSE if it does not.
  */
 int authenticate( void ) {
     int d, reply;
@@ -101,7 +101,7 @@ int authenticate( void ) {
     reply = nntpreply();
     debug = d;
     if (reply == 281) {
-	return TRUE;
+	return 1;
     } else if ( reply != 381 ) {
 	syslog( LOG_INFO, "username rejected: %03d", reply);
 	return FALSE;
@@ -125,7 +125,7 @@ int authenticate( void ) {
 	syslog( LOG_INFO, "password failed: %03d", reply);
 	return FALSE;
     }
-    return TRUE;
+    return 1;
 }
 
 
@@ -171,7 +171,7 @@ int nntpreply(void) {
     }
 
     if (r == 480 && !authenticated ) { /* need to authenticate */
-	authenticated = TRUE;
+	authenticated = 1;
 	if ( authenticate() ) {
 	    fprintf(nntpout, "%s\r\n", last_command);
 	    fflush(nntpout);

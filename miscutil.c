@@ -99,7 +99,7 @@ int initvars( char * progname ) {
 	    return FALSE;
 	}
     }
-    return TRUE;
+    return 1;
 }
 
 /*
@@ -156,17 +156,17 @@ int parseopt( char *progname, char option, char * optarg, char * conffile ) {
     }
     else if ( option == 'v' ) {
 	verbose++;
-	return TRUE;
+	return 1;
     }
     else if ( option == 'D' ) {
 	debugmode++;
-	return TRUE;
+	return 1;
     }
     else if ( ( option == 'F' ) && optarg && strlen(optarg) ) {
 	if ( conffile )
 	    free( conffile );
 	conffile = strdup(optarg);
-	return TRUE;
+	return 1;
     }
     return FALSE;
 }
@@ -272,7 +272,7 @@ int isinteresting( const char *groupname ) {
     
     /* Local groups are always interesting. At least for the server :-) */
     if ( islocalgroup( groupname ) )
-	return TRUE;
+	return 1;
 
     sprintf( s, "%s/interesting.groups", spooldir );
     d = opendir( s );
@@ -285,7 +285,7 @@ int isinteresting( const char *groupname ) {
     while( ( de = readdir( d ) ) != NULL ) {
     	if ( strcasecmp( de->d_name, groupname ) == 0 ) {
 	    closedir( d );
-	    return TRUE;
+	    return 1;
 	}
     }
     closedir( d );
@@ -349,10 +349,10 @@ const char * lookup ( const char *msgid ) {
 char * critmalloc(size_t size, const char* message) {
     char * a;
 
-    a = malloc(size);
+    a = (char *)malloc(size);
     if (!a) {
-	syslog(LOG_ERR, "malloc(%d) failed: %s", (int)size, message);
-	fprintf(stderr, "malloc(%d) failed: %s\n", (int)size, message);
+	syslog(LOG_ERR, "malloc(%ld) failed: %s", (long)size, message);
+	fprintf(stderr, "malloc(%ld) failed: %s\n", (long)size, message);
 	exit(EXIT_FAILURE);
     }
     return a;
@@ -363,10 +363,10 @@ char * critmalloc(size_t size, const char* message) {
  * and exits with the error message
  */
 char * critrealloc(char *a, size_t size, const char* message) {
-    a = realloc(a, size);
+    a = (char *)realloc(a, size);
     if (!a) {
-	syslog(LOG_ERR, "realloc(%d) failed: %s", (int)size, message);
-	fprintf(stderr, "realloc(%d) failed: %s\n", (int)size, message);
+	syslog(LOG_ERR, "realloc(%ld) failed: %s", (long)size, message);
+	fprintf(stderr, "realloc(%ld) failed: %s\n", (long)size, message);
 	exit(EXIT_FAILURE);
     }
     return a;
@@ -776,7 +776,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
  * Rich $alz, taken vom INN 2.2.2
  */
 
-/*  $Revision: 1.1 $
+/*  $Revision: 1.2 $
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.
 **  Might not be robust in face of malformed patterns; e.g., "foo[a-"
@@ -803,7 +803,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
 **  only the last one does.
 **
 **  Once the control of one instance of DoMatch enters the star-loop, that
-**  instance will return either TRUE or ABORT, and any calling instance
+**  instance will return either 1 or ABORT, and any calling instance
 **  will therefore return immediately after (without calling recursively
 **  again).  In effect, only one star-loop is ever active.  It would be
 **  possible to modify the code to maintain this context explicitly,
@@ -814,6 +814,8 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
 **  on.
 */
 
+/* YOU MUST NOT DEFINE ABORT TO 1, LEAVE AT -1 (would collide with TRUE)
+ */
 #define ABORT			-1
 
     /* What character marks an inverted character class? */
@@ -825,7 +827,7 @@ void copyfile( FILE * infile, FILE * outfile, long n ) {
 
 
 /*
-**  Match text and p, return TRUE, FALSE, or ABORT.
+**  Match text and p, return 1, FALSE, or ABORT.
 */
 static int DoMatch(const char *text, const char *p)
 {
@@ -854,25 +856,25 @@ static int DoMatch(const char *text, const char *p)
 		continue;
 	    if (*p == '\0')
 		/* Trailing star matches everything. */
-		return TRUE;
+		return 1;
 	    while (*text)
-		if ((matched = DoMatch(text++, p)) != FALSE)
+		if ((matched = DoMatch(text++, p)))
 		    return matched;
 	    return ABORT;
 	case '[':
-	    reverse = p[1] == NEGATE_CLASS ? TRUE : FALSE;
+	    reverse = p[1] == NEGATE_CLASS ? 1 : FALSE;
 	    if (reverse)
 		/* Inverted character class. */
 		p++;
 	    matched = FALSE;
 	    if (p[1] == ']' || p[1] == '-')
 		if (*++p == *text)
-		    matched = TRUE;
+		    matched = 1;
 	    for (last = *p; *++p && *p != ']'; last = *p)
 		/* This next line requires a good C compiler. */
 		if (*p == '-' && p[1] != ']'
 		    ? *text <= *++p && *text >= last : *text == *p)
-		    matched = TRUE;
+		    matched = 1;
 	    if (matched == reverse)
 		return FALSE;
 	    continue;
@@ -881,21 +883,21 @@ static int DoMatch(const char *text, const char *p)
 
 #ifdef	MATCH_TAR_PATTERN
     if (*text == '/')
-	return TRUE;
+	return 1;
 #endif	/* MATCH_TAR_PATTERN */
     return *text == '\0';
 }
 
 
 /*
-**  User-level routine.  Returns TRUE or FALSE.
+**  User-level routine.  Returns 1 or FALSE.
 **  This routine was borrowed from Rich Salz and appeared first in INN.
 */
 int wildmat(const char *text, const char *p) 
 {
 #ifdef	OPTIMIZE_JUST_STAR
     if (p[0] == '*' && p[1] == '\0')
-	return TRUE;
+	return 1;
 #endif	/* OPTIMIZE_JUST_STAR */
-    return DoMatch(text, p) == TRUE;
+    return DoMatch(text, p) == 1;
 }

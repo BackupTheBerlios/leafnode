@@ -47,19 +47,77 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
+dnl check where to put the spooldir
+AC_MSG_CHECKING(spooldir)
+AC_ARG_WITH(spooldir,
+[  --with-spooldir         news spool directory (/var/spool/news) ],
+  if echo "$withval" | egrep >/dev/null -v '^/' ; then
+    AC_MSG_ERROR(you must give an absolute path)
+  fi
+  withval=`echo "$withval" | sed 'sx/*$xx;'`
+, 
+  withval="/var/spool/news"
+)
+SPOOLDIR=$withval
+AC_MSG_RESULT($SPOOLDIR)
+AC_SUBST(SPOOLDIR)
+
+dnl check where to put the confdir
+if test "$sysconfdir" = '${prefix}/etc' \
+  -a "x$prefix" = xNONE ; then 
+  CONFDIR='/etc/leafnode'
+else
+  CONFDIR="$sysconfdir"
+fi
+if test "$CONFDIR" != "$sysconfdir"; then 
+  AC_WARN(***)
+  AC_WARN(*** overriding sysconfdir to $CONFDIR)
+  AC_WARN(*** use --sysconfdir to fix)
+  AC_WARN(*** use --sysconfdir='\$prefix/etc' to get default autoconf behaviour)
+  AC_WARN(***)
+  sleep 1
+fi
+sysconfdir=$CONFDIR
+AC_SUBST(sysconfdir)
+
+dnl check where to put the lockfile
+AC_MSG_CHECKING(lockfile)
+AC_ARG_WITH(lockfile,
+[  --with-lockfile         lockfile (/var/lock/news/fetchnews.lck) ],
+  if echo "$withval" | egrep >/dev/null -v '^/' ; then
+    AC_MSG_ERROR(you must give an absolute path)
+  fi
+, 
+  withval=/var/lock/news/fetchnews.lck  
+)
+LOCKFILE=$withval
+AC_MSG_RESULT($LOCKFILE)
+AC_SUBST(LOCKFILE)
+
+dnl check for rpm build dir
+AC_MSG_CHECKING(rpm build dir)
+d=/usr/src/packages
+test -d ${d}/SPECS || d=/usr/src/redhat dnl red hat 
+test -d ${d}/SPECS || d=none
+RPMSRC=${d}
+AC_MSG_RESULT(${RPMSRC})
+test "${RPMSRC}" = "none" || AC_SUBST(RPMSRC) 
+
 dnl Check for libcrypt
-AC_CHECK_LIB(crypt, crypt)
+AC_CHECK_LIB(crypt, crypt, [ CRYPTLIB="-lcrypt" ])
+AC_SUBST(CRYPTLIB)
 
 dnl Check for PCRE library.
 AC_CHECK_HEADER(pcre.h)
 if test "$ac_cv_header_pcre_h" = yes
 then
-  AC_CHECK_LIB(pcre, pcre_compile)
+  AC_CHECK_LIB(pcre, pcre_compile, [ LINKPCRELIB="-lpcre" ])
 fi
 if test "$ac_cv_lib_pcre_pcre_compile" != yes
 then
   AC_DEFINE(NEW_PCRE_COMPILE)
   PCRELIB=libpcre.a
+  LINKPCRELIB=libpcre.a
 else
   AC_DEFINE(HAVE_LIBPCRE)
   AC_MSG_CHECKING(for pcre_compile version)
@@ -103,6 +161,7 @@ else
   fi
 fi
 AC_SUBST(PCRELIB)
+AC_SUBST(LINKPCRELIB)
 
 dnl Check for timezone and related stuff
 AC_MSG_CHECKING(for gmtoff in struct tm)
@@ -125,7 +184,6 @@ else
 fi
 
 dnl Checks for library functions.
-AC_FUNC_FNMATCH
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL

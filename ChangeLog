@@ -1,3 +1,79 @@
+History of 2.0b4 -- changes since 2.0b3:
+
+applyfilter:
+===========
+
+291000: the char constant -\|/ is now declared "const". Patch by
+	Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: made "n" unsigned long. Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+
+fetchnews:
+=========
+
+291000: main(): msgid declared as "static" which removes the obnoxious
+	warning about it being affected by longjmp().
+291000: doxover() and doxhdr(): converted a few "unsigned char *" into
+	"char *". Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+291000: made global variable "windowsize" unsigned long. Suggested by
+	Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: doxhdr: removed unnecessary parameter "groupname" from declaration.
+	Suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+
+libutil:
+=======
+
+291000: xoverutil: writexover(): new variable lineend to bring constant
+	"\n" into header. Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+291000: miscutil: error logging in critmalloc()/critrealloc() is now
+	done with long instead of int. Patch by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+291000: miscutil: did casting of malloc()/realloc() return values in
+	critmalloc()/critrealloc(), respectively. Patch by Matthias
+	Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: activutil: readactive(): return value of memchr() is now casted.
+	Patch by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: activutil: helpfindgroup() could return -1 and therefore should
+	not be declared "unsigned". Patch by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+291000: xoverutil: return value of findxover() now long int instead of int.
+	Suggested by Joerg Dietrich <joerg@dietrich.net>.
+291000: xoverutil: parameter to findxover() now declared as unsigned long
+	instead of int.
+291000: filterutil: killfilter(): removed unnecessary parameter "artno".
+	Suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: artutil: modified call of store() by removing all unnecessary
+	parameters. Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+271000: xoverutil: helpfindxover() would segfault under certain
+	circumstances if the calculation of "new" yielded 0. Bug
+	fixed by Joerg Dietrich <joerg@dietrich.net>.
+
+nntpd:
+=====
+
+291000: global variable "cmd" declared "static". Suggested by Matthias
+	Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: dolistgroup(): declared art as unsigned long instead of int.
+	Suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: doxover(): declared art, a, b as unsigned long instead of int.
+	Suggested by Matthias Andree <ma@dt.e-technik.uni-dortmund.de>.
+291000: doselectedheader(): declared a, b and c as unsigned long instead
+	of int. Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+
+General:
+=======
+
+291000: renamed all variables called "new" to something else. This makes
+	it possible to compile leafnode with g++ which does much stricter
+	type-checking than gcc. Suggested by Matthias Andree
+	<ma@dt.e-technik.uni-dortmund.de>.
+
+----------------------------------------------------------------------------
+
 History of 2.0b3 -- changes since 2.0b2:
 
 fetchnews:
@@ -72,17 +148,17 @@ History of 2.0b2 -- changes since 2.0b1:
 libutil:
 =======
 
-251000: xoverutil: gfixxover(): argument of isspace() was not casted
+251000: xoverutil: gfixxover(): argument of isspace() was not cast
 	to unsigned char. Reported by Joerg Dietrich <joerg@dietrich.net>.
 251000: miscutil: snprintf(): unused variable rval was present.
 	Reported by Joerg Dietrich <joerg@dietrich.net>.
-251000: artutil: mgetheader(): argument of isspace() was not casted to
-	unsigned char; instead the result of isspace() was casted. Bug
+251000: artutil: mgetheader(): argument of isspace() was not cast to
+	unsigned char; instead the result of isspace() was cast. Bug
 	reported by Joerg Dietrich <joerg@dietrich.net>.
 
 nntpd:
 =====
-251000: list(): argument of tolower() was not casted to unsigned char.
+251000: list(): argument of tolower() was not cast to unsigned char.
 	Reported by Joerg Dietrich <joerg@dietrich.net>.
 
 Miscellaneous:
@@ -541,10 +617,10 @@ libutil:
 	in headers. Problem reported by Radoslaw Gancaraz <r_g@priv2.onet.pl>.
 221199: miscutil: chdirgroup(): tolower() now casts its argument like
 	isspace() etc.
-221199: miscutil: lockfile_exists(): getpid() now casted to int.
+221199: miscutil: lockfile_exists(): getpid() now cast to int.
 191199: activutil: readactive(): if reading is truncated, st.st_size is now
 	cast to int. Submitted by Bruno Rohee <rohee@OpenBSD.ORG>.
-191199: activutil: helpwriteactive(): g->age casted to unsigned long.
+191199: activutil: helpwriteactive(): g->age cast to unsigned long.
 	Submitted by Bruno Rohee <rohee@OpenBSD.ORG>.
 191199: activutil: readactive(): when groupinfo was not a regular file,
 	leafnode would crash. Bug discovered and fixed by Bruno Rohee

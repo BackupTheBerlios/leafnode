@@ -21,7 +21,7 @@
 #define MAXHEADERSIZE 5000
 
 int debug = 0;
-int verbose;
+/* int verbose; */
 int first, last;
 
 static void usage( void ) {
@@ -39,8 +39,9 @@ static void usage( void ) {
 
 int main( int argc, char * argv[] ) {
     struct filterlist *myfilter;
-    char c[4] = "-\\|/" ; 
-    int i, n, score, option, deleted, kept;
+    const char c[] = "-\\|/" ; 
+    int i, score, option, deleted, kept;
+    unsigned long n;
     char *k, *l, *msgid;
     const char *msgidpath = "";
     FILE *f;
@@ -147,10 +148,10 @@ int main( int argc, char * argv[] ) {
 	    msgid = mgetheader( "Message-ID:", l );
 	    if ( ( k = strstr( l, "\n\n" ) ) != NULL ) {
 		*k = '\0';	/* cut off body */
-		score = killfilter(myfilter, l, 0);
+		score = killfilter(myfilter, l);
 	    } else {
 		/* article has no body - delete it */
-		score = TRUE;
+		score = 1;
 	    }
 	    if ( score ) {
 		unlink( de->d_name );
@@ -167,7 +168,7 @@ int main( int argc, char * argv[] ) {
 		    printf( "%s %s deleted\n", de->d_name, msgidpath );
 	    }
 	    else {
-		n = strtol( de->d_name, NULL, 10 );
+		n = strtoul( de->d_name, NULL, 10 );
 		if ( n ) {
 		    if ( n < g->first )
 			g->first = n;

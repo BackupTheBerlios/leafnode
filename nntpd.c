@@ -109,11 +109,11 @@ struct stringlist * users = NULL;
 int pseudogroup;		/* indicates whether we are in a "real"
 				   group or pretend only */
 unsigned long int artno;	/* current article number */
-char *cmd;			/* current command line */
+static char *cmd;		/* current command line */
 time_t activetime;
 
 int debug = 0;
-int authflag = 0;		/* TRUE if authenticated */
+int authflag = 0;		/* 1 if authenticated */
 time_t gmt_off;			/* offset between localtime and GMT in sec */
 
 static jmp_buf timeout;
@@ -676,7 +676,7 @@ void dogroup(const char *arg) {
 	    g->last  = 1;
 	    g->count = 1;
 	    artno = 1;
-	    pseudogroup = TRUE;
+	    pseudogroup = 1;
 	}
 	artno = g->first;
 	fflush( stdout );
@@ -1091,39 +1091,39 @@ void dopost( void ) {
 	}
 	if ( !strncasecmp( line, "From:", 5 ) ) {
 	    if ( havefrom )
-		err = TRUE;
+		err = 1;
 	    else
-		havefrom = TRUE;
+		havefrom = 1;
 	}
 	if ( !strncasecmp( line, "Path:", 5 ) ) {
 	    if ( havepath )
-		err = TRUE;
+		err = 1;
 	    else
-		havepath = TRUE;
+		havepath = 1;
 	}
 	if ( !strncasecmp( line, "Message-ID:", 11 ) ) {
 	    if ( havemessageid )
-		err = TRUE;
+		err = 1;
 	    else
-		havemessageid = TRUE;
+		havemessageid = 1;
 	}
 	if ( !strncasecmp( line, "Subject:", 8 ) ) {
 	    if ( havesubject )
-		err = TRUE;
+		err = 1;
 	    else
-		havesubject = TRUE;
+		havesubject = 1;
 	}
 	if ( !strncasecmp( line, "Newsgroups:", 11 ) ) {
 	    if ( havenewsgroups )
-		err = TRUE;
+		err = 1;
 	    else
-		havenewsgroups = TRUE;
+		havenewsgroups = 1;
 	}
 	if ( !strncasecmp( line, "Date:", 5 ) ) {
 	    if ( havedate )
-		err = TRUE;
+		err = 1;
 	    else
-		havedate = TRUE;
+		havedate = 1;
 	}
 	len = strlen( line );
 
@@ -1133,8 +1133,8 @@ void dopost( void ) {
 	   the following lines.
 	 */
 	if ( len > 1000 ) {
-	    hdrtoolong = TRUE;
-	    err = TRUE;
+	    hdrtoolong = 1;
+	    err = 1;
 	}
 
 	/* replace tabs with spaces */
@@ -1222,7 +1222,7 @@ void dopost( void ) {
 	    break;
 	}
 	case 0: {
-	    if ( lockfile_exists( TRUE, TRUE ) ) {
+	    if ( lockfile_exists( 1, 1 ) ) {
 		/* Something is really wrong. Move the article 
 		   to failed.postings */
 		syslog( LOG_ERR, "Could not store article %s." 
@@ -1339,7 +1339,8 @@ void doselectedheader(const char *header, const char *messages,
     int n;
     int dash = 0;
     char *l;
-    int a, b = 0, c, i;
+    unsigned long a, b = 0, c;
+    long int i;
     FILE *f;
 
     struct stringlist *ap;
@@ -1387,11 +1388,11 @@ void doselectedheader(const char *header, const char *messages,
     markinterest();
     
     if ( !chdirgroup( group->name, FALSE ) )
-	pseudogroup = TRUE;
+	pseudogroup = 1;
 
     if ( !pseudogroup && ( xovergroup != group ) ) {
 	if ( !getxover() )
-	    pseudogroup = TRUE;
+	    pseudogroup = 1;
 	else
 	    xovergroup = group;
     }
@@ -1433,7 +1434,7 @@ void doselectedheader(const char *header, const char *messages,
 
     if ( messages && isdigit((unsigned char)*messages) ) {
         /* handle range form */
-        a = strtol( messages, &l, 10 );
+        a = strtoul( messages, &l, 10 );
 	if ( a < xfirst )
 	    a = xfirst;
 	if (a && l && *l) {
@@ -1444,7 +1445,7 @@ void doselectedheader(const char *header, const char *messages,
 		b = xlast;
 		l++;
 		if ( l && *l )
-		    b = strtol( l, &l, 10 );
+		    b = strtoul( l, &l, 10 );
 	    }
 	    while (l && isspace((unsigned char)*l))
 		l++;
@@ -1517,14 +1518,14 @@ void doselectedheader(const char *header, const char *messages,
                     if ( !ap )
                         continue;
                 }
-                printf("%d %s\r\n", c, strlen(s) ? s : "(none)" );
+                printf("%lu %s\r\n", c, strlen(s) ? s : "(none)" );
 	    }
 	}
     } else {
-	nntpprintf( "221 %s header %s(from article files) for postings %d-%d:",
-		    header, mp ? "matches " : "", a, b );
+	nntpprintf("221 %s header %s(from article files) for postings %lu-%lu:",
+		   header, mp ? "matches " : "", a, b );
 	for( c=a; c<=b; c++ ) {
-	    sprintf( s, "%d", c );
+	    sprintf( s, "%lu", c );
 	    l = getheader( s, header );
 /*
 	    STRIP_TRAILING_SPACE( l );
@@ -1539,7 +1540,7 @@ void doselectedheader(const char *header, const char *messages,
                 if ( !ap )
                     continue;
             }
-            printf("%d %s\r\n", c, (l && *l) ? l : "(none)" );
+            printf("%lu %s\r\n", c, (l && *l) ? l : "(none)" );
 	}
     }
 
@@ -1551,7 +1552,8 @@ void doselectedheader(const char *header, const char *messages,
 
 void doxover(const char *arg) {
     char * l;
-    int a, b, art, index;
+    unsigned long a, b, art;
+    long int index;
     int flag = FALSE;
 
     if (!group) {
@@ -1561,12 +1563,12 @@ void doxover(const char *arg) {
     markinterest();
 
     l = NULL;
-    b = a = strtol( arg, &l, 10 );
+    b = a = strtoul( arg, &l, 10 );
     if (a && l && *l) {
 	while (l && isspace((unsigned char)*l))
 	    l++;
 	if ( *l=='-' )
-	    b = strtol( ++l, &l, 10 );
+	    b = strtoul( ++l, &l, 10 );
 	while (l && isspace((unsigned char)*l))
 	    l++;
 	if ( l && *l ) {
@@ -1576,7 +1578,7 @@ void doxover(const char *arg) {
     }
 
     if ( !chdirgroup( group->name, FALSE ) )
-	pseudogroup = TRUE;
+	pseudogroup = 1;
 
     if ( !pseudogroup ) {
 	if ( xovergroup != group && getxover() )
@@ -1599,12 +1601,12 @@ void doxover(const char *arg) {
 	    a = xfirst;
 
 	for( art=a; art<=b; art++ ) {
-	    index = findxover( art );
+	    index = findxover(art);
 	    if ( index >= 0 && xoverinfo[index].text != NULL ) {
 	        if ( flag == FALSE ) {
 		    flag = TRUE;
-		    nntpprintf( "224 Overview information for postings %d-%d:",
-				 a, b );
+		    nntpprintf("224 Overview information for postings %lu-%lu:",
+				a, b );
 		}
 		printf( "%s\r\n", xoverinfo[index].text );
 	    }
@@ -1633,7 +1635,8 @@ void doxover(const char *arg) {
 
 void dolistgroup( const char * arg ) {
     struct newsgroup * g;
-    int art, index;
+    long int index;
+    unsigned long art;
 
     if ( arg && strlen(arg) ) {
 	g = findgroup( arg );
@@ -1654,9 +1657,9 @@ void dolistgroup( const char * arg ) {
     markinterest();
     group = g;
     if ( !chdirgroup( g->name, FALSE ) )
-	pseudogroup = TRUE;
+	pseudogroup = 1;
     else if ( ( xovergroup != group ) && !getxover() )
-	pseudogroup = TRUE;
+	pseudogroup = 1;
     else {
 	pseudogroup = FALSE;
 	xovergroup = group;
@@ -1666,11 +1669,12 @@ void dolistgroup( const char * arg ) {
 	nntpprintf( "211 Article list for %s follows (pseudo)", g->name );
 	printf( "%lu \r\n", g->last ? g->last : 1 );
     } else {
-	nntpprintf( "211 Article list for %s (%d-%d) follows", g->name, xfirst, xlast );
+	nntpprintf( "211 Article list for %s (%lu-%lu) follows",
+		    g->name, xfirst, xlast );
 	for( art=xfirst; art<=xlast; art++ ) {
-	    index = findxover( art );
+	    index = findxover(art);
 	    if ( index >= 0 && xoverinfo[index].text )
-		printf( "%d \r\n", art );
+		printf( "%lu \r\n", art );
 	}
     }
     printf( ".\r\n" );
@@ -1704,9 +1708,9 @@ static int readpasswd( void ) {
 
 int isauthorized( void ) {
     if ( !authentication )
-	return TRUE;
+	return 1;
     if ( authflag )
-	return TRUE;
+	return 1;
     nntpprintf( "480 Authentication required for command" );
     return FALSE;
 }
@@ -1714,7 +1718,9 @@ int isauthorized( void ) {
 void doauthinfo( const char *arg ) {
     char cmd[MAXLINELENGTH] = "";
     char param[MAXLINELENGTH] = "";
-    char salt[3] = "\0\0\0";
+#ifdef TODO
+    char salt[3] = { 0 };
+#endif
     static char * user = NULL;
     char * p;
     int result = 0;
@@ -1804,7 +1810,7 @@ void doauthinfo( const char *arg ) {
 
 int main( int argc, char ** argv ) {
     int option, reply;
-    int fodder;
+    socklen_t fodder;
     char *conffile;
     struct hostent *he;
 #ifdef HAVE_IPV6
@@ -1852,6 +1858,7 @@ int main( int argc, char ** argv ) {
 #ifdef HAVE_IPV6
 	fodder = sizeof(union sockaddr_union);
 	if (getsockname(0, (struct sockaddr *)&su, &fodder)) {
+	    /* FIXME: check errno for ENOTSOCK and bail out otherwise */
 	    strcpy( fqdn, "localhost" );
 	} else {
 	    he = gethostbyaddr( (char *)&su.sin6.sin6_addr,
@@ -1869,6 +1876,7 @@ int main( int argc, char ** argv ) {
 #else
 	fodder = sizeof(struct sockaddr_in);
 	if (getsockname(0, (struct sockaddr *)&sa, &fodder)) {
+	    /* FIXME: check errno for ENOTSOCK and bail out otherwise */
 	    strcpy( fqdn, "localhost" );
 	} else {
 	    he = gethostbyaddr( (char *)&sa.sin_addr.s_addr,
@@ -1891,7 +1899,7 @@ int main( int argc, char ** argv ) {
 	syslog( LOG_ERR, "Connect from unknown client");
     else {
 #ifdef HAVE_IPV6
-	/* do nothing, because we don't know how */
+	/* FIXME: do nothing, because we don't know how */
 #else
 	syslog( LOG_INFO, "Connect from %s", inet_ntoa(peer.sin_addr) );
 #endif

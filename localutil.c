@@ -139,7 +139,7 @@ int islocalgroup( const char *groupname ) {
 	    a = a->right;
 	}
 	else
-	    return TRUE;
+	    return 1;
     }
     return FALSE;
 }
@@ -149,7 +149,7 @@ int islocalgroup( const char *groupname ) {
  */
 int islocal( const char * grouplist ) {
     char * p, * q;
-    int retval = TRUE;	/* assume that all groups are local */
+    int retval = 1;	/* assume that all groups are local */
 
     p = strdup( grouplist );
     do {

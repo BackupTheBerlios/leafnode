@@ -3,9 +3,6 @@
 /* Define to empty if the keyword does not work.  */
 #undef const
 
-/* Define if your system has a working fnmatch function.  */
-#undef HAVE_FNMATCH
-
 /* Define if you have the strftime function.  */
 #undef HAVE_STRFTIME
 
@@ -132,14 +129,8 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
-/* Define if you have the crypt library (-lcrypt).  */
-#undef HAVE_LIBCRYPT
-
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
-
-/* Define if you have the pcre library (-lpcre).  */
-#undef HAVE_LIBPCRE
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET

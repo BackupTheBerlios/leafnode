@@ -62,8 +62,18 @@ static int processbatch( char * filename ) {
 	fclose( f );
 	return 0;
     }
-    while ( ( l = getaline( f ) ) != NULL ) {
-	sscanf( l, "#! rnews %ld", &bytes );
+    while ( ( l = getaline( f ) ) ) {
+	const char tomatch[]="#! rnews ";
+	if(strncmp(l, tomatch, strlen(tomatch))) {
+		fprintf(stderr, "expected `#! rnews', got `%-.40s[...]' ", 
+			l);
+		return 0;
+	}
+	if(!get_long(l+strlen(tomatch),&bytes)) {
+		fprintf(stderr, "cannot extract article length from
+`%-.40s[...]' ", l);
+		return 0;
+	}
 	artfile = fopen( artname, "w" );
 	copyfile( f, artfile, bytes );
 	fclose( artfile );

@@ -311,13 +311,13 @@ int readconfig( char * configfile ) {
 		p = (struct serverlist *)critmalloc( sizeof(struct serverlist),
 		     "allocating space for server name");
 		p->name = strdup( value );
-		p->descriptions = TRUE;
+		p->descriptions = 1;
 		p->next = NULL;
 		p->timeout = 30;	/* default 30 seconds */
 		p->port = 0;
 		p->username = NULL;
 		p->password = NULL;
-		p->active = TRUE;
+		p->active = 1;
 		if ( servers == NULL )
 		    servers = p;
 		else

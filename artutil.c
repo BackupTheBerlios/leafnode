@@ -30,7 +30,7 @@ char *mgetheader ( const char *hdr, char *buf ) {
     p = buf;
     while ( !havehdr && p && *p ) {
 	if ( strncasecmp( p, hdr, strlen(hdr) ) == 0 ) {
-	    havehdr = TRUE;
+	    havehdr = 1;
 	    p += strlen(hdr)+1;
 	    while (isspace((unsigned char)*p))
 		p++;
@@ -136,16 +136,14 @@ void storearticle ( char * filename, char * msgid, char * newsgroups ) {
 	xref = NULL;
     if ( ( outfile = fopen( outname, "w" ) ) == NULL )
 	return;
-
+    
     debug = 0;
     /* copy article headers except Xref: line */
     while ( ( l = getaline( infile ) ) && strlen( l ) ) {
-	if ( strncmp( l, "Xref:", 5 ) )
+	if ( strncmp( l, "Xref:", 5 ) ) 
 	    fprintf( outfile, "%s\n", l );
-	else
-	    ; /* Don't copy the new Xref: line */
     }
-
+    
     debug = debugmode;
     /* create Xref: line and all the links in the newsgroups */
     p = newsgroups;
@@ -157,7 +155,7 @@ void storearticle ( char * filename, char * msgid, char * newsgroups ) {
 	    *q++ = '\0';
 	if ( *p && ( isinteresting( p ) || create_all_links ) ) {
 	    cg = findgroup( p );
-	    if ( cg && chdirgroup( p, TRUE ) ) {
+	    if ( cg && chdirgroup( p, 1 ) ) {
 		if (xref)
 		    cxref = strdup( xref );
 		if (( xrefno = lookup_xref( cxref, cg->name )) != NULL ) {
@@ -292,16 +290,8 @@ void supersede( const char *msgid ) {
  * store articles in newsgroups which are already stored in
  * $SPOOLDIR/message.id/
  */
-void store( const char * filename,
-	    FILE * filehandle,
-	    size_t bytes,
-	    char * newsgroups,
-	    const char * subject,
-	    const char * from,
-	    const char * date,
-	    const char * msgid,
-	    const char * references,
-	    const char * lines)
+void store( const char * filename, FILE * filehandle, char * newsgroups,
+	    const char * msgid )
 {
     char tmp[10];
     static struct newsgroup * cg = NULL;
@@ -324,7 +314,7 @@ void store( const char * filename,
 		cg = findgroup( p );
 		if ( cg ) {
 		    if ( isinteresting(cg->name) || create_all_links )
-		        (void) chdirgroup( p, TRUE );
+		        (void) chdirgroup( p, 1 );
 		    else
 		    	cg = NULL;
 		}

@@ -1,7 +1,7 @@
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.1 2000/11/12 17:40:35 emma Exp $
+# $Id: Makefile.in,v 1.2 2000/11/12 18:05:48 emma Exp $
 
-VERSION = 2.0b3
+VERSION = 2.0b4-ma1
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -15,6 +15,8 @@ AR	= @AR@
 
 # Libraries
 PCRELIB = @PCRELIB@
+LINKPCRELIB = @LINKPCRELIB@
+CRYPTLIB = @CRYPTLIB@
 
 # Flags
 DEBUG  = -g
@@ -30,9 +32,9 @@ PREFIX_VAR = /var
 USRDIR = $(PREFIX_USR)/bin
 BINDIR = $(PREFIX_USR)/sbin
 MANDIR = $(PREFIX_USR)/man
-SPOOLDIR = $(PREFIX_VAR)/spool/news
-LIBDIR   = /etc/leafnode
-LOCKFILE = /var/lock/news/fetchnews.lck
+SPOOLDIR = @SPOOLDIR@
+LIBDIR   = @sysconfdir@
+LOCKFILE = @LOCKFILE@
 
 # RPM crap
 RPM = @RPM@
@@ -46,9 +48,12 @@ SRCFILES = nntputil.c configutil.c xoverutil.c activutil.c miscutil.c \
 	   vsnprintf.c strdup.c
 LIBFILES = nntputil.o configutil.o xoverutil.o activutil.o miscutil.o \
 	   artutil.o filterutil.o localutil.o \
-	   vsnprintf.o strdup.o
+	   vsnprintf.o strdup.o get_any.o
 
 all: liblnutil.a @PCRELIB@ nntpd rnews fetchnews texpire checkgroups applyfilter newsq
+
+leafnode.h: get.h
+	touch $@
 
 liblnutil.a: $(LIBFILES) leafnode.h
 	$(AR) rc liblnutil.a $(LIBFILES)
@@ -61,14 +66,14 @@ pcre/libpcre.a:
 	@echo "Building Philip Hazel's Perl regular expressions library..."
 	@cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) libpcre.a
 
-nntpd: nntpd.o config.o liblnutil.a
-	$(CC) $(CFLAGS) -o $@ nntpd.o config.o -L. -llnutil $(LIBS)
+nntpd: nntpd.o config.o liblnutil.a @CRYPTLIB@
+	$(CC) $(CFLAGS) -o $@ nntpd.o config.o -L. -llnutil $(CRYPTLIB) $(LIBS)
 
 rnews: rnews.o config.o liblnutil.a
 	$(CC) $(CFLAGS) -o $@ rnews.o config.o -L. -llnutil $(LIBS)
 
 fetchnews: fetchnews.o config.o liblnutil.a @PCRELIB@
-	$(CC) $(CFLAGS) -o $@ fetchnews.o config.o -L. -llnutil -lpcre $(LIBS)
+	$(CC) $(CFLAGS) -o $@ fetchnews.o config.o -L. -llnutil $(LINKPCRELIB) $(LIBS)
 
 texpire: texpire.o config.o liblnutil.a
 	$(CC) $(CFLAGS) -o $@ texpire.o config.o -L. -llnutil $(LIBS)
@@ -77,7 +82,7 @@ checkgroups: checkgroups.o config.o liblnutil.a
 	$(CC) $(CFLAGS) -o $@ checkgroups.o config.o -L. -llnutil $(LIBS)
 
 applyfilter: applyfilter.o config.o liblnutil.a @PCRELIB@
-	$(CC) $(CFLAGS) -o $@ applyfilter.o config.o -L. -llnutil -lpcre $(LIBS)
+	$(CC) $(CFLAGS) -o $@ applyfilter.o config.o -L. -llnutil $(LINKPCRELIB) $(LIBS)
 
 newsq: newsq.o config.o liblnutil.a
 	$(CC) $(CFLAGS) -o $@ newsq.o config.o -L. -llnutil $(LIBS)
@@ -103,17 +108,18 @@ applyfilter.o: applyfilter.c leafnode.h
 newsq.o: newsq.c leafnode.h
 	$(CC) -c $(CFLAGS) $(srcdir)/newsq.c
 
+.PHONY:	clean distclean realclean
 clean:
-	@rm -f *.o *.a *~ \#*
-	@rm -f core nntpd fetchnews texpire checkgroups applyfilter newsq
-	@rm -f rnews
-	@rm -f config.status config.cache config.log
-	@cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) clean
+	rm -f *.o *.a
+	cd pcre && $(MAKE) $(MFLAGS) -$(MAKEFLAGS) clean
 
-distclean: realclean
+realclean: distclean
 
-realclean: clean
-	@rm -f config.h Makefile pcre/Makefile *.rej *.orig
+distclean: clean
+	rm -f core nntpd fetchnews texpire checkgroups applyfilter newsq
+	rm -f rnews
+	rm -f config.h Makefile pcre/Makefile *.rej *.orig
+	rm -f config.status config.cache config.log
 
 update:
 	@$(srcdir)/update.sh $(SPOOLDIR) $(LIBDIR) $(LOCKFILE)
@@ -208,7 +214,7 @@ dist:	distclean
 	cp $(MANFILES) leafnode.h acconfig.h $(SRCFILES) \
 		INSTALL README CREDITS TODO ChangeLog FAQ \
 		config.example config.h.in configure.in Makefile.in \
-		configure install-sh \
+		configure install-sh aclocal.m4 \
 		update.sh makerpm.sh leafnode-$(VERSION).lsm \
 		leafnode-$(VERSION)
 	chmod 644 leafnode-$(VERSION)/*
@@ -247,7 +253,25 @@ patch:
 	done
 	gzip -f9 ../leafnode-$(VERSION).patch
 
+configure: configure.in aclocal.m4
+	autoconf
+
+config.h.in: stamp-h.in
+stamp-h.in: configure.in aclocal.m4 acconfig.h
+	autoheader
+	echo timestamp >stamp-h.in
+
+config.h: stamp-h
+stamp-h: config.h.in config.status
+	./config.status
+
+Makefile: Makefile.in config.status
+	./config.status
+
+config.status: configure
+	./config.status --recheck
+
 rpm: dist
 	@./makerpm.sh $(RPM) $(VERSION) $(USRDIR) $(BINDIR) $(MANDIR) $(LOCKFILE) $(SPOOLDIR) $(AWK) $(LIBDIR) $(PREFIX_USR)
-	
+
 # DO NOT DELETE
