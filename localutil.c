@@ -116,6 +116,8 @@ readlocalgroups(void)
 
     debug = 0;
     while ((l = getaline(f))) {
+	/* skip comments */
+	if (l[0] == '#') continue;
 	p = l;
 	while (*p && *p != '\t')
 	    p++;
