@@ -648,14 +648,17 @@ markinterest(const struct newsgroup *group)
 		int e = errno;
 		ln_log(LNLOG_SERR, LNLOG_CGROUP,
 		       "Could not write to %s: %m", mastr_str(s));
+		mastr_delete(s);
 		return e;
 	    } else {
+		mastr_delete(s);
 		return 0;
 	    }
 	} else {
 	    int e = errno;
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "Could not create %s: %m",
 		   mastr_str(s));
+	    mastr_delete(s);
 	    return e;
 	}
     }
@@ -877,7 +880,6 @@ list(struct newsgroup *g, int what, char *pattern)
 static void
 dolist(char *oarg)
 {
-    char *p = NULL;
     char *arg = critstrdup(oarg, "dolist");
 
     if (!strcasecmp(arg, "extensions")) {
@@ -913,7 +915,6 @@ dolist(char *oarg)
 			arg++;
 		    while (*arg && isspace((unsigned char)*arg))
 			arg++;
-		    p = arg;
 		    list(active, 0, arg);
 		}
 	    }
@@ -936,6 +937,7 @@ dolist(char *oarg)
 	    nntpprintf("503 Syntax error");
 	}
     }
+    free(arg);
 }
 
 static time_t
@@ -1598,6 +1600,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	f = fopenart(group, messages, artno);
 	if (!f) {
 	    nntpprintf("430 No such article");
+	    free(header);
 	    return;
 	}
 	l = fgetheader(f, header, 1);
@@ -1605,6 +1608,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	    nntpprintf("221 No such header: %s", hd);
 	    printf(".\r\n");
 	    fclose(f);
+	    free(header);
 	    return;
 	}
 	STRIP_TRAILING_SPACE(l);
@@ -1619,12 +1623,14 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 		nntpprintf("221 %s matches follow:", hd);
 		printf(".\r\n");
 		fclose(f);
+		free(header);
 		return;
 	    }
 	}
 	nntpprintf("221 %s %s follow:", hd, (patterns ? "matches" : "headers"));
 	printf("%s %s\r\n.\r\n", messages, l ? l : "");
 	fclose(f);
+	free(header);
 	return;
     }
 
@@ -1632,6 +1638,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 
     if (!group) {
 	nntpprintf("412 Use the GROUP command first");
+	free(header);
 	return;
     }
 
@@ -1656,6 +1663,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	if (patterns) {		/* placeholder matches pseudogroup never */
 	    nntpprintf("221 %s header matches follow:", hd);
 	    printf(".\r\n");
+	    free(header);
 	    return;
 	}
 
@@ -1672,6 +1680,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 		nntpprintf("221 No such header: %s", hd);
 		printf(".\r\n");
 	    }
+	    free(header);
 	    return;
 	}
 
@@ -1692,6 +1701,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	else if (OVfield == 6)	/* Lines */
 	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
 	printf(".\r\n");
+	free(header);
 	return;
     }
 
@@ -1699,11 +1709,14 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
     if (messages) {
 	if (parserange(messages, &a, &b) & RANGE_ERR) {
 	    nntpprintf("502 Syntax error");
+	    free(header);
 	    return;
 	}
 
-	if (!dorange(messages, &a, &b, *artno, group->first, group->last))
+	if (!dorange(messages, &a, &b, *artno, group->first, group->last)) {
+	    free(header);
 	    return;
+	}
     } else {
 	a = b = *artno;
     }
@@ -1717,6 +1730,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
     }
     if (i == -1) {
 	nntpprintf("420 No article in specified range.");
+	free(header);
 	return;
     }
     if (OVfield >= 0) {
@@ -1784,8 +1798,10 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 			    break;
 			ap = ap->next;
 		    }
-		    if (!ap)
+		    if (!ap) {
+			free(l);
 			continue;
+		    }
 		}
 		if (*l)
 		    printf("%lu %s\r\n", c, l);
@@ -1794,14 +1810,15 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	}
     }
     printf(".\r\n");
+    free(header);
     return;
 }
 
 /** call this only if a previous parserange with the same arg yielded no
- * error return! 
+ * error return!
  *
- * \return 
- *  - 1 for success 
+ * \return
+ *  - 1 for success
  *  - 0 if no articles are found (this is printed)
  */
 static int
@@ -1839,7 +1856,6 @@ dorange(const char *arg,
 void
 doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
 {
-    char *l;
     unsigned long a, b, art;
     long int idx;
     int flag = FALSE;
@@ -1851,7 +1867,6 @@ doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
     }
 
     markinterest(group);
-    l = NULL;
 
     if (!*arg)
 	arg = 0;		/* simplify subsequent tests */
