@@ -779,10 +779,6 @@ clearidtree(void)
     head = NULL;
 }
 
-#ifndef HAVE_GMTOFF
-extern time_t timezone;
-#endif
-
 typedef /*@observer@*/ const char *litstring;
 
 /*@dependent@*/ const char *
