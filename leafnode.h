@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.80 2003/01/19 17:47:02 emma Exp $ */
+/* $Id: leafnode.h,v 1.81 2003/01/27 23:32:21 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -518,7 +518,7 @@ extern "C" {
     extern char fqdn[];		/* my name, and my naming myself */
     extern int verbose;		/* verbosity level, for fetch and texpire */
     void freegrouplist(/*@only@*/ struct rbtree *rb);
-    /*@null@*/ /*@only@*/ struct rbtree * initgrouplistdir(const char *dir);
+    /*@null@*/ /*@only@*/ struct rbtree * initgrouplistdir(const char *dir, int);
 
     /*@null@*/ /*@only@*/ struct rbtree *
     initfilelist(FILE *f, const void *config,

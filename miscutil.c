@@ -14,6 +14,7 @@
 #include "get.h"
 #include "redblack.h"
 #include "validatefqdn.h"
+#include "activutil.h"
 
 #include <fcntl.h>
 #include <sys/uio.h>
@@ -248,6 +249,18 @@ parseopt(const char *progname, int option,
     return FALSE;
 }
 
+static int log_dir_unlink(const char *dir, const char *file)
+{
+    int ret, e;
+    mastr *fn = mastr_new(1024);
+    mastr_vcat(fn, dir, "/", file, NULL);
+    ret = log_unlink(mastr_str(fn), 1);
+    e = errno;
+    mastr_delete(fn);
+    errno = e;
+    return ret;
+}
+
 static int compare(const void *a, const void *b,
 		   const void *config __attribute__ ((unused)));
 static int
@@ -263,7 +276,7 @@ static /*@null@*/ /*@only@*/ struct rbtree *rb_dormant;
  *  \return rbtree, NULL in case of trouble.
  */
 /*@null@*/ /*@only@*/ struct rbtree *
-initgrouplistdir(const char *dir)
+initgrouplistdir(const char *dir, int deleteconflicts)
 {
     DIR *d;
     struct dirent *de;
@@ -303,12 +316,31 @@ initgrouplistdir(const char *dir)
 		   "%s, cannot build rbtree", myname);
 	    exit(EXIT_FAILURE);
 	}
+
 	if (k != k2) {
-	    /* key was already present in tree */
-	    ln_log(LNLOG_SCRIT, LNLOG_CTOP,
-		   "directory file name conflict \"%s\" ./. \"%s\" "
-		   "Confused, aborting.", k, k2);
-	    abort();
+	    /* key was already present in tree
+	     * resolve case conflict */
+	    /* k is the new, k2 the old entry */
+	    if (countcaps(k) < countcaps(k2)) {
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			"directory file name conflict \"%s\" ./. \"%s\" "
+			"choosing \"%s\"", k, k2, k);
+		rbdelete(k2, rb);
+		if (deleteconflicts)
+		    log_dir_unlink(mastr_str(t), k2);
+		if (NULL == rbsearch(k, rb)) {
+		    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
+			    "%s, cannot build rbtree", myname);
+		    exit(EXIT_FAILURE);
+		}
+	    } else {
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+			"directory file name conflict \"%s\" ./. \"%s\" "
+			"choosing \"%s\"", k, k2, k2);
+		if (deleteconflicts)
+		    log_dir_unlink(mastr_str(t), k);
+		free(k);
+	    }
 	}
 	/* NOTE: rbsearch does NOT make a copy of k, so you must not
          * free k here! */
@@ -381,7 +413,7 @@ int
 init_dormant(void)
 {
     if (rb_dormant == NULL)
-	rb_dormant = initgrouplistdir("/dormant.groups");
+	rb_dormant = initgrouplistdir("/dormant.groups", 1);
     if (rb_dormant)
 	return TRUE;
     else

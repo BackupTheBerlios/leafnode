@@ -8,6 +8,7 @@
 #include "ln_log.h"
 #include "format.h"
 #include "mastring.h"
+#include "activutil.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -28,7 +29,7 @@
 #define GROUPINFO "/leaf.node/groupinfo"
 
 static size_t oldactivesize = 0;
-static size_t activesize = 0;
+size_t activesize = 0;
 static time_t activetime = 0;
 static ino_t activeinode = 0;
 static time_t localmtime = 0;
@@ -42,13 +43,28 @@ struct nglist {
     /*@null@*/ struct nglist *next;
 };
 
-static int
-_compactive(const void *a, const void *b)
+int
+compactive(const void *a, const void *b)
 {
     const struct newsgroup *la = (const struct newsgroup *)a;
     const struct newsgroup *lb = (const struct newsgroup *)b;
 
     return strcasecmp(la->name, lb->name);
+}
+
+void
+newsgroup_copy(struct newsgroup *d, const struct newsgroup *s)
+    /** note this is not a deep copy, only string pointers are copied,
+     * not the strings themselves!
+     */
+{
+	d->name = s->name;
+	d->first = s->first;
+	d->last = s->last;
+	d->count = s->count;
+	d->age = s->age;
+	d->desc = s->desc;
+	d->status = s->status;
 }
 
 static /*@null@*/ /*@owned@*/ struct nglist *newgroup;
@@ -169,22 +185,17 @@ mergegroups(void)
     count = activesize;
     while (l) {
 	la = l;
-	active[count].name = (l->entry)->name;
-	active[count].first = (l->entry)->first;
-	active[count].last = (l->entry)->last;
-	active[count].count = (l->entry)->count;
-	active[count].age = (l->entry)->age;
-	active[count].desc = (l->entry)->desc;
-	active[count].status = (l->entry)->status;
-	free(l->entry);
+	newsgroup_copy(active + count, l->entry);
 	l = l->next;
 	count++;
+	free(l->entry);
 	free(la);		/* clean up */
     }
     newgroup = NULL;
     active[count].name = NULL;
     activesize = count;
-    sort(active, activesize, sizeof(struct newsgroup), _compactive);
+    sort(active, activesize, sizeof(struct newsgroup), compactive);
+    validateactive();
 }
 
 /*
@@ -205,7 +216,7 @@ findgroup(const char *name, struct newsgroup *a, size_t asize)
 					    (asize == (size_t)-1 ?
 					     activesize : asize),
 					    sizeof(struct newsgroup),
-					    _compactive);
+					    compactive);
     } else {
 	ln_log(LNLOG_SCRIT, LNLOG_CTOP,
 	       "findgroup(\"%s\") called without prior readactive()", name);
@@ -268,8 +279,9 @@ writeactive(void)
     while (g->name) {
 	g++;
     }
-    count = (size_t)(g - active);
-    sort(active, count, sizeof(struct newsgroup), &_compactive);
+    count = activesize = (size_t)(g - active);
+    sort(active, count, sizeof(struct newsgroup), &compactive);
+    validateactive();
 
     /* write groupinfo */
     g = active;
@@ -450,7 +462,8 @@ readactive(void)
     }
     activesize = (size_t)(g - active);	/* C magic */
     /* needed so that subsequent insertgroup can work properly */
-    sort(active, activesize, sizeof(struct newsgroup), &_compactive);
+    sort(active, activesize, sizeof(struct newsgroup), &compactive);
+    validateactive();
 
     /* don't check for errors, we opened the file for reading */
     (void)fclose(f);

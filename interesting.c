@@ -152,7 +152,7 @@ int
 initinteresting(void)
 {
     if (rb_interesting == NULL)
-	rb_interesting = initgrouplistdir("/interesting.groups");
+	rb_interesting = initgrouplistdir("/interesting.groups", 1);
     if (rb_interesting)
 	return TRUE;
     else
