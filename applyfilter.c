@@ -203,6 +203,6 @@ main(int argc, char *argv[])
     printf("%d articles deleted, %d kept.\n", deleted, kept);
     if (verbose)
 	printf("Updating .overview file\n");
-    getxover();
+    getxover(1);
     exit(0);
 }
