@@ -50,7 +50,7 @@ vln_log_core(int slg, FILE * console, int severity,
 		*y++ = *x;
 		*y++ = *x;
 	    } else if (*x == 'm') {
-		char *z = strerror(errno_save);
+		const char *z = strerror(errno_save);
 
 		while (*z && y < fmt + sizeof(fmt)) {
 		    if (*z == '%')
