@@ -551,15 +551,17 @@ void mergeactives(struct newsgroup *old, struct newsgroup *newa)
  * pointers in the newsgroup structure!
  * (c) 2002 Joerg Dietrich
  */
-struct newsgroup *mvactive(struct newsgroup *a)
+/*@null@*/ struct newsgroup *mvactive(/*@null@*/ struct newsgroup *a)
 {
     static struct newsgroup *b;
+
+    oldactivesize = activesize;
+    if (a == NULL) return NULL;
 
     b = (struct newsgroup *)critmalloc((1+activesize) *
 				       sizeof(struct newsgroup),
 				       "allocating active copy");
     (void)memcpy(b, a, (1+activesize) * sizeof(struct newsgroup));
-    oldactivesize = activesize;
     active = NULL;
     activesize = 0;
     return b;
