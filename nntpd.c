@@ -470,18 +470,67 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 }
 
 /*
+ * parse Xref line to find an article number to mark for download
+ * give preference to current newsgroup if any
+ * f will not be at same position afterwards
+ * \return null for failure or malloced markgroup name, store markartno then
+ */
+static /*@null@*/ /*@only@*/ char *
+getmarkgroup(/*@null@*/ const char *groupname, FILE *f,
+	     /*@out@*/ unsigned long *markartno)
+{
+    char *p, *q, *r, *s, *xref;
+    char *markgroup;
+    unsigned long a;
+    struct stringlist *l;
+
+    *markartno = 0;
+    xref = fgetheader(f, "Xref:", 1);
+    if (!xref)
+	return NULL;
+    p = xref;
+    SKIPWORD(p);
+    l = cmdlinetolist(p);
+    free(xref);
+    if (!l) {
+	return NULL;
+    }
+    if (groupname && delaybody_group(groupname)) {
+	if ((q = findinlist(l, groupname)) != NULL &&
+	    (r = strchr(q, ':')) != NULL &&
+	    (a = strtoul(r+1, &s, 10)) != 0 &&
+	    (*s == '\0')) {
+	    *markartno = a;
+	    *r = '\0';
+	    markgroup = critstrdup(q, "getmarkgroup");
+	    freelist(l);
+	    return markgroup;
+	}
+    }
+    /* look for another group to mark this article in */
+    /* ... */
+
+    freelist(l);
+    return NULL;
+}
+
+
+/*
  * Mark an article for download by appending its number to the
  * corresponding file in interesting.groups
  */
 static int
-markdownload(const struct newsgroup *group, const char *msgid)
+markdownload(const char *groupname, const char *msgid, unsigned long artno)
 {
     int e = 0;
     char *l;
     FILE *f;
-    mastr *s = mastr_new(1024);
+    mastr *s;
 
-    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, NULL);
+    if (!groupname)
+	return -1;
+    s = mastr_new(1024);
+    mastr_vcat(s, spooldir, "/interesting.groups/", groupname, NULL);
     if ((f = fopen(mastr_str(s), "r+"))) {
 	while ((l = getaline(f)) != NULL) {
 	    if (strncmp(l, msgid, strlen(msgid)) == 0) {
@@ -491,10 +540,10 @@ markdownload(const struct newsgroup *group, const char *msgid)
 	    }
 	    if (ferror(f)) e = errno;
 	}
-	(void)fprintf(f, "%s\n", msgid);
+	(void)fprintf(f, "%s %lu\n", msgid, artno);
 	if (ferror(f)) e = errno;
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	       "Marking %s: %s for download", group->name, msgid);
+	       "Marking %s: %s for download", groupname, msgid);
 	if (fclose(f)) e = errno;
     }
     if (e) {
@@ -543,7 +592,8 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
    what & 2: show header */
 {
     FILE *f;
-    unsigned long localartno;
+    unsigned long localartno, markartno;
+    char *markgroup;
     char *localmsgid = NULL;
     char *l;
     static const char *whatyouget[] = {
@@ -599,32 +649,40 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	 * present. If the blank line is missing, the body will also be
 	 * missing.
 	 */
-	/* for ARTICLE MID, assume same delaybody mode for now - FIXME */
-	if (!l && delaybody_group(group->name)) {
+	/* goal: parse Xref to get (markgroup, markartno) here */
+	if (!l) {
+	    if (localartno) {
+		markgroup = critstrdup(group->name, "doarticle");
+		markartno = localartno;
+	    } else {
+		markgroup = getmarkgroup(group ? group->name : NULL, f, &markartno);
+	    }
 	    /* EOF -> no body */
-	    switch (markdownload(group, localmsgid)) {
+	    switch (markdownload(markgroup, localmsgid, markartno)) {
 	    case 0:
 		fputs("\r\n\r\n"
-		      "\t[Leafnode:]\r\n"
-		      "\t[This message has already been "
-		      "marked for download.]\r\n", stdout);
+			"\t[Leafnode:]\r\n"
+			"\t[This message has already been "
+			"marked for download.]\r\n", stdout);
 		break;
 	    case 1:
 		printf("\r\n\r\n"
-		       "\t[Leafnode:]\r\n"
-		       "\t[Message %lu of %s]\r\n"
-		       "\t[has been marked for download.]\r\n",
-		       localartno, group->name);
+			"\t[Leafnode:]\r\n"
+			"\t[Message %lu of %s]\r\n"
+			"\t[has been marked for download.]\r\n",
+			markartno, markgroup);
 		break;
 	    default:
 		printf("\r\n\r\n"
-		       "\t[ Leafnode: ]\r\n"
-		       "\t[ Message %lu of %s ]\r\n"
-		       "\t[ cannot be marked for download. ]\r\n"
-		       "\t[ (Check the server's syslog "
-		       "for information). ]\r\n",
-		       localartno, group->name);
+			"\t[ Leafnode: ]\r\n"
+			"\t[ Message %s ]\r\n"
+			"\t[ cannot be marked for download. ]\r\n"
+			"\t[ (Check the server's syslog "
+			"for information). ]\r\n",
+			localmsgid);
 	    }
+	    if (markgroup)
+		free(markgroup);
 	} else {
 	    while ((l = getaline(f))) {
 		if (*l == '.')
