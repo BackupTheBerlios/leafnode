@@ -142,6 +142,22 @@ Filtering maxage, minlines, maxlines, maxbytes is fine. maxcrosspost
 filtering currently is expensive, and will only apply after the whole
 article has been downloaded.
 
+.SH LOGGING
+.PP
+Articles that are rejected by filters are currently logged at "news.info"
+facility/priority. They take one of the forms
+
+article N <M> rejected by filter (XOVER)
+
+store: article <M> rejected by filter
+
+where N is the article number in the current group and M is the
+Message-ID of the filtered article.
+
+You can also add "filter debugging" if you need more detailed logging,
+but it is copious and should not be used unattended. Try running
+fetchnews or applyfilter with the "-D33 -e" options to see such logging.
+
 .SH EXAMPLES
 
 .PP

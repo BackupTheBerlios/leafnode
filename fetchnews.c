@@ -853,8 +853,9 @@ fn_doxover(struct stringlist **stufftoget,
 
 	    if (filtlst && killfilter(filtlst, mastr_str(s))) {
 		groupkilled++;
-		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-			"filtered out article %s", artno);
+		ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+			"article %s %s rejected by filter (XOVER)", artno,
+			messageid);
 		if (debugmode & DEBUG_FILTER)
 		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 			    "Headers: %s", mastr_str(s));

@@ -304,7 +304,7 @@ store_stream(FILE * in /** input file */ ,
 		    "store: try filters on header \"%s\"", mastr_str(head));
 	}
 	if (killfilter(f, mastr_str(head))) {
-	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 		    "store: article %s rejected by filter", mid);
 	    rc = 1;
 	    goto bail;
