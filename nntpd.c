@@ -800,7 +800,7 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 	    }
 	}
 
-	if (g->count == 0 && g->first == 1)
+	if (is_pseudogroup(g->name))
 	    count = 1;
 	else
 	    count = g->count;
