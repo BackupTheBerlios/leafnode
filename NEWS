@@ -1,6 +1,7 @@
 2.0b-snapshot:
 incompatible changes:
 - backup.moderated is gone.
+- the fqdn option is gone. Use hostname instead.
 - Fix: timeout_active is back!
   This can cause "cannot stat /var/spool/news/leaf.node/:active.read: No
   such file or directory" to be logged until leafnode has succeeded to

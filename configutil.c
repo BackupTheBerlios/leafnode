@@ -241,7 +241,6 @@ readconfig(/*@null@*/ const char *configfile)
 				   "config: filterfile is %s", value);
 		    break;
 		case CP_HOST:
-		case CP_FQDN:
 		    owndn = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,

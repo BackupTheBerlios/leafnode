@@ -39,7 +39,6 @@ Ralfs TODO:
 	  miscalculation because of the recursion?
 	* nntpd.c: check with NNTP draft for UTF-8 stuff.  Folding should
 	  be ok now.
-	* option fqdn not explained (option hostname sufficient?)
 	* applyfilter: does not handle to-kill-crossposts correctly:
 	  only killed if removed from _all_ other groups
 	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
@@ -266,6 +265,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2002-09-07 Matthias Andree
+	   option fqdn not explained (option hostname sufficient?)
 
 2002-09-07 Matthias Andree
 	   no longer store articles in backup.moderated.
