@@ -1,120 +1,191 @@
-1. Since version 1.9, leafnode uses GNU autoconf to determine what
-   machine it will run on. Type
-	sh ./configure
-   to create an appropriate Makefile and config.h .
-   If you have and want to use IPV6, invoke "configure" with the
-   --with-ipv6 flag.
+------------------------------------------------------------------------
 
-   Remember that when you are updating a previously installed version
-   of leafnode, you need to configure the new version of leafnode to
-   overwrite the old one. You do this with the "configure --prefix"
-   option. For example, if leafnode had been previously installed in
-   /opt, you would configure leafnode with the command
-   "./configure --prefix=/opt".
+Make sure you have read the NEWS file for incompatible changes.
 
-2. Type
-	make
-   There should be no errors. Dependent on your compiler, you might get
-   the warning:
-     /fetchnews.c: In function `nntpactive':
-     /fetchnews.c:1062: warning: `%y' yields only last 2 digits of year
+The installation instructions are now part of the README.html (or
+README), which see.
 
-   Don't worry about it.
-   There have been reports that SGI IRIX' make doesn't work. If so, use
-   gmake (GNU make) instead. It may ship with IRIX, on the freeware CD.
+------------------------------------------------------------------------
 
-3. Create a "news" user if you don't have one.
+Basic Installation
+==================
 
-4. Type
-	make install
-   If you prefer an installation with the binaries stripped free of
-   symbols, use
-	make install-strip
-   instead.
+   These are generic installation instructions.
 
-5. If you are updating leafnode from a version before 1.9.3 (including
-   all 1.9.3 beta versions before 1.9.3b5), "make update". This will call
-   the update.sh shell script provided with leafnode. Your groupinfo file
-   will be reformatted and some other files will be moved around. In case
-   something goes wrong, you will find your old groupinfo file in
-   /var/spool/news/leaf.node/groupinfo.old. If everything works out
-   correctly, you can delete this file (it is not needed any more).
+   The `configure' shell script attempts to guess correct values for
+various system-dependent variables used during compilation.  It uses
+those values to create a `Makefile' in each directory of the package.
+It may also create one or more `.h' files containing system-dependent
+definitions.  Finally, it creates a shell script `config.status' that
+you can run in the future to recreate the current configuration, a file
+`config.cache' that saves the results of its tests to speed up
+reconfiguring, and a file `config.log' containing compiler output
+(useful mainly for debugging `configure').
 
-6. Edit $(LIBDIR)/config ($(LIBDIR) defaults to /etc/leafnode, but can be
-   adjusted in the Makefile). For documentation, see config.example and
-   leafnode(8). It is absolutely necessary to change the "server"
-   parameter to point it to your upstream news server (generally
-   the one of your IP provider). Make sure $NNTPSERVER or
-   /etc/nntpserver points to your own host so clients will talk to
-   leafnode rather than try to go to the upstream server.
-   If you want to use filtering of the incoming spool, see "FILTER FILE"
-   in the README.
+   If you need to do unusual things to compile the package, please try
+to figure out how `configure' could check whether to do them, and mail
+diffs or instructions to the address given in the `README' so they can
+be considered for the next release.  If at some point `config.cache'
+contains results you don't want to keep, you may remove or edit it.
 
-7. Set up a cron job (as user "news") to run texpire every night or
-   maybe every week.  Here is my crontab line, which runs nightly:
+   The file `configure.in' is used to create `configure' by a program
+called `autoconf'.  You only need `configure.in' if you want to change
+it or regenerate `configure' using a newer version of `autoconf'.
 
-0 4 * * * /usr/local/sbin/texpire
+The simplest way to compile this package is:
 
-   I did "crontab -u news -e" as root to edit the crontab file, and added
-   this line.  Substituting "1" for the third "*", thus:
+  1. `cd' to the directory containing the package's source code and type
+     `./configure' to configure the package for your system.  If you're
+     using `csh' on an old version of System V, you might need to type
+     `sh ./configure' instead to prevent `csh' from trying to execute
+     `configure' itself.
 
-0 4 * * 1 /usr/local/sbin/texpire
+     Running `configure' takes awhile.  While running, it prints some
+     messages telling which features it is checking for.
 
-   tells cron to run texpire at 4am Monday morning.
+  2. Type `make' to compile the package.
 
-8. Make sure fetchnews is run at the appropriate time.  If you have a
-   full-time link, run it out of cron (as "news" again), if not, run it
-   when your connection to the net is established.  If it is run as root,
-   it will change user to "news". If you use PPP, you can run fetchnews from
-   /etc/ppp/ip-up.
+  3. Optionally, type `make check' to run any self-tests that come with
+     the package.
 
-9. Edit /etc/inetd.conf so that $(BINDIR)/leafnode is executed for incoming
-   NNTP connections.  Here is my inetd.conf line:
+  4. Type `make install' to install the programs and any data files and
+     documentation.
 
-nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
+  5. You can remove the program binaries and object files from the
+     source code directory by typing `make clean'.  To also remove the
+     files that `configure' created (so you can compile the package for
+     a different kind of computer), type `make distclean'.  There is
+     also a `make maintainer-clean' target, but that is intended mainly
+     for the package's developers.  If you use it, you may have to get
+     all sorts of other programs in order to regenerate files that came
+     with the distribution.
 
-   This starts leafnode for all connections on the nntp port, subject to
-   /etc/hosts.allow and /etc/hosts.deny screening.  If you don't have
-   /usr/sbin/tcpd you might use this line instead:
+Compilers and Options
+=====================
 
-nntp    stream  tcp     nowait  news    /usr/local/sbin/leafnode
+   Some systems require unusual options for compilation or linking that
+the `configure' script does not know about.  You can give `configure'
+initial values for variables by setting them in the environment.  Using
+a Bourne-compatible shell, you can do that on the command line like
+this:
+     CC=c89 CFLAGS=-O2 LIBS=-lposix ./configure
 
-   Using leafnode without tcpd is strongly discouraged since it opens up your
-   news server to abuse.
+Or on systems that have the `env' program, you can do it like this:
+     env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
 
-   After these changes, force inetd to read the changed configuration file
-   by sending it the HANGUP signal. To achieve this, issue the following
-   command (as root):
+Compiling For Multiple Architectures
+====================================
 
-kill -HUP `cat /var/run/inetd.pid`
+   You can compile the package for more than one kind of computer at the
+same time, by placing the object files for each architecture in their
+own directory.  To do this, you must use a version of `make' that
+supports the `VPATH' variable, such as GNU `make'.  `cd' to the
+directory where you want the object files and executables to go and run
+the `configure' script.  `configure' automatically checks for the
+source code in the directory that `configure' is in and in `..'.
 
-10.If you have tcpd installed, write the following into /etc/hosts.deny
+   If you have to use a `make' that does not supports the `VPATH'
+variable, you have to compile the package for one architecture at a time
+in the source code directory.  After you have installed the package for
+one architecture, use `make distclean' before reconfiguring for another
+architecture.
 
-leafnode: ALL EXCEPT LOCAL
+Installation Names
+==================
 
-   to protect your news server from abuse. If you want to make leafnode
-   accessible to additional IP numbers/domains, add them in /etc/hosts.allow
-   in the format described above. See man hosts_access(5) and 
-   man hosts_options(5) (if applicable) for more information. 
+   By default, `make install' will install the package's files in
+`/usr/local/bin', `/usr/local/man', etc.  You can specify an
+installation prefix other than `/usr/local' by giving `configure' the
+option `--prefix=PATH'.
 
-11.Run fetchnews.  The first run will take some time since fetchnews reads a
-   list of all newsgroups from your upstream server.  With an 28.8 modem, it
-   can take as long as 60 minutes (depending on how many newsgroups your
-   provider offers). To see fetchnews working, run it with -vvv. If you
-   update leafnode from a version previous to 1.6, the format of the
-   groupinfo file has changed. You should therefore run fetchnews with the
-   parameter -f.
+   You can specify separate installation prefixes for
+architecture-specific files and architecture-independent files.  If you
+give `configure' the option `--exec-prefix=PATH', the package will use
+PATH as the prefix for installing programs and libraries.
+Documentation and other data files will still use the regular prefix.
 
-12.Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
-   pointing to your own host). Select the groups you want to read in
-   the future. You will find them empty except a default article.
-   Reading this article is necessary with some newsreaders to select
-   the groups for further fetching.
+   In addition, if you use an unusual directory layout you can give
+options like `--bindir=PATH' to specify different values for particular
+kinds of files.  Run `configure --help' for a list of the directories
+you can set and what kinds of files go in them.
 
-   After this, you should have empty files in
-   /var/spool/news/interesting.groups/ for every group you want to read.
+   If the package supports it, you can cause programs to be installed
+with an extra prefix or suffix on their names by giving `configure' the
+option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
 
-13.Run fetchnews again. This run should pick up all the groups you want
-   to read.
+Optional Features
+=================
 
-Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>
+   Some packages pay attention to `--enable-FEATURE' options to
+`configure', where FEATURE indicates an optional part of the package.
+They may also pay attention to `--with-PACKAGE' options, where PACKAGE
+is something like `gnu-as' or `x' (for the X Window System).  The
+`README' should mention any `--enable-' and `--with-' options that the
+package recognizes.
+
+   For packages that use the X Window System, `configure' can usually
+find the X include and library files automatically, but if it doesn't,
+you can use the `configure' options `--x-includes=DIR' and
+`--x-libraries=DIR' to specify their locations.
+
+Specifying the System Type
+==========================
+
+   There may be some features `configure' can not figure out
+automatically, but needs to determine by the type of host the package
+will run on.  Usually `configure' can figure that out, but if it prints
+a message saying it can not guess the host type, give it the
+`--host=TYPE' option.  TYPE can either be a short name for the system
+type, such as `sun4', or a canonical name with three fields:
+     CPU-COMPANY-SYSTEM
+
+See the file `config.sub' for the possible values of each field.  If
+`config.sub' isn't included in this package, then this package doesn't
+need to know the host type.
+
+   If you are building compiler tools for cross-compiling, you can also
+use the `--target=TYPE' option to select the type of system they will
+produce code for and the `--build=TYPE' option to select the type of
+system on which you are compiling the package.
+
+Sharing Defaults
+================
+
+   If you want to set default values for `configure' scripts to share,
+you can create a site shell script called `config.site' that gives
+default values for variables like `CC', `cache_file', and `prefix'.
+`configure' looks for `PREFIX/share/config.site' if it exists, then
+`PREFIX/etc/config.site' if it exists.  Or, you can set the
+`CONFIG_SITE' environment variable to the location of the site script.
+A warning: not all `configure' scripts look for a site script.
+
+Operation Controls
+==================
+
+   `configure' recognizes the following options to control how it
+operates.
+
+`--cache-file=FILE'
+     Use and save the results of the tests in FILE instead of
+     `./config.cache'.  Set FILE to `/dev/null' to disable caching, for
+     debugging `configure'.
+
+`--help'
+     Print a summary of the options to `configure', and exit.
+
+`--quiet'
+`--silent'
+`-q'
+     Do not print messages saying which checks are being made.  To
+     suppress all normal output, redirect it to `/dev/null' (any error
+     messages will still be shown).
+
+`--srcdir=DIR'
+     Look for the package's source code in directory DIR.  Usually
+     `configure' can determine that directory automatically.
+
+`--version'
+     Print the version of Autoconf used to generate the `configure'
+     script, and exit.
+
+`configure' also accepts some other, not widely useful, options.
