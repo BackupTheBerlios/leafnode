@@ -1,7 +1,7 @@
 #! /bin/sh
 
 set -e
-if test "x`darcs whatsnew -ls | grep -v '^No changes!'`" != "x" ; then
+if test "x`darcs whatsnew -s | grep -v '^No changes!'`" != "x" ; then
     echo "record your changes in darcs first!"
     exit 1
 fi
