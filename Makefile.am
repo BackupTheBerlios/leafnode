@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.12 2002/02/11 02:27:03 emma Exp $
+# $Id: Makefile.am,v 1.13 2002/04/03 22:11:42 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -25,7 +25,6 @@ man_MANS = \
 	leafnode.8 \
 	newsq.1 \
 	texpire.8
-#	rnews.8 \
 
 dist_MANS = \
 	rbcloselist.3 \
