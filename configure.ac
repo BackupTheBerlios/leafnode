@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020908a])
+AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020910a])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.35 $)
+AC_REVISION($Revision: 1.36 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -316,7 +316,7 @@ if test $ac_cv_func_setsockopt = no; then
   AC_CHECK_LIB(socket, setsockopt)
 fi
 
-AC_REPLACE_FUNCS(mergesort mkstemp inet_ntop)
+AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop)
 
 dnl Check whether the system has IPv6
 AC_CACHE_CHECK(for IPv6, cf_cv_ipv6, AC_TRY_LINK([
