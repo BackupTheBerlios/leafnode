@@ -12,7 +12,7 @@
 #include "ln_dir.h"
 
 /** mkdir -p like function, but we only treat parents,
- * so passing in a file name is safe. 
+ * so passing in a file name is safe.
  */
 int mkdir_parent(const char *s) {
     char *t = strdup(s);
@@ -21,7 +21,7 @@ int mkdir_parent(const char *s) {
 
     while(*u && (u = strchr(u + 1, '/'))) {
 	*u = '\0';
-	if (mkdir(u, 0750) && errno != EEXIST) {
+	if (*t && mkdir(t, 0750) && errno != EEXIST) {
 	    free(t);
 	    return -1;
 	}
