@@ -226,7 +226,7 @@ store_stream(FILE * in /** input file */ ,
     /* check if we already have the article */
     if (ihave(mid)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-	       "store: duplicate article <%s>", mid);
+	       "store: duplicate article %s", mid);
 	rc = -2;
 	goto bail;
     }
