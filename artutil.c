@@ -11,6 +11,7 @@
 #include "ln_log.h"
 #include "mastring.h"
 #include "msgid.h"
+#include "get.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -194,7 +195,7 @@ getheader(
  *  - -1 in case of failure, *groups and *artno_strings are undefined
  */
 int
-parsekill_xref_line(/*@exposed@*/ char *xref,
+xref_to_list(/*@exposed@*/ char *xref,
 	/*@out@*/ char ***groups, /*@null@*/ /*@out@*/ char ***artno_strings,
 	int noskip)
 {
@@ -257,7 +258,7 @@ err_out:
  * Delete a message in the local news base and in out.going.
  */
 void
-supersede_cancel(
+delete_article(
 /** article to kill */
 		    const char *mid,
 /** "Supersede" or "Cancel" */
@@ -300,7 +301,7 @@ supersede_cancel(
     if (!hdr)
 	goto out;
 
-    if ((num_groups = parsekill_xref_line(hdr, &ngs, &artnos, 1)) == -1) {
+    if ((num_groups = xref_to_list(hdr, &ngs, &artnos, 1)) == -1) {
 	/* FIXME: diagnostic! */
 	free(hdr);
 	goto out;
@@ -319,6 +320,11 @@ supersede_cancel(
 		    LNLOG_CARTICLE,
 		    "%s: failed to unlink %s:%s: %m", action, ngs[n], artnos[n]);
 	} else {
+	    struct newsgroup *g = findgroup(ngs[n], active, -1);
+	    ulong u;
+	    if (g && get_ulong(artnos[n], &u) && u == g->first)
+		g->first++;
+
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 		    "%s %s:%s", past_action, ngs[n], artnos[n]);
 	}
@@ -360,7 +366,7 @@ supersede_cancel(
 		    if (0 == log_unlink(*t, 0))
 			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 			       "%s %s", past_action, *t);
-/* break; *//* commented out to catch all */
+		    /* break; *//* commented out to catch all */
 		}
 		free(x);
 	    }
