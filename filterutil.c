@@ -25,12 +25,8 @@
 
 /*@null@*/ /*@owned@*/ struct filterlist *filter = NULL;
 
-static void free_entry(/*@null@*/ /*@only@*/ struct filterentry *e);
-
 static enum state { RF_WANTNG, RF_WANTPAT,
 		    RF_WANTNGORPAT, RF_WANTACTION } state;
-
-static /*@observer@*/ const char *whatexpected(enum state s);
 
 /*
  * find "needle" in "haystack" only if "needle" is at the beginning of a line

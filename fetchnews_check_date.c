@@ -6,10 +6,7 @@
 #include "leafnode.h"
 #include "ln_log.h"
 
-static int get_nr(char *s, int count, int *dst);
-static int scan_date(char *l, struct tm *tm);
-
-int
+static int
 get_nr(char *s, int count, int *dst)
 {
     int i;
@@ -25,7 +22,7 @@ get_nr(char *s, int count, int *dst)
     return TRUE;
 }
 
-int
+static int
 scan_date(char *l, struct tm *tm)
 {
     SKIPWORD(l);
@@ -98,5 +95,3 @@ check_date(const struct serverlist *server)
 	}
     }
 }
-
-
