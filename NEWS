@@ -6,17 +6,17 @@ Changes since 20040920a:
 - Feature: texpire offers an "-a" option to expire article based
   (as leafnode-1 did) rather than thread-based.
 
-20040920a: Changes since 20040916a:
+20040920a - Changes since 20040916a:
 - Bugfix: 20040916a broke article retrieval for many newsreaders.
   Reported by Robert Clark and Jack Raats.
 
-20040916a: Changes since 20040915a:
+20040916a - Changes since 20040915a:
 - Change: leafnode, the NNTP daemon, will no longer update overview
   information, in an attempt to fix Yvon Thoraval's slowness observed on
   MacOS X. If the groups appear inaccessible, running either fetchnews
   or texpire should fix this.
 
-20040915a: Changes since 20040823b:
+20040915a - Changes since 20040823b:
 - Bugfix: A timeout while connecting to a server (default 30 seconds)
   caused fetchnews to abort and print "Alarm clock."
   Reported by Michael Rulov.
@@ -24,12 +24,12 @@ Changes since 20040920a:
   server's addresses.
 - Documentation: The texpire manual page was revised and updated.
 
-20040823b: Changes since 20040823a:
+20040823b - Changes since 20040823a:
 - Bugfix: Fix assertion failure. The "failure" case was actually an
   expected failure and should not cause an abort. Thanks to Jack Raats.
 - Documentation: fill in missing ChangeLog information.
 
-20040823a: Changes since 20040818a:
+20040823a - Changes since 20040818a:
 - Bugfix: only_group_pcre now also applies to delaybody groups. Reported
   by Cory C. Albrecht.
 - Bugfix: diagnose errors when getting articles marked for download
@@ -43,34 +43,34 @@ Changes since 20040920a:
 - Documentation: add missing timeout_client documentation to manual
   page.
 
-20040818a: Changes since 20040813a:
+20040818a - Changes since 20040813a:
 - Feature: forward ported the "noread" feature from leafnode-1,
   suggested by Cory C. Albrecht.
 - Feature: Retry fetching bodies of delaybody articles only four times,
   then give up.
 
-20040813a: Changes since 20040513a:
+20040813a - Changes since 20040513a:
 - Bugfix: texpire will now properly repair hard links of cross-posted
   articles. Bug reported by Jeff Grossman.
 - Documentation: The extraneous "/leafnode" component was removed from
   the path names in the manual. Reported by Cory C. Albrecht.
 - Cleanup: The code is now valid C and C++.
 
-20040513a: Changes since 20040510a:
+20040513a - Changes since 20040510a:
 - Bugfix: fetchnews will try authentication when GROUP command replies 480.
 - Bugfix: bogus "too few fields in DATE reply" in debug mode.
 - Bugfix: plugged some memory leaks.
 - Cleanup: fchmod bug report message revised to include "file
   descriptor".
 
-20040510a: Changes since 20040326a:
+20040510a - Changes since 20040326a:
 - applyfilter crashed when an article had the "Message-ID" header in
   different case, for example, "Message-Id". Reported by Robert
   Marshall.
 - Do not run chmod -R on the spool unconditionally, it's too expensive.
   Just print a message what to type.
 
-20040326a: Changes since 20040305a:
+20040326a - Changes since 20040305a:
 - VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Documentation: document logstderr instead of the improper
   ln_log_stderronly. Patch by Thomas Schwinge.
@@ -89,7 +89,7 @@ Changes since 20040920a:
 
 VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 
-20040305a: Changes since 20040227a:
+20040305a - Changes since 20040227a:
 - Robustness: Leafnode programs refuse to start when an unknown or
   unsupported authentication method is configured.
 - Bugfix: Fetchnews will no longer move articles to failed.postings if
@@ -100,7 +100,7 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Portability: ugid_gset.c lacked #include directives, causing
   compile trouble. Fix by Ralf Wildenhues.
 
-20040227a: Changes since 20040206a:
+20040227a - Changes since 20040206a:
 - Internal: The stringlist handling code internal to leafnode has
   changed and can expose bugs in other code.
 - Feature: Supports PAM, based on a patch by Hynek Schlawack.
@@ -113,7 +113,7 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
   dropping root privileges. We don't want root's groups (for instance
   shadow on SuSE Linux) in our context.
 
-20040206a: Changes since 20040129a:
+20040206a - Changes since 20040129a:
 - Feature: sanity check at initialization, to avoid operating on a bogus
   spooldir after updates.
 - Cleanup: try to post article to all servers. Only when all servers
@@ -126,7 +126,7 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Cleanup: some dead code has been removed.
 - Portability: Exclude SETVBUF_REVERSED check on Intel C++.
 
-20040129a: Changes since 20040122a:
+20040129a - Changes since 20040122a:
 - Feature: newsq -c now checks the queue if there are articles to post.
   Exits 0 if there are, EX_UNAVAILABLE if there are not, EXIT_FAILURE on
   error.
@@ -139,11 +139,11 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Feature: forward port "noactive" from leafnode 1.9.25+.
 - Cleanup: drop support for "supplement" in configuration file.
 
-20040122a: Changes since 20040119a:
+20040122a - Changes since 20040119a:
 - Feature: applyfilter -C message-ID [...] now cancels articles
   with given Message-ID.
 
-20040119a: Changes since 20040116a:
+20040119a - Changes since 20040116a:
 - Update: the spec file was outdated.
 - Cleanup: Internal Makefile.am and configure.ac cleanup. Watch for
   changes in the response to --prefix and/or --sysconfdir options.
@@ -152,7 +152,7 @@ VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 Thanks to Daniel Zwick for his report and patient testing and
 to Jörg Dietrich for finding the real bug.
 
-20040116a: Changes since 20040108a:
+20040116a - Changes since 20040108a:
 - Bugfix: LIST NEWSGROUPS/LIST ACTIVE crashed when a non-existent group
   argument was given that was not a pattern. Patch by Hans-Jürgen
   Ficker.
@@ -175,7 +175,7 @@ to Jörg Dietrich for finding the real bug.
 - Change: several internal cleanups and some refactorizations.
 - Build: rebuilt with automake 1.8.2 and autoconf 2.59 
 
-20040108a: Changes since 20031221a:
+20040108a - Changes since 20031221a:
 - Change: Log username and upstream server for authentication failures.
   Patches by Samuel Tardieu.
 - Change: Better ./configure --help messages.
@@ -183,14 +183,14 @@ to Jörg Dietrich for finding the real bug.
 - Feature: log_poster_ip in a X-Leafnode-NNTP-Posting-Host header.
   Based on a patch by Samuel Tardieu.
 
-20031221a: Changes since 20031218a:
+20031221a - Changes since 20031218a:
 - Change: list active and list newsgroups are now much more efficient
   when a pattern is given that does not contain wildmat meta characters.
 - Change: list active.times is rejected with a 500 code for now.
 - Change: let fetchnews print when and why it must refetch the active
   file at the next run.
 
-20031218a: Changes since 20031203a:
+20031218a - Changes since 20031203a:
 - Change: texpire now prints why a particular group directory is not
   expired even though 0 articles are kept.
 - Change: lsmac.pl now defaults to UTC and has a --local option to
@@ -199,17 +199,17 @@ to Jörg Dietrich for finding the real bug.
 - Documentation: lsmac.pl is now documented.
 - Rebuild Makefile.ins with automake 1.8.
 
-20031203a (was not announced): Changes since 20031129a:
+20031203a (was not announced) - Changes since 20031129a:
 - Cleanup: (nntpd) Avoid extraneous fflush() that causes the status line
   and the following input to be sent in separate packets, adding packet
   overhead. Add nntpprintf_as for this purpose.
 
-20031129a: Changes since 20031122a:
+20031129a - Changes since 20031122a:
 - Cleanup: Remove global variable "current_server".
 - Bugfix: The previous cleanup also reinstates only_group_pcre matching
   for posted articles. Reported against 20031001a by Jens Nixdorf.
 
-20031122a: Changes since 20031028a:
+20031122a - Changes since 20031028a:
 - Feature: applyfilter -c checks in -n mode if filters would match the
   files (rather than newsgroups) given on the command line.
   Suggested by Reiner Steib.
@@ -218,14 +218,14 @@ to Jörg Dietrich for finding the real bug.
   reported by Robert Marshall.
 - Cleanup: Fetch active file before trying to post.
 
-20031028a: Changes since 20031026a:
+20031028a - Changes since 20031026a:
 - Bugfix: Change "ulong" to "unsigned long" to make the package compile
   on FreeBSD. Reported against 20031019a by Jack Raats.
 - Cleanup: Use rbtrees rather than custom unbalanced binary tree for
   reading the local groups.  -45 lines of code.
 - Update: libredblack now at 1.3.
 
-20031026a: Changes since 20031019a:
+20031026a - Changes since 20031019a:
 - Change: log all warnings when verbosity is > 0
 - Bugfix: do not interpret group name that starts with a dot as the end
   of server output (fetchnews).
@@ -233,14 +233,14 @@ to Jörg Dietrich for finding the real bug.
   trailing dot or two adjacent dots).
 - Change: Improve error reporting when a server disconnects.
 
-20031019a: Changes since 20031009a:
+20031019a - Changes since 20031009a:
 - Robustness: Revamped applyfilter.
 - Conformance: Reply 440 rather than 500 if user tries to POST in
   NOPOSTING mode.
 - Bugfix: GROUP article number fixes, to avoid bogus new article
   "offering" in newsreader, reported by Reiner Steib.
 
-20031009a: Changes since 20031001a:
+20031009a - Changes since 20031001a:
 - Bugfix: applyfilter no longer chokes on 0-sized articles and will
   unconditionally deleted them. Reported by Reiner Steib.
 - Bugfix: leafnode was unable to retrieve pseudo articles with XOVER n
@@ -249,7 +249,7 @@ to Jörg Dietrich for finding the real bug.
 - Documentation: fix typo (syslogd.pid) in README.html. Reported by
   Jürgen Salk.
 
-20031001a: Changes since 20030814a:
+20031001a - Changes since 20030814a:
 - Bugfix: stricter GROUP reply parsing to avoid accepting negative
   values (seen on some INN with apparently corrupt overview).
 - Bugfix: Initialfetch now also applies when the server resets its
@@ -259,14 +259,14 @@ to Jörg Dietrich for finding the real bug.
   10. When the number goes down by more than 10, re-fetch the group as
   though it were newly subscribed.
 
-20030814a: Changes since 20030731a:
+20030814a - Changes since 20030731a:
 - Bugfix: Expire groups that are no longer in "active".
 - Bugfix: Make Xref: based filters work in the XOVER phase already, to
   avoid downloading the article.
 - Logging: Make filter logging more consistent.
 - Documentation: Refine README*, mention syslog.conf edits.
 
-20030731a: Changes since 20030728a:
+20030731a - Changes since 20030728a:
 - Bugfix: applyfilter removes filtered articles from the spool at large.
 - Bugfix: applyfilter unfolds headers before applying filters. Reported
   by Reiner Steib.
@@ -274,25 +274,25 @@ to Jörg Dietrich for finding the real bug.
   Reported by Michael Frotscher.
 - Documentation: enhance filters.example. Courtesy of Reiner Steib.
 
-20030728a: Changes since 20030716a:
+20030728a - Changes since 20030716a:
 - Bugfix: unfold header before applying filters. Reported by Reiner
   Steib.
 - Feature: logstderr (in config file) -e (on command line),
   redirects all syslog to stderr, useful with daemontools or runit.
   Requested by Clemens Fischer. Only lightly tested.
 
-20030716a: Changes since 20030714a:
+20030716a - Changes since 20030714a:
 - Bugfix: posting only tried the first server. Regression in 20030714a,
   reported by Jeff Grossman.
 - Documentation: Clean up fetchnews.8.in, -B, -M, -N, -P and -R
   descriptions. New sections courtesy of Jörg Lüders.
 
-20030714a: Changes since 20030712a:
+20030714a - Changes since 20030712a:
 - Bugfix: fix double free() in filter handling. Reported by Robert J. Clark.
 - Bugfix: fix some memory leaks.
 - Change: Post first, then fetch. Suggested by Jörg Lüders.
 
-20030712a: Changes since 20030710a:
+20030712a - Changes since 20030710a:
 - Bugfix: Filtering by regexp was broken (inverse logic) unless
   DEBUG_FILTER was set (debugmode included the 32 flag).
   Regression introduced into 20030706a.
