@@ -89,7 +89,6 @@ feedincoming(void)
 {
     unsigned long articles;
     char **dl, **di;
-    char *ni;
 
     dl = spooldirlist_prefix("in.coming", DIRLIST_NONDOT, &articles);
     if (!dl) {
@@ -119,18 +118,12 @@ feedincoming(void)
 	    continue;
 	}
 
-	/* FIXME: fix xover */
 	if ((rc = store(*di, 0, 0, 0))) {
-	    static mastr *t;
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Could not store %s: \"%s\", "
 		   "moving to %s/failed.postings/",
 		   *di, store_err(rc), spooldir);
 	    (void)log_moveto(*di, "/failed.postings/");
 	} else {
-	    const char *j;
-	    for (j = strtok(ngs, "\t ,"); j && *j; j = strtok(NULL, "\t ,")) {
-		const char *k = critstrdup(j, "feedincoming");
-	    }
 	    log_unlink(*di, 0);
 	}
 	log_fclose(f);
