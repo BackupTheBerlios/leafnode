@@ -316,6 +316,7 @@ main(int argc, char *argv[])
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 		"%s: Cannot read filterfile %s, aborting.",
 		argv[0], filterfile);
+	log_unlink(lockfile);
 	exit(EXIT_FAILURE);
     }
 
