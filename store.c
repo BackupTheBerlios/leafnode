@@ -462,7 +462,7 @@ store_stream(FILE * in /** input file */ ,
 	ov = NULL;
     }
 
-    /* iterate over XRef: and update .overview */
+    /* iterate over XRef: group:number and update .overview */
     {
 	char *q = mastr_modifyable_str(xref);
 
@@ -478,12 +478,13 @@ store_stream(FILE * in /** input file */ ,
 	    if (!tt) tt = p + strlen(p);
 	    if (*tt == ' ') *tt++ = '\0';
 	    else *tt = '\0';
-	    /* now p has the file name in the group */
+	    /* now p has the number the article has in the current group */
 
 	    if (chdirgroup(q, FALSE)) {
 		int fdo;
 
-		mastr_vcat(xowrite, nb, strchr(ov, '\t'), "\n", NULL);
+		mastr_clear(xowrite);
+		mastr_vcat(xowrite, p, strchr(ov, '\t'), "\n", NULL);
 		fdo = open(".overview", O_WRONLY|O_APPEND|O_CREAT,
 			(mode_t)0660);
 		if (fdo >= 0) {
