@@ -110,6 +110,22 @@ Of course, Leafnode also has weaknesses. Some of these are:
 <h3 align=center>2. INSTALLATION</h3>
 
 <OL>
+<LI>Leafnode depends on the PCRE regular-expression matching library. It ships
+as binary package with many current Linux/BSD distributions, and is also
+available as port for *BSD. Just install the binary package for your operating
+system if it ships with one. If it comes without PCRE, don't worry, the
+installation from source is simple. To install PCRE, do:
+<OL>
+<LI>Download the current PCRE version from <a
+href="http://www.pcre.org/">http://www.pcre.org/</a>.
+<LI>Unpack PCRE: gunzip -c | tar xvf -
+<LI>cd pcre-3.7 <BR><I>(This is for PCRE-3.7, for other versions, replace that by the path that tar wrote when unpacking.)</I>
+<LI>type <KBD>./configure && make</KBD> <br><i>there should be no errors</i>
+<LI>as root, do <KBD>make install</KBD>
+<LI>as root, do <KBD>ldconfig</KBD> <br><i>this may not be needed on all
+systems, but better safe than sorry</i>
+<LI>DONE!
+</OL>
 <LI>Leafnode uses GNU autoconf to determine the configuration of the
 machine it will be compiled on. Type
 <pre>
@@ -117,19 +133,31 @@ machine it will be compiled on. Type
 </pre>
 to create an appropriate Makefile and config.h.
 
-<P>The configure script can take some flags:
+<P>The configure script can take some flags (replace DIR by a directory name,
+FILE by a file name):
 <pre>
---with-ipv6       use this if you have and want to use IPV6
---prefix=[dir]    Leafnode installs itself normally in the /usr/local/sbin
+--spooldir=DIR    To override the default /var/spool/news, where leafnode puts
+                  its news spool.
+
+--lockfile=FILE   To override the default /var/run/news/fetchnews.lock, where
+                  leafnode puts its lock file.
+
+--prefix=DIR      Leafnode installs itself normally in the /usr/local/sbin
                   directory. If you want to use another directory, use this
 		  flag. For example, if you want to install leafnode in
-		  /usr/sbin, use --prefix=/usr .
+		  /usr/sbin, use --prefix=/usr
+
+--sysconfdir=DIR  Default path for configuration is /etc/leafnode when --prefix
+                  is not used or set to /usr, and PREFIX/etc otherwise.
+		  You can use this to change the config file location from
+		  its default.
 </pre>
 
 <strong>BEWARE:</strong> Former versions always defaulted their sysconfdir to
 /etc/leafnode. Current versions only override sysconfdir to /etc/leafnode if
 configured without --prefix or with --prefix=/usr. That way, if
---prefix=/opt/leafnode, the sysconfdir goes to /opt/leafnode/etc, which is more appropriate.
+--prefix=/opt/leafnode, the sysconfdir goes to /opt/leafnode/etc, which
+is more appropriate.
 
 <LI>Type
 <pre>
@@ -185,10 +213,10 @@ tells cron to run texpire at 4am every Monday morning.
 full-time link, run it out of cron (as "news" again); if not, run it
 when your connection to the net is established. If it is run as root
 it will change to user "news". If you use PPP, you can run fetchnews
-from /etc/ppp/ip-up.
+from /etc/ppp/ip-up (or /etc/ppp/ip-up.local, depending on your OS).
 
 <LI>We assume that you have tcpd installed, it ships with most
-distributions. If you don't, fetch it from
+distributions. If you don't have it, fetch it from
 ftp://ftp.porcupine.org/pub/security/, it's in tcp_wrappers, and install
 it. It's preferable if you compile it with -DHOSTS_OPTIONS, and the
 examples below assume you did.
@@ -198,6 +226,9 @@ NNTP connections.  Here is my inetd.conf line:
 <pre>
 nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
 </pre>
+
+<I>Note: some systems install tcpd to a different path, but it's
+uncommon. Change the first path accordingly if your tcpd resides in /usr/etc or /usr/lbin.</i>
 
 <p>After these changes, force inetd to read the changed configuration file
 by sending it the HANGUP signal. To achieve this, issue the following
@@ -235,6 +266,8 @@ a list of all newsgroups from your upstream server. In the worst case,
 this can take up to 60 minutes, depending on how many newsgroups your
 provider offers and how reliable your modem connection is. To see
 fetchnews working, run it with -vvv.
+
+<LI>Run texpire. It will create directories missing after the first install.
 
 <LI>Read news using an NNTP client (with $NNTPSERVER or /etc/nntpserver
 pointing to your own host). Select the groups you want to read in
