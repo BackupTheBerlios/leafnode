@@ -20,7 +20,8 @@ cp -p $builddir/leafnode-$vers.tar.bz2 $dest/
 cp -p $builddir/README $dest/leafnode-readme.txt
 #cp -p FAQ.{xml,html,txt,pdf} $dest/
 cp -p ChangeLog $dest/ChangeLog.txt
-cp -p NEWS TODO $dest/
+cp -p TODO $dest/
+cp -p NEWS $dest/NEWS.txt
 if test ! -e leafnode-$vers.tar.bz2.asc -o ! leafnode-$vers.tar.bz2.asc -nt leafnode-$vers.tar.bz2 ; then
     ( cd $dest ; gpg -ba --sign leafnode-$vers.tar.bz2 )
 fi
