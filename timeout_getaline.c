@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 static jmp_buf to;
-static void
+static RETSIGTYPE
 timer(int sig)
 {
     (void)sig;
