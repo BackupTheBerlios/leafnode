@@ -887,12 +887,15 @@ static void
 nntpactive(void)
 {
     struct stat st;
-    char *l, *p;
+    char *l, *p, *q;
     struct stringlist *groups = NULL;
     struct stringlist *helpptr = NULL;
     char s[PATH_MAX];		/* FIXME: possible overrun below */
     char timestr[64];		/* must store at least a date in YYMMDD HHMMSS format */
     int reply = 0, error;
+     DIR *ng;
+     struct dirent * nga;
+     unsigned long last, first, i;
     unsigned long count = 0;
 
     sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
@@ -919,9 +922,12 @@ nntpactive(void)
 	    p = l;
 	    while (!isspace((unsigned char)*p))
 		p++;
-	    if (*p)
+	    if (*p) {
 		*p = '\0';
-	    insertgroup(l, 0, 0, time(NULL), NULL);
+		p++;
+		p += strlen(p) - 1; /* p contains status char */
+	    }
+	    insertgroup(l, *p, 0, 0, time(NULL), NULL);
 	    appendtolist(&groups, &helpptr, l);
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
@@ -963,6 +969,7 @@ nntpactive(void)
 	}
 	freelist(groups);
     } else {
+	last = first = 0;
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: getting newsgroups list", current_server->name);
 	putaline(nntpout, "LIST");
@@ -974,8 +981,41 @@ nntpactive(void)
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    count ++;
 	    p = l;
-	    CUTSKIPWORD(p);
-	    insertgroup(l, 0, 0, 0, NULL);
+	    while (!isspace((unsigned char)*p) )
+                p++;
+	    while ( isspace((unsigned char)*p) ) {
+                *p = '\0';
+                p++;
+                p += strlen(p) - 1; /* p contains the status char */
+	    }
+	    /* see if the newsgroup is interesting.  if it is, and we
+	       don't have it in groupinfo, figure water marks */
+            if (isinteresting(l)
+		&& !(active && findgroup(l))
+                && chdirgroup(l, FALSE))
+	    {
+                first = ULONG_MAX;
+                last = 0;
+                ng = opendir(".");
+                while ((nga = readdir(ng))) {
+                    if (isdigit ((unsigned char)*(nga->d_name))) {
+                        q = NULL;
+                        i = strtoul(nga->d_name, &q, 10);
+                        if (*q == '\0') {
+                            if (i < first)
+                                first = i;
+                            if (i > last)
+                                last = i;
+                        }
+                    }
+                }
+                if (first > last) {
+                    first = 1;
+                    last = 1;
+                }
+                closedir(ng);
+            }
+            insertgroup(l, p[0], first, last, 0, NULL);
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: read %lu newsgroups", current_server->name, count);
@@ -1229,9 +1269,10 @@ processupstream(const char *server, const int port, time_t lastrun)
 		    newserver = getgroup(g, 1);
 		if ((f != NULL) && newserver)
 		    fprintf(f, "%s %lu\n", g->name, newserver);
-	    } else {
-		ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-		       "%s not found in groupinfo file", ng);
+	    } else { /* g != NULL */
+		if (!forceactive || (debug & DEBUG_ACTIVE))
+		    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+			   "%s not found in groupinfo file", ng);
 	    }
 	}
     }
@@ -1493,12 +1534,8 @@ main(int argc, char **argv)
 	    exit(EXIT_FAILURE);
 	alarm(0);
 
-	lastrun = 0;
-	if (forceactive) {
-	    fakeactive();
-	} else {
+	if (!forceactive)
 	    rereadactive();
-	}
 
 	feedincoming();
 
