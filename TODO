@@ -59,6 +59,9 @@ stuff?
 
 Matthias:
 
+* Reiner Steib: applyfilter -c /path/to/some/article (leafnode-list
+  2003-08-12)
+
 * fix TOKENSIZE in filters.
 
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
