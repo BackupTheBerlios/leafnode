@@ -1,3 +1,15 @@
+2002-05-01  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* filterutil.c: killfilter copes with folded Newsgroups: header. 
+	* artutil.c, leafnode.h: mgetheader operates on constant strings.
+
+	* activutil.c, artutil.c, fetchnews.c, filterutil.c, log_moveto.c,
+	miscutil.c, moderated.c, newsq.c, nntpd.c, store.c, xoverutil.c:
+	mastr_vcat calls now 64 bit clean.
+
+	* nntpd.c: output of markdownload error (forward port from 1.9). 
+	Free dormant groups data in main.
+
 2002-04-28  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
 	* fetchnews.c, leafnode.h, miscutil.c: cleanup handling of
