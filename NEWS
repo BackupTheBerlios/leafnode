@@ -2,6 +2,9 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20040823b:
+- Documentation: The texpire manual page was revised and updated.
+
 20040823b: Changes since 20040823a:
 - Bugfix: Fix assertion failure. The "failure" case was actually an
   expected failure and should not cause an abort. Thanks to Jack Raats.

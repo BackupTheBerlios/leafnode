@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.8 2004/09/12 12:03:33 emma Exp $
+.\" $Id: texpire.8.in,v 1.9 2004/09/12 12:11:59 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -79,43 +79,18 @@ for the list of other files affected.
 
 .SH NOTES
 .B Texpire
-is thread-based, not article-based.  It deletes a thread when no
-postings in it have been accessed in N days, where N is configurable,
-and the oldest article in the thread is older than N days.
-.PP
-It would be nice if
-.B texpire
-could figure out N itself, for instance by deleting until X MB space
-is free, but it is a bit hard to find the amount of free disk space
-portably.  That policy also implies that news should use whatever disk
-space is left over by other uses, which is IMHO a bad policy, because
-the news service's quality will degrade as other uses need more and
-more space,
-.I without any conscious decision
-to use less space for news.
-.PP
-.B Texpire
-sets its real and effective uid to "news" (if it can), because almost
-all of the problems I have had with
-.B leafnode
-are due to files which aren't writable for user "news".
-
+is thread-based, not article-based.  That means it will only delete an
+article if the whole thread it is in has not been accessed within the
+given expiry period (through the expire and groupexpire parameters).
 .SH BUGS
-.B Texpire
-may not delete an article as soon it should in certain circumstances;
-eventually it will.
-.PP
-If a group is removed by hand from the
-.I /var/spool/news/leaf.node/groupinfo
-file but the group's articles not deleted,
-.B texpire
-may never delete these articles.
 .PP
 .B Texpire
 ignores "Expires" headers.
 .PP
 .B Texpire
-is unable to delete articles in groups which have very different numbers.
+is unable to delete articles in groups where article numbers are far
+apart, because the required memory depends on the difference between
+lowest and highest article number in that group.
 
 .SH AUTHOR
 Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
@@ -126,7 +101,7 @@ Modified by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg.de>.
 Copyright of the modifications 1997-1999.
 .PP
 Modified by Matthias Andree <matthias.andree@gmx.de>. Copyright of the
-modifications 1999-2002.
+modifications 1999-2004.
 .PP
 Parts written by Stefan Wiens <s.wi@gmx.de>. Copyright 2001.
 
