@@ -117,26 +117,25 @@ machine it will be compiled on. Type
 </pre>
 to create an appropriate Makefile and config.h.
 
-<p>The configure script can take some flags:
+<P>The configure script can take some flags:
 <pre>
 --with-ipv6       use this if you have and want to use IPV6
 --prefix=[dir]    Leafnode installs itself normally in the /usr/local/sbin
                   directory. If you want to use another directory, use this
 		  flag. For example, if you want to install leafnode in
-		  /usr/sbin, use --prefix=/usr/sbin .
+		  /usr/sbin, use --prefix=/usr .
 </pre>
+
+<strong>BEWARE:</strong> Former versions always defaulted their sysconfdir to
+/etc/leafnode. Current versions only override sysconfdir to /etc/leafnode if
+configured without --prefix or with --prefix=/usr. That way, if
+--prefix=/opt/leafnode, the sysconfdir goes to /opt/leafnode/etc, which is more appropriate.
 
 <LI>Type
 <pre>
           make
 </pre>
-There should be no errors. Dependent on your compiler, you might get
-the warning:
-<pre>
-    /fetchnews.c: In function `nntpactive':
-    /fetchnews.c:1062: warning: `%y' yields only last 2 digits of year
-</pre>
-Don't worry about it.
+There should be no errors.
 
 <LI>Create a user "news" if you don't have one.
 
@@ -150,6 +149,11 @@ use
 	  make install-strip
 </pre>
 instead.
+
+<LI>For packagers: if you want to prefix all installation paths with a common
+prefix, e. g. to support RPM's BuildRoot feature: You can use
+<KBD>make install-strip INSTALLROOT=/var/tmp/leafnode-root</KBD>, it may change
+to DESTDIR in a future version though.
 
 <LI>If you are updating leafnode from a previous version, see the section
 "Updating" below.
