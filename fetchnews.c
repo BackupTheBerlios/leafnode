@@ -619,7 +619,7 @@ static int parseulong(const char **in, /*@out@*/ unsigned long *var)
     unsigned long value = 0;
 
     for(;;) {
-	int d;
+	unsigned int d;
 	if (!isdigit((unsigned char)**in)) {
 	    if (valid)
 		*var = value;
@@ -630,7 +630,7 @@ static int parseulong(const char **in, /*@out@*/ unsigned long *var)
 	valid = 1;
 	d = **in - '0';
 	(*in)++;
-	if (value > ULONG_MAX / 10 || (value == ULONG_MAX / 10 && d > ULONG_MAX % 10)) {
+	if (value > ULONG_MAX / 10u || (value == ULONG_MAX / 10u && d > ULONG_MAX % 10u)) {
 	    oflow = 1;
 	}
 	value = value * 10 + d;
@@ -663,9 +663,9 @@ static int
 getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
     int delaybody_this_group)
 {
-    unsigned long h, window;
+    unsigned long h, window, u;
     long n;
-    char *l, *t;
+    const char *l, *t;
 
     if (!gs_match(current_server -> group_pcre, g->name))
 	return 0;
@@ -685,13 +685,13 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
     }
 
     t = l;
-    if (!parsegroupreply(&t, &n, &h, &window, last)) {
+    if (!parsegroupreply(&t, &u, &h, &window, last)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse GROUP reply: \"%s\"",
 		g->name, l);
 	return 0;
     }
 
-    if (n != 211) {
+    if (u != 211) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: protocol error in response to GROUP command: \"%s\", must be 211 or 411",
 		g->name, l);
 	return 0;
