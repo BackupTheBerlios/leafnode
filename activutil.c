@@ -69,6 +69,20 @@ newsgroup_copy(struct newsgroup *d, const struct newsgroup *s)
 
 static /*@null@*/ /*@owned@*/ struct nglist *newgroup;
 
+/* validate if the group name is acceptable.
+ * If it is, return 1.
+ * If it is not acceptable (NULL components f. i.),
+ * log a warning and return 0.
+ */
+int validate_groupname(const char *name) {
+    if (*name == '.' || strstr(name, "..") || name[strlen(name)-1] == '.') {
+	ln_log(LNLOG_SWARNING, LNLOG_CGROUP, "Warning: skipping group \"%s\", "
+		"invalid name (NULL component).", name);
+	return 0;
+    }
+    return 1;
+}
+
 /*
  * insert a group into a list of groups. If a group is already present,
  * it will not be inserted again or changed.
@@ -86,6 +100,14 @@ insertgroup(const char *name, char status, long unsigned first,
     /* interpret INN status characters x->n, j->y, =->y */
     if (status == 'x') status = 'n';
     if (strchr("j=", status)) status = 'y';
+
+    if (*name == '.' || strstr(name, "..") || name[strlen(name)-1] == '.') {
+	ln_log(LNLOG_SWARNING, LNLOG_CGROUP, "Warning: skipping group \"%s\", "
+		"invalid name (NULL component).", name);
+	return;
+    }
+
+    if (!validate_groupname(name)) return;
 
     if (oldactive) {
 	g = findgroup(name, oldactive, oldactivesize);
