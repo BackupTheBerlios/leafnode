@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.106 2004/09/16 11:05:29 emma Exp $ */
+/* $Id: leafnode.h,v 1.107 2004/11/13 02:02:13 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -171,6 +171,8 @@ int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
 
     /* handling of misc. lines */
     /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);
+    /* reads one line, regardless of length, returns pointer to static buffer */
+    /*@null@*/ /*@dependent@*/ char *getabufferedline(const char *s, size_t *start, size_t length);
     /* reads one line, regardless of length, returns pointer to static buffer */
 
     /*@null@*/ /*@only@*/ char *

@@ -64,3 +64,51 @@ getaline(FILE * f /** file to read from */ )
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", buf);	/* FIXME: CTOP? */
     return buf;
 }
+
+/**
+ * Reads the next line from the buffer \p s and strips CRLF and LF.
+ * \return pointer to static buffer holding line or 0 for I/O or OOM error.
+ */
+char *
+getabufferedline(const char *s /** buffer to read from */, 
+                 size_t *start, /** where in the buffer to start from */
+                 size_t length /** total length of the buffer */ )
+{
+    size_t len;                /* # of chars stored into buf before '\0' */
+    const char *t;
+
+    if (s == NULL || start == NULL || *start >= length ) {
+        return 0;
+    }
+
+    /* first have to find out how big the line will be. Counts the number of
+       characters until we get to a newline */
+    for (len = 0, t = s + *start; *t != '\n'; t++) { len++; }
+
+    if (size < len) {
+        /* Previous buffer was too small, realloc a bigger one. */
+        if (buf) {
+            free(buf);
+        }
+        size = len + 1;
+
+        buf = malloc(size);
+        if (buf == NULL) {
+            return 0;
+        }
+    }
+
+    memcpy(buf, s + *start,  len);
+    buf[len] = '\0';            /* unconditionally terminate string,
+                                  possibly overwriting newline */
+
+    /* now see if there are extra chars to skip over. */
+    *start += len;
+    while(s[*start] == '\r') (*start)++;
+    if (s[*start] == '\n') (*start)++;
+
+    if (debugmode & DEBUG_IO)
+       ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", buf);   /* FIXME: CTOP? */
+
+    return buf;
+}
