@@ -10,6 +10,13 @@
   Mensmann.
 - Only change permissions/owner of leafnode directories when creating
   them. Requested by Kevin Bulgrien.
+- delaybody is back!  (Ralf Wildenhues)
+  delaybody mode can now be enabled for all or selected groups only,
+  specified by wildcard patterns with the "groupdelaybody" option.
+- fetchnews revamped (Ralf Wildenhues)
+  It is now possible to query all or some newsgroups only, fetch several
+  articles by Message-ID and fine-tune fetching of headers and bodies
+  of delaybody groups as well as articles in regular groups.
 
 2.0b8_ma10pre3.3:
 - fix: texpire crashes (Ralf Wildenhues)

@@ -1,5 +1,116 @@
+2002-07-11  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* activutil.c, applyfilter.c, checkgroups.c, configutil.c,
+	dirutil.c, fetchnews.c, interesting.c, leafnode.h, log_moveto.c,
+	lsort.c, miscutil.c, moderated.c, newsq.c, nntpd.c, queues.c,
+	rnews.c, store.c, sync_dir.c, texpire.c, xoverutil.c: Replace
+	PATH_MAX with LN_PATH_MAX, #defined to (PATH_MAX+1).  Use mastr
+	buffers instead of fixed-size in many places.  Change parseopt() to
+	malloc conffile.
+	* checkgroups.c applyfilter.c: Fix some memleaks. 
+	* configutil.c: Fix possible overrun in parse_line, strncpy result
+	was not 0-terminated.
+	* miscutil.c: chdirgroup: possible overrun fixed, mallocs storage now.
+	Change this _portably_ and _safe_ if it hurts perfomance.
+	* nntpd.c: GROUP bogus.group may not change current group.
+	LISTGROUP other.group did not work.
+
+2002-07-10  Matthias Andree <matthias.andree@gmx.de>
+
+	* nntpd.c: Change , in Message-ID local part to x to fix RFC-822
+	violation. Reported by Ralf the Bug Hunter.
+
+2002-07-09  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* fetchnews.c: minor optimization: replace 'strcspn(s, t) ==
+	strlen(s)' with '!strpbrk(s, t)'.
+	* miscutil.c: Supply log argument.
+
+2002-07-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* store.c: Fix spurious %m in store_err().
+	* fetchnews.c: Rename write_pseudo_header to store_pseudo_header,
+	because it calls store().
+	* queues.c: Fix moving failed articles into failed.postings.
+	Reported by Mike Castle <dalgoda@ix.netcom.com>.
+	* miscutil.c: Log non-regular files in message.id/XXX/
+	* cmp_firstcolumn.c: Add some documentation.
+	* tools/Makefile.am: Put simple-batcher.sh into EXTRA_DIST.
+	* tools/simple-batcher.sh: Add this el-cheapo rnews batcher, good
+	for testing. Documentation inside.
+
+2002-07-08  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* cmp_firstcolumn.c: cmp_firstcolumn: fast version.
+
+2002-07-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* README.html: Add notes about automatically appending the leafnode
+	path to sysconfdir, drop --with-runas-group documentation.
+	* configure.ac: Add notes about automatically appending the
+	leafnode path to sysconfdir all over the place, and strip trailing
+	/leafnode or /leafnode/ in sysconfdir for compatibility.
+	* NEWS: Document new sysconfdir behaviour.
+	* INSTALL: INSTALL was outdated, current information on how to
+	install leafnode is now in README. Point the user there.
+	* Makefile.am: Add sysconf_DATA to EXTRA_DIST.
+	* update.sh: Use id -u rather than cut and go figure RUNAS_GROUP
+	ourselves
+	* miscutil.c: Remove RUNAS_GROUP, did not work anyhow. Use primary
+	group of RUNAS_USER, and check that group and user id are not zero.
+	* leafnode.h: change libdir misnomer to sysconfdir. Drop
+	RUNAS_GROUP, use primary group of RUNAS_USER instead.
+	* Makefile.am, filters.example: Add filters.example. Change
+	sysconfdir handling again.
+	* configutil.c, fetchnews.c, rnews.c: change libdir misnomer to
+	sysconfdir. drop sys/resource.h.
+	* checkgroups.c: drop sys/resource.h
+	* activutil.c, applyfilter.c, leafnode-version.c, localutil.c,
+	moderated.c, nntpd.c, texpire.c: change libdir misnomer to
+	sysconfdir
+	* Makefile.am: LIBDIR -> SYSCONFDIR
+	* Makefile.am, configure.ac: Drop RUNAS_GROUP, it's hosed. Let
+	Makefile.am add the leafnode suffix to sysconfdir rather than
+	configure.ac
+	* Makefile.am, cmp_firstcolumn.c, fetchnews.c, leafnode.h: Rename
+	cmp_upstream to cmp_firstcolumn and put it into a separate file.
+
+2002-07-08  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* fetchnews.c, miscutil.c: initfile now does not touch the line it
+	puts into the rbtree.  cmp_upstream compares the first word of both
+	keys ignoring case.  Separators are space and tab.  This is slower,
+	but less error-prone.
+
+2002-07-08  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Never fetch newsgroup descriptions from a server
+	with "nodesc" set.
+	* fetchnews.c: Drop SIGALRM handling. It was only needed for
+	locking, which does now handle timeouts itself.
+	* redblack.c, redblack.h: Update libredblack to 1.2.
+	* NEWS, TODO, miscutil.c: Only change permissions/owner of leafnode
+	directories when creating them. Requested by Kevin Bulgrien.
+	* nntpd.c: Fix sockaddr/sigaction "sa" name clash.
+	* TODO: [no log message]
+	* fetchnews.c, nntpd.c, timeout_getaline.c: Use sigaction and
+	SA_RESTART, in the hope to avoid any EINTR issues and signals
+	restored to SIG_DFL on SVR4.
+	* config.example: Add warning to only_fetch_once.
+	* nntpd.c: Fix checking wrong part of message-ID bug in
+	validate_messageid. Found & fixed by Mike Castle
+	<dalgoda@ix.netcom.com>.
+
 2002-07-07  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
+	* fetchnews.c: getmarked: ugly hack to preserve 'MID artno' line in
+	case of failure.  nntpactive: Do not log 'getting newsgroup
+	descriptions' in case of nodesc.  processupstream: better logging,
+	do not fail with new server.
+	* miscutil.c: initfilelist replaces all spaces and tabs with 0,
+	screams if none found.
+	* fetchnews.c: Fix comment in getgroup, count and output total
+	number of pseudo headers fetched.
 	* TODO: Update.
 	* fetchnews.c: getgroup:  Fallback from XOVER to XHDR should work
 	now.
