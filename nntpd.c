@@ -318,8 +318,10 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
     }
 }
 
-/* build and return an open fd to pseudoart in group */
-static FILE *
+
+/** build and return an open FILE stream to pseudoart in group, may
+ * return NULL. */
+/*@null@*/ static FILE *
 buildpseudoart(const char *grp)
 {
     FILE *f;
@@ -346,7 +348,7 @@ buildpseudoart(const char *grp)
 }
 
 /* open a pseudo art */
-static FILE *
+/*@null@*/ static FILE *
 fopenpseudoart(const struct newsgroup *group, const char *arg,
 	       const unsigned long article_num)
 {
@@ -386,7 +388,7 @@ ispseudogroup(const char *group)
 }
 
 /* open an article by number or message-id */
-static FILE *
+/*@null@*/ static FILE *
 fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
 /* FIXME: when may artno be touched? */
 {
@@ -420,12 +422,13 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
 	f = fopen(s, "r");
 	if (!f)
 	    f = fopenpseudoart(group, s, a);
+	/* warning: f may be NULL */
 	markinterest(group);	/* FIXME: check error */
     }
 
     /* do not return articles with zero size (these have been truncated by
      * store.c after a write error) */
-    if (fstat(fileno(f), &st) || st.st_size == 0) {
+    if (f && (fstat(fileno(f), &st) || st.st_size == 0)) {
 	fclose(f);
 	f = 0;
     }
