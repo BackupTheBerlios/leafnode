@@ -157,6 +157,12 @@ initvars(const char *const progname, int logtostdout)
     }
 #endif /* not TESTMODE */
 
+    if (chdir(spooldir)) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot change to spooldir %s: %m\n",
+		spooldir);
+	return FALSE;
+    }
+    
     return TRUE;
 }
 
