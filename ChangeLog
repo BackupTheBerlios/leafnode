@@ -1,3 +1,48 @@
+2002-01-07  Matthias Andree  <matthias.andree@gmx.de>
+
+	* TODO: Update.
+	* xoverutil.c: Rename getxover to xgetxover, add a group parameter
+	which - when non-NULL - has the in-core groupinfo updated. Provide
+	getxover as xgetxover(NULL) for compatibility.  Add maybegetxover
+	which only operates when the group directory is more current than
+	the .overview or the .overview is more current than groupinfo.
+	* redblack.c: Handle OOM in rb_openlist. Found by Ralf Wildenhues.
+	Bug filed on https://sourceforge.net/project/libredblack, Bug-ID
+	#500600.
+	* queues.c: Fix memory leak (rbdestroy) in error conditions. Found
+	by Ralf Wildenhues.
+	* nntputil.c: Streamline newnntpreply, fixing compiler warnings.
+	* mastring.h: Add lclint annotations.
+	* mastrcpy.c: Add lclint annotations.
+	* lsort.c: Fixes for type bugs and memory leaks found by Ralf
+	Wildenhues.
+
+	* ln_log.c: Fix for lclint.
+	* activutil.c: Declare active-/inode-times and sizes static.
+	* leafnode.h: Drop activetime in favor of query_active_mtime().
+	* activutil.c: Add query_active_mtime.
+	* leafnode.h: Include type fixes and lclint annotations sent by
+	Ralf Wildenhues.  Add xgetxover and maybegetxover.
+
+	* dirutil.c: Include type fixes and lclint annotations sent by
+	Ralf Wildenhues.
+
+	* configure.ac: Bump version, add -lpcre to LIBS rather than
+	LINKPCRELIB.
+
+	* config.example: Document authenticate option.
+	* applyfilter.c: Properly initialize min/max, found by Ralf
+	Wildenhues.
+
+	* activutil.c: Fix two subtle bugs found by Ralf Wildenhues.
+	* nntpd.c: Implement fix suggested by Ralf Wildenhues: use fclose
+	before freeing our setvbuf buffer.  fopenart returns failure when
+	the article to be opened has 0 bytes (store.c marks write errors
+	by truncating the inode). Fixes a bug that was present since the
+	introduction of store.c.  When the group contents are more current
+	than .overview, rebuild .overview. Fixes a long-standing bug
+	reported by Stefan Wiens.
+
 2002-01-06  Matthias Andree  <matthias.andree@gmx.de>
 
 	=== RELEASE 2.0b8_ma9.2pre ===
