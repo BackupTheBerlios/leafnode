@@ -293,7 +293,7 @@ void delete_article(const char *mid, const char *action, const char *past_action
 	goto out;
 
     if ((num_groups = xref_to_list(hdr, &ngs, &artnos, 1)) == -1) {
-	/* FIXME: diagnostic! */
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "error: cannot convert Xref header to list");
 	free(hdr);
 	goto out;
     }
