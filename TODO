@@ -21,19 +21,7 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
-0.0 rnews is currently deactivated. Work in progress. Will have to
-    reintroduce rnews and find a way to feed news batches to UUCP mode
-    upstream (also listed at 3.3).
-
-1.1 article can be given out in spite of missing message.id file - a
-    missing message.id file/link hints to spool corruption. store() does
-    NOT link into message.id on write errors.
-
 1.1 fix posting issues, introduce per-server queues?
-
-1.1 .overview must always be more current than groupinfo, so that nntpd
-    never offers article via GROUP that it cannot provide via XOVER
-    e. g. (Stefan Wiens)
 
 1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
     sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
@@ -56,6 +44,8 @@ urgence:
     ACTION: fix
 
 2.2 for posts to moderated groups, add server preferences for posting?
+
+2.2 track which user posted an article (Stefan Fleiter)
 
 2.2 make user that leafnode runs under (now hard-wired to "news") configurable
 
@@ -117,6 +107,13 @@ urgence:
 2.3 if XHDR and XOVER fail, fall back to HEAD!
     ACTION: implement HEAD
 
+3.3 rnews is currently deactivated. Work in progress. Will have to
+    reintroduce rnews and find a way to feed news batches to UUCP mode
+    upstream
+
+3.3 does not send UUCP to upstream, introduce option to batch and spool
+    UUCP
+
 3.3 Ben Holmes: enable clients to read newsgroups immediately after
     completion of their download, rather than only after fetchnews
     completed.
@@ -128,9 +125,6 @@ urgence:
 
 3.3 Suggestion by Jörg Mensmann: only pick groups from supplement that
     have not been fetched before (or filter groups by server)
-
-3.3 does not send UUCP to upstream, introduce option to batch and spool
-    UUCP
 
 3.3 don't supersede() articles unconditionally
     ACTION: figure criteria for allowing/denying supersede
@@ -220,6 +214,15 @@ urgence:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-01-07 1.1 article can be given out in spite of missing message.id
+           file - a missing message.id file/link hints to spool
+           corruption. store() does NOT link into message.id on write
+           errors.
+
+2002-01-07 .overview must always be more current than groupinfo, so that
+           nntpd never offers article via GROUP that it cannot provide
+           via XOVER e. g. (Stefan Wiens)
 
 2002-01-06 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
 	   ACTION: replace by proper state machine
