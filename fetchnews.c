@@ -74,6 +74,7 @@ static int ismsgidonserver(char *msgid);
 static unsigned long getgroup(struct newsgroup *g, unsigned long server);
 static int postarticles(void);
 static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *, int);
+static int getbymsgid(const char *msgid, int delayflg);
 
 static void
 _ignore_answer(FILE * f)
@@ -429,6 +430,55 @@ ismsgidonserver(char *msgid)
 	return FALSE;
     }
 }
+
+/**
+ * get a list of message-ids, remove successfully fetched ids
+ * \return
+ * -  0 if all articles successfully loaded
+ * - -1 if articles outstanding
+ * - -2 if server error, disconnect
+ */
+static int
+getmsgidlist(struct stringlist **first)
+{
+    struct stringlist **slp = first;
+
+    if (slp == NULL)	/* consistency check */
+	return -1;
+    if (*slp == NULL)	/* done! */
+	return 0;
+
+    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+	   "Getting articles specified by Message-ID");
+    groupfetched = 0;
+    groupkilled = 0;
+
+    /* remove MIDs of articles we already have
+     * as well as successfully downloaded articles
+     */
+    while (*slp) {
+	char *mid = (*slp)->string;
+
+	if (ihave(mid)) {
+	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+		    "I have Article %s already", mid);
+	    removefromlist(slp);
+	    continue;
+	}
+        if (getbymsgid(mid, 0)) {
+	    removefromlist(slp);
+	    continue;
+	}
+	*slp = (*slp)->next;
+    }
+    ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+	    "%lu articles fetched by Message-ID, %lu killed",
+	    groupfetched, groupkilled);
+    globalfetched += groupfetched;
+    globalkilled += groupkilled;
+    return *first == NULL ? 0 : -1;
+}
+
 
 #if 0
 /*
@@ -1376,15 +1426,13 @@ post_FILE(FILE * f, char **line)
 /**
  * post all spooled articles to currently connected server
  * \return
- * -  1 if all postings succeed
- * -  1 if there are no postings to post
+ * -  1 if all postings succeed or there are no postings to post
  * -  0 if a posting is strange for some reason
  */
 int
 postarticles(void)
 {
     char *line = 0;
-    FILE *f;
     int n;
     unsigned long articles;
     char **x, **y;
@@ -1400,7 +1448,7 @@ postarticles(void)
 
     n = 0;
     for (y = x; *y; y++) {
-	f = NULL;
+	FILE *f;
 	if (!(f = fopen_reg(*y, "r"))) {
 	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		   "Cannot open %s to post, expecting regular file.", *y);
@@ -1622,26 +1670,11 @@ do_server(time_t lastrun)
     rc = 1;	/* now assume success */
 
     /* fetch by MID */
-    if (msgidlist != NULL) {
-	struct stringlist **slp = &msgidlist;
-
-	groupfetched = 0;
-	groupkilled = 0;
-
-	/* remove MIDs of present as well as successfully downloaded articles */
-	while (*slp) {
-	    char *mid = (*slp)->string;
-
-	    if (ihave(mid) || getbymsgid(mid, 0)) {
-		removefromlist(slp);
-		continue;
-	    }
-	    *slp = (*slp)->next;
-	}
-	globalfetched += groupfetched;
-	globalkilled += groupkilled;
-	if (!msgidlist)
-	    rc = 0;
+    switch (getmsgidlist(&msgidlist)) {
+    case 0:
+	rc = 0;
+    default:
+	;
     }
 
     /* do regular fetching of articles, headers, delayed bodies */
