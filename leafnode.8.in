@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.26 2004/08/22 09:21:39 emma Exp $
+.\" $Id: leafnode.8.in,v 1.27 2004/08/22 16:53:17 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -236,7 +236,7 @@ This parameter lists the Perl-compatible regular expression of groups
 that are fetched or posted to this server. The PCRE is automatically
 anchored at the left hand side, so you can omit the leading ^. Remember
 to escape dots, as in: de\\.comp\\.|de\\.comm\\. Another example might
-be only_groups_pcre=de\.(?!alt) that fetches all de.* groups that are
+be only_groups_pcre=de\\.(?!alt) that fetches all de.* groups that are
 not de.alt.* groups. Consult the PCRE documentation for details.
 
 If this parameter is omitted, all groups are fetched from and posted to
