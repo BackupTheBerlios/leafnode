@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE 500
 #include "leafnode.h"
 #include "ln_log.h"
 

@@ -6,7 +6,6 @@
  * See README for restrictions on the use of this software.
  */
 
-#define _XOPEN_SOURCE 500
 #include "leafnode.h"
 #include "get.h"
 #include "critmem.h"
