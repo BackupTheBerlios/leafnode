@@ -15,6 +15,6 @@ log_fchmod(const int f, mode_t m)
 {
     int r = fchmod(f, m);
     if (r < 0)
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chmod %d to %o: %m", f, (int)m);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chmod file descriptor %d to %o: %m", f, (int)m);
     return r;
 }
