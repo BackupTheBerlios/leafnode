@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0-snapshot-20020823a])
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.31 $)
+AC_REVISION($Revision: 1.32 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -297,7 +297,7 @@ AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid snprintf vsnprintf getaddrinfo])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid snprintf vsnprintf getaddrinfo gai_strerror])
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it

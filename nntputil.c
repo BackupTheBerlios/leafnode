@@ -227,7 +227,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     const char *errcause;
     int sock;
 
-#ifdef HAVE_GETADDRINFO
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR)
     /* This stuff supports IPv6 and IPv4 transparently. */
     int err;
 
