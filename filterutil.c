@@ -246,7 +246,6 @@ readfilter(/*@null@*/ const char *filterfilename)
 {
     FILE *ff;
     char *l;
-    pcre *ng = NULL;
     char *param, *value, *ngt = NULL;
     struct filterlist *f;
     int rv = TRUE, invertngs = 0;
@@ -293,13 +292,11 @@ readfilter(/*@null@*/ const char *filterfilename)
 		    invertngs = 1;
 		} else
 		    invertngs = 0;
-		ng = ln_pcre_compile(value, 0, NULL, filterfilename, line);
-		if (ng) state = RF_WANTPAT;
-		else rv = FALSE;
+		state = RF_WANTPAT;
 	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) &&
 		    !strcasecmp("pattern", param)) {
-		pcre *re;
-		if (!ng) {
+		pcre *re, *ngp;
+		if (!ngt || !(ngp = ln_pcre_compile(ngt, 0, NULL, filterfilename, line))) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 			    "No newsgroup for pattern = %s (line %lu) found",
 			    value, line);
@@ -316,7 +313,7 @@ readfilter(/*@null@*/ const char *filterfilename)
 			filterfilename, line);
 		if (re) {
 		    f = newfilter();
-		    insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs);
+		    insertfilter(f, ngp, critstrdup(ngt, "readfilter"), invertngs);
 		    (f->entry)->expr = re;
 		    (f->entry)->cleartext = critstrdup(value, "readfilter");
 		} else {
@@ -329,8 +326,13 @@ readfilter(/*@null@*/ const char *filterfilename)
 			(!strcasecmp("maxlines", param)) ||
 			(!strcasecmp("maxbytes", param)) ||
 			(!strcasecmp("maxcrosspost", param)))) {
+		pcre *ngp;
 		f = newfilter();
-		insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs);
+		if (!(ngp = ln_pcre_compile(ngt, 0, NULL, filterfilename, line))) {
+		    rv = FALSE;
+		    continue;
+		}
+		insertfilter(f, ngp, critstrdup(ngt, "readfilter"), invertngs);
 		(f->entry)->cleartext = critstrdup(param, "readfilter");
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
 		state = RF_WANTACTION;
@@ -361,10 +363,10 @@ readfilter(/*@null@*/ const char *filterfilename)
 	}
     } /* while */
     (void)fclose(ff);
-    if (ng)
-	free(ng);
     free(param);
     free(value);
+    if (ngt)
+	free(ngt);
     if (state != RF_WANTNG && state != RF_WANTNGORPAT) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "%s:%lu: premature end of file, expected %s",
