@@ -465,8 +465,8 @@ killfilter(const struct filterlist *f, const char *hdr)
 	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
 	               "regexp filter: /%s/ %s", g->cleartext, match ? "matched" : "did not match");
 		if (match) regexp_addinfo(g, hdr);
-		match = !match; /* interface with older code */
 	    }
+	    match = !match; /* interface with older code */
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
 	    p = findinheaders("Date:", hdr);
