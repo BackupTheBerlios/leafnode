@@ -2,7 +2,7 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050104a:
+20050105a: Changes since 20050104a:
 - Bugfix: delete_article also removes articles from in.coming directory
 - Bugfix: store() does not create message.id link unless there was at
   least one valid newsgroup, also avoids writing empty Xref: header that
