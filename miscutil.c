@@ -82,6 +82,7 @@ initvars(const char *const progname)
     (void)progname;		/* shut up compiler warnings */
     /*@=noeffect@*/
 
+#ifndef TESTMODE
     if (uid_getbyuname("news", &ui)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot uid_getbyuname(news,&ui): %m\n");
 	return FALSE;
@@ -90,6 +91,8 @@ initvars(const char *const progname)
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot gid_getbyuname(news,&gi): %m\n");
 	return FALSE;
     }
+#endif /* not TESTMODE */
+
     /* config.c stuff does not have to be initialized */
     expire_base = NULL;
     /* These directories should exist anyway */
@@ -101,16 +104,19 @@ initvars(const char *const progname)
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot mkdir(%s): %m\n", x);
 	    return FALSE;
 	}
+#ifndef TESTMODE
 	if (chown(x, ui, gi)) {	/* Flawfinder: ignore */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chown(%s,%ld,%ld): %m\n",
 		   x, (long)ui, (long)gi);
 	    return FALSE;
 	}
-	if (log_chmod(x, md->m)) {	/* Flawfinder: ignore */
+#endif /* not TESTMODE */
+	if (log_chmod(x, md->m)) {
 	    return FALSE;
 	}
 	md++;
     }
+#ifndef TESTMODE
     if (gid_ensure(gi)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure gid %ld: %m\n", (long)gi);
 	return FALSE;
@@ -119,6 +125,7 @@ initvars(const char *const progname)
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure uid %ld: %m\n", (long)ui);
 	return FALSE;
     }
+#endif /* not TESTMODE */
 
     return TRUE;
 }
@@ -207,7 +214,8 @@ static time_t
 getlastart(const char *group) /*@globals errno, spooldir;@*/ ;
 static time_t
 getlastart(const char *group)
-{				/*@globals errno, spooldir;@*/
+  /*@globals errno, spooldir;@*/
+{
     mastr *g;
     char *p = critstrdup(group, "getlastart"), *q;
     struct stat st;
