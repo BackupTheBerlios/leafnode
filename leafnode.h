@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.43 2002/05/06 09:06:08 emma Exp $ */
+/* $Id: leafnode.h,v 1.44 2002/06/14 15:44:30 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -227,6 +227,7 @@ extern "C" {
     void readlocalgroups(void);
     int is_localgroup(const char *groupname);
     int is_alllocal(const char *grouplist);
+    int is_anylocal(const char *grouplist);
     void freelocal(void);
 
 /* translation from message-id to article number, used in fetch and expire */

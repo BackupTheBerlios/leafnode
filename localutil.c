@@ -179,13 +179,39 @@ is_alllocal(const char *grouplist)
 
     p = g = critstrdup(grouplist, "islocal");
     do {
-	while (isspace((unsigned char)*p))
-	    p++;
+	SKIPLWS(p);
 	q = strchr(p, ',');
 	if (q)
 	    *q++ = '\0';
-	if (!is_localgroup(p))
+	if (!is_localgroup(p)) {
 	    retval = FALSE;
+	    break;
+	}
+	p = q;
+    } while (p && *p && retval);
+    free(g);
+    return retval;
+}
+
+/*
+ * find whether a comma-separated list of groups contains at least one local group
+ */
+int
+is_anylocal(const char *grouplist)
+{
+    char *p, *q, *g;
+    int retval = FALSE;		/* assume that no group is local */
+
+    p = g = critstrdup(grouplist, "islocal");
+    do {
+	SKIPLWS(p);
+	q = strchr(p, ',');
+	if (q)
+	    *q++ = '\0';
+	if (is_localgroup(p)) {
+	    retval = TRUE;
+	    break;
+	}
 	p = q;
     } while (p && *p && retval);
     free(g);
