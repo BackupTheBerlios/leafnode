@@ -779,6 +779,7 @@ static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
+    unsigned long count;
 
     rereadactive();
     g = findgroup(arg, active, -1);
@@ -799,8 +800,13 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 	    }
 	}
 
+	if (g->count == 0 && g->first == 1)
+	    count = 1;
+	else
+	    count = g->count;
+
 	nntpprintf("211 %lu %lu %lu %s group selected",
-		   g->count, g->first, g->last, g->name);
+		   count, g->first, g->last, g->name);
 	*artno = g->first;
 
 	fflush(stdout);
