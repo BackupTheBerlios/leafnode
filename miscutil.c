@@ -791,27 +791,23 @@ rfctime(void)
 	"Thu", "Fri", "Sat"
     };
     time_t now;
-    struct tm gmt;
-    struct tm local;
+    struct tm *local;
+    time_t off;
     int hours, mins;
 
     /* get local and Greenwich times */
     now = time(0);
-    gmt = *(gmtime(&now));
-    local = *(localtime(&now));
-#ifdef HAVE_GMTOFF
-    hours = local.tm_gmtoff / 60 / 60;
-    mins = local.tm_gmtoff / 60 % 60;
-#else
-    /* this is empirical */
-    hours = -timezone / 60 / 60 + ((local.tm_isdst > 0) ? 1 : 0);
-    mins = -timezone / 60 % 60;
-#endif
+    off = gmtoff(now);
+    local = localtime(&now);
+    mins = off / 60;
+    hours = mins / 60;
+    mins %= 60;
     /* finally print the string */
     sprintf(date, "%3s, %d %3s %4d %02d:%02d:%02d %+03d%02d",
-	    days[local.tm_wday], local.tm_mday, months[local.tm_mon],
-	    local.tm_year + 1900, local.tm_hour, local.tm_min,
-	    local.tm_sec, hours, mins);
+	    days[local->tm_wday], local->tm_mday, months[local->tm_mon],
+	    local->tm_year + 1900, local->tm_hour, local->tm_min,
+	    local->tm_sec,
+	    hours, mins);
     return date;
 }
 
