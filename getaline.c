@@ -54,7 +54,7 @@ getaline(FILE * f /** file to read from */ )
     } else {
 	if (debug & DEBUG_IO) {
 	    /* FIXME: CTOP? */
-	    ln_log(LNLOG_SWARN, LNLOG_CTOP, "<%s (incomplete, ignored)", buf);
+	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "<%s (incomplete, ignored)", buf);
 	}
 	return NULL;
     }
