@@ -29,7 +29,7 @@ getmoderator(const char *group)
     mastr_vcat(modpath, sysconfdir, "/moderators", NULL);
     f = fopen(mastr_str(modpath), "r");
     if (!f) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "Could not open %s: %m",
+	ln_log(LNLOG_SNOTICE, LNLOG_CTOP, "Could not open %s: %m",
 	       mastr_str(modpath));
 	mastr_delete(modpath);
 	return NULL;
