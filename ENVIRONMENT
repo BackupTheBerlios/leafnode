@@ -6,6 +6,11 @@ LN_LOG_ABORT_ON_ERROR
 	If this environment variable is defined (even empty), the first
 	error logged causes leafnode to abort().
 
+STOP_AT_MESSAGEID
+	If this environment variable is defined to a Message-ID,
+	leafnode will raise a SIGSTOP in store_stream when trying to
+	store the corresponding article.
+
 NOPOSTING
 	if set, the client cannot post, and its contents are output,
 	with control characters replaced by underscores
