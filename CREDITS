@@ -1,3 +1,4 @@
+# (UTF-8)
 Arnt Gulbrandsen <agulbra@troll.no> was the sole author of Leafnode up to
 	version 1.4.
 Markus Enzenberger <enz@cip.physik.uni-muenchen.de> wrote the delaybody
@@ -19,17 +20,17 @@ Andreas Kneib <akneib@gmx.net> for <1b0qv1-ca.ln1@andreas.kneib.biz>
 Andrzej Radecki <radecki@wpk.p.lodz.pl>
 Andy Doran <andy@psn.ie>
 Andy Piper <squiggle@ukgateway.net>
-Arkadiusz Mi¿kiewicz <misiek@misiek.eu.org>
+Arkadiusz MiÂ¿kiewicz <misiek@misiek.eu.org>
 Arne Wichmann <aw@anhrefn.saar.de>
 Axel Eble <aeble@controlware.de>
 Benjamin Schweizer <SternSZ@gmx.de>
-Bjørn Frantzen <bjoff@bgnett.no>
+BjÃ¸rn Frantzen <bjoff@bgnett.no>
 Brent J. Nordquist <brent-nordquist@bethel.edu>
 Brian Ewins <brian.ewins@bt.com>
 Bruce Schneier
 Bruno Rohee <rohee@OpenBSD.ORG>
 Carl D. Craven <raven@phoenyx.net>
-Carles Sadurní Anguita <sadurni@benidorm.net>
+Carles SadurnÃ­ Anguita <sadurni@benidorm.net>
 Carlos Robinson <cerobinson@teleline.es>
 Carsten Bobek <c.bobek@gmx.de>
 Christian Fertig <fertig@informatik.uni-frankfurt.de>
@@ -67,16 +68,16 @@ Jeffrey Goldberg <J.Goldberg@cranfield.ac.uk>
 Jens-Uwe Rumstich <rumstich@informatik.hu-berlin.de>
 Jo Moskalewski <JoMo@schwaben.de>
 Joe Hutchinson <joeh@netspace.net.au>
-Jörg Dietrich <joerg@dietrich.net>
-Jörg Lüders
+JÃ¶rg Dietrich <joerg@dietrich.net>
+JÃ¶rg LÃ¼ders
 Joey Hess <joey@kitenet.net>
 John R. Schrader <jrschrader@mainz-online.de>
-Johnny Teveßen <j.tevessen@gmx.net>
+Johnny TeveÃŸen <j.tevessen@gmx.net>
 Jose Rosales <jrosales@tdv.net>
-Jürgen Richter <richter@wohnheim.uni-ulm.de>
-Jürgen Salk <juergen.salk@gmx.de>
-Jürgen Strohmayer <usenet@bigfoot.de>
-Jürgen Vollmer <vollmer@cocolab.de>
+JÃ¼rgen Richter <richter@wohnheim.uni-ulm.de>
+JÃ¼rgen Salk <juergen.salk@gmx.de>
+JÃ¼rgen Strohmayer <usenet@bigfoot.de>
+JÃ¼rgen Vollmer <vollmer@cocolab.de>
 Juha Pohjalainen <jmp@iki.fi>
 Karen Nakamura <mail@gpsy.com>
 Karsten Merker <merker@guug.de>
@@ -122,10 +123,11 @@ Radoslaw Gancaraz <r_g@priv2.onet.pl>
 Ralf Wildenhues <ralf.wildenhues@gmx.de>
 Randolf Skerka <Randolf.Skerka@gmx.de>
 Rene Wuttke <rene@wuttke.net>
-Rey ¿ben <rey@linuxrules.xs4all.nl>
+Rey IJben <rey@linuxrules.xs4all.nl>
 Riccardo Tromba <inafir@tin.it>
 Richard Poole <rp202@rp202.demon.co.uk>
 Richard van Denzel <richardd@interaccess.nl>
+Robert Clark <clark@exiter.com>
 Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>
 Ron Rosson <insane@oneinsane.net>
 Sebastien Bellefeuille <sebas@magma.ca>
@@ -147,7 +149,7 @@ Thomas J. Merritt <tjm@codegen.com>
 Thomas Schwinge <schwinge-lists-leafnode@nic-nac-project.de>
 Thomas Themel <tthemel@gmx.net>
 Thomas Zajic <zlatko@gmx.at>
-Tim König <tk2652@compuserve.de>
+Tim KÃ¶nig <tk2652@compuserve.de>
 Timo Giesselmann <gmann@on-line.de>
 Tobias Burnus <tobias.burnus@uumail.de>
 Tom Schlangen <t.schlangen@ndh.net>
