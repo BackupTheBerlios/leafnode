@@ -1,3 +1,14 @@
+2004-08-15  Matthias Andree <matthias.andree@gmx.de>
+
+	* config.example, config.table, configutil.c, fetchnews.c,
+	leafnode.8.in, leafnode.h: Forward port noread feature from
+	leafnode-1.
+
+2004-08-14  Matthias Andree <matthias.andree@gmx.de>
+
+	* CHANGES-FROM-LEAFNODE-1, Makefile.am: Add CHANGES-FROM-LEAFNODE-1
+	file
+
 2004-08-13  Matthias Andree <matthias.andree@gmx.de>
 
 	* nntpd.c:
