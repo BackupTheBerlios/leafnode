@@ -15,6 +15,7 @@
 #include "format.h"
 #include "attributes.h"
 #include "ln_dir.h"
+#include "msgid.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -99,7 +100,9 @@ store_stream(FILE * in /** input file */ ,
 	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */,
 	     int delayflg /** delayed download, 0 == no, full article,
 			    1 == yes, pseudo head
-			    2 == yes, full article */
+			    2 == yes, full article
+			    3 == no, but articles is from in.coming
+			         and we have a message.id link */
 	)
 {
     int rc = -1;		/* first, assume something went wrong */
@@ -283,8 +286,9 @@ store_stream(FILE * in /** input file */ ,
     if (maxbytes == 0 && !found_body)
 	BAIL(-4, "Headers extend beyond allowed read range");
 
-    /* check if we already have the article, ignore if downloading delayed body */
-    if (delayflg != 2 && ihave(mid)) {
+    /* check if we already have the article, ignore if downloading
+     * delayed body or feeding from in.coming */
+    if (delayflg < 2 && ihave(mid)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "store: duplicate article %s", mid);
 	rc = -2;
@@ -440,11 +444,13 @@ store_stream(FILE * in /** input file */ ,
 
     /* now create link in message.id */
     m = lookup(mid);
-    if (link(mastr_str(tmpfn), m)) {
-	if (errno == ENOENT) {	/* message.id file missing, create */
+    if (delayflg == 3 ? link_force(mastr_str(tmpfn), m)
+	    : link(mastr_str(tmpfn), m)) {
+	if (errno == ENOENT) {	/* message.id directory missing, create */
 	    if (0 == mkdir_parent(m, MKDIR_MODE))
-		if (0 == link(mastr_str(tmpfn), m))
+		if (0 == (delayflg == 3 ? link_force(mastr_str(tmpfn), m) : link(mastr_str(tmpfn), m))) {
 		    goto cont;
+		}
 	}
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 	       "store: cannot link %s to %s: %m", mastr_str(tmpfn), m);
@@ -571,6 +577,7 @@ bail:
 	return rc;
     }
 
+/** open a file and feed it to store_stream */
 int
 store(const char *name, int nntpmode,
       /*@null@*/ const struct filterlist *f /** filters or NULL */,

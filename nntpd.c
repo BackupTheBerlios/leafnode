@@ -17,6 +17,7 @@
 #include "mastring.h"
 #include "h_error.h"
 #include "masock.h"
+#include "msgid.h"
 
 /* FIXME: write wrapper for this fellow */
 #ifdef SOCKS
@@ -1510,7 +1511,8 @@ dopost(void)
 	}
 
 	if (havemessageid) {
-	    struct stat st;
+	    int tmp;
+	    char *m;
 
 	    if (!validate_messageid(mid)) {
 		nntpprintf("441 Invalid header \"Message-ID: %s\", article not posted", mid);
@@ -1518,10 +1520,22 @@ dopost(void)
 		goto cleanup;
 	    }
 
-	    if (stat(lookup(mid), &st) == 0) {
-		nntpprintf("441 435 Duplicate, article not posted");
-		log_unlink(inname, 0);
-		goto cleanup;
+	    tmp = msgid_allocate(inname, m = lookup(mid));
+	    switch(tmp) {
+		case 1:
+		    nntpprintf("441 435 Duplicate, article not posted");
+		    log_unlink(inname, 0);
+		    goto cleanup;
+		    break;
+		case 0:
+		    /* OK */
+		    break;
+		default:
+		    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot link %s to %s: %m",
+			    inname, m);
+		    log_unlink(inname, 0);
+		    goto cleanup;
+		    break;
 	    }
 	}
 
