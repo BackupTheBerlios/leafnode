@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.26 2002/01/14 01:53:19 emma Exp $ */
+/* $Id: leafnode.h,v 1.27 2002/01/30 12:19:46 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -58,6 +58,10 @@ extern "C" {
 #include <time.h>		/* time_t */
 #include <stdarg.h>		/* va_list */
 #include <dirent.h>		/* DIR */
+
+#if !HAVE_WORKING_FORK
+#define fork() ((pid_t)(-1))
+#endif
 
 #include <pcre.h>
 
