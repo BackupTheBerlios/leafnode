@@ -61,9 +61,6 @@ Ralfs TODO:
     (Kevin Bulgrien), to allow for leafwa tricks.
 
 10pre4
-0.0 add COPYING (Ralf Wildenhues)
-
-10pre4
 0.0 do not use mkstemp on MacOS X, it's unsafe there
 
 10pre4
@@ -277,6 +274,9 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-05-05 Matthias Andree
+	   add COPYING (requested by Ralf Wildenhues)
 
 2002-05-05 Matthias Andree
 	   left over temp files when lock cannot be obtained (Jari Lehtonen
