@@ -1279,13 +1279,15 @@ nntpactive(int fa)
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, ".") != 0)) {
 	    char *r;
-	    count++;
 	    p = l;
 	    if (!splitLISTline(l, &p, &r))
 		continue;
 	    *p = '\0';
-	    insertgroup(l, *r, 0, 0, time(NULL), NULL);
-	    appendtolist(&groups, &helpptr, l);
+	    if (gs_match(current_server->group_pcre, l)) {
+		insertgroup(l, *r, 0, 0, time(NULL), NULL);
+		appendtolist(&groups, &helpptr, l);
+		count++;
+	    }
 	}
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 		"%s: found %lu new newsgroups", current_server->name, count);
@@ -1339,7 +1341,6 @@ nntpactive(int fa)
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
 	    last = first = 0;
-	    count++;
 	    p = l;
 	    if (!splitLISTline(l, &q, &p))
 		continue;
@@ -1358,7 +1359,10 @@ nntpactive(int fa)
 		    first = last = 0;
 		}
 	    }
-	    insertgroup(l, p[0], first, last, 0, NULL);
+	    if (gs_match(current_server->group_pcre, l)) {
+		insertgroup(l, p[0], first, last, 0, NULL);
+		count++;
+	    }
 	}
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		"%s: read %lu newsgroups", current_server->name, count);
