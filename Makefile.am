@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.56 2004/01/18 19:38:39 emma Exp $
+# $Id: Makefile.am,v 1.57 2004/01/27 12:31:07 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -106,6 +106,7 @@ liblnutil_a_SOURCES	= \
 	msgid.h \
 	msgid_hash.c \
 	msgid_sanitize.c \
+	mysetvbuf.h mysetvbuf.c \
 	nfswrite.c \
 	nntputil.c \
 	parserange.c \
