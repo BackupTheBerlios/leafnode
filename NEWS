@@ -2,6 +2,9 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20041227a:
+- Change: checkpoint the ./configure cache before common failure points
+
 20041227a: Changes since 20041215a:
 - Bugfix: Fix massive memory leak in "GROUP" command and other commands
   that read the overview data. Reported by Lloyd Zusman.

@@ -56,6 +56,9 @@ CFLAGS="$CFLAGS $ac_cv_prog_gcc_flags"
 export CFLAGS
 AC_SUBST(CFLAGS)
 
+dnl save what we've found out so far
+AC_CACHE_SAVE
+
 dnl check which user to use
 AC_MSG_CHECKING(runas-user)
 AC_ARG_ENABLE(runas-user, AS_HELP_STRING(--enable-runas-user=USER,user (news)),
@@ -191,6 +194,8 @@ test "x${RMPSRC}" = "xnone" || AC_SUBST(RPMSRC)
 
 dnl Check for libcrypt
 AC_CHECK_LIB(crypt, crypt)
+
+AC_CACHE_SAVE
 
 dnl Check for PCRE library.
 AC_PATH_PROG(PCRECONFIG,pcre-config,AC_MSG_ERROR(pcre-config not found, make sure you have the pcre and pcre-devel packages installed))
