@@ -506,6 +506,7 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
     p->password = NULL;
     p->active = TRUE;
     p->feedtype = CPFT_NNTP; /* default: use NNTP */
+    p->group_pcre = NULL;
     return p;
 }
 
