@@ -25,7 +25,7 @@ int debug = 0;
 static int
 comp(const void *a, const void *b)
 {
-    return strcasecmp(*(const char **)a, *(const char **)b);
+    return strcasecmp(*(const char *const *)a, *(const char *const *)b);
 }
 
 int
@@ -44,7 +44,7 @@ main(void)
     f = fopen(path, "r");
     if (f == NULL) {
 	fprintf(stderr, "Error: Can't open groupinfo.old!\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     act = (char **)critmalloc(sizeof(char *),
@@ -54,7 +54,7 @@ main(void)
 	act = (char **)realloc(act, (acount + 1) * sizeof(char *));
 	if (act == NULL) {
 	    fprintf(stderr, "realloc returned NULL\n");
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	act[acount] = strdup(l);
 	acount++;
