@@ -29,7 +29,7 @@ mycritcalloc(const char *f, long l, size_t size, const char *message)
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "calloc(1, %d) failed: %s", (int)size, message);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
     return a;
 }
