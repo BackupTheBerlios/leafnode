@@ -19,22 +19,7 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
-0.0 Jörg Dietrich: message.id/XXX in Makefile anlegen.
-
-0.0 when taking in Jörg's status char patch, make sure that posts to
-moderated groups are backed up should the upstream server be
-misconfigured.
-
-0.0 do not store postings into moderated groups if Approved: header is
-missing. do not store crosspostings into moderated groups locally. Only
-post articles to moderated groups to one server. see next item
-
-0.0 for the previous item, add server preferences for posting?
-
-0.0 add support for local moderated news groups (define moderator
-address)
-
-0.0 local timezone for logging
+0.0 Alexander Reinwarth: "does it work on FreeBSD?"
 
 0.0 rnews is currently deactivated. Work in progress. Will have to
     reintroduce rnews and find a way to feed news batches to UUCP mode
@@ -61,14 +46,21 @@ address)
 1.1 groupinfo not updated after timeout + subsequent SIGINT
     ACTION: check if report still current
 
+1.1 split post functionality from fetchnews to a separate daemon (but
+    maybe call the new daemon automatically) Ozz 2001-06-12
+
 1.3 authinfo handling in nntpd.c proper? (just user gives ACCEPT)
     ACTION: replace by proper state machine
+
+2.2 for posts to moderated groups, add server preferences for posting?
 
 2.2 make user that leafnode runs under (now hard-wired to "news") configurable
 
 2.2 also run feedincoming on exit of programs that lock
 
 2.2 do not store cancel and perhaps other control messages locally?
+
+2.2 cancelwatch
 
 2.2 heed Expires: header in texpire
 
@@ -77,6 +69,8 @@ address)
 2.2 pipeline GROUP commands for speed
 
 2.2 Create rpost/inews
+
+2.2 Fix and amend copyright statements and licenses.
 
 2.2 groupinfo is not updated for local groups (article low/high marks)
     when these are reinserted.
@@ -99,9 +93,8 @@ address)
 
 2.2 convert Newsgroup: to lowercase on external newsgroups.
 
-2.2 report by Alessio Bragadini,
-    <3AEFB20C.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>
-    posting to moderated groups submitted more than once
+2.2 option to freeze interesting.groups as it is -- just give away group
+    permissions to root -- Ozz 2001-06-12
 
 2.2 groupinfo is all 0 0 0 if groupinfo is entirely re-read, until
     texpire is run.
@@ -125,17 +118,15 @@ address)
 2.3 if XHDR and XOVER fail, fall back to HEAD!
     ACTION: implement HEAD
 
-2.3 flag servers as "don't post here" (Robin S. Socha, 2000-12-17,
-    Message-ID: <3A3D1CB3.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>)
-    ACTION: implement server-specific configuration option
+3.3 Ben Holmes: read newsgroups immediately after completion of their
+    download, rather than only after fetchnews completed.
 
 3.3 add support for stderr logging so that multilog can be used
     (clemensF <rabat@web.de>).
 
 3.3 add IHAVE support for feeding upstream
 
-3.3 add support for a NOPOSTING env variable that prevents posting
-    (possibly replacing the banner with the contents of the variable).
+3.3 document NOPOSTING env variable that prevents posting
 
 3.3 does not send UUCP to upstream, introduce option to batch and spool
     UUCP
@@ -192,6 +183,10 @@ address)
 
 3.3 let texpire use the actual article date rather than mtime/atime
 
+3.3 send posted articles out immediately -- based on switches or
+    filters? MID <3C10FC04.BeroList-2.5.9@wpxx02.toxi.uni-wuerzburg.de>?
+    Ben Holness.
+
 3.4 postarticles is a horrible mess. It deletes the articles IMMEDIATELY
     if it's available on a server.
 
@@ -203,7 +198,7 @@ address)
 
 4.4 implement detection if local group shadows server group
 
-4.4 make libwrap aware? implement standalone mode?
+4.4 NOPOSTING: replace the banner with the contents of this variable.
 
 4.4 can fetchnews cope with servers that reject XOVER? (Matthias Andree)
 
