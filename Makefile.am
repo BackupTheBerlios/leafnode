@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.64 2004/03/26 14:36:54 emma Exp $
+# $Id: Makefile.am,v 1.65 2004/03/26 14:47:04 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -263,7 +263,6 @@ update:
 	@./update.sh $(SPOOLDIR) $(SYSCONFDIR) $(SPOOLDIR)/leaf.node/lock.file $(RUNAS_USER) $(RUNAS_GROUP)
 
 install-data-hook:
-# directories
 	$(INSTALL) -d -m 02770 $(DESTDIR)$(SPOOLDIR)
 	$(INSTALL) -d -m 02770 $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)
@@ -273,6 +272,7 @@ install-data-hook:
 	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
+	-chmod -R o= $(DESTDIR)$(SPOOLDIR)
 	@echo
 	@echo "*** DO MAKE SURE THAT YOU RUN texpire -r IF YOU HAVE ARTICLES IN THE SPOOL ***"
 	@echo

@@ -1,14 +1,21 @@
-Changes since 20040319a:
+20040326a: Changes since 20040305a:
+- VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 - Documentation: document logstderr instead of the improper
   ln_log_stderronly. Patch by Thomas Schwinge.
 - Documentation: mention there was an internal change to stringlist
   handling before 20040227a. This triggered the XPAT/XHDR/NEWNEWS
   regression.
-
-20040319a: Changes since 20040305a:
 - Bugfix: XPAT, XHDR, NEWNEWS caused a segmentation fault when issued
   without argument (slrn bug triggered by ESC 1 ESC p or ESC 2 ESC p for
   instance). Reported by Robert Grimm.
+- Leafnode now makes all directories group writable by default but
+  withdraws *all* world permissions. To meddle with the spool, put the
+  user to meddle in the same group that the news user uses as primary
+  group. If you do this, YOU take the blame for all security issues,
+  insecure scripts and all that, particularly when using CGI scripts
+  or setgid flags.
+
+VERSIONS 20040319a AND 20040324a HAVE BEEN WITHDRAWN.
 
 20040305a: Changes since 20040227a:
 - Robustness: Leafnode programs refuse to start when an unknown or

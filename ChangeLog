@@ -1,5 +1,21 @@
+2004-03-26  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20040326a =
+	* fetchnews.c: Drop too relaxed umask.
+	* miscutil.c: Set minimum umask.
+	* Makefile.am, activutil.c, checkgroups.c, fetchnews.c, leafnode.h,
+	miscutil.c, nntpd.c: Change permission handling. No world
+	permissions whatsoever.
+
+2004-03-24  Matthias Andree <matthias.andree@gmx.de>
+
+	* Makefile.am: Relax group permissions.
+	* TODO: update
+	* Makefile.am, miscutil.c: Relax group permissions.
+
 2004-03-20  Matthias Andree <matthias.andree@gmx.de>
 
+	* NEWS: mention stringlist change
 	* NEWS, config.example: ln_log_stderronly is bogus, we use logstderr.
 	Patch by Thomas Schwinge.
 
@@ -7,7 +23,7 @@
 
 	* ChangeLog, configure.ac: Snapshot 20040319a.
 
-	= snapshot 20040319a =
+	= snapshot 20040319a = (withdrawn)
 	* NEWS, nntpd.c: Fix SIGSEGV when XPAT, XHDR or NEWNEWS are issued
 	without arguments.  slrn does such non-sense. Reported by Robert
 	Grimm.
