@@ -118,7 +118,7 @@ store_stream(FILE * in /** input file */ ,
 	ln_log(LNLOG_SCRIT, LNLOG_CTOP, "store: nntpmode and maxbytes are mutually exclusive for now.");
 	abort();
     }
-    
+
     /* check for OOM */
     if (!head) {
 	mastr_delete(ln);
@@ -153,7 +153,8 @@ store_stream(FILE * in /** input file */ ,
      *  - looking for Control: cancel and Supersedes:
      *  - check count of each mandatory header
      */
-    while ((s = mastr_getln(ln, in, maxbytes)) > 0) {
+    while ((maxbytes > 0 || maxbytes == -1) &&
+	(s = mastr_getln(ln, in, maxbytes)) > 0) {
 	if (maxbytes != -1) maxbytes -= s;
 	mastr_chop(ln);
 	if (debugmode & DEBUG_STORE)
@@ -198,7 +199,7 @@ store_stream(FILE * in /** input file */ ,
 	case 'S':
 	    if (c_subject < 2 && str_isprefix(line, "Subject:"))
 		++c_subject;
-	    if (str_isprefix(line, "Supersedes:")) {
+	    else if (str_isprefix(line, "Supersedes:")) {
 		supersede_cancel(line + 11, "Supersede", "Superseded");
 	    }
 	    break;
@@ -378,7 +379,8 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-1, "write error");
 
     /* copy body */
-    while ((s = mastr_getln(ln, in, maxbytes)) > 0) {
+    while ((maxbytes > 0 || maxbytes == -1) &&
+	(s = mastr_getln(ln, in, maxbytes)) > 0) {
 	if (maxbytes != -1) maxbytes -= s;
 	mastr_chop(ln);
 #if 0
@@ -452,7 +454,7 @@ store_stream(FILE * in /** input file */ ,
 		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
 			"store: ignoring %ld bytes",
 			(long)maxbytes); 
-	    while (maxbytes > 0 && (s = mastr_getln(ln, in, maxbytes)) >= 0) {
+	    while (maxbytes > 0 && (s = mastr_getln(ln, in, maxbytes)) > 0) {
 		mastr_chop(ln);
 		maxbytes -= s;
 		if (debugmode & DEBUG_STORE)
