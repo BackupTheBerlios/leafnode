@@ -1,5 +1,24 @@
+2002-09-14  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Only delete postings from out.going on successful
+	post if they don't bear an Approved: header.  
+	* nntpd.c: Also spool postings in out.going that are nonlocal and
+	have a moderator and approval. Might be useful for articles
+	crossposted to local moderated and upstream unmoderated groups.
+	Should not happen though...  
+	* fetchnews.c: When an upstream post goes to a moderated group,
+	delete it after the first successful post, to avoid annoying
+	moderators. Reported by Jeff Grossman <jeff@stikman.com>.  
+	* log_unlink.c: Forge 0 return code when ignore_enoent is set and
+	ENOENT is seen.  
+
 2002-09-10  Matthias Andree <matthias.andree@gmx.de>
 
+	* CREDITS, configure.ac, leafnode.spec.in: Adjust RPM build along
+	the lines suggested by Kenneth Porter.  
+	* store.c: Include link_force.h, fixes compiler warning.  
+
+	--- release snapshot-20020910a ---
 	* nntpd.c: Make the message.id linking stuff work also when
 	articles without Message-ID are posted.  
 	* link_force.c: Do not leave temporary file around when the
