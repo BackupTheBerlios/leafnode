@@ -1019,14 +1019,15 @@ main(int argc, char **argv)
     time_t now;
     int option, reply;
     char *conffile = NULL;
+    const char *const myname = "texpire";
 
-    ln_log_open("texpire");
+    ln_log_open(myname);
 
     if (!initvars(argv[0], 0))
-	exit(EXIT_FAILURE);
+	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "frn")) != -1) {
-	if (parseopt("texpire", option, optarg, &conffile))
+	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
 	case 'f':
@@ -1053,7 +1054,10 @@ main(int argc, char **argv)
     if (conffile)
 	free(conffile);
 
-    if (lockfile_exists(LOCKWAIT)) {
+    if (!init_post())
+	init_failed(myname);
+
+    if (attempt_lock(LOCKWAIT)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "%s: lockfile %s exists, abort\n",
 		argv[0], lockfile);
 	exit(EXIT_FAILURE);

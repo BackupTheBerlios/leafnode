@@ -1738,7 +1738,7 @@ dopost(void)
 	    fclose(stdout);
 	    fclose(stderr);
 
-	    if (lockfile_exists(2UL)) {
+	    if (attempt_lock(2UL)) {
 		ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
 		       "Cannot obtain lock file to store article %s. "
 		       "It will be posted later.", inname);
@@ -2407,6 +2407,7 @@ main(int argc, char **argv)
     const long bufsize = BLOCKSIZE;
     char *buf = (char *)critmalloc(bufsize, "main");
     char *conffile = NULL;
+    const char *const myname = "leafnode";
 
 #ifdef HAVE_IPV6
     struct sockaddr_in6 sa, peer;
@@ -2419,10 +2420,9 @@ main(int argc, char **argv)
 
     mysetfbuf(stdout, buf, bufsize);
 
-    ln_log_open("leafnode");
+    ln_log_open(myname);
     if (!initvars(argv[0], 1))
-	exit(EXIT_FAILURE);
-
+	init_failed(myname);
 
     /* have stderr discarded */
     se = freopen("/dev/null", "w+", stderr);
@@ -2433,7 +2433,7 @@ main(int argc, char **argv)
     }
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
-	if (!parseopt("leafnode", option, optarg, &conffile)) {
+	if (!parseopt(myname, option, optarg, &conffile)) {
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
 	    exit(EXIT_FAILURE);
 	}
@@ -2448,6 +2448,9 @@ main(int argc, char **argv)
     }
     if (conffile)
 	free(conffile);
+
+    if (!init_post())
+	init_failed(myname);
 
     verbose = 0;
     umask((mode_t) 02);
@@ -2476,7 +2479,7 @@ main(int argc, char **argv)
 		   strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
-	peeraddr = critstrdup("local file or pipe", "leafnode");
+	peeraddr = critstrdup("local file or pipe", myname);
     } else {
 	peeraddr = masock_sa2addr((struct sockaddr *)&peer);
 	log_sockaddr("remote host", (struct sockaddr *)&peer, peeraddr);
