@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.74 2002/09/02 00:32:56 emma Exp $ */
+/* $Id: leafnode.h,v 1.75 2002/09/09 23:28:41 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -165,9 +165,6 @@ extern "C" {
 
 /* conffile is malloced */
     int parseopt(const char *, int, /*@null@*/ const char *, /*@null@*/ char **);
-
-/* converts a message-id to a file name, the return value points to static storage  */
-    /*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
 
 /* handling of misc. lines */
     /*@null@*/ /*@dependent@*/ char *getaline(FILE * f);
@@ -528,7 +525,6 @@ extern "C" {
 /*
  * misc prototypes
  */
-    /*@falsewhennull@*/ int ihave(/*@null@*/ const char *mid);
     int lockfile_exists(unsigned long timeout);
     int handover_lock(pid_t pid);
     void putaline(FILE *, const char *fmt, ...)
