@@ -1,5 +1,11 @@
 2002-09-10  Matthias Andree <matthias.andree@gmx.de>
 
+	* nntpd.c: Make the message.id linking stuff work also when
+	articles without Message-ID are posted.  
+	* link_force.c: Do not leave temporary file around when the
+	destination exists. Found FreeBSD 4.7-PRERELEASE IEEE Std
+	1003.1-2001 Violation in rename(2) in the same go.  
+	* arc4random.h: add arc4random.h 
 	* nntpd.c, store.c: Fix CVSTrac #6: bogus 'duplicate article' when
 	an article is posted while fetchnews is running and querying
 	multiple upstream servers with fast interconnection. Tracked down by
