@@ -19,6 +19,7 @@
  * descriptor. \return 0 for success, -1 for error
  * WARNING: This function expects that SIGCHLD is _NOT_ set to SIG_IGN,
  * it will mail away the file but report it failed otherwise!
+ * FIXME: add To: line if missing (reported by Jörg Dietrich 2002-02-12)
  */
 int
 mailto(const char *address, int fd)
