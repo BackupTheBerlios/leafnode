@@ -25,7 +25,7 @@ b_comp(const void *a, const void *b)
     return strcmp(*(const char *const *)a, *(const char *const *)b);
 }
 
-void ln_log(void) {}; /* dummy */
+void ln_log(void);
 void ln_log(void) {} /* dummy */
 
 int
