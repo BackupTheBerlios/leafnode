@@ -17,6 +17,8 @@ texpire \- delete old news article threads
 
 .B texpire [-fnr] [-D debugmode] [-F configfile] [-v[v[v[v]]]]
 
+.B texpire [-D debugmode] [-F configfile] [-v[v[v[v]]]] -C messageid [...]
+
 .SH DESCRIPTION
 .B Leafnode
 is a USENET package intended for small sites, where there are few
@@ -33,6 +35,12 @@ is the program which deletes old articles from the local news spool,
 rehashes the spool after updates of leafnode.
 
 .SH OPTIONS
+.TP
+.I -C messageid [...]
+Switch on cancel mode. This will attempt to remove the articles with
+given Message-ID numbers from the spool. Note that the Message-ID must
+be given with angle brackets; remember to use single quotes to protect
+the Message-IDs from the shell.
 .TP
 .I -D debugmode
 Switch on debug mode. This will log a lot of information via syslog to

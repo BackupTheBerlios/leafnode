@@ -2,6 +2,10 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050103a:
+- Feature: texpire can now remove articles from the spool, new -C
+  option.
+
 20050103a: Changes since 20050102a:
 - Change: obtain LISTGROUP article numbers directly from the directory
   rather than from the overview, to let cancel/supersedes take effect

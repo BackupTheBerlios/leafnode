@@ -70,6 +70,9 @@ static int expire_threads = 1;	/* if whole threads are blocked from expiry */
 static char gdir[LN_PATH_MAX];		/* name of current group directory */
 static unsigned long deleted, kept;
 
+/** what mode texpire operates in */
+static enum modes { TEM_expire, TEM_cancel } mode = TEM_expire;
+
 extern unsigned long xcount;
 
 /* Thread expiry by Stefan Wiens 2001-01-08 */
@@ -1024,12 +1027,15 @@ main(int argc, char **argv)
     if (!initvars(argv[0], 0))
 	init_failed(myname);
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "afnr")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "aCfnr")) != -1) {
 	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
 	case 'f':
 	    use_atime = 0;
+	    break;
+	case 'C':
+	    mode = TEM_cancel;
 	    break;
 	case 'r':
 	    repair_spool = 1;
@@ -1072,12 +1078,40 @@ main(int argc, char **argv)
 	exit(2);
     }
 
-    if (verbose) {
-	printf("texpire %s: ", version);
-	if (use_atime)
-	    printf("check mtime and atime\n");
-	else
-	    printf("check mtime only\n");
+    switch (mode) {
+	case TEM_expire:
+	    if (verbose) {
+		printf("texpire %s: ", version);
+		if (use_atime)
+		    printf("check mtime and atime\n");
+		else
+		    printf("check mtime only\n");
+	    }
+
+	    if (debugmode & DEBUG_EXPIRE) {
+		ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			"texpire %s: use_atime is %d; repair_spool is %d",
+			version, use_atime, repair_spool);
+	    }
+	    if (default_expire == 0) {
+		fprintf(stderr, "%s: no expire time\n", argv[0]);
+		exit(2);
+	    }
+
+	    /* actual main loop */
+	    expiregroups();
+	    expiremsgid();
+	    break;
+	case TEM_cancel:
+	    while(optind < argc) {
+		if (verbose)
+		    printf("Trying to remove %s...\n", argv[optind]);
+		delete_article(argv[optind], "Remove", "Removed", 1);
+		optind++;
+	    }
+	    break;
+	default:
+	    abort();
     }
 
     if (verbose) {
@@ -1085,24 +1119,14 @@ main(int argc, char **argv)
     }
     feedincoming();
 
-    if (debugmode & DEBUG_EXPIRE) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-	       "texpire %s: use_atime is %d; repair_spool is %d",
-	       version, use_atime, repair_spool);
-    }
-    if (default_expire == 0) {
-	fprintf(stderr, "%s: no expire time\n", argv[0]);
-	exit(2);
-    }
-
-    expiregroups();
     writeactive();
+
+    /* cleanup */
     freeactive(active);		/* throw away active data */
     active = NULL;
     freexover();		/* throw away overview data */
     freeinteresting();
     free_dormant();
-    expiremsgid();
     /* do not release the lock earlier to prevent confusion of other daemons */
     (void)log_unlink(lockfile, 0);
     freeconfig();
