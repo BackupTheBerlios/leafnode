@@ -163,7 +163,7 @@ decompresspipe(FILE *original, const char *const compressor[])
 	    }
 	    break;
     default:
-	/* parent of feeder */
+	; /* parent of feeder */
     }
     close(explodepipe[1]);
     close(feedpipe[0]);
