@@ -1716,10 +1716,9 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
     };
     int OVfield;
     char *l;
-    unsigned long a, b = 0, c;
+    unsigned long a, b = 0;
     long int i, idxa, idxb;
     FILE *f;
-    struct stringlist *ap;
     char *header;
 
     header = (char *)critmalloc((i = strlen(hd)) + 2, "doselectedheader");
@@ -1744,21 +1743,14 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    return;
 	}
 	STRIP_TRAILING_SPACE(l);
-	if (patterns) {
-	    ap = patterns;
-	    while (ap) {
-		if (0 == ngmatch((const char *)&(ap->string), l))
-		    break;
-		ap = ap->next;
-	    }
-	    if (!ap) {		/* doesn't match any pattern */
-		nntpprintf("221 %s matches follow:", hd);
-		fputs(".\r\n", stdout);
-		fclose(f);
-		free(header);
-		free(l);
-		return;
-	    }
+	if (patterns && !matchlist(patterns, l)) {
+	    /* doesn't match any pattern */
+	    nntpprintf("221 %s matches follow:", hd);
+	    fputs(".\r\n", stdout);
+	    fclose(f);
+	    free(header);
+	    free(l);
+	    return;
 	}
 	nntpprintf("221 %s %s follow:", hd, (patterns ? "matches" : "headers"));
 	printf("%s %s\r\n.\r\n", messages, l ? l : "");
@@ -1866,77 +1858,42 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
-	    char *t = 0;
-	    char *li = xoverinfo[i].text;
-	    int d;
+	    l = cuttab(xoverinfo[i].text, OVfield+2);
+	    if (!l)
+		continue;
 
-	    /* OK MA 2001-06-27 */
-	    for (d = 0; li && d <= OVfield; d++) {
-		li = strchr(li, '\t');
-		if (li)
-		    li++;
+	    if (patterns && !matchlist(patterns, l)) {
+		free(l);
+		continue;
 	    }
 
-	    if (li) {
-		char *p;
-		p = strchr(li, '\t');
-		if (!p)
-		    p = li + strlen(li);
-
-		t = (char *)critmalloc(p - li + 1, "doselectedheader");
-		mastrncpy(t, li, p - li + 1);
-	    }
-
-	    if (patterns) {
-		ap = patterns;
-		if (!t) continue;
-		while (ap) {
-		    if (!ngmatch((const char *)&(ap->string), t))
-			break;
-		    ap = ap->next;
-		}
-		if (!ap) {
-		    if (t) free(t);
-		    continue;
-		}
-	    }
-
-	    if (t) {
-		printf("%lu %s\r\n", xoverinfo[i].artno, t);
-		free(t);
-	    }
+	    printf("%lu %s\r\n", xoverinfo[i].artno, l);
+	    free(l);
 	}
     } else {
 	nntpprintf
-	    ("221 %s header %s (from article files) for postings %lu-%lu:",
+	    ("221 %s header %s(from article files) for postings %lu-%lu:",
 	     hd, patterns ? "matches " : "", a, b);
 	/* as we have the overview anyway, we might as well read the article
 	   number from it, even if we have to open the article for the header,
 	   saves trying to open non-existing articles */
 	for (i = idxa; i <= idxb; i++) {
 	    char s[64];
-	    c = xoverinfo[i].artno;
+	    unsigned long c = xoverinfo[i].artno;
 
 	    sprintf(s, "%lu", c);
 	    l = getheader(s, header);
-	    if (l) {
-		STRIP_TRAILING_SPACE(l);
-		if (patterns) {
-		    ap = patterns;
-		    while (ap) {
-			if (!ngmatch((const char *)&(ap->string), l))
-			    break;
-			ap = ap->next;
-		    }
-		    if (!ap) {
-			free(l);
-			continue;
-		    }
-		}
-		if (*l)
-		    printf("%lu %s\r\n", c, l);
+	    if (!l)
+		continue;
+
+	    STRIP_TRAILING_SPACE(l);
+	    if (patterns && !matchlist(patterns, l)) {
 		free(l);
+		continue;
 	    }
+	    if (*l)
+		printf("%lu %s\r\n", c, l);
+	    free(l);
 	}
     }
     fputs(".\r\n", stdout);
