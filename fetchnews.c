@@ -767,10 +767,10 @@ store_pseudo_header(mastr *s)
 	rc = -1;
     }
 
-    if (log_fsync(tmpfd) || log_close(tmpfd)) {
-	rc = -1;
-	goto out;
-    }
+    if (log_fsync(tmpfd)) rc = -1;
+    if (log_close(tmpfd)) rc = -1;
+    if (rc == -1) goto out;
+
     if (store(mastr_str(tmpfn), 0, 0, 1) == 0) {
 	(void)log_unlink(mastr_str(tmpfn), 0);
     } else {
@@ -1754,7 +1754,6 @@ out:
  * -  0 if no other servers have to be queried (for Message-ID fetch, e. g.)
  * -  1 if no errors, but more servers needed (normal return code)
  * - -1 for non fatal errors (go to next server)
- * - -2 for fatal errors (do not query any more)
  */
 static int
 do_server(int forceactive)
@@ -1763,6 +1762,12 @@ do_server(int forceactive)
     int rc = -1;	/* assume non fatal errors */
     int res;
     int reply;
+    int flag = 0;
+    enum flags {
+	f_mayshort = 1,
+	f_mustnotshort = 2,
+	f_error = 4
+    };
 
     /* do not try to connect if we don't want to post here in -P mode */
     if (action_method == FETCH_POST
@@ -1798,20 +1803,17 @@ do_server(int forceactive)
 	goto out;
     }
 
-    rc = 1;	/* now assume success */
-
     check_date(current_server->name);
 
     /* post articles */
     if (action_method & FETCH_POST) {
+	flag |= f_mustnotshort;
 	switch(current_server->feedtype) {
 	    case CPFT_NNTP:
 		if (reply == 200) {
 		    res = postarticles(current_server);
 		    if (res == 0 && rc >= 0)
-			rc = -1;
-		    else if (rc == 0)
-			rc = 1;		/* when posting, query all servers! */
+			flag |= f_error;
 		}
 		break;
 	    case CPFT_NONE:
@@ -1827,7 +1829,7 @@ do_server(int forceactive)
     /* fetch by MID */
     switch (getmsgidlist(&msgidlist)) {
     case 0:
-	rc = 0;
+	flag |= f_mayshort;
     default:
 	;
     }
@@ -1837,10 +1839,16 @@ do_server(int forceactive)
 	nntpactive(forceactive);	/* get list of newsgroups or new newsgroups */
 	res = processupstream(current_server->name, current_server->port,
 			forceactive);
-	if (res == 1)
-	    rc = 1;
-	else
-	    rc = -1;
+	if (res != 1)
+	    flag |= f_error;
+    }
+
+    if (flag & f_mustnotshort)
+	flag &= ~f_mayshort;
+    if (flag & f_error) {
+	rc = -1;
+    } else {
+	rc = flag & f_mayshort ? 0 : 1;
     }
 
 out:
