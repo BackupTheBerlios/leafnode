@@ -51,6 +51,8 @@ extern struct state _res;
  */
 int debugmode = 0;
 int verbose = 0;
+char *spooldir;
+char *lockfile;
 
 struct mydir {
 /*@null@*//*@observer@*/ const char *name;
@@ -78,17 +80,46 @@ static const struct mydir dirs[] = {
 int
 initvars(const char *const progname, int logtostdout)
 {
-#ifndef TESTMODE
-    uid_t ui;
-    gid_t gi;
-#endif /* not TESTMODE */
-    struct mydir const *md = &dirs[0];
-
     /*@-noeffect@*/
     (void)progname;		/* shut up compiler warnings */
     /*@=noeffect@*/
 
-#ifndef TESTMODE
+    whoami();
+    validatefqdn(logtostdout);
+
+    /* spooldir may be changed later by parseopt: */
+    spooldir = critstrdup(def_spooldir, "initvars");
+
+    /* config.c stuff does not have to be initialized */
+    expire_base = NULL;
+
+    return TRUE;
+}
+
+void
+init_failed(const char *progname) {
+    fprintf(stderr, "%s initialization failed. aborting.\n", progname);
+    exit(EXIT_FAILURE);
+}
+
+int
+init_post(void) {
+    uid_t ui;
+    gid_t gi;
+    struct mydir const *md = &dirs[0];
+    mastr *l = mastr_new(LN_PATH_MAX);
+
+    mastr_vcat(l, spooldir, "/leaf.node/lock.file", NULL);
+    lockfile=critstrdup(mastr_str(l), "init_post");
+    mastr_delete(l);
+
+    if (!localgroups) {
+	l = mastr_new(LN_PATH_MAX);
+	mastr_vcat(l, sysconfdir, "/local.groups", NULL);
+	localgroups=critstrdup(mastr_str(l), "init_post");
+	mastr_delete(l);
+    }
+
     if (uid_getbyuname(RUNAS_USER, &ui)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot uid_getbyuname(%s,&ui): %m\n",
 		RUNAS_USER);
@@ -110,13 +141,7 @@ initvars(const char *const progname, int logtostdout)
 		RUNAS_USER);
 	return FALSE;
     }
-#endif /* not TESTMODE */
 
-    whoami();
-    validatefqdn(logtostdout);
-
-    /* config.c stuff does not have to be initialized */
-    expire_base = NULL;
     /* These directories should exist anyway */
     while (md->name) {
 	mastr *x = mastr_new(LN_PATH_MAX);
@@ -130,16 +155,23 @@ initvars(const char *const progname, int logtostdout)
 			return FALSE;
 		}
 	} else {
-#ifndef TESTMODE
 		if (chown(mastr_str(x), ui, gi)) {	/* Flawfinder: ignore */
-		    ln_log(LNLOG_SERR, LNLOG_CTOP,
-			    "cannot chown(%s,%ld,%ld): %m\n",
-			    mastr_str(x), (long)ui, (long)gi);
-		    mastr_delete(x);
-		    return FALSE;
+		    if (uid_get() == 0) {
+			ln_log(LNLOG_SERR, LNLOG_CTOP,
+				"cannot chown(%s,%ld,%ld): %m\n",
+				mastr_str(x), (long)ui, (long)gi);
+			mastr_delete(x);
+			return FALSE;
+		    } else {
+			ln_log(LNLOG_SWARNING, LNLOG_CTOP,
+				"cannot chown(%s,%ld,%ld): %m\n",
+				mastr_str(x), (long)ui, (long)gi);
+		    }
 		}
-#endif /* not TESTMODE */
 		if (log_chmod(mastr_str(x), md->m)) {
+		    ln_log(LNLOG_SERR, LNLOG_CTOP,
+			    "cannot chmod(%s,%o): %m\n",
+			    mastr_str(x), md->m);
 		    mastr_delete(x);
 		    return FALSE;
 		}
@@ -147,76 +179,25 @@ initvars(const char *const progname, int logtostdout)
 	md++;
 	mastr_delete(x);
     }
-#ifndef TESTMODE
-    if (gid_ensure(gi)) {
+
+    if (gid_get() == 0 && gid_ensure(gi)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure gid %ld: %m\n", (long)gi);
 	return FALSE;
     }
-    if (uid_ensure(ui)) {
+    if (uid_get() == 0 && uid_ensure(ui)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure uid %ld: %m\n", (long)ui);
 	return FALSE;
     }
-#endif /* not TESTMODE */
 
     if (chdir(spooldir)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot change to spooldir %s: %m\n",
 		spooldir);
 	return FALSE;
     }
-    
+
     return TRUE;
 }
-
 /*@=globstate@*/
-
-/*
- * Find whether a certain option is specified on the command line
- * and return the pointer to this option - i.e. if 0 is returned,
- * the option is not present. Does not call getopt().
- */
-int
-findopt(char option, int argc, char *argv[])
-{
-    int i, j;
-
-    i = 1;
-    while (i < argc) {
-	if (strcmp(argv[i], "--") == 0) {	/* end of option args */
-	    return 0;
-	}
-	if (argv[i][0] == '-') {	/* option found */
-	    j = strlen(argv[i]) - 1;
-	    while (j > 0) {
-		if (argv[i][j] == option)
-		    return i;
-		j--;
-	    }
-	}
-	i++;
-    }
-    return 0;
-}
-
-/*
- * Get configuration file from command line without calling getopt()
- * returns name of configuration file or NULL if no such file was found.
- * If there is more than one "-F configfile" present, use the first one.
- */
-/*@null@*//*@observer@*/ char *
-getoptarg(char option, int argc, char *argv[])
-{
-    int i, j;
-
-    i = findopt(option, argc, argv);
-    if (!i)
-	return NULL;
-    j = strlen(argv[i]) - 1;
-    if ((argv[i][j] == option) && (i + 1 < argc)
-	&& (argv[i + 1][0] != '-')) {
-	return argv[i + 1];
-    }
-    return NULL;
-}
 
 /*
  * parse options global to all leafnode programs
@@ -245,6 +226,13 @@ parseopt(const char *progname, int option,
 	    else
 		debugmode = ~0;
 	    return TRUE;
+	case 'd':
+	    if (opta && *opta) {
+		free(spooldir);
+		spooldir = critstrdup(opta, "parseopt");
+		return TRUE;
+	    }
+	    return FALSE;
 	case 'F':
 	    if (opta != NULL && *opta) {
 		if (conffile)
