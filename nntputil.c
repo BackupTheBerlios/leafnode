@@ -126,7 +126,7 @@ newnntpreply(const struct serverlist *s,
     assert(nntpin != NULL);
 
     do {
-	response = mgetaline(nntpin);
+	response = timeout_getaline(nntpin, s->timeout);
 	if (!response) {
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
 		   "%s NNTP server disconnected or timed out while waiting for response", 
@@ -343,7 +343,7 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
 int
 nntpconnect(const struct serverlist *upstream)
 {
-    int sock, reply, infd;
+    int sock, reply, infd, e;
     socklen_t optlen = sizeof(sendbuf);
     char *line;
     char service[20];
@@ -356,7 +356,11 @@ nntpconnect(const struct serverlist *upstream)
 
     ln_log(LNLOG_SINFO, LNLOG_CSERVER, "%s: connecting to port %s",
 	   upstream->name, service);
+    alarm(upstream->timeout);
     sock = tcp_connect(upstream->name, service, PF_UNSPEC);
+    e = errno;
+    alarm(0);
+    errno = e;
     if (sock < 0)
 	return 0;
 
