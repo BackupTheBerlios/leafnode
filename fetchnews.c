@@ -12,6 +12,7 @@
 #include "ln_log.h"
 #include "mastring.h"
 #include "format.h"
+#include "msgid.h"
 
 #include <sys/types.h>
 #include <ctype.h>
@@ -961,7 +962,8 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
 
     switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
 			 -1, delayflg)) {
-    case 1:
+    case 1: /* killfilter */
+    case -2: /* duplicate */
 	groupkilled++;
 	return 1;
     case 0:
