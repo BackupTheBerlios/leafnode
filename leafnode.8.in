@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.15 2003/01/19 12:29:44 emma Exp $
+.\" $Id: leafnode.8.in,v 1.16 2003/01/19 17:47:16 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -449,6 +449,9 @@ Would allow full access to 192.168.1.4, read-only access to the other
 IPs in 192.168.1.* an deny access from all other clients.
 
 .SH BUGS
+Some strings are chopped after 1024 characters, notably configuration
+and filter configuration.
+
 This manual page needs revision.
 
 .SH AUTHOR
