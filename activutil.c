@@ -533,8 +533,6 @@ readactive(void)
 	g->name = critstrdup(p, "readactive");
 	if (g->first == 0)
 	    g->first = 1;	/* pseudoarticle */
-	if (g->last == 0 && !is_localgroup(g->name))
-	    g->last = 1;
 	if (g->last == (unsigned long)-1) {
 	    /* corrupted by older leafnode-2 version */
 	    if (chdirgroup(g->name, FALSE))

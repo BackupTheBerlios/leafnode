@@ -355,13 +355,20 @@ store_stream(FILE * in /** input file */ ,
 	    g = findgroup(name, active, -1);
 	    if (g) {
 		int ls = 0;
+		int local;
 		(void)chdirgroup(name, TRUE);
 		if (touch_truncate(LASTPOSTING))
 		    BAIL(-1, "cannot touch " LASTPOSTING);
 
-		/* advance pointer when it was a pseudo article */
-		if (g->last < g->first)
-		    g->last = g->first;
+		local = is_localgroup(g->name) ? 1 : 0;
+
+		/* keep pointers consistent */
+		if (g->first < 1) g->first = 1;
+		if (g->last < g->first - local) {
+		    /* was empty */
+		    g->last = g->first - local;
+		    g->first++;
+		}
 
 		for (;;) {
 		    str_ulong(nb, ++g->last);

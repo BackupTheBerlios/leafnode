@@ -1354,7 +1354,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 		continue;
 	    *p = '\0';
 	    if (gs_match(cursrv->group_pcre, l)) {
-		insertgroup(l, *r, 0, 0, time(NULL), NULL);
+		insertgroup(l, *r, 1, 0, time(NULL), NULL);
 		appendtolist(groups, l);
 		count++;
 	    }
@@ -1410,7 +1410,6 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    return 1;
 	}
 	while ((l = mgetaline(nntpin)) && (strcmp(l, "."))) {
-	    last = first = 0;
 	    p = l;
 	    if (!splitLISTline(l, &q, &p))
 		continue;
@@ -1419,18 +1418,21 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    /* see if the newsgroup is interesting.  if it is, and we
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
-	    if (is_interesting(l)
-		    && (forceact || !(active && findgroup(l, active, -1)))
-		    && chdirgroup(l, FALSE)) {
-		unsigned long c;
-		first = ULONG_MAX;
-		last = 0;
-		if (getwatermarks(&first, &last, &c) || 0 == c) {
-		    /* trouble or empty group */
-		    first = last = 0;
-		}
-	    }
+	    first = 1;
+	    last = 0;
 	    if (gs_match(cursrv->group_pcre, l)) {
+		if (is_interesting(l)
+			&& (forceact || !(active && findgroup(l, active, -1)))
+			&& chdirgroup(l, FALSE)) {
+		    unsigned long c = 0;
+		    first = ULONG_MAX;
+		    last = 0;
+		    if (getwatermarks(&first, &last, &c) || 0 == c) {
+			/* trouble or empty group */
+			first = 1;
+			last = 0;
+		    }
+		}
 		insertgroup(l, p[0], first, last, 0, NULL);
 		count++;
 	    }
