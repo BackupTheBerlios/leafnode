@@ -39,10 +39,6 @@ Ralfs TODO:
 	  miscalculation because of the recursion?
 	* nntpd.c: check with NNTP draft for UTF-8 stuff.  Folding should
 	  be ok now.
-	* applyfilter: does not handle to-kill-crossposts correctly:
-	  only killed if removed from _all_ other groups
-	  (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
-	  "%d articles deleted' message not correct.
 	* delaybody mode: Cancels for marked bodies lead to marks not being
 	  removed (supersedes are handled ok) until expiry of the pseudo header.
 	* sysconfdir is missing /leafnode, thus wrong manpages (more?)
@@ -66,8 +62,6 @@ Matthias:
 * fix TOKENSIZE in filters.
 
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
-
-0.0 make "newsgroup" in filter a PCRE (rather than wildmat)
 
 10pre5
 0.0 if group is empty, low water mark is not bumped up to high water mark
@@ -246,9 +240,18 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 ========================================================================
 FIXED ITEMS:
 
+2003-07-29 Matthias Andree
+	   applyfilter: does not handle to-kill-crossposts correctly:
+	   only killed if removed from _all_ other groups
+	   (stat.st_nlink<2) but deleted from to-do group.  Subsequently,
+	   "%d articles deleted' message not correct.
+
 2003-07-28 Matthias Andree
 	   add support for stderr logging so that multilog can be used
 	   (clemensF <rabat@web.de>).
+
+2003-07-06 Matthias Andree
+	   make "newsgroup" in filter a PCRE (rather than wildmat)
 
 2003-02-03 Matthias Andree
 	   Leftover link in temp.files for posted articles. Reported by
