@@ -1,5 +1,6 @@
 2003-10-19  Matthias Andree <matthias.andree@gmx.de>
 
+	= snapshot 20031009a =
 	* getwatermarks.c: Fix for empty groups.
 	* fetchnews.c: Bump group "first" counter rather than last in empty
 	groups.

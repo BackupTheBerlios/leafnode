@@ -1,4 +1,4 @@
-Changes since 20031009a:
+20031019a: Changes since 20031009a:
 - Revamp applyfilter, now more robust.
 - Reply 440 rather than 500 if user tries to POST in NOPOSTING mode.
 - GROUP article number fixes, to avoid bogus new article "offering" in
