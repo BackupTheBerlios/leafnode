@@ -81,7 +81,7 @@ main(int argc, char *argv[])
     ln_log_open("checkgroups");
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
-    while ((option = getopt(argc, argv, "DVv")) != -1) {
+    while ((option = getopt(argc, argv, "D:Vv")) != -1) {
 	if (!parseopt("checkgroups", option, NULL, NULL, 0)) {
 	    usage();
 	    exit(EXIT_FAILURE);

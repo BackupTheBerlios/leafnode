@@ -978,7 +978,7 @@ main(int argc, char **argv)
     if (!initvars(argv[0]))
 	exit(EXIT_FAILURE);
 
-    while ((option = getopt(argc, argv, "F:VDvfrn")) != -1) {
+    while ((option = getopt(argc, argv, "F:VD:vfrn")) != -1) {
 	if (parseopt("texpire", option, optarg, conffile, sizeof(conffile))) {
 	    /* FIXME: what happens here? */
 	    ;
