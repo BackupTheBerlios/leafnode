@@ -68,51 +68,8 @@
 #define P_CONTINUE	381
 #define P_ACCEPTED	281
 
-static char *generateMessageID(void);
-static /*@dependent@*/ /*@null@*/ FILE *fopenart(/*@null@*/ const struct newsgroup *group, const char *,
-		      unsigned long *);
-static /*@dependent@*/ /*@null@*/ FILE *buildpseudoart(const char *grp);
-static /*@dependent@*/ /*@null@*/ FILE *fopenpseudoart(const struct newsgroup *group, const char *arg,
-			    const unsigned long article_num);
-static void list(struct newsgroup *ng, int what, char *pattern);
-static void main_loop(void);	/* main program loop */
-static void doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
-		      unsigned long *);
-static /*@null@*/ /*@dependent@*/ struct newsgroup *
-dogroup(struct newsgroup *, const char *, unsigned long *);
-static void dohelp(void);
-static void domode(const char *arg);
-static void domove(/*@null@*/ const struct newsgroup *group, int, unsigned long *);
-static void dolist(char *p);
-static void dodate(void);
-static void donewgroups(const char *);
-static void donewnews(char *);
-static void dopost(void);
-static void doxhdr(/*@null@*/ const struct newsgroup *group, const char *,
-		   unsigned long artno);
-static void doxpat(/*@null@*/ const struct newsgroup *group, const char *,
-		   unsigned long artno);
-static void doxover(/*@null@*/ const struct newsgroup *group, const char *, unsigned long);
-static void doselectedheader(/*@null@*/ const struct newsgroup *, const char *,
-			     const char *, struct stringlist *,
-			     unsigned long *);
-static /*@null@*/ /*@dependent@*/ struct newsgroup *
-dolistgroup(/*@null@*/ struct newsgroup *group, const char *,
-				     unsigned long *);
-static int markinterest(const char *);
-
 static /*@null@*/ /*@only@*/ char *NOPOSTING;
 				/* ok-to-print version of getenv("NOPOSTING") */
-static int allowposting(void)
-    /*@globals undef NOPOSTING@*/;
-static int allowsubscribe(void);
-static int isauthorized(void);
-static void doauthinfo(char *arg)
-    /*@modifies arg@*/;
-static int dorange(/*@null@*/ const char *arg,
-		   /*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
-		   unsigned long artno, unsigned long lo, unsigned long hi);
-
 static /*@dependent@*/ const struct newsgroup *xovergroup;	/* FIXME */
 /*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
@@ -157,131 +114,6 @@ nntpprintf_as(const char *fmt, ...)
 	ln_log(LNLOG_SDEBUG, LNLOG_CALL, ">%s", buffer);
     printf("%s\r\n", buffer);
     va_end(args);
-}
-
-static void
-main_loop(void)
-{
-    /* "global" state */
-    static unsigned long artno = 0;
-    static struct newsgroup *group = 0;
-
-    /* locals */
-    char *arg, *cmd;
-    int n;
-    size_t size;
-
-    while (fflush(stdout), (cmd = mgetaline(stdin))) {
-	/* collect possible returned children */
-	while (waitpid(-1, 0, WNOHANG) > 0);
-
-	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
-	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", cmd);
-
-	size = strlen(cmd);
-	if (size == 0)
-	    continue;		/* necessary for netscape to be quiet */
-	else if (size > MAXLINELENGTH || size > INT_MAX) {
-	    /* ignore attempts at buffer overflow */
-	    nntpprintf("500 Dazed and confused");
-	    continue;
-	}
-	cmd = critstrdup(cmd, "main_loop");
-	/* parse command line */
-	n = 0;
-	while (isspace((unsigned char)cmd[n]))
-	    n++;
-	while (isalpha((unsigned char)cmd[n]))
-	    n++;
-	while (isspace((unsigned char)cmd[n]))
-	    cmd[n++] = '\0';
-	arg = cmd + n;
-	while (cmd[n])
-	    n++;
-	n--;
-	while (n>=0 && isspace((unsigned char)cmd[n]))
-	    cmd[n--] = '\0';
-	if (!strcasecmp(cmd, "quit")) {
-	    nntpprintf("205 Always happy to serve!");
-	    free(cmd);
-	    return;
-	}
-	if (!strcasecmp(cmd, "article")) {
-	    if (isauthorized())
-		doarticle(group, arg, 3, &artno);
-	} else if (!strcasecmp(cmd, "head")) {
-	    if (isauthorized())
-		doarticle(group, arg, 2, &artno);
-	} else if (!strcasecmp(cmd, "body")) {
-	    if (isauthorized())
-		doarticle(group, arg, 1, &artno);
-	} else if (!strcasecmp(cmd, "stat")) {
-	    if (isauthorized())
-		doarticle(group, arg, 0, &artno);
-	} else if (!strcasecmp(cmd, "help")) {
-	    dohelp();
-	} else if (!strcasecmp(cmd, "ihave")) {
-	    nntpprintf("500 IHAVE is for big news servers");
-	} else if (!strcasecmp(cmd, "last")) {
-	    if (isauthorized())
-		domove(group, -1, &artno);
-	} else if (!strcasecmp(cmd, "next")) {
-	    if (isauthorized())
-		domove(group, 1, &artno);
-	} else if (!strcasecmp(cmd, "list")) {
-	    if (isauthorized())
-		dolist(arg);
-	} else if (!strcasecmp(cmd, "mode")) {
-	    if (isauthorized())
-		domode(arg);
-	} else if (!strcasecmp(cmd, "date")) {
-	    dodate();
-	} else if (!strcasecmp(cmd, "newgroups")) {
-	    if (isauthorized())
-		donewgroups(arg);
-	} else if (!strcasecmp(cmd, "newnews")) {
-	    if (isauthorized())
-		donewnews(arg);
-	} else if (!strcasecmp(cmd, "slave")) {
-	    nntpprintf("202 Cool - I always wanted a slave");
-	} else if (!strcasecmp(cmd, "post")) {
-	    if (allowposting()) {
-		if (isauthorized())
-		    dopost();
-	    } else {
-		nntpprintf("440 You are not allowed to post.");
-	    }
-	} else if (!strcasecmp(cmd, "xhdr") || !strcasecmp(cmd, "hdr")) {
-	    if (isauthorized())
-		doxhdr(group, arg, artno);
-	} else if (!strcasecmp(cmd, "xpat") || !strcasecmp(cmd, "pat")) {
-	    if (isauthorized())
-		doxpat(group, arg, artno);
-	} else if (!strcasecmp(cmd, "xover") || !strcasecmp(cmd, "over")) {
-	    if (isauthorized())
-		doxover(group, arg, artno);
-	} else if (!strcasecmp(cmd, "listgroup")) {
-	    if (isauthorized())
-		group = dolistgroup(group, arg, &artno);
-	} else if (!strcasecmp(cmd, "group")) {
-	    if (isauthorized())
-		group = dogroup(group, arg, &artno);
-	} else if (!strcasecmp(cmd, "authinfo")) {
-	    doauthinfo(arg);
-	} else {
-	    nntpprintf("500 Unknown command");
-	}
-	free(cmd);
-    }
-    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-	   "Warning: EOF in client input. Timeout or disconnect "
-	   "without prior QUIT command.");
-    /* We used to send 400 before disconnecting, but the list of clients
-     * reported broken keeps growing, and lists tin, slrn and pine,
-     * three major text-mode news readers. We anticipate upcoming NNTP
-     * standards by silently disconnecting. The 400 error message we
-     * used to send was sent in compliance with
-     * RFC-977 p. 23 */
 }
 
 /*
@@ -411,6 +243,19 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
     return f;
 }
 
+static int
+allowsubscribe(void)
+{
+    char *s;
+    static int allowsubs; /* 0: uninitialized, 1: can subscribe,
+			     2: cannot subscribe */
+    if (!allowsubs) {
+	s = getenv("NOSUBSCRIBE");
+	allowsubs = (s != 0 ? 2 : 1);
+    }
+    return 2 - allowsubs;
+}
+
 /* return FALSE if group is NOT a pseudo group 
  * return TRUE  if group is a pseudo group 
  */
@@ -441,6 +286,68 @@ is_pseudogroup(const char *group)
 
     /* non-empty group -> not pseudo */
     return FALSE;
+}
+
+/* note bug.. need not be _immediately after_ GROUP */
+/* returns 0 for success, errno for error */
+static int
+markinterest(const char *group)
+{
+    struct stat st;
+    struct utimbuf buf;
+    int not_yet_interesting;
+    time_t now;
+    FILE *f;
+    mastr *s;
+
+    if (is_localgroup(group))
+	return 0;		/* local groups don't have to be marked */
+    if (is_dormant(group))
+	return 0;		/* dormant groups don't have to be marked */
+
+    not_yet_interesting = 0;
+
+    s = mastr_new(LN_PATH_MAX);
+    mastr_vcat(s, spooldir, "/interesting.groups/", group, NULL);
+
+    if (stat(mastr_str(s), &st) == 0) {
+	/* already marked interesting, update atime */
+	now = time(0);
+	buf.actime = (now < st.st_atime) ? st.st_atime : now;
+	buf.modtime = st.st_mtime;
+	/* NOTE: as a side effect, the ctime is also set to now, so effectively, we don't need to care for  */
+	if (utime(mastr_str(s), &buf)) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP,
+		   "Cannot update timestamp on %s: %m", mastr_str(s));
+	    not_yet_interesting = 1;
+	}
+    } else {
+	not_yet_interesting = 1;
+    }
+
+    if (not_yet_interesting && allowsubscribe()) {
+	f = fopen(mastr_str(s), "w");
+	if (f) {
+	    if (fclose(f)) {
+		int e = errno;
+		ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		       "Could not write to %s: %m", mastr_str(s));
+		mastr_delete(s);
+		return e;
+	    } else {
+		mastr_delete(s);
+		return 0;
+	    }
+	} else {
+	    int e = errno;
+	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "Could not create %s: %m",
+		   mastr_str(s));
+	    mastr_delete(s);
+	    return e;
+	}
+    }
+    mastr_delete(s);
+    return 0;
 }
 
 /* open an article by number or message-id */
@@ -626,21 +533,6 @@ allowposting(void)
     return 2 - allowpost;
 }
 
-static int
-allowsubscribe(void)
-{
-    char *s;
-    static int allowsubs; /* 0: uninitialized, 1: can subscribe,
-			     2: cannot subscribe */
-    if (!allowsubs) {
-	s = getenv("NOSUBSCRIBE");
-	allowsubs = (s != 0 ? 2 : 1);
-    }
-    return 2 - allowsubs;
-}
-
-
-
 /* display an article or somesuch */
 /* DOARTICLE */
 static void
@@ -751,68 +643,6 @@ doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 
     free(localmsgid);
     return;			/* FIXME: OF COURSE there were no errors */
-}
-
-/* note bug.. need not be _immediately after_ GROUP */
-/* returns 0 for success, errno for error */
-static int
-markinterest(const char *group)
-{
-    struct stat st;
-    struct utimbuf buf;
-    int not_yet_interesting;
-    time_t now;
-    FILE *f;
-    mastr *s;
-
-    if (is_localgroup(group))
-	return 0;		/* local groups don't have to be marked */
-    if (is_dormant(group))
-	return 0;		/* dormant groups don't have to be marked */
-
-    not_yet_interesting = 0;
-
-    s = mastr_new(LN_PATH_MAX);
-    mastr_vcat(s, spooldir, "/interesting.groups/", group, NULL);
-
-    if (stat(mastr_str(s), &st) == 0) {
-	/* already marked interesting, update atime */
-	now = time(0);
-	buf.actime = (now < st.st_atime) ? st.st_atime : now;
-	buf.modtime = st.st_mtime;
-	/* NOTE: as a side effect, the ctime is also set to now, so effectively, we don't need to care for  */
-	if (utime(mastr_str(s), &buf)) {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "Cannot update timestamp on %s: %m", mastr_str(s));
-	    not_yet_interesting = 1;
-	}
-    } else {
-	not_yet_interesting = 1;
-    }
-
-    if (not_yet_interesting && allowsubscribe()) {
-	f = fopen(mastr_str(s), "w");
-	if (f) {
-	    if (fclose(f)) {
-		int e = errno;
-		ln_log(LNLOG_SERR, LNLOG_CGROUP,
-		       "Could not write to %s: %m", mastr_str(s));
-		mastr_delete(s);
-		return e;
-	    } else {
-		mastr_delete(s);
-		return 0;
-	    }
-	} else {
-	    int e = errno;
-	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "Could not create %s: %m",
-		   mastr_str(s));
-	    mastr_delete(s);
-	    return e;
-	}
-    }
-    mastr_delete(s);
-    return 0;
 }
 
 static struct newsgroup *
@@ -1787,55 +1617,50 @@ cleanup:
 
 }
 
-void
-doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
+/** call this only if a previous parserange with the same arg yielded no
+ * error return!
+ *
+ * \return
+ *  - 1 for success
+ *  - 0 if no articles are found (this is printed)
+ */
+static int
+dorange(/*@null@*/ const char *arg,
+	/*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
+	unsigned long artno, unsigned long lo, unsigned long hi)
 {
-    /* NOTE: XHDR is not to change the current article pointer, thus,
-       we're using call by value here */
-    struct stringlist *l = cmdlinetolist(arg);
+    int i;
 
-    switch (stringlistlen(l)) {
-    case 1:
-	doselectedheader(group, l->string, NULL, NULL, &artno);
-	/* discard changes to artno */
-	break;
-    case 2:
-	doselectedheader(group, l->string, l->next->string, NULL, &artno);
-	/* discard changes to artno */
-	break;
-    default:
-	nntpprintf("502 Usage: XHDR header [{first[-[last]]|<message-id>}]");
-    }
-    if (l)
-	freelist(l);
-}
-
-void
-doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
-{
-    /* NOTE: XPAT is not to change the current article pointer, thus,
-       we're using call by value here */
-    struct stringlist *l = cmdlinetolist(arg);
-
-    if (stringlistlen(l) < 3) {
-	nntpprintf("502 Usage: PAT header first[-[last]] pattern or "
-		   "PAT header message-id pattern");
+    if (arg) {
+	*a = lo;
+	*b = hi;
+	i = parserange(arg, a, b);
+	if (!(i & RANGE_HAVETO))
+	    *b = *a;
     } else {
-	doselectedheader(group, l->string, l->next->string, l->next->next,
-			 &artno);
-	/* discard changes to artno */
+	*a = *b = artno;
     }
-    if (l)
-	freelist(l);
-}
 
+    if ((*b < *a) || (*a > hi) || (*b < lo)) {
+	nntpprintf("420 No articles in specified range.");
+	return 0;
+    }
+
+    /* sanitize */
+    if (*b > hi)
+	*b = hi;
+    if (*a < lo)
+	*a = lo;
+
+    return 1;
+}
 /**
  * This function outputs a list of article headers.
  * You can give a list of patterns, then only headers matching one of
  * these patterns are listed.  If you give NULL as the patterns
  * argument, every header is listed.
  */
-void
+static void
 doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup */ ,
 		 const char *hd /** header to extract */ ,
 		 const char *messages /** message range */ ,
@@ -2031,48 +1856,51 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
     fputs(".\r\n", stdout);
     free(header);
     return;
-}
-
-/** call this only if a previous parserange with the same arg yielded no
- * error return!
- *
- * \return
- *  - 1 for success
- *  - 0 if no articles are found (this is printed)
- */
-static int
-dorange(/*@null@*/ const char *arg,
-	/*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
-	unsigned long artno, unsigned long lo, unsigned long hi)
+}static void
+doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
-    int i;
+    /* NOTE: XHDR is not to change the current article pointer, thus,
+       we're using call by value here */
+    struct stringlist *l = cmdlinetolist(arg);
 
-    if (arg) {
-	*a = lo;
-	*b = hi;
-	i = parserange(arg, a, b);
-	if (!(i & RANGE_HAVETO))
-	    *b = *a;
-    } else {
-	*a = *b = artno;
+    switch (stringlistlen(l)) {
+    case 1:
+	doselectedheader(group, l->string, NULL, NULL, &artno);
+	/* discard changes to artno */
+	break;
+    case 2:
+	doselectedheader(group, l->string, l->next->string, NULL, &artno);
+	/* discard changes to artno */
+	break;
+    default:
+	nntpprintf("502 Usage: XHDR header [{first[-[last]]|<message-id>}]");
     }
-
-    if ((*b < *a) || (*a > hi) || (*b < lo)) {
-	nntpprintf("420 No articles in specified range.");
-	return 0;
-    }
-
-    /* sanitize */
-    if (*b > hi)
-	*b = hi;
-    if (*a < lo)
-	*a = lo;
-
-    return 1;
+    if (l)
+	freelist(l);
 }
+
+static void
+doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
+{
+    /* NOTE: XPAT is not to change the current article pointer, thus,
+       we're using call by value here */
+    struct stringlist *l = cmdlinetolist(arg);
+
+    if (stringlistlen(l) < 3) {
+	nntpprintf("502 Usage: PAT header first[-[last]] pattern or "
+		   "PAT header message-id pattern");
+    } else {
+	doselectedheader(group, l->string, l->next->string, l->next->next,
+			 &artno);
+	/* discard changes to artno */
+    }
+    if (l)
+	freelist(l);
+}
+
 
 /** implement XOVER command. */
-void
+static void
 doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
     unsigned long a, b;
@@ -2145,7 +1973,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
     }
 }
 
-/*@null@*/ /*@dependent@*/ struct newsgroup *
+static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
@@ -2296,7 +2124,7 @@ doauth_file(char *const cmd, char *const val)
     return P_SYNTAX_ERROR;
 }
 
-void
+static void
 doauthinfo(char *arg)
     /*@modifies arg@*/
 {				/* we nuke away the password, no const here! */
@@ -2391,6 +2219,131 @@ static inline int
 mysetfbuf(FILE * f, /*@null@*/ /*@exposed@*/ /*@out@*/ char *buf, size_t size)
 {
     return mysetvbuf(f, buf, _IOFBF, size);
+}
+
+static void
+main_loop(void)
+{
+    /* "global" state */
+    static unsigned long artno = 0;
+    static struct newsgroup *group = 0;
+
+    /* locals */
+    char *arg, *cmd;
+    int n;
+    size_t size;
+
+    while (fflush(stdout), (cmd = mgetaline(stdin))) {
+	/* collect possible returned children */
+	while (waitpid(-1, 0, WNOHANG) > 0);
+
+	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
+	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", cmd);
+
+	size = strlen(cmd);
+	if (size == 0)
+	    continue;		/* necessary for netscape to be quiet */
+	else if (size > MAXLINELENGTH || size > INT_MAX) {
+	    /* ignore attempts at buffer overflow */
+	    nntpprintf("500 Dazed and confused");
+	    continue;
+	}
+	cmd = critstrdup(cmd, "main_loop");
+	/* parse command line */
+	n = 0;
+	while (isspace((unsigned char)cmd[n]))
+	    n++;
+	while (isalpha((unsigned char)cmd[n]))
+	    n++;
+	while (isspace((unsigned char)cmd[n]))
+	    cmd[n++] = '\0';
+	arg = cmd + n;
+	while (cmd[n])
+	    n++;
+	n--;
+	while (n>=0 && isspace((unsigned char)cmd[n]))
+	    cmd[n--] = '\0';
+	if (!strcasecmp(cmd, "quit")) {
+	    nntpprintf("205 Always happy to serve!");
+	    free(cmd);
+	    return;
+	}
+	if (!strcasecmp(cmd, "article")) {
+	    if (isauthorized())
+		doarticle(group, arg, 3, &artno);
+	} else if (!strcasecmp(cmd, "head")) {
+	    if (isauthorized())
+		doarticle(group, arg, 2, &artno);
+	} else if (!strcasecmp(cmd, "body")) {
+	    if (isauthorized())
+		doarticle(group, arg, 1, &artno);
+	} else if (!strcasecmp(cmd, "stat")) {
+	    if (isauthorized())
+		doarticle(group, arg, 0, &artno);
+	} else if (!strcasecmp(cmd, "help")) {
+	    dohelp();
+	} else if (!strcasecmp(cmd, "ihave")) {
+	    nntpprintf("500 IHAVE is for big news servers");
+	} else if (!strcasecmp(cmd, "last")) {
+	    if (isauthorized())
+		domove(group, -1, &artno);
+	} else if (!strcasecmp(cmd, "next")) {
+	    if (isauthorized())
+		domove(group, 1, &artno);
+	} else if (!strcasecmp(cmd, "list")) {
+	    if (isauthorized())
+		dolist(arg);
+	} else if (!strcasecmp(cmd, "mode")) {
+	    if (isauthorized())
+		domode(arg);
+	} else if (!strcasecmp(cmd, "date")) {
+	    dodate();
+	} else if (!strcasecmp(cmd, "newgroups")) {
+	    if (isauthorized())
+		donewgroups(arg);
+	} else if (!strcasecmp(cmd, "newnews")) {
+	    if (isauthorized())
+		donewnews(arg);
+	} else if (!strcasecmp(cmd, "slave")) {
+	    nntpprintf("202 Cool - I always wanted a slave");
+	} else if (!strcasecmp(cmd, "post")) {
+	    if (allowposting()) {
+		if (isauthorized())
+		    dopost();
+	    } else {
+		nntpprintf("440 You are not allowed to post.");
+	    }
+	} else if (!strcasecmp(cmd, "xhdr") || !strcasecmp(cmd, "hdr")) {
+	    if (isauthorized())
+		doxhdr(group, arg, artno);
+	} else if (!strcasecmp(cmd, "xpat") || !strcasecmp(cmd, "pat")) {
+	    if (isauthorized())
+		doxpat(group, arg, artno);
+	} else if (!strcasecmp(cmd, "xover") || !strcasecmp(cmd, "over")) {
+	    if (isauthorized())
+		doxover(group, arg, artno);
+	} else if (!strcasecmp(cmd, "listgroup")) {
+	    if (isauthorized())
+		group = dolistgroup(group, arg, &artno);
+	} else if (!strcasecmp(cmd, "group")) {
+	    if (isauthorized())
+		group = dogroup(group, arg, &artno);
+	} else if (!strcasecmp(cmd, "authinfo")) {
+	    doauthinfo(arg);
+	} else {
+	    nntpprintf("500 Unknown command");
+	}
+	free(cmd);
+    }
+    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+	   "Warning: EOF in client input. Timeout or disconnect "
+	   "without prior QUIT command.");
+    /* We used to send 400 before disconnecting, but the list of clients
+     * reported broken keeps growing, and lists tin, slrn and pine,
+     * three major text-mode news readers. We anticipate upcoming NNTP
+     * standards by silently disconnecting. The 400 error message we
+     * used to send was sent in compliance with
+     * RFC-977 p. 23 */
 }
 
 int
