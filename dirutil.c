@@ -29,7 +29,7 @@
 /** open a directory below the spooldir.
  * \return DIR* handle from opendir or NULL (and set errno)
  */
-DIR *
+/*@dependent@*/ /*@null@*/ DIR *
 open_spooldir(const char *name /** subdirectory of spooldir to open */ )
 {
     char x[PATH_MAX];
@@ -38,7 +38,7 @@ open_spooldir(const char *name /** subdirectory of spooldir to open */ )
 	return opendir(x);
     }
     errno = ENOMEM;
-    return 0;
+    return NULL;
 }
 
 /** Core function to other dirlist_* functions.
@@ -46,7 +46,7 @@ open_spooldir(const char *name /** subdirectory of spooldir to open */ )
  * passed the filter.
  * \see free_dirlist
  */
-static char **
+static /*@only@*/ /*@null@*/ char **
 dirlist_core(
 /** Directory name. */
 		const char *name,
@@ -60,18 +60,18 @@ dirlist_core(
 		int spool,
 /** Pointer to an unsigned long variable. If non-NULL, the count of
     entries in the list is stored here. */
-		long unsigned *count)
+		/*@null@*/ long unsigned *count)
 {
     DIR *d;
     char **hdl, **ptr;
-    size_t cms = 1024;
+    size_t cms = (size_t)1024;
     struct dirent *de;
-    int namelen = strlen(name);
-    int snamelen = strlen(spooldir);
+    size_t namelen = strlen(name);
+    size_t snamelen = strlen(spooldir);
 
     d = spool ? open_spooldir(name) : opendir(name);
     if (!d)
-	return 0;
+	return NULL;
 
     ptr = hdl = (char **)malloc(cms * sizeof(*hdl));
     if (!ptr)
@@ -89,8 +89,7 @@ dirlist_core(
 	    nhdl = (char **)realloc((char *)hdl, cms * sizeof(*hdl));
 	    if (!nhdl)
 		goto dirlist_nomem;
-	    else
-		hdl = nhdl;
+	    hdl = nhdl;
 
 	    ptr = hdl + off;
 	}
@@ -98,7 +97,7 @@ dirlist_core(
 	    *ptr = (char *)malloc(namelen + 2 + strlen(de->d_name)
 				  + (spool ? 1 + snamelen : 0));
 	    if (*ptr) {
-		char *p;
+		/*@dependent@*/ char *p;
 		if (spool) {
 		    p = mastrcpy(*ptr, spooldir);
 		    p = mastrcpy(p, "/");
@@ -118,16 +117,18 @@ dirlist_core(
 	++ptr;
     }
     *ptr = 0;
-    closedir(d);
+    (void)closedir(d);
+    /*@+ignoresigns@*/   /* ptr >= hdl */
     if (count)
 	*count = ptr - hdl;
+    /*@=ignoresigns@*/
     return hdl;
 
   dirlist_nomem:
     if (hdl)
 	free_dirlist(hdl);
     errno = ENOMEM;
-    closedir(d);
+    (void)closedir(d);
     return 0;
 }
 
@@ -136,7 +137,7 @@ dirlist_core(
  * passed the filter.
  * \see free_dirlist
  */
-char **
+/*@null@*/ /*@only@*/  char **
 dirlist(
 /** Directory name. */
 	   const char *name,
@@ -145,7 +146,7 @@ dirlist(
 	   int (*filterfunc) (const char *),
 /** Pointer to an unsigned long variable. If non-NULL, the count of
     entries in the list is stored here. */
-	   long unsigned *count)
+	   /*@null@*/ long unsigned *count)
 {
     return dirlist_core(name, filterfunc, 0, 0, count);
 }
@@ -155,7 +156,7 @@ dirlist(
  * passed the filter.
  * \see free_dirlist
  */
-char **
+/*@null@*/ /*@only@*/ char **
 dirlist_prefix(
 /** Directory name. */
 		  const char *name,
@@ -164,7 +165,7 @@ dirlist_prefix(
 		  int (*filterfunc) (const char *),
 /** Pointer to an unsigned long variable. If non-NULL, the count of
     entries in the list is stored here. */
-		  long unsigned *count)
+		  /*@null@*/ long unsigned *count)
 {
     return dirlist_core(name, filterfunc, 1, 0, count);
 }
@@ -175,7 +176,7 @@ dirlist_prefix(
  * passed the filter.
  * \see free_dirlist
  */
-char **
+/*@null@*/ /*@only@*/ char **
 spooldirlist_prefix(
 /** Directory name. */
 		       const char *name,
@@ -184,14 +185,14 @@ spooldirlist_prefix(
 		       int (*filterfunc) (const char *),
 /** Pointer to an unsigned long variable. If non-NULL, the count of
     entries in the list is stored here. */
-		       long unsigned *count)
+		       /*@null@*/ long unsigned *count)
 {
     return dirlist_core(name, filterfunc, 1, 1, count);
 }
 
 /** free directory list pointed to by hdl */
 void
-free_dirlist(char **hdl /** string array to free */ )
+free_dirlist(/*@null@*/ /*@only@*/ char **hdl /** string array to free */ )
 {
     char **ptr = hdl;
 
@@ -209,7 +210,9 @@ free_dirlist(char **hdl /** string array to free */ )
 int
 DIRLIST_ALL(const char *x)
 {
+  /*@-noeffect@*/
     (void)x;			/* fix compiler warning */
+  /*@=noeffect@*/
     return 1;
 }
 
