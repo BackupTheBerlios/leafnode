@@ -25,7 +25,9 @@ urgence:
     reintroduce rnews and find a way to feed news batches to UUCP mode
     upstream (also listed at 3.3).
 
-1.1 article can be given out in spite of missing message.id file
+1.1 article can be given out in spite of missing message.id file - a
+    missing message.id file/link hints to spool corruption. store() does
+    NOT link into message.id on write errors.
 
 1.1 fix posting issues, introduce per-server queues?
 
@@ -56,7 +58,8 @@ urgence:
 
 2.2 make user that leafnode runs under (now hard-wired to "news") configurable
 
-2.2 also run feedincoming on exit of programs that lock
+2.2 also run feedincoming on exit of programs that lock (after they free
+    the lock)
 
 2.2 do not store cancel and perhaps other control messages locally?
 
@@ -66,11 +69,11 @@ urgence:
 
 2.2 Check RPM build
 
-2.2 pipeline GROUP commands for speed
+2.2 pipeline GROUP commands for speed (make configurable for
+    compatiblity with old server: separate parameter from ARTICLE
+    pipeline)?
 
 2.2 Create rpost/inews
-
-2.2 progress displays on terminals for fetchnews and texpire
 
 2.2 Fix and amend copyright statements and licenses.
 
@@ -81,10 +84,7 @@ urgence:
     ACTION: work in progress.
     FIX: Use garbage collector instead?
 
-2.2 nntpd Control-Nachrichten und Artikel in moderierte Newsgroups
-    werden auch angezeigt. (Letzteres ist u.U. gar nicht so tragisch,
-    denn es verhindert, dass Newbies ihre "moderierten" Postings
-    wiederholt abschicken.) -> RFC violation (reported by Jörg Dietrich).
+2.2 nntpd control articles are also displayed
 
 2.2 report Raymond Scholz, rnews doesn't read from pipes.
     ACTION: reimplement rnews from scratch.
@@ -166,10 +166,6 @@ urgence:
 
 3.3 get rid of _all_ sscanf (Matthias Andree)
 
-3.3 forbid crosspostings to local and global groups. (consider this for
-    local posts and check whether to ignore this for downstream pulled
-    articles)
-
 3.3 how to make newsgroup names 8-bit compliant? E.g., how to produce
     a newsgroups line of the form
 	Newsgroups: norge.østfold
@@ -214,6 +210,12 @@ urgence:
 4.4 see if the dots that NNTP servers escape can remain in the articles
     so that the body can be passed through to the client 1:1 (would need
     review if CR is required, and would break "direct spool" operation)
+
+4.4 progress displays on terminals for fetchnews and texpire
+
+4.4 optionally forbid crosspostings to local and global groups.
+    (consider this for local posts and check whether to ignore this for
+    downstream pulled articles)
 
 5.5 getgroup: "%s: considering %ld articles %lu - %lu" does not include
     proper article count as sent by server, but just uses last-first+1
