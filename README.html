@@ -309,6 +309,10 @@
 news.info               /var/log/news
 </pre>
 
+	    <p>Note that if you want to send in a bug report and need
+	    debug logging, you'll have to replace news.info by
+	    news.debug (and send a SIGHUP, as shown below).</p>
+
             <p>Your syslog.conf may already suggest a different
             file. If your syslog.conf suggests news.info logging,
             use that, but be sure to activate it in case it's
@@ -318,6 +322,9 @@ news.info               /var/log/news
             <p>Also make sure you use TABs between news.info and
             the path.</p>
           </li>
+
+	  <li>Create the /var/log/news file, type: <kbd>touch
+	      /var/log/news</kbd>.
 
           <li>Send syslogd a HUP signal. <kbd>kill -1 `cat
           /var/run/syslogd.pid`</kbd> usually does the job, if it
