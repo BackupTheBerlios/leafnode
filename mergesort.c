@@ -34,6 +34,7 @@
  * SUCH DAMAGE.
  */
 
+#define _BSD_SOURCE
 /* pull in prototypes if missing in system */
 #include "leafnode.h"
 

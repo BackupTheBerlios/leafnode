@@ -20,7 +20,7 @@
  * USA 
  */
 
-#define _GNU_SOURCE
+#undef _GNU_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
 #include "getline.h"
