@@ -643,10 +643,13 @@ doxover(struct stringlist **stufftoget,
 		}
 		write(tmpfd, hdr, (size_t)(q-hdr)); /* FIXME: check error! */
 		if (!log_fsync(tmpfd) && !log_close(tmpfd)) {
-		    if (store(mastr_str(tmpfn), 0, 0, 1) == 0)
+		    if (store(mastr_str(tmpfn), 0, 0, 1) == 0) {
 			(void)log_unlink(mastr_str(tmpfn));
-		    else
+		    } else {
+			int dummy;
+			(void)dummy;
 			; /* FIXME */
+		    }
 		}
 		mastr_delete(tmpfn);
 	    } else {
