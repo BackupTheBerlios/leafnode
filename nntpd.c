@@ -248,13 +248,12 @@ main_loop(void)
     }
     ln_log(LNLOG_SWARNING, LNLOG_CTOP,
 	   "Warning: premature EOF in client input.");
-#ifndef NOT_YET
-    /* this will become obsolete when the new NNTP standards are
-       published around December 2001 or Early 2002, we'd drop the 400
-       error message then. Until then, we send it in compliance with
-       RFC-977 p. 23 */
-    nntpprintf("400 service discontinued: EOF");
-#endif
+    /* We used to send 400 before disconnecting, but the list of clients
+     * reported broken keeps growing, and lists tin, slrn and pine,
+     * three major text-mode news readers. We anticipate upcoming NNTP
+     * standards by silently disconnecting. The 400 error message we
+     * used to send was sent in compliance with
+     * RFC-977 p. 23 */
 }
 
 /*
@@ -390,7 +389,7 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
  * return TRUE  if group is a pseudo group 
  */
 static int
-ispseudogroup(const char *group)
+is_pseudogroup(const char *group)
 {
     return (!chdirgroup(group, FALSE) && !is_localgroup(group));
 }
@@ -410,12 +409,13 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
     t = NULL;
     a = strtoul(arg, &t, 10);
     if (a && t && !*t && group != NULL) {
-	if (ispseudogroup(group->name)) {
+	if (is_pseudogroup(group->name)) {
 	    f = fopenpseudoart(group, arg, a);
 	} else {
-	    f = fopen(arg, "r");
-	    if (!f && (!is_localgroup(group->name)))
+	    if (is_pseudogroup(group->name) && !is_localgroup(group->name))
 		f = fopenpseudoart(group, arg, a);
+	    else
+		f = fopen(arg, "r");
 	}
 
 	if (f)
@@ -766,7 +766,7 @@ dogroup(const char *arg, unsigned long *artno)
 		   set g->first to 1? */
 	    }
 	} else {		/* group directory is not present */
-	    g->first = g->last = g->count = ispseudogroup(g->name) ? 1ul : 0ul;
+	    g->first = g->last = g->count = is_pseudogroup(g->name) ? 1ul : 0ul;
 	}
 	nntpprintf("211 %lu %lu %lu %s group selected",
 		   g->count, g->first, g->last, g->name);
@@ -1666,7 +1666,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	OVfield--;
     } while (OVfield >= 0 && strcasecmp(h[OVfield], header));
 
-    if (!ispseudogroup(group->name)) {
+    if (!is_pseudogroup(group->name)) {
 	/* FIXME: does this work for local groups? */
 	/* is a real group */
 	if (xovergroup != group) {
@@ -1896,7 +1896,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	}
     }
 
-    if (!ispseudogroup(group->name)) {
+    if (!is_pseudogroup(group->name)) {
 	if (xovergroup != group) {
 	    freexover();
 	    if (getxover(1))
@@ -1967,7 +1967,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 	return 0;
     }
     group = g;
-    if ((pseudogroup = ispseudogroup(g->name))) {
+    if ((pseudogroup = is_pseudogroup(g->name))) {
 	/* group has not been visited before */
 	markinterest(group);
     } else if ((xovergroup != group) && !getxover(1)) {
