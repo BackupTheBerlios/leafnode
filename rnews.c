@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -282,7 +281,7 @@ main(int argc, char *argv[])
     char conffile[PATH_MAX+1];
     int err;
 
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
+    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
 	|| (err >= (int)sizeof(conffile)))
 	exit(EXIT_FAILURE);
 

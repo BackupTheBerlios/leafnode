@@ -19,7 +19,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
-#include <sys/resource.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -141,7 +140,7 @@ readconfig(char *configfile)
     if (configfile) {
 	snprintf(s, PATH_MAX, "%s", configfile);
     } else {
-	snprintf(s, PATH_MAX, "%s/config", libdir);
+	snprintf(s, PATH_MAX, "%s/config", sysconfdir);
     }
     if ((f = fopen(s, "r")) == NULL) {
 	err = errno;

@@ -29,7 +29,6 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <unistd.h>
 #include <utime.h>
 #include <assert.h>
@@ -353,7 +352,7 @@ usage(void)
 	    "no matter if they were posted to a delaybody group.\n"
 	    "\n"
 	    "See also the leafnode homepage at\n"
-	    "    http://www.leafnode.org/\n", libdir);
+	    "    http://www.leafnode.org/\n", sysconfdir);
 }
 
 /**
@@ -1804,7 +1803,7 @@ main(int argc, char **argv)
     struct sigaction sa;
 
     verbose = 0;
-    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", libdir)) < 0)
+    if (((err = snprintf(conffile, sizeof(conffile), "%s/config", sysconfdir)) < 0)
 	|| (err >= (int)sizeof(conffile)))
 	exit(EXIT_FAILURE);
 
