@@ -62,8 +62,58 @@ newsgroups = .*
 pattern = ^Subject: (AW|WG|Re^\d+):
 action = kill
 
-### Do not fetch articles that GMANE considered spam (only effective in
-### groups of the gmane hierarchy):
-newsgroups = .*
+### Do not fetch articles that Gmane considered spam (only effective in
+### groups of the gmane hierarchy). Note that filtering on "Xref"
+### already filters at XOVER level, see section EFFICIENCY in
+### filterfile(8).
+newsgroups = gmane\..*
 pattern = ^Xref:.* gmane\.spam\.detected:
 action = kill
+
+### Filter on some subject, except if the posting is a followup to your
+### messsage. This requires, that all your postings use a FQDN for the
+### Message-Id, see "hostname" in leafnode(8).
+newsgroups = .*
+pattern = ^Subject: some_subject
+action = -1
+### Always accept own postings and direct followups:
+pattern = ^Message-Id:\s*<[^@]+@my-fqdn\.invalid>
+action = select
+### A direct followup:
+pattern = ^References:.*<[^@]+@my-fqdn\.invalid>$
+action = select
+### 2nd level followup:
+pattern = ^References:.*<[^@]+@my-fqdn\.invalid>[^>]+>$
+action = 100
+### 3rd level followup:
+pattern = ^References:.*<[^@]+@my-fqdn\.invalid>[^>]+>[^>]+>$
+action = 10
+### Followup on any level.
+pattern = ^References:.*<[^@]+@my-fqdn\.invalid>
+action = 2
+
+### A troll is flooding a group `foo.bar'. Annoyingly he changes "From"
+### and "Message-Id" (MID) quite often, but the MID is always consists
+### of 16 times a hex number [0-9A-F], a dot followed by 16 times
+### [0-9A-F] again (local part) and 8 times [a-z], a dot and 8 times
+### [a-z] for the domain part. Thus we have
+### "[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}"; replace this by a
+### more simple pattern if needed.
+newsgroups = foo\.bar
+pattern = ^Message-Id:\s*<[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}>
+action = kill
+### Now we got rid of the troll.  But too many people do feed the troll!
+### We need to filter certain levels of followups, too.
+### A direct followup:
+pattern = ^References:.*<[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}>$
+action = -1000
+### 2nd level followup:
+pattern = ^References:.*<[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}>[^>]+>$
+action = -100
+### 3rd level followup:
+pattern = ^References:.*<[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}>[^>]+>[^>]+>$
+action = -10
+### Followup on any level. Use with care! (Thread topic might change and
+### become interesting again.)
+pattern = ^References:.*<[A-F0-9]{16}\.[A-F0-9]{16}@[a-z]{8}\.[a-z]{8}>
+action = -1
