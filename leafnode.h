@@ -437,8 +437,8 @@ int xgetxover(const int, /*@null@*/ struct newsgroup *g, const int);
      * global variables from config file. These are defined in configutil.c
      */
     struct expire_entry {
-	time_t xtime;
 	struct expire_entry *next;
+	time_t xtime;	/** negative: do not expire */
 	char *group;
     };
 extern long sendbuf;	/* TCP send buffer of currently connected server */
