@@ -364,6 +364,12 @@ readconfig(char *configfile)
 				   "config: read pseudoarticle from %s",
 				   pseudofile);
 		    break;
+		case CP_DONTPOST:
+		    p->dontpost = atoi(value);
+		    if (debugmode & DEBUG_CONFIG)
+			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
+				   "config: don't post is %d", p->dontpost);
+		    break;
 		case CP_SERVER:
 		case CP_SUPPL:
 		    if (debugmode & DEBUG_CONFIG)
