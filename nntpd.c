@@ -1000,7 +1000,7 @@ donewnews(char *arg)
     while ((de = readdir(d))) {
 	if (ngmatch((const char *)&(l->string), de->d_name) == 0) {
 	    chdirgroup(de->d_name, FALSE);
-	    getxover();
+	    getxover(1);
 	    ng = opendir(".");
 	    while ((nga = readdir(ng))) {
 		long artno;
@@ -1435,7 +1435,7 @@ dopost(void)
 	    if (modgroup && !approved) {
 		free(modgroup);
 		nntpprintf("240 Posting scheduled for posting to "
-		           "upstream, be patient");
+			   "upstream, be patient");
 		log_unlink(inname);
 		return;
 	    }
@@ -1653,7 +1653,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	/* FIXME: does this work for local groups? */
 	/* is a real group */
 	if (xovergroup != group) {
-	    if (getxover())
+	    if (getxover(1))
 		xovergroup = group;
 	}
     } else {
@@ -1873,7 +1873,7 @@ doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
     if (!ispseudogroup(group->name)) {
 	if (xovergroup != group) {
 	    freexover();
-	    if (getxover())
+	    if (getxover(1))
 		xovergroup = group;
 	    else
 		xovergroup = 0;
@@ -1944,7 +1944,7 @@ dolistgroup(struct newsgroup *group, const char *arg, unsigned long *artno)
     if ((pseudogroup = ispseudogroup(g->name))) {
 	/* group has not been visited before */
 	markinterest(group);
-    } else if ((xovergroup != group) && !getxover()) {
+    } else if ((xovergroup != group) && !getxover(1)) {
 	if (isinteresting(g->name)) {
 	    /* group has already been marked as interesting but is empty */
 	    emptygroup = TRUE;
@@ -2000,8 +2000,10 @@ readpasswd(void)
     while ((l = getaline(f)) != NULL) {
 	appendtolist(&users, &ptr, l);
     }
-    if (ferror(f)) return errno;
-    if (fclose(f)) return errno;
+    if (ferror(f))
+	return errno;
+    if (fclose(f))
+	return errno;
     return 0;
 }
 
@@ -2017,14 +2019,15 @@ isauthorized(void)
 }
 
 static int
-doauth_file(char *const cmd, char *const val) /*@modifies *val@*/
-{
+doauth_file(char *const cmd, char *const val)
+{				/*@modifies *val@*/
     static char *user = NULL;
 
     if (0 == strcasecmp(cmd, "user")) {
 	char *t;
 
-	if (user) free(user);
+	if (user)
+	    free(user);
 	user = malloc(strlen(val) + 2);
 	t = mastrcpy(user, val);
 	*t++ = ':';
@@ -2036,16 +2039,17 @@ doauth_file(char *const cmd, char *const val) /*@modifies *val@*/
     if (0 == strcasecmp(cmd, "pass")) {
 	char *pwdline;
 
-	if (!user) return P_REJECTED;
+	if (!user)
+	    return P_REJECTED;
 	/* XXX hook up other authenticators here
 	 * user name + blank is in "user"
 	 * password (cleartext) is in "val" */
 	if ((pwdline = findinlist(users, user))) {
 	    char *c, *pwd;
 
-	    pwd = pwdline + strlen(user);   /* crypted original password */
-	    c = crypt(val, pwd);            /* crypt password from net with
-					       original password as salt */
+	    pwd = pwdline + strlen(user);	/* crypted original password */
+	    c = crypt(val, pwd);	/* crypt password from net with
+					   original password as salt */
 	    memset(val, 0x55, strlen(val));
 	    if (strcmp(c, pwd))
 		return P_REJECTED;
@@ -2062,8 +2066,8 @@ doauth_file(char *const cmd, char *const val) /*@modifies *val@*/
 }
 
 void
-doauthinfo(char *arg) /* we nuke away the password, no const here! */
-{
+doauthinfo(char *arg)
+{				/* we nuke away the password, no const here! */
     char *cmd;
     char *param;
     int result = 0;
@@ -2091,15 +2095,15 @@ doauthinfo(char *arg) /* we nuke away the password, no const here! */
     SKIPLWS(param);
 
     switch (authentication) {
-	case AM_FILE:
-	    result = doauth_file(cmd, param);
-	    break;
-	default:
-	    result = P_NOT_SUPPORTED;
-	    break;
+    case AM_FILE:
+	result = doauth_file(cmd, param);
+	break;
+    default:
+	result = P_NOT_SUPPORTED;
+	break;
     }
 
- done:
+  done:
     switch (result) {
     case P_ACCEPTED:
 	nntpprintf("%d Authentication accepted", result);
@@ -2139,8 +2143,7 @@ log_sockaddr(const char *tag, const struct sockaddr *sa)
     if (!s)
 	ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 	       "cannot get hostname: %s (h_errno=%d)", my_h_strerror(h_e), h_e);
-    ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s: %s:%ld (%s)", tag, s ? s : a,
-	   port, a);
+    ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s: %s:%ld (%s)", tag, s ? s : a, port, a);
     if (s)
 	free(s);
     free(a);			/* a == NULL caught above */
@@ -2154,7 +2157,9 @@ dummy(int unused)
     (void)unused;
 }
 
-int mysetfbuf(FILE *f, char *buf, size_t size) {
+int
+mysetfbuf(FILE * f, char *buf, size_t size)
+{
 #ifdef SETVBUF_REVERSED
     return setvbuf(f, _IOFBF, buf, size);
 #else
@@ -2263,9 +2268,9 @@ main(int argc, char **argv)
 	   allowposting()? "" : " (No posting.)",
 	   allowposting()? "" : getenv("NOPOSTING"));
     fflush(stdout);
-    rereadactive(); /* print banner first, so while the client command
-is in transit, we read the active file. should speed things up by 2
-round trips for clients. */
+    rereadactive();		/* print banner first, so while the client command
+				   is in transit, we read the active file. should speed things up by 2
+				   round trips for clients. */
     main_loop();
     freexover();
     freeactive();
