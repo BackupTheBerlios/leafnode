@@ -23,7 +23,7 @@ log_moveto(/*@notnull@*/ const char *file /** source file */ ,
     int r, e;
 
     mastr *s = mastr_new(PATH_MAX);
-    mastr_vcat(s, spooldir, dir, BASENAME(file), 0);
+    mastr_vcat(s, spooldir, dir, BASENAME(file), NULL);
     r = rename(file, mastr_str(s));
     e = errno;
     if (r)

@@ -462,7 +462,7 @@ markdownload(const struct newsgroup *group, const char *msgid)
     FILE *f;
     mastr *s = mastr_new(1024);
 
-    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, 0);
+    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, NULL);
     if ((f = fopen(mastr_str(s), "r+"))) {
 	while ((l = getaline(f)) != NULL) {
 	    if (strncmp(l, msgid, strlen(msgid)) == 0) {
@@ -646,7 +646,7 @@ markinterest(const struct newsgroup *group)
     not_yet_interesting = 0;
 
     s = mastr_new(1024);
-    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, 0);
+    mastr_vcat(s, spooldir, "/interesting.groups/", group->name, NULL);
 
     if (stat(mastr_str(s), &st) == 0) {
 	/* already marked interesting, update atime */
@@ -1071,7 +1071,7 @@ donewnews(char *arg)
     nntpprintf("230 List of new articles since %ld in newsgroup %s", age,
 	       l->string);
     s = mastr_new(1024);
-    mastr_vcat(s, spooldir, "/interesting.groups", 0);
+    mastr_vcat(s, spooldir, "/interesting.groups", NULL);
     d = opendir(mastr_str(s));
     if (!d) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m",

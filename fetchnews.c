@@ -86,7 +86,7 @@ server_info(const char *spool, const char *server,
 	str_ulong(portstr + 1, port);
     }
 
-    mastr_vcat(s, spool, "/leaf.node/", server, portstr, suffix, 0);
+    mastr_vcat(s, spool, "/leaf.node/", server, portstr, suffix, NULL);
 
     res = critstrdup(mastr_str(s), "server_info");
     mastr_delete(s);
@@ -959,7 +959,7 @@ dirtyactive(struct serverlist *srv)
 
     assert(srv != NULL);
     str_ulong(p, srv->port);
-    mastr_vcat(s, spooldir, "/leaf.node/last:", srv->name, ":", p, 0);
+    mastr_vcat(s, spooldir, "/leaf.node/last:", srv->name, ":", p, NULL);
     r = unlink(mastr_str(s));
     if (r && errno != ENOENT) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER, "cannot unlink %s: %m", mastr_str(s));
@@ -1273,7 +1273,7 @@ do_group(const char *ng, /** which group to operate on */
     if (g) {
 	/* get server high water mark */
 	s = mastr_new(1024);
-	mastr_vcat(s, g->name, " ", 0);
+	mastr_vcat(s, g->name, " ", NULL);
 	l = ngs ? findinlist(ngs, mastr_str(s)) : NULL;
 	mastr_delete(s);
 	/* l now contains a string (without quote marks): 

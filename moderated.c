@@ -26,7 +26,7 @@ getmoderator(const char *group)
     mastr *modpath = mastr_new(PATH_MAX);
     FILE *f;
 
-    mastr_vcat(modpath, libdir, "/moderators", 0);
+    mastr_vcat(modpath, libdir, "/moderators", NULL);
     f = fopen(mastr_str(modpath), "r");
     if (!f) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Could not open %s: %m",

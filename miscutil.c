@@ -232,7 +232,7 @@ getlastart(const char *group)
 	    *q = '/';
 	else
 	    *q = tolower((unsigned char)*q);
-    mastr_vcat(g, spooldir, "/", p, "/", LASTPOSTING, 0);
+    mastr_vcat(g, spooldir, "/", p, "/", LASTPOSTING, NULL);
     free(p);
     if (stat(mastr_str(g), &st)) {
 	if (errno != ENOENT) {
@@ -336,7 +336,7 @@ initgrouplistdir(const char *dir)
 	return NULL;
     }
 
-    (void)mastr_vcat(t, spooldir, dir, 0);
+    (void)mastr_vcat(t, spooldir, dir, NULL);
     d = opendir(mastr_str(t));
     if (!d) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m",

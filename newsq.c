@@ -104,7 +104,7 @@ main(int argc, char **argv)
 
     printf("Articles awaiting post to upstream servers:\n"
 	   "-------------------------------------------\n");
-    mastr_vcat(s, spooldir, "/out.going", 0);
+    mastr_vcat(s, spooldir, "/out.going", NULL);
     if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
@@ -116,7 +116,7 @@ main(int argc, char **argv)
     printf("\n");
     printf("Articles awaiting store to local groups:\n"
 	   "----------------------------------------\n");
-    mastr_vcat(s, spooldir, "/in.coming", 0);
+    mastr_vcat(s, spooldir, "/in.coming", NULL);
     if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;
@@ -127,7 +127,7 @@ main(int argc, char **argv)
 
     printf("\n");
     printf("Articles in failed.postings:\n" "----------------------------\n");
-    mastr_vcat(s, spooldir, "/failed.postings", 0);
+    mastr_vcat(s, spooldir, "/failed.postings", NULL);
     if ((c = show_queue(mastr_str(s))) < 0) {
 	printf("Error occurred.\n");
 	ret = 1;

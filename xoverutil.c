@@ -630,7 +630,7 @@ fixxover(void)
     }
 
     s = mastr_new(1024);
-    mastr_vcat(s, spooldir, "/interesting.groups", 0);
+    mastr_vcat(s, spooldir, "/interesting.groups", NULL);
 
     d = opendir(mastr_str(s));
     if (!d) {

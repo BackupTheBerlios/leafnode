@@ -110,7 +110,7 @@ store_stream(FILE * in /** input file */ ,
     ssize_t s;
     mastr *ln = mastr_new(4095l);	/* line buffer */
 
-    (void)mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", 0);
+    (void)mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", NULL);
 
     /* check for OOM */
     if (!head) {
@@ -345,7 +345,7 @@ store_stream(FILE * in /** input file */ ,
 		    goto bail;
 		}
 	    }
-	    (void)mastr_vcat(xref, " ", name, ":", nb, 0);
+	    (void)mastr_vcat(xref, " ", name, ":", nb, NULL);
 	}
     }
     if (fputs("Xref: ", tmpstream) == EOF)

@@ -65,7 +65,7 @@ mgetheader(
 	p = buf;
     } else {
 	hunt = mastr_new(strlen(hdr) + 1);
-	(void)mastr_vcat(hunt, "\n", hdr, 0);
+	(void)mastr_vcat(hunt, "\n", hdr, NULL);
 	p = strstr(buf, mastr_str(hunt));
 	mastr_delete(hunt);
 	if (!p)

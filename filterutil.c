@@ -515,7 +515,7 @@ killfilter(const struct filterlist *f, const char *hdr)
 	    long l = 1;
 	    p = findinheaders("Newsgroups:", hdr);
 	    if (p == NULL) internalerror();
-	    while (*p && *p != '\n') {
+	    while (*p && *p != '\n') { /* FIXME: cope with folding */
 		if (*p++ == ',') {
 		    SKIPLWS(p);
 		    l++;

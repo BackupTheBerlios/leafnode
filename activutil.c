@@ -225,7 +225,7 @@ writeactive(void)
 
     { /* this block limits the s scope */
 	mastr *s = mastr_new(PATH_MAX);
-	mastr_vcat(s, spooldir, GROUPINFO ".XXXXXXXXXX", 0);
+	mastr_vcat(s, spooldir, GROUPINFO ".XXXXXXXXXX", NULL);
 	tmp = critstrdup(mastr_str(s), "writeactive");
 	mastr_delete(s);
     }
@@ -298,7 +298,7 @@ writeactive(void)
     }
 
     log_fclose(a);
-    mastr_vcat(c, spooldir, GROUPINFO, 0);
+    mastr_vcat(c, spooldir, GROUPINFO, NULL);
     if (rename(tmp, mastr_str(c))) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
 		   "failed to rename new groupinfo file %s into place: %m",
@@ -356,7 +356,7 @@ readactive(void)
 
     freeactive(active);
     active = 0;
-    mastr_vcat(s, spooldir, GROUPINFO, 0);
+    mastr_vcat(s, spooldir, GROUPINFO, NULL);
 
     if ((f = fopen(mastr_str(s), "r")) == NULL) {
 	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m",
