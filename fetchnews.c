@@ -988,8 +988,7 @@ nntpactive(void)
     sprintf(s, "%s/leaf.node/last:%s:%d", spooldir, current_server->name,
 	    current_server->port);
 
-    if (!forceactive && (0 == stat(s, &st))
-	&& (time(NULL) - st.st_mtime)/86400 < timeout_active) {
+    if (!forceactive && (0 == stat(s, &st))) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CSERVER,
 	       "%s: checking for new newsgroups", current_server->name);
 	/* "%Y" and "timestr + 2" avoid Y2k compiler warnings */
