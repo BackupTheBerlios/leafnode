@@ -778,7 +778,7 @@ doxover(struct stringlist **stufftoget,
 	/*@null@*/ struct filterlist *filtlst, char *groupname)
 {
     char *l;
-    unsigned long count = 0;
+    unsigned long count = 0, dupes = 0, seen = 0;
     long reply;
     struct stringlist *helpptr = NULL;
     int delaybody_this_group = delaybody_group(groupname);
@@ -797,6 +797,7 @@ doxover(struct stringlist **stufftoget,
 	char **newsgroups_list = NULL;
 	int num_groups;
 
+	seen ++;
 	if (abs(str_nsplit(xover, l, "\t", sizeof(xover) / sizeof(xover[0]))) <
 	    8) {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP,
@@ -840,6 +841,7 @@ doxover(struct stringlist **stufftoget,
 	    }
 	    if (ihave(messageid)) {
 		/* we have the article already */
+		dupes++;
 		mastr_delete(s);
 		goto next_over;
 	    }
@@ -867,8 +869,9 @@ next_over:
 	int rc = count;
 
 	if (l && strcmp(l, ".") == 0) {
-	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: XOVER: %ld to get, %ld filtered",
-		    groupname, count, groupkilled);
+	    ln_log(LNLOG_SINFO, LNLOG_CGROUP, "%s: XOVER: %ld seen, %ld I have, "
+		    "%ld filtered, %ld to get",
+		    groupname, seen, dupes, groupkilled, count);
 	} else {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: XOVER: reply was mutilated",
 		    groupname);
