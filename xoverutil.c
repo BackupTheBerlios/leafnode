@@ -465,8 +465,8 @@ xgetxover(
 	p = q;
     }
 
+    xcount = current;		/* to prevent findxover from choking */
     if (!fixxover) {
-	xcount = current;		/* to prevent findxover from choking */
 	if (g)
 	    g->count = current;
 	free(overview);

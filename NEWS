@@ -8,6 +8,7 @@ Changes since 20050105a:
   Raymond Scholz
 - Bugfix: even if groupexpire is < 0 to mean "no expire", fix overview
   data and check group for consistency.
+- Bugfix: do not abort in texpire when DEBUG_EXPIRE is set.
 
 20050105a: Changes since 20050104a:
 - Bugfix: delete_article also removes articles from in.coming directory
