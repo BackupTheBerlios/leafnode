@@ -402,12 +402,12 @@ check_old_format(char *l)
     if (*l++ != ' ') return FALSE;
 
     for (i = 0; i < 3; i++) {
-	if (!isdigit(*l++)) return FALSE;
-	while(isdigit(*l++));
+	if (!isdigit((unsigned char)*l++)) return FALSE;
+	while(isdigit((unsigned char)*l++));
 	if (*l++ != ' ') return FALSE;
     }
 
-    if(!isspace(*l++)) return FALSE;
+    if(!isspace((unsigned char)*l++)) return FALSE;
 
     return TRUE;    
 }
@@ -419,15 +419,15 @@ read_group_parameters(char *l, struct newsgroup *g, unsigned long *age)
     if (*l++ != '\t') return FALSE;
 
     if(!get_ulong(l, &g->last)) return FALSE;
-    for (; *l && isdigit(*l); l++);
+    for (; *l && isdigit((unsigned char)*l); l++);
     if (*l++ != '\t') return FALSE;
 
     if(!get_ulong(l, &g->first)) return FALSE;
-    for (; *l && isdigit(*l); l++);
+    for (; *l && isdigit((unsigned char)*l); l++);
     if (*l++ != '\t') return FALSE;
 
     if(!get_ulong(l, age)) return FALSE;
-    for (; *l && isdigit(*l); l++);
+    for (; *l && isdigit((unsigned char)*l); l++);
     if (*l++ != '\t') return FALSE;
 
     return TRUE;

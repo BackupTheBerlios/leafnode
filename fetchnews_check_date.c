@@ -14,7 +14,7 @@ get_nr(char *s, int count, int *dst)
     *dst = 0;
 
     for (i = 0; i < count; i++) {
-	if (!isdigit(s[i])) return FALSE;
+	if (!isdigit((unsigned char)s[i])) return FALSE;
 	*dst *= 10;
 	*dst += s[i] - '0';
     }
