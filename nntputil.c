@@ -1,8 +1,8 @@
-/*
-  nntputil -- misc nntp-related stuff. Only used by fetch.
-  See AUTHORS for copyright holders and contributors.
-  See README for restrictions on the use of this software.
-*/
+/**
+ * nntputil.c -- miscellaneous NNTP-related stuff.
+ * See AUTHORS for copyright holders and contributors.
+ * See README for restrictions on the use of this software.
+ */
 #include "leafnode.h"
 #include "ln_log.h"
 #include "h_error.h"
@@ -41,7 +41,7 @@ FILE *nntpin  = NULL;
 FILE *nntpout = NULL;
 int authenticated;
 
-/*
+/**
  * Authenticate ourselves at a remote server.
  * Returns TRUE if authentication succeeds, FALSE if it does not.
  */
@@ -104,16 +104,17 @@ authenticate(void)
     return TRUE;
 }
 
-/*
- * decode an NNTP reply number
- * reads a line from the server and returns an integer
- *
- * -1 is used to flag "protocol error"
- *
- * the text returned is discarded
+/**
+ * Reads a status line from the NNTP server, parses the status code and
+ * returns it. Optionally, a pointer to the status line can be stored
+ * into *resline, which is static storage.
+ * \return
+ * - -1 for read error
+ * - status code from server otherwise.
  */
 int
-newnntpreply(/*@out@*/ char **resline)
+newnntpreply(/*@out@*/ char **resline
+	     /** If non-NULL, stores pointer to line here. */)
 {
     char *response;
     int r = 0;
@@ -158,14 +159,18 @@ newnntpreply(/*@out@*/ char **resline)
     return r;
 }
 
+/** Reads a line from the server, parses the status code, returns it and
+ * discards the rest of the status line.
+ */
 int
 nntpreply(void)
 {
     return newnntpreply(0);
 }
 
-extern struct state _res;
-
+/** Create a socket and connect it to a remote address.
+ * \returns -1 for trouble, socket descriptor if successful. 
+ */
 static int
 any_connect(const int family, const int socktype, const int protocol,
 	    const struct sockaddr *sa, socklen_t addrlen,
@@ -203,17 +208,25 @@ any_connect(const int family, const int socktype, const int protocol,
     return sock;
 }
 
-/** Resolve host name and connect to it.
- * \return -1 for trouble
+/** Resolve host name and connect to it, try each of its addresses in
+ * turn, until a connection is established.
+ * \return -1 for trouble,
+ * socket descriptor otherwise.
  */
 static int
-tcp_connect(const char *const nodename, const char *const service,
-	    int address_family)
+tcp_connect(/** host name or address in dotted or colon (IPv6)
+	     * notation */
+    const char *const nodename,
+    /** service name or port number */
+    const char *const service,
+    /** address family, 0 means "don't care" */
+    int address_family)
 {
     const char *errcause;
     int sock;
 
 #ifdef HAVE_GETADDRINFO
+    /* This stuff supports IPv6 and IPv4 transparently. */
     int err;
 
     struct addrinfo hints = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -249,6 +262,7 @@ tcp_connect(const char *const nodename, const char *const service,
 
     return sock;
 #else
+    /* This is legacy IPv4 code. */
     long port;
 
     struct hostent *he;
@@ -313,11 +327,13 @@ tcp_connect(const char *const nodename, const char *const service,
 #endif
 }
 
-/*
- * connect to upstream nntp server
+/**
+ * Connect to upstream NNTP server.
  *
- * returns 200 for posting allowed, 201 for read-only;
- * if connection failed, return 0
+ * \returns
+ * - 200 for posting allowed
+ * - 201 for read-only access
+ * - 0 if the connection could not be established
  */
 int
 nntpconnect(const struct serverlist *upstream)
@@ -362,6 +378,12 @@ nntpconnect(const struct serverlist *upstream)
     }
 
     reply = newnntpreply(&line);
+    if (reply == 200 || reply == 201) {
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
+	       "%s: connected (%d), banner: \"%s\"",
+	       upstream->name, reply, line ? line : "(none)");
+    }
+
     if (line && strstr(line, "NewsCache")) {
 	/* NewsCache has a broken STAT implementation
 	   always returns 203 0 Message-ID
@@ -370,11 +392,7 @@ nntpconnect(const struct serverlist *upstream)
     } else {
 	stat_is_evil = 0;
     }
-    if (reply == 200 || reply == 201) {
-	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	       "%s: connected (%d), banner: \"%s\"",
-	       upstream->name, reply, line ? line : "(none)");
-    }
+
     if (line && strstr(line, "NNTPcache server V2.3")) {
 	/* NNTPcache 2.3.3 is still in widespread use, but it
 	   has Y2k bugs which have only been fixed in a beta
@@ -389,6 +407,7 @@ nntpconnect(const struct serverlist *upstream)
 	nntpdisconnect();
 	return 0;
     }
+
     if (getsockopt(fileno(nntpout), SOL_SOCKET, SO_SNDBUF,
 		   (char *)&sendbuf, &optlen) == -1) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
@@ -396,13 +415,14 @@ nntpconnect(const struct serverlist *upstream)
 	nntpdisconnect();
 	return 0;
     }
+
     ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	   "%s: TCP send buffer size is %ld", upstream->name, sendbuf);
     return reply;
 }
 
-/*
- * disconnect from upstream server
+/**
+ * Disconnect from upstream server.
  */
 void
 nntpdisconnect()
