@@ -26,7 +26,7 @@ mycritrealloc(const char *f, long l, void *a, size_t size, const char *message)
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "realloc(%d) failed: %s", (int)size, message);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
     return a;
 }
