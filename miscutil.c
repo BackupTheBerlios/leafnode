@@ -225,7 +225,7 @@ init_post(void) {
 		if (log_chmod(mastr_str(x), md->m)) {
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
 			    "cannot chmod(%s,%o): %m\n",
-			    mastr_str(x), md->m);
+			    mastr_str(x), (unsigned int)md->m);
 		    mastr_delete(x);
 		    return FALSE;
 		}
