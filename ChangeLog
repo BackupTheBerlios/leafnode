@@ -1,3 +1,27 @@
+2002-07-03  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* applyfilter.c, getwatermarks.c, store.c, xoverutil.c: Never lower
+	high water mark, not even on empty group.  It breaks clients
+	detection of new articles.  Forward port from leafnode-1 bugfixes.
+	* nntpd.c: Simplify list, make use of SKIPWORD in dolist.  Fix
+	NEWGROUPS low/high output, remove white space from LISTGROUP
+	output.  Fix output of pseudo article number.  Do not reset water
+	marks on pseudo or empty group.
+	* store.c: Fix some of the "trying to read across EOF" for rnews. 
+	Minor optimization in header parsing.
+	* rnews.c: Remove lockfile in error case.
+	* fetchnews.c: Quick hack for exit status and correct display of
+	fetched articles for 'fetchnews -M MID'.  Needs rewrite.
+
+2002-07-03  Matthias Andree <matthias.andree@gmx.de>
+
+	* configure.ac: bump version
+	* TODO: update
+
+2002-07-03  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* Makefile.am: Revive Distribution of rnews.
+
 2002-07-03  Matthias Andree <matthias.andree@gmx.de>
 
 	* Makefile.am: add missing version.h 
