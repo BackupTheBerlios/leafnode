@@ -29,10 +29,10 @@ mastrncpy(/*@out@*/ /*@unique@*/ /*@returned@*/ char *dest, const char *src, siz
     /* storage space exhausted */
     if (n < 1) {
 	--dest;
-	*dest = 0;
+	*dest = '\0';
 	return 0;
     }
 
-    *dest = 0;
+    *dest = '\0';
     return n == 1 ? 0 : dest;
 }

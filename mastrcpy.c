@@ -20,6 +20,6 @@ mastrcpy(/*@out@*/ /*@returned@*/ char *dest, const char *src)
     while (*src) {
 	*(dest++) = *(src++);
     }
-    *dest = 0;
+    *dest = '\0';
     return dest;
 }
