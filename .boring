@@ -42,3 +42,4 @@ cscope\.out$
 ^texpire$
 ^xsnprintf$
 ^new$
+^build
