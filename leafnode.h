@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.77 2002/10/23 15:39:46 emma Exp $ */
+/* $Id: leafnode.h,v 1.78 2002/10/23 16:27:12 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -427,6 +427,7 @@ extern "C" {
 	char *name;		/* Servername */
 	char *username;
 	char *password;
+	pcre *group_pcre;
 	unsigned short port;	/* port, if 0, look up nntp/tcp */
 	int usexhdr;		/* use XHDR instead of XOVER if sensible */
 	int descriptions;	/* download descriptions as well */

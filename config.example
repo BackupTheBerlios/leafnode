@@ -181,6 +181,12 @@ server = news.hiof.no
 # server = really.slow.snail
 # timeout = 60
 
+## This shows how a server is configured that only has specific news
+## groups. Note that this parameter is a PCRE, not a wildmat! See
+## pcre(3) or pcre(7), depending on your PCRE version.
+# server = cnews.corel.com
+# only_groups_pcre = corel\.
+
 ## Yet another server which either does not understand the XOVER commands
 ## correctly or performs better on XHDR.   fetchnews will still fall back
 ## to using XOVER if you use delaybody mode or filtering.

@@ -13,6 +13,7 @@
 #include "mastring.h"
 #include "format.h"
 #include "msgid.h"
+#include "groupselect.h"
 
 #include <sys/types.h>
 #include <ctype.h>
@@ -375,9 +376,11 @@ isgrouponserver(char *newsgroups)
 	q = strchr(p, ',');
 	if (q)
 	    *q++ = '\0';
-	putaline(nntpout, "GROUP %s", p);
-	if (nntpreply() == 211)
-	    retval = TRUE;
+	if (gs_match(current_server -> group_pcre, p)) {
+	    putaline(nntpout, "GROUP %s", p);
+	    if (nntpreply() == 211)
+		retval = TRUE;
+	}
 	p = q;
     } while (q && !retval);
     return retval;
@@ -617,6 +620,9 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
     unsigned long h, window;
     long n;
     char *l;
+
+    if (!gs_match(current_server -> group_pcre, g->name))
+	return 0;
 
     putaline(nntpout, "GROUP %s", g->name);
     l = getaline(nntpin);

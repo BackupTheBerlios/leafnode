@@ -16,6 +16,9 @@ incompatible changes:
   logging in verbose mode somewhat.
 
 other changes:
+- forward-port of only_groups_pcre option from leafnode-1.
+- articles that are mailed to the moderator that don't already have a To:
+  header line now get the To: header appended.
 - no longer installs the "lsort" program. You can remove it from
   /usr/local/sbin/lsort
 - fetchnews now logs how many articles could be filtered from pseudo

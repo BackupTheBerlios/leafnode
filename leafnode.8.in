@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.13 2002/08/20 00:17:09 emma Exp $
+.\" $Id: leafnode.8.in,v 1.14 2002/10/23 16:27:12 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -219,6 +219,15 @@ be faster to use XOVER).
 .TP
 dontpost = 1
 Set this if you do not want postings to be sent to this server.
+.TP
+only_groups_pcre = PCRE
+This parameter lists the Perl-compatible regular expression of groups
+that are fetched or posted to this server. The PCRE is automatically
+anchored at the left hand side, so you can omit the leading ^. Remember
+to escape dots, as in: de\\.comp\\.|de\\.comm\\.
+
+If this parameter is omitted, all groups are fetched from and posted to
+this server.
 
 .PP
 .B GENERAL OPTIONAL PARAMETERS

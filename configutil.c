@@ -11,6 +11,8 @@
 #include "config_defs.h"
 #include "configparam.h"
 #include "get.h"
+#include "groupselect.h"
+
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -445,6 +447,17 @@ readconfig(/*@null@*/ const char *configfile)
 		    }
 		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
 			    "config: feedtype is %s", get_feedtype(p->feedtype));
+		    break;
+		case CP_ONLYGROUPSPCRE:
+		    {
+			pcre *r = gs_compile(value);
+
+			if (!r)
+			    exit(2);
+			p->group_pcre = r;
+			ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+				"config: only_groups_pcre = %s", value);
+		    }
 		    break;
 		default:
 		    ln_log(LNLOG_SERR, LNLOG_CTOP,
