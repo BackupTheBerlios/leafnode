@@ -145,7 +145,7 @@ expire = 20
 ## This option allows to redirect all logging away from syslog and into
 ## stderr. It is useful if you're running leafnode from daemontools and
 ## want to log into multilog, for example.
-# ln_log_stderronly = 1
+# logstderr = 1
 
 ############################################
 ##                                        ##
