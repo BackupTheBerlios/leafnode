@@ -57,8 +57,8 @@ ihave(/*@null@*/ const char *mid
     if (m && (0 == stat(m, &st))) {
 	if (!S_ISREG(st.st_mode)) {
 	    ln_log(LNLOG_SWARNING, LNLOG_CARTICLE,
-		    "ihave(): article file %s is not a regular file (mode 0%o)",
-		   m,  st.st_mode);
+		    "ihave(): article file %s is not a regular file (mode 0%lo)",
+		   m,  (unsigned long)st.st_mode);
 	    return 0;
 	} else {
 	    return 1;
