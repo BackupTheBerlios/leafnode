@@ -1,5 +1,9 @@
 2002-01-07  Matthias Andree  <matthias.andree@gmx.de>
 
+	* leafnode-version.c: Preset PATH to /bin:/usr/bin and run uname
+	without a path, SuSE Linux 7.3 installs it to /bin, FreeBSD to
+	/usr/bin.
+
 	* TODO: Update.
 	* xoverutil.c: Rename getxover to xgetxover, add a group parameter
 	which - when non-NULL - has the in-core groupinfo updated. Provide
