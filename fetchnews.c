@@ -728,7 +728,7 @@ create_pseudo_header(const char *subject, const char *from,
  *  -  0 for sucess
  */
 static int
-write_pseudo_header(mastr *s)
+store_pseudo_header(mastr *s)
 {
     int rc = 0;
     int tmpfd;
@@ -738,14 +738,14 @@ write_pseudo_header(mastr *s)
     tmpfd = safe_mkstemp(mastr_modifyable_str(tmpfn));
     if (tmpfd < 0) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		"write_pseudo_header: error in mkstemp(\"%s\"): %m",
+		"store_pseudo_header: error in mkstemp(\"%s\"): %m",
 		mastr_str(tmpfn));
 	rc = -1;
 	goto out;
     }
     if (write(tmpfd, mastr_str(s), mastr_len(s)) < (ssize_t)mastr_len(s)) {
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		"write_pseudo_header: write failed: %m");
+		"store_pseudo_header: write failed: %m");
 	rc = -1;
     }
 
@@ -844,7 +844,7 @@ doxover(struct stringlist **stufftoget,
 
 	    if (delaybody_this_group) {
 		/* write pseudoarticle */
-		if (write_pseudo_header(s) == 0)
+		if (store_pseudo_header(s) == 0)
 		    count++;
 	    } else {
 		count++;
