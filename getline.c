@@ -49,7 +49,6 @@ _getline(char *to, size_t size, FILE * stream)
  * - >= 0 count of characters read  
  * - -1 for EOF/error 
  */
-ssize_t getline(char **pto, size_t * size, FILE * stream);
 ssize_t
 getline(char **pto, size_t * size, FILE * stream)
 {
