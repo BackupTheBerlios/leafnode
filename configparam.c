@@ -16,7 +16,7 @@ comp(const void *a, const void *b)
     return strcmp((const char *)a, ((const struct configparam *)b)->name);
 }
 
-const struct configparam *
+/*@null@*/ /*@dependent@*/ const struct configparam *
 find_configparam(register const char *name)
 {
     return (const struct configparam *)

@@ -53,7 +53,8 @@ main(int argc, char *argv[])
     const char c[] = "-\\|/";
     int i, score, option, deleted, kept;
     unsigned long n;
-    char *k, *l, *msgid;
+    char *l, *msgid;
+    /*@dependent@*/ char *k;
     const char *msgidpath = "";
     int f;
     DIR *d;

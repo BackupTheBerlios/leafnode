@@ -37,7 +37,7 @@ struct newsgroup /*@null@*/ *active  = NULL;
 
 struct nglist {
     struct newsgroup *entry;
-    struct nglist *next;
+    /*@null@*/ struct nglist *next;
 };
 
 static int
@@ -49,7 +49,7 @@ _compactive(const void *a, const void *b)
     return strcasecmp(la->name, lb->name);
 }
 
-struct nglist *newgroup;
+static /*@null@*/ /*@owned@*/ struct nglist *newgroup;
 
 /*
  * insert a group into a list of groups. If a group is already present,
@@ -58,9 +58,10 @@ struct nglist *newgroup;
 void
 insertgroup(const char *name, char status, long unsigned first,
 	    long unsigned last, time_t age, const char *desc)
+    /*@globals newgroup@*/
 {
     struct nglist *l;
-    static struct nglist *lold;
+    static /*@dependent@*/ struct nglist *lold;
     struct newsgroup *g;
 
     /* interpret INN status characters */
@@ -93,11 +94,13 @@ insertgroup(const char *name, char status, long unsigned first,
 				    "Allocating space for newsgroup list");
 
     l->entry = g;
-    l->next = NULL;
-    if (newgroup == NULL)
+    if (newgroup == NULL) {
+	l->next = newgroup;   /* make splint happy */
 	newgroup = l;
-    else
+    } else {
+	l->next = lold->next; /* == NULL, appending to the list */
 	lold->next = l;
+    }
     lold = l;
 }
 
@@ -132,6 +135,7 @@ changegroupdesc(const char *groupname, char *description)
  */
 void
 mergegroups(void)
+    /*@globals active, newgroup@*/
 {
     struct nglist *l, *la;
     size_t count = 0;
@@ -173,7 +177,7 @@ mergegroups(void)
  * The size of the active file can be passed to asize. If asize == -1
  * activesize will be used.
  */
-struct newsgroup *
+/*@null@*/ /*@dependent@*/ struct newsgroup *
 findgroup(const char *name, struct newsgroup *a, size_t asize)
 {
     char *n = critstrdup(name, "findgroup");
@@ -318,7 +322,7 @@ writeactive(void)
  * safe to call without active
  */
 void
-freeactive(struct newsgroup *a)
+freeactive(/*@null@*/ /*@only@*/ struct newsgroup *a)
 {
     struct newsgroup *g;
 
@@ -326,14 +330,15 @@ freeactive(struct newsgroup *a)
 	return;
 
     g = a;
+    /*@+loopexec@*/
     while (g->name) {
 	free(g->name);
 	if (g->desc)
 	    free(g->desc);
 	g++;
     }
+    /*@=loopexec@*/
     free(a);
-    a = 0;
 }
 
 /*

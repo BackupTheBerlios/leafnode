@@ -16,5 +16,6 @@ enum { CS_GLOBAL = 4711, CS_SERVER, CS_SERVERDECL };
 
 extern const struct configparam configparam[];
 extern const int count_configparam;
-const struct configparam *find_configparam(register const char *name);
+/*@null@*/ /*@dependent@*/ const struct configparam *
+find_configparam(register const char *name);
 #endif
