@@ -3,7 +3,7 @@ dnl written by Cornelius Krasel & Matthias Andree, 1999-2001
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode],[2.0b8_ma7.7pre],[matthias.andree@gmx.de])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.12 $)
+AC_REVISION($Revision: 1.13 $)
 AC_CONFIG_SRCDIR([leafnode.h])
 AC_CONFIG_HEADER(config.h)
 
@@ -20,6 +20,7 @@ AC_PATH_PROG(CAT,cat,false)
 AC_PATH_PROG(GZIP,gzip,false)
 AC_PATH_PROG(BZIP2,bzip2,false)
 AC_PATH_PROG(SED,sed,false)
+AC_PATH_PROG(DEFAULTMTA,sendmail,/usr/sbin/sendmail,/usr/sbin:/usr/lib:/usr/etc)
 
 dnl If we're using gcc, enable some warnings
 AC_CACHE_CHECK(for additional compiler options, ac_cv_prog_gcc_flags, [
