@@ -1,3 +1,19 @@
+2002-04-27  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* Makefile.am, fetchnews.c, leafnode.h, log_moveto.c, queues.c:
+	function moveto renamed in log_moveto and placed in separate file. 
+	queues.c: in case of store failure in feedincoming, log_moveto
+	message to failed.postings.  Since store does not exhibit transient
+	failure in general, this should be safe.
+
+	* applyfilter.c: remove spurious sign warning.
+
+	* configure.ac: test for strdup removed.
+	* dirutil.c, lsort.c, masock_sa2addr.c, masock_sa2name.c,
+	mkdir_parent.c, moderated.c: Replace all strdup with critstrdup.
+
+	* nntpd.c: forward port error checking in markdownload.
+
 2002-04-26  Matthias Andree  <matthias.andree@gmx.de>
 
 	* TODO: "check for I/O errors in markdownload" is now fixed.
