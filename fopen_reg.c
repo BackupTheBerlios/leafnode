@@ -28,7 +28,7 @@
 /** Open an existing file if it's a regular file.
  * Sets errno in case of trouble. Safe on systems with broken stat() macros.
  * \return FILE* stream handle or NULL if it's not a regular file.
- * \bugs on systems, that do not support ENOTSUP, returns EINVAL instead.
+ * \bug on systems that do not support ENOTSUP, returns EINVAL instead.
  */
 /*@null@*/ /*@dependent@*/ FILE *
 fopen_reg(

@@ -35,7 +35,7 @@ lookup(/*@null@*/ const char *msgid)
 	namelen = i;
     }
 
-    /** \bugs When fixing this, make sure we don't have a period as the
+    /** \bug When fixing this, make sure we don't have a period as the
      * last character (breaks NTFS on CygWin) and heed POSIX portable
      * file name character set
      */

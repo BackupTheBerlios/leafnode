@@ -1264,7 +1264,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 
 /** Split a line which is assumed in RFC-977 LIST format.  Puts a
  * pointer to the end of the newsgroup name into nameend (the caller
- * should then set this to '\0'), and a pointer to the status character
+ * should then set this to '\\0'), and a pointer to the status character
  * into status.
  * \return
  * - 1 if the status character is valid

@@ -1,6 +1,6 @@
-/** \file strcasestr.c -- strcasestr replacement 
+/** \file strcasestr.c strcasestr replacement
  * \author Matthias Andree
- * \year 2004
+ * \date 2004
  *
  * GNU LESSER PUBLIC LICENSE, v2.1
  */

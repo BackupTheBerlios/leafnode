@@ -1,7 +1,7 @@
 /** \file bsearch_range.c
  * binary search for an interval of values in a sorted array,
  * \author Ralf Wildenhues
- * \year 2002
+ * \date 2002
  */
 
 #include <stddef.h>

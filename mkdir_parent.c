@@ -1,6 +1,6 @@
 /** \file mkdir_parent.c
  * \author Matthias Andree
- * \year 2001
+ * \date 2001
  */
 
 #include "critmem.h"

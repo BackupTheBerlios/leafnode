@@ -1,7 +1,7 @@
 /** \file masock_sa2name.c
  *  (C) Copyright 2001 by Matthias Andree
  *  \author Matthias Andree
- *  \year 2001
+ *  \date 2001
  */
 
 #include "masock.h"

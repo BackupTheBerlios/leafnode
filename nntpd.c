@@ -1168,7 +1168,7 @@ validate_newsgroups(const char *n)
 }
 
 /** Check if the Message-ID is acceptable, feed with n pointing to the
- * first angle bracket. <MID> This version is pedantic: no whitespace,
+ * first angle bracket. This version is pedantic: no whitespace,
  * no weird characters, no bogus domains.
  */
 static int

@@ -1,7 +1,7 @@
 /** \file parserange.c
  *  Parse a range of format [n1][-][n2] as used in NNTP XOVER
  *  \author Matthias Andree
- *  \year 2001
+ *  \date 2001
  */
 
 #include <string.h>

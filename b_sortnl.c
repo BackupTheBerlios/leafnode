@@ -1,7 +1,7 @@
 /** \file b_sortnl.c
  *  Ultra-short non-locale-dependent sort replacement.
  *  exits with code 0 for success, code 1 for internal problems (out of memory), *  code 2 for I/O errors.
- * \year 2000 - 2002
+ * \date 2000 - 2002
  * \author Matthias Andree
  */
 
