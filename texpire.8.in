@@ -14,7 +14,7 @@ texpire \- delete old news article threads
 
 .SH SYNOPSIS
 .B texpire -V
-.br
+
 .B texpire [-fnr] [-D debugmode] [-F configfile] [-v[v[v[v]]]]
 
 .SH DESCRIPTION
