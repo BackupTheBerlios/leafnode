@@ -1380,10 +1380,12 @@ processupstream(const char *const server, const unsigned short port,
 	closeinteresting(r);
 	freeinteresting();
     } else {
+	size_t len = strlen(newsgrp);
 	newserver = do_group(newsgrp, ngs, f);
 	helpptr = ngs;
 	while (helpptr) {
-	    if (strncmp(helpptr->string, newsgrp, strlen(newsgrp)))
+	    if (strncmp(helpptr->string, newsgrp, len) ||
+		        helpptr->string[len] != ' ')
 		fprintf(f, "%s\n", helpptr->string);
 	    helpptr = helpptr->next;
 	}
