@@ -1629,7 +1629,9 @@ dopost(void)
 			log_unlink(mastr_str(outgoingname), 0);
 		goto unlink_cleanup;
 	    }
-	} else {
+	}
+	
+	if (no_direct_spool) {
 	    /* remove message.id link so fetchnews can download the
 	     * posting */
 	    log_unlink(lookup(mid), 0);
