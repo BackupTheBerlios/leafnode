@@ -1156,7 +1156,8 @@ postarticles(void)
 	haveid = 0;
 	f = 0;
 	if (!(f = fopen_reg(*y, "r"))) {
-	    ln_log(LNLOG_SERR, LNLOG_CARTICLE, "Cannot open %s", *y);
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		   "Cannot open %s to post, expecting regular file.", *y);
 	} else {
 	    char *f1;
 
