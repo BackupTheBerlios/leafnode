@@ -1,1 +1,1 @@
--kr -ncs -l80 -psl -hnl -nfca -nfc1
+-kr -ncs -l80 -psl
