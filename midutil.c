@@ -35,6 +35,10 @@ lookup(/*@null@*/ const char *msgid)
 	namelen = i;
     }
 
+    /** \bugs When fixing this, make sure we don't have a period as the
+     * last character (breaks NTFS on CygWin) and heed POSIX portable
+     * file name character set
+     */
     p = mastrcpy(name, spooldir);
     p = mastrcpy(p, "/message.id/");
     (void)mastrcpy(p + 4, msgid);
