@@ -347,7 +347,7 @@ buildpseudoart(const char *grp)
 	   "Creating pseudoarticle for group %s", grp);
     fprintf(f, "Path: %s!not-for-mail\n", owndn ? owndn : fqdn);
     fprintf(f, "Newsgroups: %s\n", grp);
-    fprintf(f, "From: Leafnode <nobody@%s>\n", owndn ? owndn : fqdn);
+    fprintf(f, "From: Leafnode <news@%s>\n", owndn ? owndn : fqdn);
     fprintf(f, "Subject: Leafnode placeholder for group %s\n", grp);
     fprintf(f, "Date: %s\n", rfctime());
     fprintf(f, "Message-ID: <leafnode:placeholder:%s@%s>\n", grp,
