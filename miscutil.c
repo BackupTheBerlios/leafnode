@@ -39,6 +39,8 @@
 #include <dmalloc.h>
 #endif
 
+static void whoami(void);
+
 char fqdn[FQDN_SIZE];
 extern struct state _res;
 
@@ -95,6 +97,9 @@ initvars(const char *const progname)
 	return FALSE;
     }
 #endif /* not TESTMODE */
+
+    whoami();
+    validatefqdn(fqdn);
 
     /* config.c stuff does not have to be initialized */
     expire_base = NULL;
@@ -622,29 +627,39 @@ chdirgroup(const char *group,
 }
 
 /* get the fully qualified domain name of this box into fqdn */
-void
+static void
 whoami(void)
 {
     struct hostent *he;
+    int debugqual = 0;
+    char *x;
 
-    if (!gethostname(fqdn, FQDN_SIZE - 1)
-	&& (he = gethostbyname(fqdn)) != NULL) {
-	strncpy(fqdn, he->h_name, FQDN_SIZE - 1);
-	if (strchr(fqdn, '.') == NULL) {
+    if ((x = getenv("LN_DEBUG_QUALIFICATION")) != NULL
+	&& *x)
+	debugqual = 1;
+
+    if (!gethostname(fqdn, 255) && (he = gethostbyname(fqdn)) != NULL) {
+	fqdn[0] = '\0';
+	strncat(fqdn, he->h_name, 255);
+	if (debugqual) ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			      "canonical hostname: %s", fqdn);
+	if (!is_validfqdn(fqdn)) {
 	    char **alias;
-
 	    alias = he->h_aliases;
-	    while (alias && *alias)
-		if (strchr(*alias, '.') && (strlen(*alias) > strlen(fqdn)))
-		    strncpy(fqdn, *alias, FQDN_SIZE - 1);
-		else
+	    while (alias && *alias) {
+		if (debugqual) {
+		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
+			   "alias for my hostname: %s", *alias);
+		}
+		if (is_validfqdn(*alias)) {
+		    strncat(fqdn, *alias, 255);
+		    break;
+		} else {
 		    alias++;
+		}
+	    }
 	}
-    } else {
-	*fqdn = '\0';
     }
-
-    endhostent();
 }
 
 /*
