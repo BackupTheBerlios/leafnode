@@ -1352,10 +1352,10 @@ nntpactive(int fa)
 	    if (is_interesting(l)
 		    && (forceact || !(active && findgroup(l, active, -1)))
 		    && chdirgroup(l, FALSE)) {
+		unsigned long c;
 		first = ULONG_MAX;
 		last = 0;
-		unsigned long count;
-		if (getwatermarks(&first, &last, &count) || 0 == count) {
+		if (getwatermarks(&first, &last, &c) || 0 == c) {
 		    /* trouble or empty group */
 		    first = last = 0;
 		}
