@@ -492,7 +492,7 @@ doxover(struct stringlist **stufftoget,
 	int xoverlen = strlen(l);
 	char *xover[20];
 	char *artno, *subject, *from, *date, *messageid;
-	char *references, *lines, *bytes, *p, *q;
+	char *references, *lines, *bytes, *p;
 	char *newsgroups = NULL;
 	char *newsgroups_storage = NULL;
 
@@ -507,7 +507,7 @@ doxover(struct stringlist **stufftoget,
 
 	/* format of an XOVER line is usually:
 	   article number, subject, author, date, message-id, references,
-	   byte count, line count, xhdr (optional) */
+	   byte count, line count, xref (optional) */
 	artno = xover[0];
 	subject = xover[1];
 	from = xover[2];
@@ -538,11 +538,12 @@ doxover(struct stringlist **stufftoget,
 		/* Xref: header but no newsgroups given */
 		newsgroups = groupname;
 	    } else {
+		char *q, *r;
 		/* Allocating space for pseudo-newsgroups header */
 		newsgroups_storage = (char *)critcalloc(strlen(p),
 						"Allocating space for "
 						"newsgroups header");
-		newsgroups = newsgroups_storage;
+		r = newsgroups = newsgroups_storage;
 
 		/* skip server name */
 		SKIPWORD(p);
@@ -550,23 +551,23 @@ doxover(struct stringlist **stufftoget,
 		/* now the thing points to the first newsgroup, if present */
 		while (p && *p && (q = strchr(p, ':')) != NULL) {
 		    *q = '\0';
-		    strcat(newsgroups, p);
+		    r = mastrcpy(r, p);
 		    p = q + 1;
 		    SKIPWORD(p);	/* skip article number and subsequent
 					   white space */
 		    if (*p)
 			/* more than one newsgroup */
-			strcat(newsgroups, ",");
+			r = mastrcpy(r, ",");
 		}
 	    }
 	}
 
 	if ((filtermode & FM_XOVER) || delaybody) {
-	    char *hdr;
+	    char *hdr, *q;
 
 	    hdr = (char *)critmalloc(xoverlen + strlen(newsgroups) + 200,
 				     "allocating space for pseudo header");
-	    sprintf(hdr, "From: %s\n"
+	    q = hdr + sprintf(hdr, "From: %s\n"
 		    "Subject: %s\n"
 		    "Message-ID: %s\n"
 		    "References: %s\n"
@@ -575,14 +576,14 @@ doxover(struct stringlist **stufftoget,
 		    from, subject, messageid, references, date, newsgroups);
 
 	    if (lines) {
-		strcat(hdr, "Lines: ");
-		strcat(hdr, lines);
-		strcat(hdr, "\n");
+		q = mastrcpy(q, "Lines: ");
+		q = mastrcpy(q, lines);
+		q = mastrcpy(q, "\n");
 	    }
 	    if (bytes) {
-		strcat(hdr, "Bytes: ");
-		strcat(hdr, bytes);
-		strcat(hdr, "\n");
+		q = mastrcpy(q, "Bytes: ");
+		q = mastrcpy(q, bytes);
+		q = mastrcpy(q, "\n");
 	    }
 	    if (filtlst && killfilter(filtlst, hdr)) {
 		groupkilled++;
@@ -614,9 +615,9 @@ doxover(struct stringlist **stufftoget,
 		    continue;
 		}
 		if ((f = fopenmsgid(c)) != NULL) {
-		    fprintf(f, "%s", hdr);
+		    fputs(hdr, f);
 		    fclose(f);
-		    store(c, 0, 0);	/* FIXME: filter here! */
+		    store(c, 0, 0);
 		}
 	    } else {
 		count++;

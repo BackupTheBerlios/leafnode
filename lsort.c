@@ -9,6 +9,7 @@
 
 #include "leafnode.h"
 #include "critmem.h"
+#include "mastring.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -38,8 +39,8 @@ main(void)
     size_t i;
     FILE *f;
 
-    strcpy(path, spooldir);
-    strcat(path, "/leaf.node/groupinfo.old");
+    l = mastrcpy(path, spooldir);
+    (void)mastrcpy(l, "/leaf.node/groupinfo.old");
 
     f = fopen(path, "r");
     if (f == NULL) {

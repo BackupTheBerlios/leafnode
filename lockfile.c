@@ -25,6 +25,7 @@
 #include "ln_log.h"
 #include "critmem.h"
 #include "validatefqdn.h"
+#include "mastring.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -201,7 +202,7 @@ lockfile_exists(
 		   unsigned long timeout)
 {
     const int block = 1;
-    char *l2, *pid;
+    char *l2, *pid, *p;
     int fd;
     int have_lock = 0;
     int quiet = 0;
@@ -226,8 +227,8 @@ lockfile_exists(
     pid = (char *)critmalloc(strlen(fqdn) + sizeof(unsigned long) * 4 + 4,
 			     "lockfile_exists");
 
-    strcpy(l2, lockfile);
-    strcat(l2, append);
+    p = mastrcpy(l2, lockfile);
+    (void)mastrcpy(p, append);
 
     /* make a temporary file */
     fd = safe_mkstemp(l2);

@@ -204,6 +204,7 @@ getxoverline(
 	if (from != NULL && date != NULL && subject != NULL && msgid != NULL
 	    && bytes) {
 	    if (!require_messageidlink || ihave(msgid)) {
+		char *p;
 		/* only generate message ID if article has a link in
 		   message.id */
 		result = (char *)critmalloc(strlen(from) + strlen(date) +
@@ -213,12 +214,12 @@ getxoverline(
 					    + 100
 					    + (xref ? strlen(xref) : 0),
 					    "computing overview line");
-		sprintf(result, "%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",
+		p = result + sprintf(result, "%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%ld",
 			filename, subject, from, date, msgid,
 			references ? references : "", bytes, linecount);
 		if (xref) {
-		    strcat(result, "\tXref: ");
-		    strcat(result, xref);
+		    p = mastrcpy(p, "\tXref: ");
+		    (void)mastrcpy(p, xref);
 		}
 	    }
 	}			/* FIXME: if mandatory headers missing, delete offending article */
