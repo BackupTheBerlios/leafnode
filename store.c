@@ -115,6 +115,8 @@ store_stream(FILE * in /** input file */ ,
     mastr *head = mastr_new(4095l);	/* full header for killing */
     ssize_t s;
     mastr *ln = mastr_new(4095l);	/* line buffer */
+    mastr *xowrite = mastr_new(4095l);	/* buffer for overview line */
+    char *ov = NULL;			/* hold getxoverline result */
 
     (void)mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", NULL);
 
@@ -344,8 +346,9 @@ store_stream(FILE * in /** input file */ ,
 		    /* we use sync_link on the always-open file below */
 		    /* ls = !sync_link(tmpfn, nb); */
 		    ls = !link(mastr_str(tmpfn), nb);
-		    if (ls)
+		    if (ls) {
 			/*@innerbreak@*/ break;
+		    }
 		    if (errno == EEXIST) {
 			int e;
 			ln_log(LNLOG_SWARNING, LNLOG_CARTICLE,
@@ -452,62 +455,108 @@ store_stream(FILE * in /** input file */ ,
 	rc = -1;
 	goto bail;
     }
+
+    ov = getxoverline(0, mastr_str(tmpfn));
+    if (ov && !strchr(ov, '\t')) {
+	free(ov);
+	ov = NULL;
+    }
+
+    /* iterate over XRef: and update .overview */
+    {
+	char *q = mastr_modifyable_str(xref);
+
+	SKIPLWS(q);
+	while(*q) {
+	    char *tt, *p;
+
+	    p = strchr(q, ':');
+	    if (!p) break;
+	    *p++ = '\0';
+	    /* now q has the group name */
+	    tt = strchr(p, ' ');
+	    if (!tt) tt = p + strlen(p);
+	    if (*tt == ' ') *tt++ = '\0';
+	    else *tt = '\0';
+	    /* now p has the file name in the group */
+
+	    if (chdirgroup(q, FALSE)) {
+		int fdo;
+
+		mastr_vcat(xowrite, nb, strchr(ov, '\t'), "\n", NULL);
+		fdo = open(".overview", O_WRONLY|O_APPEND|O_CREAT,
+			(mode_t)0660);
+		if (fdo >= 0) {
+		    /* FIXME: will getxover cope with hosed
+		     * overview files? ENOSPC is a candidate... */
+		    (void)writes(fdo, mastr_str(xowrite));
+		    (void)close(fdo);
+		}
+	    }
+	    q = tt;
+	}
+    }
+
     tmpstream = NULL;
     rc = 0;
 
-  bail:
-    if (head)
-	mastr_delete(head);
-    if (ignore && rc) {
-	if (nntpmode) {
-	    while ((line = getaline(in)))
-		if (0 == strcmp(line, "."))
-		    break;
-	} else {
-	    /* drain bytes */
-	    if (debugmode & DEBUG_STORE)
-		ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-			"store: ignoring %ld bytes",
-			(long)maxbytes); 
-	    while (maxbytes > 0 && (s = mastr_getln(ln, in, maxbytes)) > 0) {
-		mastr_chop(ln);
-		maxbytes -= s;
+bail:
+	if (head)
+	    mastr_delete(head);
+	if (ignore && rc) {
+	    if (nntpmode) {
+		while ((line = getaline(in)))
+		    if (0 == strcmp(line, "."))
+			break;
+	    } else {
+		/* drain bytes */
 		if (debugmode & DEBUG_STORE)
 		    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-			    "store: ignored %ld: %s, "
-			    "to go: %ld", (long)s, mastr_str(ln), 
+			    "store: ignoring %ld bytes",
 			    (long)maxbytes); 
+		while (maxbytes > 0 && (s = mastr_getln(ln, in, maxbytes)) > 0) {
+		    mastr_chop(ln);
+		    maxbytes -= s;
+		    if (debugmode & DEBUG_STORE)
+			ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+				"store: ignored %ld: %s, "
+				"to go: %ld", (long)s, mastr_str(ln), 
+				(long)maxbytes); 
+		}
 	    }
 	}
-    }
-    if (olddirfd >= 0) {
-	(void)fchdir(olddirfd);
-	(void)close(olddirfd);
-    }
-    if (xref)
-	mastr_delete(xref);
-    if (mid)
-	free(mid);
-    if (ln)
-	mastr_delete(ln);
-    if (nglist) {
-	free_strlist(nglist);
-	free(nglist);
-    }
-    mastr_delete(ngs);
-    if (tmpstream) {
-	(void)fflush(tmpstream);
-	if (rc) {
-	    /* kill the beast */
-	    (void)ftruncate(fileno(tmpstream), 0);
-	    (void)fsync(fileno(tmpstream));
+	if (olddirfd >= 0) {
+	    (void)fchdir(olddirfd);
+	    (void)close(olddirfd);
 	}
-	(void)fclose(tmpstream);
+	if (xref)
+	    mastr_delete(xref);
+	if (mid)
+	    free(mid);
+	if (ln)
+	    mastr_delete(ln);
+	if (nglist) {
+	    free_strlist(nglist);
+	    free(nglist);
+	}
+	if (ov) {
+	    free(ov);
+	}
+	mastr_delete(xowrite);
+	mastr_delete(ngs);
+	if (tmpstream) {
+	    (void)fflush(tmpstream);
+	    if (rc) {
+		/* kill the beast */
+		(void)ftruncate(fileno(tmpstream), 0);
+		(void)fsync(fileno(tmpstream));
+	    }
+	    (void)fclose(tmpstream);
+	}
+	(void)log_unlink(mastr_str(tmpfn), 0);
+	mastr_delete(tmpfn);
+	return rc;
     }
-    (void)log_unlink(mastr_str(tmpfn), 0);
-    mastr_delete(tmpfn);
-    return rc;
-}
 
 int
 store(const char *name, int nntpmode,
