@@ -1862,7 +1862,7 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	return;
     }
     if (OVfield >= 0) {
-	nntpprintf("221 %s header %s (from overview) for postings %lu-%lu:",
+	nntpprintf("221 %s header %s(from overview) for postings %lu-%lu:",
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
