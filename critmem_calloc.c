@@ -24,6 +24,8 @@ mycritcalloc(const char *f, long l, size_t size, const char *message)
     (void)f;
     (void)l;			/* shut up compiler warnings */
     a = calloc(1, size);
+    if (a == NULL && size == 0)
+	a = calloc(1,1);
 #endif
 
     if (!a) {

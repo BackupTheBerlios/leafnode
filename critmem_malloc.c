@@ -23,6 +23,8 @@ mycritmalloc(const char *f, long l, size_t size, const char *message)
     (void)f;
     (void)l;			/* shut up compiler warnings */
     a = malloc(size);
+    if (a == NULL && size == 0)
+	a = malloc(1);
 #endif
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,

@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.52 2004/01/16 19:52:53 emma Exp $
+# $Id: Makefile.am,v 1.53 2004/01/16 20:29:02 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -221,7 +221,7 @@ config_paths.h: Makefile
 amiroot_SOURCES		= amiroot.c
 amiroot_LDADD 		=
 
-b_sortnl_SOURCES	= b_sortnl.c
+b_sortnl_SOURCES	= b_sortnl.c critmem_malloc.c critmem_realloc.c
 b_sortnl_LDADD		= @LIBOBJS@
 
 # programs

@@ -17,6 +17,7 @@
 #endif
 
 #include "leafnode.h"
+#include "critmem.h"
 
 static int
 b_comp(const void *a, const void *b)
@@ -24,21 +25,21 @@ b_comp(const void *a, const void *b)
     return strcmp(*(const char *const *)a, *(const char *const *)b);
 }
 
+int ln_log(void) {} /* dummy */
+
 int
 main(void)
 {
     size_t max = 1000;
-    char **x = (char **)malloc(max * sizeof(char *));
+    char **x = (char **)critmalloc(max * sizeof(char *), "b_sortnl");
     size_t count;
     char buf[LINELEN];
     size_t i;
 
-    if (!x)
-	exit(1);
     for (count = 0;; count++) {
 	if (count == max) {
 	    max += max;
-	    x = (char **)realloc(x, max * sizeof(char *));
+	    x = (char **)critrealloc(x, max * sizeof(char *), "b_sortnl");
 
 	    if (!x)
 		exit(1);
@@ -46,7 +47,7 @@ main(void)
 	if (NULL == fgets(buf, LINELEN, stdin))
 	    break;
 
-	x[count] = (char *)malloc(strlen(buf) + 1);
+	x[count] = (char *)critmalloc(strlen(buf) + 1, "b_sortnl");
 
 	if (!x[count])
 	    exit(1);

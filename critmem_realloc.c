@@ -13,15 +13,17 @@
  * and exits with the error message
  */
 void *
-mycritrealloc(const char *f, long l, void *a, size_t size, const char *message)
+mycritrealloc(const char *f, long l, void *oa, size_t size, const char *message)
 {
 
 #ifdef WITH_DMALLOC
-    a = _realloc_leap(f, l, a, size);
+    a = _realloc_leap(f, l, oa, size);
 #else
     (void)f;
     (void)l;			/* shut up compiler warnings */
-    a = realloc(a, size);
+    a = realloc(oa, size);
+    if (a == NULL && size == 0)
+	a = realloc(oa, 1);
 #endif
     if (!a) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,

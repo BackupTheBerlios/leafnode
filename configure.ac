@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040108a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.82 $)
+AC_REVISION($Revision: 1.83 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -233,8 +233,6 @@ AC_SUBST(LINKPCRELIB)
 dnl Checks for library functions.
 AC_FUNC_CHOWN
 AC_FUNC_FORK dnl checks whether fork() is just a stub
-AC_FUNC_MALLOC dnl checks whether malloc(0) works
-AC_FUNC_REALLOC dnl checks whether realloc(0) works
 dnl AC_FUNC_MKTIME
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_STRFTIME
@@ -242,6 +240,9 @@ dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror])
+dnl THESE ARE DISABLED AND UNNEEDED, no malloc(0) calls possible
+dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
+dnl AC_FUNC_REALLOC dnl checks whether realloc(0) works
 
 dnl Check if system vsnprintf works
 AC_CACHE_CHECK([if your system's vsnprintf works],
