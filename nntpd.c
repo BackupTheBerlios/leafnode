@@ -93,7 +93,7 @@ static struct newsgroup *dolistgroup(struct newsgroup *group, const char *,
 static int markinterest(const struct newsgroup *);
 static int allowposting(void);
 static int isauthorized(void);
-static void doauthinfo(const char *arg);
+static void doauthinfo(char *arg);
 static int dorange(const char *arg,
 		   unsigned long *a, unsigned long *b,
 		   unsigned long artno, unsigned long lo, unsigned long hi);
@@ -1174,7 +1174,7 @@ dopost(void)
     int err = 0;
     int duplicate = FALSE;
     int hdrtoolong = FALSE;
-    size_t i, len;
+    size_t len;
     int out;
     char inname[PATH_MAX + 1];
     static int postingno;	/* starts at 0 */
@@ -1278,19 +1278,16 @@ dopost(void)
 	    hdrtoolong = TRUE;
 	    err = TRUE;
 	}
-	/* replace tabs with spaces */
-	for (i = 0; i < len; i++)
-	    if (isspace((unsigned char)line[i]))
-		line[i] = ' ';
 	if (len && line[len - 1] == '\n')
 	    line[--len] = '\0';
 	if (len && line[len - 1] == '\r')
 	    line[--len] = '\0';
-	if (len && line[len - 1] == '\r')
-	    line[--len] = '\0';
-	if (len)
+	if (len) {
+	    /* regular header line, write it */
 	    write(out, line, len);
-	else {
+	} else {
+	    /* separator between header and body, defer writing to
+	     * append missing headers */
 	    if (!havepath) {
 		writes(out, "Path: ");
 		if (owndn)
@@ -1307,10 +1304,9 @@ dopost(void)
 		writes(out, "\r\n");
 	    }
 	    if (!havemessageid) {
-		char tmp[800];
-
-		snprintf(tmp, sizeof(tmp), "Message-ID: %s\r\n", msgid);
-		writes(out, tmp);
+		writes(out, "Message-ID: ");
+		writes(out, msgid);
+		writes(out, "\r\n");
 	    }
 	}
 	writes(out, "\r\n");
@@ -1330,8 +1326,6 @@ dopost(void)
 	    }
 	    len = strlen(line);
 	    if (len && line[len - 1] == '\n')
-		line[--len] = '\0';
-	    if (len && line[len - 1] == '\r')
 		line[--len] = '\0';
 	    if (len && line[len - 1] == '\r')
 		line[--len] = '\0';
@@ -1969,8 +1963,13 @@ dolistgroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 /*
  * authinfo stuff
  */
-/*
- * read users and their crypted passwords into a stringlist
+/**
+ * Read users and their crypt(3)ed passwords into a stringlist.
+ * File name: ${sysconfdir}/users
+ * File format: line oriented, each line:
+ * USER PASSWORD
+ * "USER" may not contain a space for obvious reasons.
+ * \returns 0 for success, errno otherwise.
  */
 static int
 readpasswd(void)
@@ -1985,13 +1984,13 @@ readpasswd(void)
     if ((f = fopen(s, "r")) == NULL) {
 	error = errno;
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "unable to open %s: %m", s);
-	authentication = AM_NAME;
 	return error;
     }
     while ((l = getaline(f)) != NULL) {
 	appendtolist(&users, &ptr, l);
     }
-    fclose(f);
+    if (ferror(f)) return errno;
+    if (fclose(f)) return errno;
     return 0;
 }
 
@@ -2006,66 +2005,89 @@ isauthorized(void)
     return FALSE;
 }
 
-/** Bug: this must be replaced by a proper state machine */
-void
-doauthinfo(const char *arg)
+static int
+doauth_file(char *const cmd, char *const val) /*@modifies *val@*/
 {
-    char cmd[MAXLINELENGTH] = "";
-    char param[MAXLINELENGTH] = "";
     static char *user = NULL;
-    char *p;
+
+    if (0 == strcasecmp(cmd, "user")) {
+	char *t;
+
+	if (user) free(user);
+	user = malloc(strlen(val) + 2);
+	t = mastrcpy(user, val);
+	*t++ = ' ';
+	*t = '\0';
+	memset(val, 0x55, strlen(val));
+	return P_CONTINUE;
+    }
+
+    if (0 == strcasecmp(cmd, "pass")) {
+	char *pwdline;
+
+	if (!user) return P_REJECTED;
+	/* XXX hook up other authenticators here
+	 * user name + blank is in "user"
+	 * password (cleartext) is in "val" */
+	if ((pwdline = findinlist(users, user))) {
+	    char *c, *pwd;
+
+	    pwd = pwdline + strlen(user);   /* crypted original password */
+	    c = crypt(val, pwd);            /* crypt password from net with
+					       original password as salt */
+	    memset(val, 0x55, strlen(val));
+	    if (strcmp(c, pwd))
+		return P_REJECTED;
+	    else
+		return P_ACCEPTED;
+	}
+	/* user not found */
+	memset(val, 0x55, strlen(val));
+	return P_REJECTED;
+    }
+
+    memset(val, 0x55, strlen(val));
+    return P_SYNTAX_ERROR;
+}
+
+void
+doauthinfo(char *arg) /* we nuke away the password, no const here! */
+{
+    char *cmd;
+    char *param;
     int result = 0;
 
-    if (!arg || !strlen(arg))
-	result = P_SYNTAX_ERROR;
-    else if (!authentication)
+    if (!authentication) {
 	result = P_NOT_SUPPORTED;
-    else if (sscanf(arg, "%s %s", cmd, param) != 2)
-	result = P_SYNTAX_ERROR;
-    else if (!strcasecmp(cmd, "user")) {
-	if (authentication == AM_NAME) {
-	    if (getpwnam(param))
-		result = P_ACCEPTED;
-	    else
-		result = P_REJECTED;
-	} else if (authentication == AM_FILE) {
-	    user = critstrdup(param, "doauthinfo");
-	    result = P_CONTINUE;
-	}
-    } else if (!strcasecmp(cmd, "pass")) {
-	if (authentication == AM_NAME) {
-	    result = P_SYNTAX_ERROR;
-	} else if (authentication == AM_FILE) {
-	    if ((p = findinlist(users, user)) != NULL) {
-		char templ[80];
-		char passw[80];
-
-		snprintf(templ, 79, "%s %%s", user);
-		if (sscanf(p, templ, passw) != 1) {
-		    result = P_SYNTAX_ERROR;
-		    ln_log(LNLOG_SWARNING, LNLOG_CTOP,
-			   "Could not parse line %s", p);
-		} else {
-		    p = crypt(param, passw);
-		    if (!strcmp(passw, p))
-			result = P_ACCEPTED;
-		    else {
-			result = P_REJECTED;
-			printf("%s\n", p);
-		    }
-		}
-	    } else {
-		/* user unknown */
-		result = P_REJECTED;
-	    }
-	} else {
-	    ln_log(LNLOG_SERR, LNLOG_CTOP,
-		   "This should not happen: doauthinfo " __FILE__
-		   " line %d", __LINE__);
-	}
-    } else {
-	result = P_SYNTAX_ERROR;
+	goto done;
     }
+
+    if (!arg || !*arg) {
+	result = P_SYNTAX_ERROR;
+	goto done;
+    }
+
+    cmd = arg;
+    SKIPLWS(cmd);
+    param = cmd;
+    if (!*param || !isspace(*param)) {
+	result = P_SYNTAX_ERROR;
+	goto done;
+    }
+
+    *param++ = '\0';
+    SKIPLWS(param);
+
+    switch (authentication) {
+	case AM_FILE:
+	    result = doauth_file(cmd, param);
+	    break;
+	default:
+	    result = P_NOT_SUPPORTED;
+	    break;
+    }
+
+ done:
     switch (result) {
     case P_ACCEPTED:
 	nntpprintf("%d Authentication accepted", result);
