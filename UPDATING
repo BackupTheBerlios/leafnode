@@ -1,0 +1,19 @@
+NOTE: the local.groups and groupinfo files have changed from any former
+version to 2.0b8_ma8pre.
+
+To fix local.groups, if you have perl installed:
+  perl -ple 's /\s+/\ty\t/' -i.bak /etc/leafnode/local.groups
+This will make a backup of your original /etc/leafnode/local.groups.
+
+If you don't have Perl, use a text editor that preserves HTAB
+characters, change all while space to TAB and insert an additional field
+reading just y:
+
+Before: local.test some test group
+After:  local.testTAByTABsome test group
+
+Use the real TAB character rather than TAB.
+
+
+
+To fix the "remote" groups, run fetchnews -f.

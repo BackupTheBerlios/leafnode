@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.in,v 1.14 2001/12/18 01:17:37 emma Exp $
+# $Id: Makefile.in,v 1.15 2001/12/18 01:24:12 emma Exp $
 
 VERSION = @PACKAGE_VERSION@
 
@@ -271,6 +271,7 @@ EXTRASRC = \
 	Makefile.in \
 	README.html \
 	TODO \
+	UPDATING \
 	aclocal.m4 \
 	config.example \
 	config.h.in \
