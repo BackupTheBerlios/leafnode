@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.33 2002/04/03 21:35:58 emma Exp $ */
+/* $Id: leafnode.h,v 1.34 2002/04/03 21:58:12 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -412,7 +412,6 @@ extern "C" {
 
     /* max # of articles to read at first time */
     extern int delaybody;	/* delay download of message body */
-    extern int avoidxover;	/* prefer XHDR over XOVER */
     extern int debugmode;	/* log lots of stuff via syslog */
     extern long windowsize;
 /* Note: Sync the DEBUG_ flags below with config.example */
