@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.27 2004/08/22 16:53:17 emma Exp $
+.\" $Id: leafnode.8.in,v 1.28 2004/08/23 09:48:26 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -336,6 +336,10 @@ Leafnode can filter the input headers for arbitrary regular expressions.
 These are stored in a file designated "filterfile". The format of "filterfile"
 is described in
 .BR filterfile (5).
+.TP
+timeout_client = 300
+Wait timeout_client seconds for a command from the client (newsreader)
+before exiting.
 .TP
 timeout_short = 2
 By default, a group that has been accidentally touched is being fetched
