@@ -1,8 +1,8 @@
 /* \file getaline.c
  * Fetch a single line from a stdio stream, arbitrary length.
- * \date 2000
+ * \date 2000 - 2002
  * 
- *  Copyright(C) 2000 Matthias Andree <matthias.andree@gmx.de> 
+ *  Copyright(C) 2000 - 2002 Matthias Andree <matthias.andree@gmx.de> 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as
@@ -45,11 +45,18 @@ getaline(FILE * f /** file to read from */ )
     len = getline(&buf, &size, f);
     if (len < 0)
 	return 0;
-    if (len && (buf[len - 1] == '\n')) {	/* go back on top of the newline */
+    if (len && (buf[len - 1] == '\n')) {	/* go back on top of
+						   the newline */
 	--len;
 	if (len && (buf[len - 1] == '\r'))
 	    /* also delete CR */
 	    --len;
+    } else {
+	if (debug & DEBUG_IO) {
+	    /* FIXME: CTOP? */
+	    ln_log(LNLOG_SWARN, LNLOG_CTOP, "<%s (incomplete, ignored)", buf);
+	}
+	return NULL;
     }
     buf[len] = '\0';		/* unconditionally terminate string,
 				   possibly overwriting newline */
