@@ -54,6 +54,8 @@ stuff?
 
 Matthias:
 
+* Fix all USAGE() statements. Print standard options from a common file.
+
 * fix TOKENSIZE in filters.
 
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
