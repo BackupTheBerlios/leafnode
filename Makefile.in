@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.in,v 1.15 2001/12/18 01:24:12 emma Exp $
+# $Id: Makefile.in,v 1.16 2001/12/18 02:05:12 emma Exp $
 
 VERSION = @PACKAGE_VERSION@
 
@@ -651,6 +651,8 @@ getfoldedline.o: getfoldedline.c leafnode.h attributes.h redblack.h \
  config.h critmem.h
 getline.o: getline.c leafnode.h attributes.h redblack.h \
  config.h getline.h critmem.h
+gmtoff.o: gmtoff.c leafnode.h attributes.h redblack.h \
+ config.h
 h_error.o: h_error.c h_error.h
 inet_ntop.o: inet_ntop.c config.h
 leafnode-version.o: leafnode-version.c leafnode.h attributes.h \
@@ -687,6 +689,8 @@ miscutil.o: miscutil.c leafnode.h attributes.h redblack.h \
  config.h critmem.h ugid.h ln_log.h \
  format.h msgid.h mastring.h get.h
 mkdir_parent.o: mkdir_parent.c ln_dir.h
+moderated.o: moderated.c leafnode.h attributes.h redblack.h \
+ config.h ln_log.h mastring.h critmem.h
 msgid_hash.o: msgid_hash.c msgid.h
 msgid_sanitize.o: msgid_sanitize.c msgid.h
 newsq.o: newsq.c leafnode.h attributes.h redblack.h \
