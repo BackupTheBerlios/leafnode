@@ -922,9 +922,12 @@ splitLISTline(char *line, char **nameend, char **status) {
     /* p now points to the status char */
     *status = p;
     switch (*p) {
-	case 'y': case 'Y':
-	case 'n': case 'N':
-	case 'm': case 'M':
+	case 'y':
+	case 'n':
+	case 'm':
+	case 'j': /* j, = and x are for INN compatibility */
+	case '=':
+	case 'x':
 	    return 1;
 	default:
 	    ln_log(LNLOG_SWARNING, LNLOG_CGROUP,
@@ -1018,7 +1021,6 @@ nntpactive(void)
 	}
 	freelist(groups);
     } else {
-	last = first = 0;
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: getting newsgroups list", current_server->name);
 	putaline(nntpout, "LIST");
@@ -1028,6 +1030,7 @@ nntpactive(void)
 	    return;
 	}
 	while ((l = getaline(nntpin)) && (strcmp(l, "."))) {
+	    last = first = 0;
 	    count++;
 	    p = l;
 	    if (!splitLISTline(l, &q, &p)) continue;
