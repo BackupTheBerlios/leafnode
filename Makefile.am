@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.4 2002/01/06 02:39:14 emma Exp $
+# $Id: Makefile.am,v 1.5 2002/01/08 05:10:21 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -132,12 +132,12 @@ sbin_PROGRAMS = \
 	checkgroups \
 	fetchnews \
 	leafnode \
-	leafnode-version \
 	lsort \
 	texpire
 #	rnews is disabled
 
 bin_PROGRAMS = \
+	leafnode-version \
 	newsq
 
 noinst_PROGRAMS = \
@@ -249,6 +249,7 @@ install-data-hook:
 # don't use test -e, it's broken on Solaris (only in /usr/bin/test)
 	p=$(DESTDIR)$(LIBDIR)/local.groups ; \
 	test -f $$p || cp /dev/null $$p
+	rm -f $(DESTDIR)$(sbindir)/leafnode-version
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp news $$p && chmod 2755 $$p  ; true
 	@echo
