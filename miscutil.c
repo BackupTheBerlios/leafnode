@@ -389,6 +389,22 @@ closeinteresting(RBLIST * r)
     rbcloselist(r);
 }
 
+void
+freeinteresting(void)
+{
+    if (rb) {
+	RBLIST *r = openinteresting();
+	const char *x;
+	while ((x = readinteresting(r))) {
+	    /* this is ugly, but readinteresting delivers const */
+	    free((char *)x);
+	}
+	closeinteresting(r);
+	rbdestroy(rb);
+	rb = NULL;
+    }
+}
+
 /**
  * check whether "groupname" is represented in interesting.groups, without
  * touching the file.
@@ -579,7 +595,7 @@ appendtolist(struct stringlist **list, struct stringlist **lastentry,
  * return pointer to string if found, NULL otherwise
  */
 /*@null@*/ char *
-findinlist(struct stringlist *haystack, /*@null@*/ char *needle)
+findinlist(struct stringlist *haystack, /*@null@*/ const char *const needle)
 {
     struct stringlist *a;
 
