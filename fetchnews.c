@@ -1395,7 +1395,7 @@ nntpactive(int fa)
 		    do {
 			l = getaline(nntpin);
 			error++;
-		    } while (l && *l && *l != '.');
+		    } while (l && *l && strcmp(l, "."));
 		    if (error > 1) {
 			current_server->descriptions = 0;
 			ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
