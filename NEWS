@@ -2,6 +2,9 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050104a:
+- Bugfix: delete_article also removes articles from in.coming directory
+
 20050104a: Changes since 20050103a:
 - Feature: texpire can now remove articles from the spool, new -C
   option.

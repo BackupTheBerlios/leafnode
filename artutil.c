@@ -255,14 +255,44 @@ err_out:
     return -1;
 }
 
-void delete_article(const char *mid, const char *action, const char *past_action, const int updatexover)
+/* returns number of deleted articles */
+static unsigned int delete_mid_from_dir(const char *dir, const char *msgid,
+	const char *past_action) {
+    char **dl, **t;
+    unsigned int count = 0;
+
+    dl = spooldirlist_prefix(dir, DIRLIST_ALL, 0);
+    if (!dl) {
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+	       "Cannot read directory \"%s\": %m", dir);
+    } else {
+	for (t = dl; *t; t++) {
+	    char *x = getheader(*t, "Message-ID:");
+	    if (x) {
+		if (!strcmp(x, msgid)) {
+		    if (0 == log_unlink(*t, 0)) {
+			count++;
+			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+			       "%s %s", past_action, *t);
+		    }
+		    /* do not break here - want to remove all */
+		}
+		free(x);
+	    }
+	}
+	free_dirlist(dl);
+    }
+    return count;
+}
+
+void delete_article(const char *mid, const char *action,
+	const char *past_action, const int updatexover)
 {
     const char *filename;
     char *r, *hdr;
     char **ngs, **artnos;
     int n, num_groups;
     struct stat st;
-    char **dl, **t;
     int fd = open(".", O_RDONLY);
     char *msgidalloc = critstrdup(mid, "supersede_cancel");
     char *msgid = msgidalloc;
@@ -283,6 +313,10 @@ void delete_article(const char *mid, const char *action, const char *past_action
 
     if (debugmode & DEBUG_CANCEL)
 	ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "debug: %s %s", action, msgid);
+
+    /* delete from queue directories */
+    delete_mid_from_dir("out.going", msgid, past_action);
+    delete_mid_from_dir("in.coming", msgid, past_action);
 
     filename = lookup(msgid);
     if (!filename)
@@ -344,28 +378,6 @@ void delete_article(const char *mid, const char *action, const char *past_action
 	} else {
 	    ln_log(LNLOG_SINFO, LNLOG_CARTICLE, "%s %s", past_action, filename);
 	}
-    }
-
-    /* delete from out.going */
-    /* FIXME: also delete from in.coming */
-    dl = spooldirlist_prefix("out.going", DIRLIST_ALL, 0);
-    if (!dl) {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-	       "Cannot read out.going directory: %m");
-    } else {
-	for (t = dl; *t; t++) {
-	    char *x = getheader(*t, "Message-ID:");
-	    if (x) {
-		if (!strcmp(x, msgid)) {
-		    if (0 == log_unlink(*t, 0))
-			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-			       "%s %s", past_action, *t);
-		    /* break; *//* commented out to catch all */
-		}
-		free(x);
-	    }
-	}
-	free_dirlist(dl);
     }
 
     if (fchdir(fd))
