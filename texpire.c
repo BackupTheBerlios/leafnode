@@ -68,7 +68,7 @@ static int repair_spool = 0;	/* repair mode */
 static int expire_threads = 1;	/* if whole threads are blocked from expiry */
 
 static char gdir[LN_PATH_MAX];		/* name of current group directory */
-static unsigned long deleted, kept;
+static unsigned long deleted;
 
 /** what mode texpire operates in */
 static enum modes { TEM_expire, TEM_cancel } mode = TEM_expire;
@@ -519,18 +519,18 @@ updatedir(const char *groupname)
  * also count total number of articles
  */
 static unsigned long
-low_wm(unsigned long high)
+low_wm(unsigned long high, unsigned long *kept)
 {
     unsigned long low, i;
     struct rnode *r;
 
     low = high + 1;
-    kept = 0;
+    *kept = 0;
     for (i = 0; i < HASHSIZE; ++i) {
 	r = hashtab[i];
 	while (r) {
 	    if (r->artno) {	/* don't count nonexisting articles */
-		++kept;
+		++*kept;
 		if (r->artno < low) {
 		    low = r->artno;
 		}
@@ -764,6 +764,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     unsigned long first, last, i, totalthreads;
     struct thread *threadlist;
     const char *appendlog = NULL;
+    unsigned long kept;
 
     deleted = kept = 0;
 
@@ -827,7 +828,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     /* compute new low-water mark, count remaining articles */
     kept = 0;
     if (!last && g) last = g->last;
-    first = low_wm(last);
+    first = low_wm(last, &kept);
     /* free unused memory */
     free_threadlist(threadlist);
     threadlist = 0;
@@ -929,6 +930,7 @@ expiremsgid(void)
     char **dl, **di;
     struct stat st;
     mastr *s = mastr_new(LN_PATH_MAX);
+    unsigned long kept;
 
     deleted = kept = 0;
 
