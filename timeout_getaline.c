@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 500
 #include "leafnode.h"
 #include "ln_log.h"
 
@@ -15,7 +16,7 @@ static RETSIGTYPE
 timer(int sig)
 {
     (void)sig;
-    longjmp(to, 1);
+    siglongjmp(to, 1);
 }
 
 /*
@@ -27,7 +28,7 @@ timeout_getaline(FILE * f, unsigned int timeout)
     char *l;
     struct sigaction sa;
 
-    if (setjmp(to)) {
+    if (sigsetjmp(to, 1)) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "timeout reading.");
 	return NULL;
     }

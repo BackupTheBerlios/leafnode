@@ -6,6 +6,7 @@
  * See README for restrictions on the use of this software.
  */
 
+#define _XOPEN_SOURCE 500
 #include "leafnode.h"
 #include "get.h"
 #include "critmem.h"
@@ -115,7 +116,7 @@ static RETSIGTYPE
 sigcatch(int signo)
 {
     if (signo == SIGINT || signo == SIGTERM)
-	longjmp(jmpbuffer, signo);
+	siglongjmp(jmpbuffer, signo);
     else if (signo == SIGUSR1)
 	verbose++;
     else if (signo == SIGUSR2)
@@ -2011,7 +2012,7 @@ main(int argc, char **argv)
 	fprintf(stderr, "Cannot catch SIGUSR1.\n");
     else if (mysigaction(SIGUSR2, &sa))
 	fprintf(stderr, "Cannot catch SIGUSR2.\n");
-    else if (setjmp(jmpbuffer) != 0) {
+    else if (sigsetjmp(jmpbuffer, 1) != 0) {
 	servers = NULL;		/* in this case, jump the while ... loop */
 	rc = 2;			/* and prevent writing "complete markers"
 				   if we omit this, we may never get rid of
