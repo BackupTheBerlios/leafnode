@@ -36,8 +36,6 @@
 #include <dmalloc.h>
 #endif
 
-extern struct state _res;
-
 /* global variables are initialized here */
 unsigned long xfirst = 0;
 unsigned long xlast = 0;
@@ -278,7 +276,7 @@ findxover(unsigned long article)
 	    if (xoverinfo[i].artno > xoverinfo[i + 1].artno) {
 		ln_log(LNLOG_SERR, LNLOG_CTOP,
 		       "problem in findxover: xoverinfo[%u] and [%u] "
-		       "not in ascending order: %ld > %ld, aborting",
+		       "not in ascending order: %lu > %lu, aborting",
 		       i, i + 1, xoverinfo[i].artno, xoverinfo[i + 1].artno);
 		abort();	/* bail out */
 	    }
