@@ -32,7 +32,7 @@
  * Copes with folded header lines.
  * NOTE: calls abort() if header does not contain a colon.
  * \return malloc()ed copy of header without its tag (caller must free
- * that) or NULL 
+ * that) or NULL
  * \bug should rather use Boyer-Moore or something to be quicker
  */
 /*@null@*//*@only@*/ char *
@@ -46,7 +46,7 @@ mgetheader(
     char *p, *q;
     char *value = NULL;
 
-    assert(hdr);
+    assert(hdr != NULL);
     if (NULL == buf) return NULL;
 
     if (!strchr(hdr, ':')) {
@@ -117,7 +117,7 @@ fgetheader(
     if (!f)
 	return NULL;
 
-    assert(header);
+    assert(header != NULL);
 
     if (!strchr(header, ':')) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
