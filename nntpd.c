@@ -1712,13 +1712,12 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 {
     /* FIXME: this is bloody complex and hard to follow */
     static const char *const h[] = { "Subject:", "From:", "Date:", "Message-ID:",
-	"References:", "Bytes:", "Lines:"
+	"References:", "Bytes:", "Lines:", "Xref:"
     };
     int OVfield;
     char *l;
     unsigned long a, b = 0;
     long int i, idxa, idxb;
-    FILE *f;
     char *header;
 
     header = (char *)critmalloc((i = strlen(hd)) + 2, "doselectedheader");
@@ -1728,17 +1727,17 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 
     /* HANDLE MESSAGE-ID FORM */
     if (messages && *messages == '<') {
-	f = fopenart(group, messages, artno);
+	FILE *f = fopenart(group, messages, artno);
 	if (!f) {
 	    nntpprintf("430 No such article");
 	    free(header);
 	    return;
 	}
 	l = fgetheader(f, header, 1);
+	fclose(f);
 	if (!l || !(*l)) {
 	    nntpprintf("221 No such header: %s", hd);
 	    fputs(".\r\n", stdout);
-	    fclose(f);
 	    free(header);
 	    return;
 	}
@@ -1747,14 +1746,12 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    /* doesn't match any pattern */
 	    nntpprintf("221 %s matches follow:", hd);
 	    fputs(".\r\n", stdout);
-	    fclose(f);
 	    free(header);
 	    free(l);
 	    return;
 	}
 	nntpprintf("221 %s %s follow:", hd, (patterns ? "matches" : "headers"));
 	printf("%s %s\r\n.\r\n", messages, l ? l : "");
-	fclose(f);
 	free(header);
 	free(l);
 	return;
@@ -1826,6 +1823,8 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 	    printf("1 %d\r\n", 1024);	/* just a guess */
 	else if (OVfield == 6)	/* Lines */
 	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
+	else if (OVfield == 7)  /* Xref */
+	    printf("1 %s %s:1\r\n", fqdn, group->name);
 	fputs(".\r\n", stdout);
 	free(header);
 	return;
@@ -1858,16 +1857,18 @@ doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup 
 		   hd, patterns ? "matches " : "", a, b);
 
 	for (i = idxa; i <= idxb; i++) {
+	    char *t;
 	    l = cuttab(xoverinfo[i].text, OVfield+2);
 	    if (!l)
 		continue;
+	    t = (OVfield == 7 ? l+6 : l); /* cut out 'Xref: ' if necessary */
 
-	    if (patterns && !matchlist(patterns, l)) {
+	    if (patterns && !matchlist(patterns, t)) {
 		free(l);
 		continue;
 	    }
 
-	    printf("%lu %s\r\n", xoverinfo[i].artno, l);
+	    printf("%lu %s\r\n", xoverinfo[i].artno, t);
 	    free(l);
 	}
     } else {
@@ -1999,10 +2000,11 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 	nntpprintf("%lu\t"
 		   "Leafnode placeholder for group %s\t"
 		   "nobody@%s (Leafnode)\t%s\t"
-		   "<leafnode.%s@%s>\t\t1000\t40",
+		   "<leafnode.%s@%s>\t\t1000\t40\t"
+		   "Xref: %s %s:1",
 		   b, group->name,
 		   owndn ? owndn : fqdn, rfctime(), group->name,
-		   owndn ? owndn : fqdn);
+		   owndn ? owndn : fqdn, fqdn, group->name);
 	fputs(".\r\n", stdout);
     }
 }
