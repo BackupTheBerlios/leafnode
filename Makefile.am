@@ -210,7 +210,6 @@ EXTRA_DIST = \
 	README_FIRST \
 	README.html \
 	update.sh \
-	UPDATING \
 	tools/archivefaq.pl \
 	tools/make_pass.pl \
 	tools/README \
