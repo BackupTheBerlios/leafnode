@@ -49,10 +49,11 @@ int debugmode = 0;
 int verbose = 0;
 
 struct mydir {
-    /*@null@*/ const char *name;
+/*@null@*//*@observer@*/ const char *name;
     mode_t m;
 };
 
+/*@+matchanyintegral@*/
 static const struct mydir dirs[] = {
     {"failed.postings", 0755},	/* carries articles that could not be posted to upstream */
     {"backup.moderated", 0755},	/* carries articles to moderated upstream groups */
@@ -64,10 +65,12 @@ static const struct mydir dirs[] = {
     {"temp.files", 0700},	/* for temporary files */
     {0, 0}
 };
+/*@=matchanyintegral@*/
 
 /*
  * initialize all global variables
  */
+/*@-globstate@*/
 int
 initvars(const char *const progname)
 {
@@ -75,16 +78,16 @@ initvars(const char *const progname)
     gid_t gi;
     struct mydir const *md = &dirs[0];
 
-    (void)progname; /* shut up compiler warnings */
+    /*@-noeffect@*/
+    (void)progname;		/* shut up compiler warnings */
+    /*@=noeffect@*/
 
     if (uid_getbyuname("news", &ui)) {
-        ln_log(LNLOG_SERR, LNLOG_CTOP, 
-               "cannot uid_getbyuname(news,&ui): %m\n");
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot uid_getbyuname(news,&ui): %m\n");
 	return FALSE;
     }
     if (gid_getbyuname("news", &gi)) {
-        ln_log(LNLOG_SERR, LNLOG_CTOP, 
-               "cannot gid_getbyuname(news,&gi): %m\n");
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot gid_getbyuname(news,&gi): %m\n");
 	return FALSE;
     }
     /* config.c stuff does not have to be initialized */
@@ -94,9 +97,8 @@ initvars(const char *const progname)
 	char x[PATH_MAX];
 
 	snprintf(x, sizeof(x), "%s/%s", spooldir, md->name);
-	if (mkdir(x, 0110) && errno != EEXIST) {
-            ln_log(LNLOG_SERR, LNLOG_CTOP,
-                   "cannot mkdir(%s): %m\n", x);
+	if (mkdir(x, (mode_t) 0110) && errno != EEXIST) {
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot mkdir(%s): %m\n", x);
 	    return FALSE;
 	}
 	if (chown(x, ui, gi)) {	/* Flawfinder: ignore */
@@ -106,24 +108,24 @@ initvars(const char *const progname)
 	}
 	if (chmod(x, md->m)) {	/* Flawfinder: ignore */
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot chmod(%s,%o): %m\n",
-		    x, (unsigned int)md->m);
+		   x, (unsigned int)md->m);
 	    return FALSE;
 	}
 	md++;
     }
     if (gid_ensure(gi)) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure gid %ld: %m\n",
-	       (long)gi);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure gid %ld: %m\n", (long)gi);
 	return FALSE;
     }
     if (uid_ensure(ui)) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure uid %ld: %m\n",
-	       (long)ui);
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot ensure uid %ld: %m\n", (long)ui);
 	return FALSE;
     }
 
     return TRUE;
 }
+
+/*@=globstate@*/
 
 /*
  * Find whether a certain option is specified on the command line
@@ -158,7 +160,7 @@ findopt(char option, int argc, char *argv[])
  * returns name of configuration file or NULL if no such file was found.
  * If there is more than one "-F configfile" present, use the first one.
  */
-char *
+/*@null@*//*@observer@*/ char *
 getoptarg(char option, int argc, char *argv[])
 {
     int i, j;
@@ -179,7 +181,7 @@ getoptarg(char option, int argc, char *argv[])
  */
 int
 parseopt(const char *progname, int option,
-	 const char *opta, char *conffile, size_t conffilesize)
+	 /*@null@*/ const char *opta, char *conffile, size_t conffilesize)
 {
     if (option == 'V') {
 	printf("%s %s\n", progname, version);
@@ -193,7 +195,7 @@ parseopt(const char *progname, int option,
 	else
 	    debugmode = ~0;
 	return TRUE;
-    } else if ((option == 'F') && opta && *opta) {
+    } else if ((option == 'F') && opta != NULL && *opta) {
 	return mastrncpy(conffile, opta, conffilesize) ? 1 : 0;
     }
     return FALSE;
@@ -203,10 +205,11 @@ parseopt(const char *progname, int option,
  * Check when the last posting has arrived in the group. \return 0 in
  * case of trouble, st_ctime of LASTPOSTED file of that group otherwise.  
  */
-static time_t getlastart(const char *group);
 static time_t
-getlastart(const char *group) /*@globals errno;*/
-{
+getlastart(const char *group) /*@globals errno, spooldir;@*/ ;
+static time_t
+getlastart(const char *group)
+{				/*@globals errno, spooldir;@*/
     mastr *g;
     char *p = critstrdup(group, "getlastart"), *q;
     struct stat st;
@@ -260,38 +263,40 @@ checkinteresting(void)
     while ((de = readdir(d)) != NULL) {
 	time_t lastart = getlastart(de->d_name);
 	if ((stat(de->d_name, &st) == 0) && S_ISREG(st.st_mode)) {
-	    const char *reason = 0;
+/*@dependent@*//*@null@*/ const char *reason;
 	    /* reading a newsgroup changes the ctime (in
 	     * markinterest()), if the newsgroup is newly created, the
 	     * mtime is changed as well */
-	    /* timeout_short for unread groups */
-	    if ((st.st_mtime == st.st_ctime) /* unread so far */ &&
-		(lastart - st.st_ctime > (timeout_short * SECONDS_PER_DAY))) {
-		reason =
-		    "newly-arrived group not read for \"timeout_short\" days after last article";
-	    }
 	    /* timeout_long for read groups */
 	    if ((lastart - st.st_ctime > (timeout_long * SECONDS_PER_DAY))) {
 		reason =
 		    "established group not read for \"timeout_long\" days after last article";
 	    }
+	    /* timeout_short for unread groups */
+	    else if ((st.st_mtime == st.st_ctime) /* unread so far */ &&
+		     (lastart - st.st_ctime >
+		      (timeout_short * SECONDS_PER_DAY))) {
+		reason =
+		    "newly-arrived group not read for \"timeout_short\" days after last article";
+	    } else
+		reason = NULL;
 	    if (reason) {
 		ln_log(LNLOG_SINFO, LNLOG_CGROUP,
 		       "skipping %s from now on: %s\n", de->d_name, reason);
-		log_unlink(de->d_name);
+		(void)log_unlink(de->d_name);
 		/* don't reset group counts because if a group is
 		   resubscribed, new articles will not be shown */
 	    }
 	}
     }
-    closedir(d);
+    (void)closedir(d);
 }
 
 static int compare(const void *a, const void *b,
 		   const void *config __attribute__ ((unused)));
 static int
 compare(const void *a, const void *b,
-	const void *config __attribute__ ((unused)))
+	/*@unused@*/ const void *config __attribute__ ((unused)))
 {
     return strcasecmp((const char *)a, (const char *)b);
 }
@@ -316,10 +321,11 @@ initinteresting(void)
     if (!rb) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP,
 	       "cannot init red-black-tree, out of memory.");
+	mastr_delete(t);
 	return 0;
     }
 
-    mastr_vcat(t, spooldir, "/interesting.groups", 0);
+    (void)mastr_vcat(t, spooldir, "/interesting.groups", 0);
     d = opendir(mastr_str(t));
     if (!d) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m",
@@ -328,7 +334,7 @@ initinteresting(void)
 	return FALSE;
     }
     while ((de = readdir(d)) != NULL) {
-	const char *k;
+	char *k;
 
 	if (de->d_name[0] == '.')
 	    continue;
@@ -337,10 +343,12 @@ initinteresting(void)
 	    ln_log(LNLOG_SERR, LNLOG_CTOP, "out of memory in "
 		   "isinteresting, cannot build rbtree");
 	    mastr_delete(t);
+	    free(k);
 	    exit(EXIT_FAILURE);
 	}
+	free(k);
     }
-    closedir(d);
+    (void)closedir(d);
     mastr_delete(t);
     return TRUE;
 }
@@ -459,7 +467,7 @@ makedir(char *d)
 	if (!chdir(p))
 	    continue;
 	if (errno == ENOENT)
-	    if (mkdir(p, MKDIR_MODE)) {
+	    if (mkdir(p, (mode_t) MKDIR_MODE)) {
 		ln_log(LNLOG_SERR, LNLOG_CGROUP, "mkdir %s: %m", d);
 		exit(EXIT_FAILURE);
 	    }
@@ -476,7 +484,7 @@ makedir(char *d)
  */
 int
 chdirgroup(const char *group,
-	   int creatdir /** if true, create missing directories */)
+	   int creatdir /** if true, create missing directories */ )
 {
     char *p;
     char s[PATH_MAX];		/* FIXME: possible overrun below */
@@ -560,8 +568,8 @@ appendtolist(struct stringlist **list, struct stringlist **lastentry,
  * find a string in a stringlist
  * return pointer to string if found, NULL otherwise
  */
-char *
-findinlist(struct stringlist *haystack, char *needle)
+/*@null@*/ char *
+findinlist(struct stringlist *haystack, /*@null@*/ char *needle)
 {
     struct stringlist *a;
 
@@ -580,7 +588,7 @@ findinlist(struct stringlist *haystack, char *needle)
  * free a list
  */
 void
-freelist(struct stringlist *list)
+freelist( /*@only@*/ struct stringlist *list)
 {
     struct stringlist *a = list, *b;
     if (!list)
@@ -618,8 +626,9 @@ cmdlinetolist(const char *cmdline)
 
     if (!cmdline || !*cmdline)
 	return NULL;
-    o = (c = (char *)critmalloc(strlen(cmdline) + 1,
-				"Allocating temporary string space"));
+    o = (char *)critmalloc(strlen(cmdline) + 1,
+			   "Allocating temporary string space");
+    c = o;
     strcpy(c, cmdline);
     while (*c) {
 	char *p;
@@ -648,7 +657,8 @@ struct msgidtree {
     char msgid[1];
 };
 
-static struct msgidtree *head;	/* starts as NULL */
+							/*@only@*//*@null@*/ static struct msgidtree *head;
+							/* starts as NULL */
 void
 insertmsgid(const char *msgid, unsigned long art)
 {
@@ -677,7 +687,8 @@ insertmsgid(const char *msgid, unsigned long art)
 		critmalloc(sizeof(struct msgidtree) + strlen(msgid),
 			   "Building expiry database");
 
-	    (*a)->left = (*a)->right = NULL;
+	    (*a)->left = NULL;
+	    (*a)->right = NULL;
 	    strcpy((*a)->msgid, msgid);
 	    (*a)->art = art;
 	    return;
@@ -712,7 +723,7 @@ findmsgid(const char *msgid)
 }
 
 static void
-begone(struct msgidtree *m)
+begone( /*@only@*//*@null@*/ struct msgidtree *m)
 {
     if (m) {
 	begone(m->right);
@@ -732,14 +743,16 @@ clearidtree(void)
 extern time_t timezone;
 #endif
 
-const char *
+typedef /*@observer@*/ const char *litstring;
+
+/*@dependent@*/ const char *
 rfctime(void)
 {
     static char date[128];
-    const char *months[] = { "Jan", "Feb", "Mar", "Apr",
+    litstring months[] = { "Jan", "Feb", "Mar", "Apr",
 	"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
-    const char *days[] = { "Sun", "Mon", "Tue", "Wed",
+    litstring days[] = { "Sun", "Mon", "Tue", "Wed",
 	"Thu", "Fri", "Sat"
     };
     time_t now;
@@ -764,7 +777,7 @@ rfctime(void)
 	    days[local.tm_wday], local.tm_mday, months[local.tm_mon],
 	    local.tm_year + 1900, local.tm_hour, local.tm_min,
 	    local.tm_sec, hours, mins);
-    return (date);
+    return date;
 }
 
 /*
