@@ -8,7 +8,7 @@ Name: leafnode
 Release: 1
 Copyright: see COPYING
 Group: Applications/News
-Source: ftp://wpxx02.toxi.uni-wuerzburg.de/pub/leafnode-%version.tar.gz
+Source: http://mandree.home.pages.de/leafnode/beta/leafnode-%version.tar.bz2
 
 %define prefix      /usr
 %define spooldir    /var/spool/news
@@ -52,7 +52,7 @@ make  DESTDIR=$RPM_BUILD_ROOT install-strip
 %attr(750,root,root) %{prefix}/sbin/applyfilter
 %attr(750,root,root) %{prefix}/sbin/checkgroups
 %attr(750,root,root) %{prefix}/sbin/leafnode
-#%attr(750,root,root) %{prefix}/sbin/rnews
+%attr(750,root,root) %{prefix}/sbin/rnews
 %attr(4750,%{runas_user},%{runas_group}) %{prefix}/sbin/fetchnews
 %attr(4750,%{runas_user},%{runas_group}) %{prefix}/sbin/texpire
 %doc %_mandir/man1/*
