@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.39 2002/10/23 16:27:12 emma Exp $
+# $Id: Makefile.am,v 1.40 2002/11/08 23:06:59 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -166,6 +166,9 @@ noinst_PROGRAMS = \
 	amiroot \
 	b_sortnl \
 	lsort
+
+check_PROGRAMS= \
+		t.getwatermarks
 
 EXTRA_DIST = \
 	$(sysconf_DATA) \
