@@ -66,11 +66,10 @@ a separate manual page (
 .BR pcre (7)
 or, on newer systems,
 .BR pcre (3)).
-You can prefix the pattern with an exclamation point to invert its
-meaning, but this is usually not what you want. You USUALLY mean to use
-an inverted assertion, such as
+If you want to negate a part of the pattern, use a negative assertion,
+try (untested):
 
-pattern = ^Subject:(?!.*bad weather)
+pattern = ^Subject:(?!.*bad weather.*)$
 
 Be very careful when using the | operator. Make sure you use parentheses
 to tell PCRE which part you want matched. "^Subject: Jens|Jan" is

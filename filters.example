@@ -44,12 +44,6 @@ newsgroups = !your\.newsgroup
 pattern = ^Subject:.*weather
 action = kill
 
-### this pattern ignores all articles that haven't been posted
-### by the Sylpheed software (BEWARE, READ THE NEXT EXAMPLE!)
-newsgroups = .*
-pattern = !^X-Newsreader: Sylpheed
-action = kill
-
 ### As the previous pattern is not generally useful, here's one
 ### that only applies to the Subject: header:
 ### This ignores all postings about bad weather:

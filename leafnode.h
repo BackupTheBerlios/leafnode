@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.85 2003/07/06 21:21:13 emma Exp $ */
+/* $Id: leafnode.h,v 1.86 2003/07/06 21:54:22 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -303,7 +303,6 @@ extern "C" {
 	long limit;
 	char *cleartext;
 	pcre *expr;
-	int invertpat;
 	char *action;
     };
     struct filterlist {

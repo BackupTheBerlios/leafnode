@@ -189,7 +189,6 @@ newfilter(void)
     fe->action = NULL;
     fe->limit = -1;
     fe->invertngs = 0;
-    fe->invertpat = 0;
     fl = (struct filterlist *)critmalloc(sizeof(struct filterlist),
 					 "Allocating filterlist space");
 
@@ -201,10 +200,9 @@ newfilter(void)
 static struct filterlist *oldf = NULL;
 
 static void
-insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ pcre *ng, /*@only@*/ char *ngpcretext, int invertngs, int invertpat)
+insertfilter(/*@owned@*/ struct filterlist *f, /*@only@*/ pcre *ng, /*@only@*/ char *ngpcretext, int invertngs)
 {
     (f->entry)->invertngs = invertngs;
-    (f->entry)->invertpat = invertpat;
     (f->entry)->newsgroups = ng;
     (f->entry)->ngpcretext = ngpcretext;
     if (!filter)
@@ -251,7 +249,7 @@ readfilter(/*@null@*/ const char *filterfilename)
     pcre *ng = NULL;
     char *param, *value, *ngt = NULL;
     struct filterlist *f;
-    int rv = TRUE, invertngs = 0, invertpat = 0;
+    int rv = TRUE, invertngs = 0;
     unsigned long line = 0;
 
     filter = NULL;
@@ -314,16 +312,11 @@ readfilter(/*@null@*/ const char *filterfilename)
 		     */
 		    continue;
 		}
-		if (*value == '!') {
-		    value ++;
-		    invertpat = 1;
-		} else
-		    invertpat = 0;
 		re = ln_pcre_compile(value, PCRE_MULTILINE, NULL,
 			filterfilename, line);
 		if (re) {
 		    f = newfilter();
-		    insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs, invertpat);
+		    insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs);
 		    (f->entry)->expr = re;
 		    (f->entry)->cleartext = critstrdup(value, "readfilter");
 		} else {
@@ -337,7 +330,7 @@ readfilter(/*@null@*/ const char *filterfilename)
 			(!strcasecmp("maxbytes", param)) ||
 			(!strcasecmp("maxcrosspost", param)))) {
 		f = newfilter();
-		insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs, invertpat);
+		insertfilter(f, ng, critstrdup(ngt, "readfilter"), invertngs);
 		(f->entry)->cleartext = critstrdup(param, "readfilter");
 		(f->entry)->limit = (int)strtol(value, NULL, 10);
 		state = RF_WANTACTION;
@@ -429,7 +422,7 @@ regexp_addinfo(const struct filterentry *g, const char *hdr) {
     const char *x = hdr;
     while (*x) {
 	int len = strcspn(x, "\n");
-	int match = g->invertpat ^ (pcre_exec(g->expr, NULL, x, (int)strcspn(x, "\n"),
+	int match = (pcre_exec(g->expr, NULL, x, (int)strcspn(x, "\n"),
 		0, 0, NULL, 0) >= 0);
 	if (match) {
 	    ln_log(LNLOG_SDEBUG, LNLOG_CALL, "regexp filter: detail: \"%-.*s\""
@@ -466,13 +459,13 @@ killfilter(const struct filterlist *f, const char *hdr)
 	           g->ngpcretext);
 	}
 	if ((g->limit == -1) && (g->expr)) {
-	    match = g->invertpat ^ (pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
+	    match = (pcre_exec(g->expr, NULL, hdr, (int)strlen(hdr),
 			      0, 0, NULL, 0) >= 0);
 	    if (debugmode & DEBUG_FILTER) {
 	        ln_log(LNLOG_SDEBUG, LNLOG_CALL,
 	               "regexp filter: /%s/ %s", g->cleartext, match ? "matched" : "did not match");
 		if (match) regexp_addinfo(g, hdr);
-		match = !match;
+		match = !match; /* interface with older code */
 	    }
 	} else if (strcasecmp(g->cleartext, "maxage") == 0) {
 	    long a;
