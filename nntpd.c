@@ -1281,7 +1281,7 @@ dopost(void)
     static int postingno;	/* starts at 0 */
 
     do {
-	sprintf(inname, "%s/in.coming/%d-%lu-%d",
+	sprintf(inname, "%s/temp.files/%d-%lu-%d",
 		spooldir, (int)getpid(), (unsigned long)time(NULL),
 		++postingno);
 	out = open(inname, O_WRONLY | O_EXCL | O_CREAT, (mode_t) 0444);
@@ -1547,6 +1547,30 @@ dopost(void)
 	    }
 	}
 
+	if (!moderator && !is_alllocal(groups)) {
+	    /* also posted to external groups or moderated group with
+	       unknown moderator, store into out.going */
+	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
+	    outbasename = strrchr(inname, '/');
+	    outbasename++;
+	    sprintf(s, "%s/out.going/%s", spooldir, outbasename);
+	    if (sync_link(inname, s)) {
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		       "unable to schedule for posting to upstream, "
+		       "link %s -> %s failed: %m", inname, s);
+		nntpprintf("503 Could not schedule article for posting "
+			   "to upstream, see syslog.");
+		log_unlink(inname);
+		goto cleanup;
+	    }
+	    if (modgroup && !approved) {
+		nntpprintf("240 Posting scheduled for posting to "
+			   "upstream, be patient");
+		log_unlink(inname);
+		goto cleanup;
+	    }
+	}
+
 	if (moderator && !approved) {
 	    /* Mail the article to the moderator */
 	    int fd;
@@ -1569,8 +1593,27 @@ dopost(void)
 	    goto cleanup;
 	}
 
+	if (0 == no_direct_spool || is_anylocal(groups)) {
+	    /* at least one internal group is given, store into in.coming */
+	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
+	    outbasename = strrchr(inname, '/');
+	    outbasename++;
+	    sprintf(s, "%s/in.coming/%s", spooldir, outbasename);
+	    if (sync_link(inname, s)) {
+		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		       "unable to schedule for posting to local spool, "
+		       "link %s -> %s failed: %m", inname, s);
+		nntpprintf("503 Could not schedule article for posting "
+			   "to local spool, see syslog.");
+		log_unlink(inname);
+		goto cleanup;
+	    }
+	}
+
 	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
-	       is_alllocal(groups) ? "LOCAL" : "UPSTREAM", mid, groups);
+	       is_anylocal(groups) ? (
+		   is_alllocal(groups) ? "LOCAL" : "LOCAL+UPSTREAM")
+	       : "UPSTREAM", mid, groups);
 
 	switch (fork()) {
 	case -1:
