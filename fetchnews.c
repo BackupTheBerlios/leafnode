@@ -1,8 +1,11 @@
-/*
-  fetchnews -- post articles to and get news from upstream server(s)
-  See AUTHORS for copyright holders and contributors.
-  See README for restrictions on the use of this software.
-*/
+/**
+ * \file fetchnews.c
+ *
+ * Post articles to and get news from upstream server(s)
+ * See AUTHORS for copyright holders and contributors.
+ * See README for restrictions on the use of this software.
+ */
+
 #include "leafnode.h"
 #include "get.h"
 #include "critmem.h"
@@ -183,7 +186,9 @@ add_fetchgroups(void)
 
 /**
  * parse fetchnews command line
- * \return 0 for success, -1 for failure
+ * \return
+ * -  0 for success
+ * - -1 for failure
  */
 static int
 process_options(int argc, char *argv[])
@@ -349,9 +354,11 @@ usage(void)
 	    "    http://www.leafnode.org/\n", libdir);
 }
 
-/*
+/**
  * check whether any of the newsgroups is on server
- * return TRUE if yes, FALSE otherwise
+ * \return
+ * - TRUE if yes
+ * - FALSE otherwise
  */
 static int
 isgrouponserver(char *newsgroups)
@@ -377,9 +384,11 @@ isgrouponserver(char *newsgroups)
     return retval;
 }
 
-/*
+/**
  * check whether message-id is on server
- * return TRUE if yes, FALSE otherwise
+ * \return
+ * - TRUE if yes
+ * - FALSE otherwise
  *
  * Since the STAT implementation is buggy in some news servers
  * (NewsCache), we use HEAD instead, although this causes more traffic.
@@ -461,7 +470,7 @@ donewnews(struct newsgroup *g, time_t lastrun)
 }
 #endif
 
-/*
+/**
  * get an article by message id
  */
 static int
@@ -472,7 +481,7 @@ getbymsgid(const char *msgid, int delayflg)
     return (getarticle(NULL, &artno, delayflg) > 0) ? TRUE : FALSE;
 }
 
-/*
+/**
  * Get bodies of messages that have marked for download.
  * The group must already be selected at the remote server and
  * the current directory must be the one of the group.
@@ -538,9 +547,12 @@ getmarked(struct newsgroup *group)
     freelist(failed);
 }
 
-/*
+/**
  * calculate first and last article number to get
- * returns 0 for error, 1 for success, -1 if group is not available at all
+ * \return
+ * -  0 for error
+ * -  1 for success
+ * - -1 if group is not available at all
  */
 static int
 getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
@@ -630,7 +642,7 @@ getfirstlast(struct newsgroup *g, unsigned long *first, unsigned long *last,
 }
 
 
-/* create pseudo article header from xover entries */
+/** create pseudo article header from xover entries */
 static /*@only@*/ mastr *
 create_pseudo_header(const char *subject, const char *from,
 	const char *date, const char *messageid, const char *references,
@@ -697,11 +709,12 @@ out:
     return rc;
 }
 
-/*
+/**
  * get headers of articles with XOVER and return a stringlist of article
  * numbers to get (or number of pseudo headers stored)
- * return -1 for error
- * return -2 if XOVER was rejected
+ * \return
+ * - -1 for error
+ * - -2 if XOVER was rejected
  */
 static long
 doxover(struct stringlist **stufftoget,
@@ -799,11 +812,12 @@ next_over:
 	return -1;
 }
 
-/*
+/**
  * use XHDR to check which articles to get. This is faster than XOVER
  * since only message-IDs are transmitted, but you lose some features
- * return -1 for error
- * return -2 if XHDR was rejected
+ * \return
+ * - -1 for error
+ * - -2 if XHDR was rejected
  */
 static long
 doxhdr(struct stringlist **stufftoget, unsigned long first, unsigned long last)
@@ -903,7 +917,7 @@ chopmid(/*@unique@*/ const char *in)
     return buf;
 }
 
-/*
+/**
  * get all articles in a group, with pipelining NNTP commands
  */
 static unsigned long
@@ -961,7 +975,7 @@ getarticles(/*@null@*/ struct stringlist *stufftoget, long n,
 }
 
 /**
- * getgroup(): fetch all articles for that group.
+ * fetch all articles for that group.
  * \return
  * - 0 for error or if group is unavailable
  * - otherwise last article number in that group
@@ -1097,8 +1111,9 @@ getgroup(struct newsgroup *g, unsigned long first)
  * pointer to the end of the newsgroup name into nameend (the caller
  * should then set this to '\0'), and a pointer to the status character
  * into status.
- * \return - 1 if the status character is valid
- *         - 0 if the status character is invalid
+ * \return
+ * - 1 if the status character is valid
+ * - 0 if the status character is invalid
  */
 static int
 splitLISTline(char *line, /*@out@*/ char **nameend, /*@out@*/ char **status)
@@ -1148,7 +1163,7 @@ dirtyactive(struct serverlist *srv)
     return r;
 }
 
-/*
+/**
  * get active file from current_server
  */
 static void
@@ -1349,12 +1364,12 @@ post_FILE(FILE * f, char **line)
     return FALSE;
 }
 
-/*
+/**
  * post all spooled articles to currently connected server
- *
- * if all postings succeed, returns 1
- * if there are no postings to post, returns 1
- * if a posting is strange for some reason, returns 0
+ * \return
+ * -  1 if all postings succeed
+ * -  1 if there are no postings to post
+ * -  0 if a posting is strange for some reason
  */
 int
 postarticles(void)
@@ -1461,7 +1476,9 @@ get_old_watermark(struct stringlist *ngs, const char *name)
 
 /** process a given server/port,
  *  read upstream water marks and write back, using temporary file
- * \return 1 for success, 0 otherwise
+ * \return
+ * -  1 for success
+ * -  0 otherwise
  */
 static int
 processupstream(const char *const server, const unsigned short port,
@@ -1551,7 +1568,7 @@ out:
 }
 
 
-/*
+/**
  * works current_server.
  * \return
  * -  0 if no other servers have to be queried,
@@ -1656,7 +1673,7 @@ out:
     return rc;
 }
 
-/*
+/**
  * main program
  */
 int
