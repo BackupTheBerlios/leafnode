@@ -10,7 +10,7 @@
 
 #include <unistd.h>
 
-static jmp_buf to;
+static sigjmp_buf to;
 static RETSIGTYPE
 timer(int sig)
 {
