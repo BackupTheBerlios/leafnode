@@ -70,15 +70,6 @@ static struct stringlist *msgidlist = NULL;	/* list of Message-IDs to get (speci
 static struct stringlist *nglist = NULL;	/* newsgroups patterns to fetch */
 static char *only_server = NULL;		/* server name when -S option is given */
 
-/* function declarations */
-static void usage(void);
-static int isgrouponserver(const struct serverlist *, char *newsgroups);
-static int ismsgidonserver(char *msgid);
-static unsigned long getgroup(struct serverlist *, struct newsgroup *g, unsigned long server);
-static int postarticles(const struct serverlist *);
-static int getarticle(/*@null@*/ struct filterlist *, /*@reldef@*/ unsigned long *, int);
-static int getbymsgid(const char *msgid, int delayflg);
-
 static void
 _ignore_answer(FILE * f)
 {
@@ -148,6 +139,41 @@ add_fetchgroups(void)
 	}
 	sl = sl->next;
     }
+}
+
+static void
+usage(void)
+{
+    fprintf(stderr, "Usage:\n"
+	    "fetchnews -V\n"
+	    "    print version on stderr and exit\n"
+	    "fetchnews [-BDfHnPRv] [-F configfile] [-t #] [-x #] [-S server]\n"
+	    "          [-N newsgroup] [-N group.pattern] [-M message-id]\n"
+	    "    -B                get article bodies in delaybody groups\n"
+	    "    -D debugmode      switch on debugmode\n"
+	    "    -f                force reload of groupinfo file\n"
+	    "    -F conffile       use \"configfile\" instead of %s/config\n"
+	    "    -H                get article headers in delaybody groups\n"
+	    "    -n                switch off automatic unsubscription of groups\n"
+	    "    -P                post only, don't get new articles\n"
+	    "    -M message-id     get article by Message-ID\n"
+	    "    -N newsgroup      get only articles in \"newsgroup\"\n"
+	    "    -N group.pattern  get articles from all interesting groups\n"
+	    "                      matching the wildcard \"group.pattern\"\n"
+	    "    -R                get articles in non delaybody groups\n"
+	    "    -S server         only get articles from \"server\"\n"
+	    "    -t delay          wait \"delay\" seconds between articles\n"
+	    "    -v                verbose mode (may be repeated)\n"
+	    "    -x extra          go \"extra\" articles back in upstream history\n"
+	    "Setting none of the options\n"
+	    "    -B -H -P -R\n"
+            "is equivalent to setting all of them, unless [-M message-id] is used.\n"
+	    "Options [-S server], [-M message-id] and [-N newsgroup] may be repeated.\n"
+	    "Articles specified by Message-ID will always be fetched as a whole,\n"
+	    "no matter if they were posted to a delaybody group.\n"
+	    "\n"
+	    "See also the leafnode homepage at\n"
+	    "    http://www.leafnode.org/\n", sysconfdir);
 }
 
 /**
@@ -278,41 +304,6 @@ print_fetchnews_mode(/*@observer@*/ const char *myname)
     mastr_delete(s);
 }
 
-static void
-usage(void)
-{
-    fprintf(stderr, "Usage:\n"
-	    "fetchnews -V\n"
-	    "    print version on stderr and exit\n"
-	    "fetchnews [-BDfHnPRv] [-F configfile] [-t #] [-x #] [-S server]\n"
-	    "          [-N newsgroup] [-N group.pattern] [-M message-id]\n"
-	    "    -B                get article bodies in delaybody groups\n"
-	    "    -D debugmode      switch on debugmode\n"
-	    "    -f                force reload of groupinfo file\n"
-	    "    -F conffile       use \"configfile\" instead of %s/config\n"
-	    "    -H                get article headers in delaybody groups\n"
-	    "    -n                switch off automatic unsubscription of groups\n"
-	    "    -P                post only, don't get new articles\n"
-	    "    -M message-id     get article by Message-ID\n"
-	    "    -N newsgroup      get only articles in \"newsgroup\"\n"
-	    "    -N group.pattern  get articles from all interesting groups\n"
-	    "                      matching the wildcard \"group.pattern\"\n"
-	    "    -R                get articles in non delaybody groups\n"
-	    "    -S server         only get articles from \"server\"\n"
-	    "    -t delay          wait \"delay\" seconds between articles\n"
-	    "    -v                verbose mode (may be repeated)\n"
-	    "    -x extra          go \"extra\" articles back in upstream history\n"
-	    "Setting none of the options\n"
-	    "    -B -H -P -R\n"
-            "is equivalent to setting all of them, unless [-M message-id] is used.\n"
-	    "Options [-S server], [-M message-id] and [-N newsgroup] may be repeated.\n"
-	    "Articles specified by Message-ID will always be fetched as a whole,\n"
-	    "no matter if they were posted to a delaybody group.\n"
-	    "\n"
-	    "See also the leafnode homepage at\n"
-	    "    http://www.leafnode.org/\n", sysconfdir);
-}
-
 /**
  * check whether any of the newsgroups is on server
  * \return
@@ -386,6 +377,64 @@ ismsgidonserver(char *msgid)
     } else {
 	return FALSE;
     }
+}
+
+/**
+ * Get a single article and apply filters.
+ * \return
+ *  - -2: server disconnected or OS error in store, abort the fetch
+ *  - -1: did not get a 22X reply, continue the fetch
+ *  - 0: other error receiving article
+ *  - 1: success, article number on upstream server stored in artno
+ *
+ */
+static int
+getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
+    int delayflg)
+{
+    char *l;
+    int reply = 0;
+
+    l = getaline(nntpin);
+    if (!l) {
+	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+	       "Server went away when it should send an article.");
+	return -2;
+    }
+
+    if ((sscanf(l, "%3d %lu", &reply, artno) != 2) || (reply / 10 != 22)) {
+	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+	       "Wrong reply to ARTICLE command: %s", l);
+	if (reply / 100 == 5)
+	    return -2;		/* fatal error */
+	return -1;
+    }
+
+    switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
+			 -1, delayflg)) {
+    case 1: /* killfilter */
+    case -2: /* duplicate */
+	groupkilled++;
+	return 1;
+    case 0:
+	groupfetched++;
+	return 1;
+    case -1:
+	return -2;
+    default:
+	return 0;
+    }
+}
+
+/**
+ * get an article by message id
+ */
+static int
+getbymsgid(const char *msgid, int delayflg)
+{
+    unsigned long artno;
+    putaline(nntpout, "ARTICLE %s", msgid);
+    return (getarticle(NULL, &artno, delayflg) > 0) ? TRUE : FALSE;
 }
 
 /**
@@ -476,17 +525,6 @@ fn_donewnews(struct newsgroup *g, time_t lastrun)
 #endif
 }
 #endif
-
-/**
- * get an article by message id
- */
-static int
-getbymsgid(const char *msgid, int delayflg)
-{
-    unsigned long artno;
-    putaline(nntpout, "ARTICLE %s", msgid);
-    return (getarticle(NULL, &artno, delayflg) > 0) ? TRUE : FALSE;
-}
 
 /**
  * Get bodies of messages that have marked for download.
@@ -964,53 +1002,6 @@ fn_doxhdr(struct stringlist **stufftoget, unsigned long first,
  * get articles
  */
 
-/**
- * Get a single article and apply filters.
- * \return
- *  - -2: server disconnected or OS error in store, abort the fetch
- *  - -1: did not get a 22X reply, continue the fetch
- *  - 0: other error receiving article
- *  - 1: success, article number on upstream server stored in artno
- *
- */
-static int
-getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
-    int delayflg)
-{
-    char *l;
-    int reply = 0;
-
-    l = getaline(nntpin);
-    if (!l) {
-	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-	       "Server went away when it should send an article.");
-	return -2;
-    }
-
-    if ((sscanf(l, "%3d %lu", &reply, artno) != 2) || (reply / 10 != 22)) {
-	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
-	       "Wrong reply to ARTICLE command: %s", l);
-	if (reply / 100 == 5)
-	    return -2;		/* fatal error */
-	return -1;
-    }
-
-    switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
-			 -1, delayflg)) {
-    case 1: /* killfilter */
-    case -2: /* duplicate */
-	groupkilled++;
-	return 1;
-    case 0:
-	groupfetched++;
-	return 1;
-    case -1:
-	return -2;
-    default:
-	return 0;
-    }
-}
-
 static /*@dependent@*/ const char *
 chopmid(/*@unique@*/ const char *in)
 {
@@ -1482,117 +1473,6 @@ post_FILE(const struct serverlist *cursrv, FILE * f, char **line)
     return FALSE;
 }
 
-/**
- * post all spooled articles to currently connected server
- * \return
- * -  1 if all postings succeed or there are no postings to post
- * -  0 if a posting is strange for some reason
- */
-int
-postarticles(const struct serverlist *cursrv)
-{
-    char *line = 0;
-    int n;
-    unsigned long articles;
-    char **x, **y;
-
-    x = spooldirlist_prefix("out.going", DIRLIST_NONDOT, &articles);
-    if (!x) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read out.going: %m");
-	return 0;
-    }
-
-    ln_log(LNLOG_SINFO, LNLOG_CSERVER, "found %lu articles in out.going.",
-	   articles);
-
-    if (active == NULL) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "I need an active file (to figure which groups are moderated) before I can post.");
-	return 0;
-    }
-
-    n = 0;
-    for (y = x; *y; y++) {
-	FILE *f;
-	if (!(f = fopen_reg(*y, "r"))) {
-	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-		   "Cannot open %s to post, expecting regular file.", *y);
-	} else {
-	    struct stat st;
-	    char *f1;
-
-	    f1 = fgetheader(f, "Newsgroups:", 1);
-	    if (0 == fstat(fileno(f), &st) && f1) {
-		if (cursrv->post_anygroup || isgrouponserver(cursrv, f1)) {
-		    char *f2;
-
-		    f2 = fgetheader(f, "Message-ID:", 1);
-		    if (f2) {
-			if (ismsgidonserver(f2)) {
-			    if (!(st.st_mode & S_IXUSR))
-				ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-					"Message-ID of %s already in use upstream"
-					" -- discarding article", *y);
-			    if (unlink(*y)) {
-				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
-				       "Cannot delete article %s: %m", *y);
-				/* FIXME: don't fail here */
-			    }
-			} else {
-			    int xdup = 0;
-			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-				   "Posting %s", *y);
-			    
-			    if (post_FILE(cursrv, f, &line) || (xdup = strncmp(line, "441 435 ", 8) == 0)) {
-				char *mod;
-				char *app;
-
-				if (xdup)
-				    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
-					    "Duplicate article %s, treating as success.", *y);
-
-				/* don't post unapproved postings to
-				 * moderated groups more than once
-				 */
-				mod = checkstatus(f1, 'm');
-				app = fgetheader(f, "Approved:", 1);
-				if (mod != NULL && app == NULL) {
-				    (void)log_unlink(*y, 1);
-				} else {
-				    /* set u+x bit to mark article as posted */
-				    chmod(*y, 0544);
-				}
-
-				if (mod != NULL)
-				    free(mod);
-				if (app != NULL)
-				    free(app);
-
-				/* POST was OK or duplicate */
-				++n;
-			    } else {
-				/* POST failed */
-				/* FIXME: TOCTOU race here - check for
-				 * duplicate article here */
-
-				ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
-				       "Unable to post %s: \"%s\".", *y, line);
-			    }
-			}
-			free(f2);
-		    }
-		}
-		free(f1);
-	    }
-	    log_fclose(f);
-	}
-    }
-    free_dirlist(x);
-    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
-	   "%s: %d articles posted", cursrv->name, n);
-    globalposted += n;
-    return 1;
-}
-
 /* these groups need not be fetched *again* */
 static struct rbtree *done_groups = NULL;
 
@@ -1769,6 +1649,117 @@ out:
     free(newfile);
     free(oldfile);
     return rc;
+}
+
+/**
+ * post all spooled articles to currently connected server
+ * \return
+ * -  1 if all postings succeed or there are no postings to post
+ * -  0 if a posting is strange for some reason
+ */
+static int
+postarticles(const struct serverlist *cursrv)
+{
+    char *line = 0;
+    int n;
+    unsigned long articles;
+    char **x, **y;
+
+    x = spooldirlist_prefix("out.going", DIRLIST_NONDOT, &articles);
+    if (!x) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot read out.going: %m");
+	return 0;
+    }
+
+    ln_log(LNLOG_SINFO, LNLOG_CSERVER, "found %lu articles in out.going.",
+	   articles);
+
+    if (active == NULL) {
+	ln_log(LNLOG_SERR, LNLOG_CTOP, "I need an active file (to figure which groups are moderated) before I can post.");
+	return 0;
+    }
+
+    n = 0;
+    for (y = x; *y; y++) {
+	FILE *f;
+	if (!(f = fopen_reg(*y, "r"))) {
+	    ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		   "Cannot open %s to post, expecting regular file.", *y);
+	} else {
+	    struct stat st;
+	    char *f1;
+
+	    f1 = fgetheader(f, "Newsgroups:", 1);
+	    if (0 == fstat(fileno(f), &st) && f1) {
+		if (cursrv->post_anygroup || isgrouponserver(cursrv, f1)) {
+		    char *f2;
+
+		    f2 = fgetheader(f, "Message-ID:", 1);
+		    if (f2) {
+			if (ismsgidonserver(f2)) {
+			    if (!(st.st_mode & S_IXUSR))
+				ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+					"Message-ID of %s already in use upstream"
+					" -- discarding article", *y);
+			    if (unlink(*y)) {
+				ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				       "Cannot delete article %s: %m", *y);
+				/* FIXME: don't fail here */
+			    }
+			} else {
+			    int xdup = 0;
+			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+				   "Posting %s", *y);
+			    
+			    if (post_FILE(cursrv, f, &line) || (xdup = strncmp(line, "441 435 ", 8) == 0)) {
+				char *mod;
+				char *app;
+
+				if (xdup)
+				    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+					    "Duplicate article %s, treating as success.", *y);
+
+				/* don't post unapproved postings to
+				 * moderated groups more than once
+				 */
+				mod = checkstatus(f1, 'm');
+				app = fgetheader(f, "Approved:", 1);
+				if (mod != NULL && app == NULL) {
+				    (void)log_unlink(*y, 1);
+				} else {
+				    /* set u+x bit to mark article as posted */
+				    chmod(*y, 0544);
+				}
+
+				if (mod != NULL)
+				    free(mod);
+				if (app != NULL)
+				    free(app);
+
+				/* POST was OK or duplicate */
+				++n;
+			    } else {
+				/* POST failed */
+				/* FIXME: TOCTOU race here - check for
+				 * duplicate article here */
+
+				ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
+				       "Unable to post %s: \"%s\".", *y, line);
+			    }
+			}
+			free(f2);
+		    }
+		}
+		free(f1);
+	    }
+	    log_fclose(f);
+	}
+    }
+    free_dirlist(x);
+    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
+	   "%s: %d articles posted", cursrv->name, n);
+    globalposted += n;
+    return 1;
 }
 
 
