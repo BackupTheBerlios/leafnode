@@ -1667,6 +1667,8 @@ dopost(void)
 	    break;
 	}			/* switch(fork()) */
 
+	goto cleanup;
+
 unlink_cleanup:
 	msgid_deallocate(inname, mid);
 cleanup:
@@ -1679,7 +1681,7 @@ cleanup:
 	if (outgoingname) mastr_delete(outgoingname);
 	if (incomingname) mastr_delete(incomingname);
 	return;
-    }
+    } /* if (havefrom && havesubject && havenewsgroups && !err) */
 
     log_unlink(inname, 0);
     if (!havefrom)
