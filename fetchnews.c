@@ -1688,7 +1688,7 @@ main(int argc, char **argv)
 	}
 
 	if (!noexpire)
-	    checkinteresting();
+	    expireinteresting();
     } else {
 	if (!checkforpostings())
 	    exit(0);

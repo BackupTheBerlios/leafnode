@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.49 2002/06/21 23:40:58 emma Exp $ */
+/* $Id: leafnode.h,v 1.50 2002/06/22 00:31:59 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -185,9 +185,10 @@ extern "C" {
 
 /* is the group an interesting one? */
     int is_interesting(const char *groupname);
-    void checkinteresting(void);
+    void expireinteresting(void);
 
     int is_dormant(const char *groupname);
+
 /*
  * newsgroup management
  */
@@ -486,6 +487,9 @@ extern "C" {
     extern char fqdn[];		/* my name, and my naming myself */
     extern int verbose;		/* verbosity level, for fetch and texpire */
     extern int debug;		/* debug level */
+    void freegrouplist(/*@only@*/ struct rbtree *rb);
+    /*@null@*/ /*@only@*/ struct rbtree * initgrouplistdir(const char *dir);
+
 
 /*
  * misc prototypes
