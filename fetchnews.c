@@ -653,13 +653,13 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 {
     unsigned long h, window, u;
     long n;
-    const char *l, *t;
+    char *l, *t;
 
     if (!gs_match(cursrv -> group_pcre, g->name))
 	return 0;
 
     putaline(nntpout, "GROUP %s", g->name);
-    l = mgetaline(nntpin);
+    n = newnntpreply(cursrv, &l);
     if (!l)
 	return 0;
 
@@ -1679,6 +1679,7 @@ postarticles(const struct serverlist *cursrv)
 
     if (active == NULL) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "I need an active file (to figure which groups are moderated) before I can post.");
+	free_dirlist(x);
 	return 0;
     }
 
