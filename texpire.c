@@ -803,9 +803,6 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 	       "%s: expire %ld, low water mark %lu, high water mark %lu",
 	       n, (long)expire, first, last);
-    if (expire <= 0) {
-	return;
-    }
     /* check the syntax of the .overview info */
     if (debugmode & DEBUG_EXPIRE) {
 	for (i = 0; i < xcount; ++i) {
@@ -818,13 +815,15 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     threadlist = build_threadlist(xcount);
     totalthreads = count_threads(threadlist);
     updatedir(n);
-    remove_newer(threadlist, expire);
-    if (debugmode & DEBUG_EXPIRE) {
-	ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
-	       "%s: threads total: %lu, to delete: %lu", n,
-	       totalthreads, count_threads(threadlist));
+    if (expire > 0) {
+	remove_newer(threadlist, expire);
+	if (debugmode & DEBUG_EXPIRE) {
+	    ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
+		    "%s: threads total: %lu, to delete: %lu", n,
+		    totalthreads, count_threads(threadlist));
+	}
+	delete_threads(threadlist);
     }
-    delete_threads(threadlist);
     /* compute new low-water mark, count remaining articles */
     kept = 0;
     if (!last && g) last = g->last;
