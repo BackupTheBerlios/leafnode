@@ -37,7 +37,6 @@ unsigned long artlimit = 0;
 unsigned long initiallimit = 0;
 int create_all_links = 0;
 int delaybody = 0;
-int avoidxover = 0;
 int timeout_long = 7;
 int timeout_short = 2;
 int timeout_active = 90;
@@ -117,15 +116,15 @@ readconfig(char *configfile)
     char *param, *value;
     int err;
     time_t i;
-    char s[PATH_MAX];		/* FIXME: possible overrun below */
+    char s[PATH_MAX+1];
 
     artlimit = 0;
     param = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     value = (char *)critmalloc(TOKENSIZE, "allocating space for parsing");
     if (configfile) {
-	snprintf(s, 1023, "%s", configfile);
+	snprintf(s, PATH_MAX, "%s", configfile);
     } else {
-	snprintf(s, 1023, "%s/config", libdir);
+	snprintf(s, PATH_MAX, "%s/config", libdir);
     }
     if ((f = fopen(s, "r")) == NULL) {
 	err = errno;
@@ -245,12 +244,15 @@ readconfig(char *configfile)
 				   killbogus);
 		    break;
 		case CP_AVOIDXOVER:
-		    avoidxover = strtol(value, NULL, 10);
+		    p->usexhdr = strtol(value, NULL, 10);
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "config: avoidxover is %d (default 0)",
-				   avoidxover);
-
+				   "config: usexhdr is %d (default 0)",
+				   p->usexhdr);
+		    if (p->usexhdr && (filterfile || delaybody))
+			ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
+				   "config: usexhdr does not work together "
+				   "with filtering or delaybody mode.");
 		    break;
 		case CP_TOSHORT:
 		    timeout_short = strtol(value, NULL, 10);
@@ -387,7 +389,7 @@ readconfig(char *configfile)
 		    p->next = NULL;
 		    p->timeout = 30;	/* default 30 seconds */
 		    p->port = 0;
-		    p->usexhdr = avoidxover;
+		    p->usexhdr = 0;	/* default: use XOVER */
 		    p->username = NULL;
 		    p->password = NULL;
 		    p->active = TRUE;
