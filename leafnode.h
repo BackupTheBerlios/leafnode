@@ -81,6 +81,9 @@ typedef int bool;
 /*@constant int BLOCKSIZE;@*/
 #define BLOCKSIZE 16384
 
+/*@constant int MAXHEADERSIZE;@*/
+#define MAXHEADERSIZE 16383
+
 /*@constant mode_t MKDIR_MODE;@*/
 #define MKDIR_MODE 0770
 
@@ -730,6 +733,12 @@ int cmp_firstcolumn(const void *a, const void *b,
 #define D(a)
 #endif
 void d_stop_mid(const char *mid);
+
+/* readheaders.c */
+extern int
+readheaders(int fd, /*@unique@*/ const char *name, char **bufp, size_t *size,
+	const char *delim);
+
 
 #if 0
 #warning "WARNING: do not disable fsync in production use"

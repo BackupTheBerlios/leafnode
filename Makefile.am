@@ -115,6 +115,7 @@ liblnutil_a_SOURCES	= \
 	pcrewrap.h \
 	putaline.c \
 	queues.c \
+	readheaders.c \
 	redblack.c \
 	redblack.h \
 	sgetcwd.h \
