@@ -2012,10 +2012,15 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
     }
 }
 
-static int str_comp(const void *p1, const void *p2) {
+static int strnum_comp(const void *p1, const void *p2) {
     char *const *s1 = p1;
     char *const *s2 = p2;
-    return strcmp(*s1, *s2);
+    unsigned long u1, u2;
+    if (!get_ulong(*s1, &u1)) return 0;
+    if (!get_ulong(*s2, &u2)) return 0;
+    if (u1 == u2) return 0;
+    if (u1 < u2) return -1;
+    return 1;
 }
 
 static /*@null@*/ /*@dependent@*/ struct newsgroup *
@@ -2065,7 +2070,7 @@ dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *
 	char **t = dirlist(".", DIRLIST_ALLNUM, &ul), **i;
 	nntpprintf_as("211 Article list for %s follows", g->name);
 	if (t) {
-	    qsort(t, ul, sizeof(char *), str_comp);
+	    qsort(t, ul, sizeof(char *), strnum_comp);
 	    for (i = t; *i; i++)
 		nntpprintf_as("%s", *i);
 	    free_dirlist(t);
