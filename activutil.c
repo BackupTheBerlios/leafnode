@@ -63,8 +63,6 @@ insertgroup(const char *name, char status, long unsigned first,
     static struct nglist *lold;
     struct newsgroup *g;
 
-    lold = newgroup;
-
     /* interpret INN status characters */
     if (status == 'x') status = 'n';
     if (strchr("j=", status)) status = 'y';
@@ -84,6 +82,7 @@ insertgroup(const char *name, char status, long unsigned first,
     g->age = age;
     g->desc = desc ? critstrdup(desc, "insertgroup") : NULL;
     g->status = status;
+
     l = (struct nglist *)critmalloc(sizeof(struct nglist),
 				    "Allocating space for newsgroup list");
 
