@@ -62,9 +62,6 @@ Ralfs TODO:
 	  "%d articles deleted' message not correct.
 
 10pre4
-0.0 markdownload: check for I/O errors
-
-10pre4
 0.0 forward port bug fixes from 1.9.19rc*
     (applyfilter done)
 
@@ -302,6 +299,10 @@ Ralfs TODO:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-04-26 Ralf Wildenhues
+	   nntpd.c: do error checking on interesting.groups/* files
+		    fix file descriptor leak
 
 2002-04-13 Matthias Andree
 	   nntpd.c: list PAT in dohelp? (Ralf Wildenhues)
