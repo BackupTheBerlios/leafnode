@@ -23,7 +23,7 @@ putaline(FILE * f, const char *fmt, ...)
     vsnprintf(lineout, sizeof(lineout), fmt, args);
     if (debug & DEBUG_IO)
 	ln_log(LNLOG_SDEBUG, LNLOG_CALL, ">%s", lineout);
-    mastrncpy(last_command, lineout, sizeof(lineout));
+    (void)mastrncpy(last_command, lineout, sizeof(lineout));
     fprintf(f, "%s\r\n", lineout);
     fflush(f);
     va_end(args);
