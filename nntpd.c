@@ -808,12 +808,14 @@ opengroup(struct newsgroup *g)
 	markinterest(g->name);
     if (chdirgroup(g->name, FALSE)) {
 	maybegetxover(g);
+#if 0
 	if (g->count == 0) {
 	    if (getwatermarks(&g->first, &g->last, &g->count)) {
 		nntpprintf("503 Cannot get group article count.");
 		return NULL;
 	    }
 	}
+#endif
     }
     return g;
 }
@@ -836,7 +838,7 @@ dogroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 		    1lu, g->first, g->first, g->name);
 	else
 	    nntpprintf("211 %lu %lu %lu %s group selected",
-		    g->count, g->first, g->last, g->name);
+		    g->count, min(g->last, g->first), g->last, g->name);
 	*artno = g->first;
 
 	fflush(stdout);

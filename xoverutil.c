@@ -436,6 +436,7 @@ xgetxover(
 	    xlast = art;
     }
 
+#if 0
     if (!xcount || xlast < xfirst) {
 	char sd[LN_PATH_MAX], s[LN_PATH_MAX + 15];
 	if (!getcwd(sd, sizeof(sd))) {
@@ -455,6 +456,7 @@ xgetxover(
 	    free(overview);
 	return 1;
     }
+#endif
 
     /* count number of entries in .overview file, store into current */
     p = overview;
@@ -588,7 +590,7 @@ xgetxover(
     xcount = current;
 
     if (g) {
-	g->first = xfirst;
+	g->first = min(xfirst, g->last + 1);
 	if (xlast > g->last)
 	    g->last = xlast;
 	g->count = current;

@@ -519,13 +519,13 @@ updatedir(const char *groupname)
  * find lowest article number, lower than high,
  * also count total number of articles
  */
-unsigned long
+static unsigned long
 low_wm(unsigned long high)
 {
     unsigned long low, i;
     struct rnode *r;
 
-    low = high;
+    low = high + 1;
     kept = 0;
     for (i = 0; i < HASHSIZE; ++i) {
 	r = hashtab[i];
@@ -823,6 +823,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
     delete_threads(threadlist);
     /* compute new low-water mark, count remaining articles */
     kept = 0;
+    if (!last) last = g->last;
     first = low_wm(last);
     /* free unused memory */
     free_threadlist(threadlist);

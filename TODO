@@ -59,9 +59,6 @@ Matthias:
 * use NEWSGROUPS file possibly obtained via ftp instead of downloading?
 
 10pre5
-0.0 if group is empty, low water mark is not bumped up to high water mark
-
-10pre5
 0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
 10pre5
@@ -234,6 +231,9 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2003-10-31 Matthias Andree
+	   if group is empty, low water mark is not bumped up to high water mark
 
 2003-10-30 Matthias Andree
 	   If some.group is dormant (i.e. listed in dormant.groups),
