@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.18 2002/05/06 09:05:15 emma Exp $
+# $Id: Makefile.am,v 1.19 2002/06/16 19:58:28 ralf Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -45,6 +45,8 @@ liblnutil_a_SOURCES	= \
 	activutil.c \
 	artutil.c \
 	attributes.h \
+	bsearch_range.h \
+	bsearch_range.c \
 	config.c \
 	configparam.c \
 	configparam.h \
