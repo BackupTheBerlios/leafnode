@@ -9,6 +9,7 @@
 #include <sysexits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
