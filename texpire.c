@@ -731,10 +731,11 @@ legalxoverline(const char *xover, unsigned long artno)
     }
 
     /* Xref */
+    SKIPLWS(p);
     if (0 != strncasecmp(p, "Xref:", 5)) {
 	if (debugmode & DEBUG_EXPIRE)
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
-		    "%lu xover error: Xref: header lacks XRef: tag.", artno);
+		    "%lu xover error: Xref: header lacks Xref: tag.", artno);
 	return 0;
     }
 
