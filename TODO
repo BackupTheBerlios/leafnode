@@ -75,6 +75,8 @@ Matthias:
 2.2 do not allow crossposts into local and upstream groups at the same
     time
 
+2.2 do not allow anyone to post with approved header
+
 10pre5
 2.2 rb_lookup: warning: `cmp' might be used uninitialized in this
     function. May happen with rb_lookup with rbinfo->rb_root == RBNULL.
