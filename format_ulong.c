@@ -1,7 +1,7 @@
 #include "format.h"
 
 void
-str_ulong(char *p, unsigned long u)
+str_ulong( /*@out@*/ char *p, unsigned long u)
 {
     unsigned int len = 0;
     unsigned int i = u;

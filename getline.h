@@ -3,9 +3,9 @@
 #include <sys/types.h>
 #include "config.h"
 
-ssize_t _getline(char *to, size_t size, FILE * stream);
+ssize_t _getline( /*@out@*/ char *to, size_t size, FILE * stream);
 
 #ifndef HAVE_GETLINE
-ssize_t getline(char **, size_t *, FILE *);	/* fgets replacement */
+ssize_t getline( /*@out@*/ char **, size_t *, FILE *);	/* fgets replacement */
 #endif
 #endif
