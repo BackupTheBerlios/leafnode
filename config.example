@@ -133,3 +133,9 @@ expire = 20
 ## The default is 10 seconds.
 # server = really.slow.snail
 # timeout = 60
+
+## Finally, we show a server which is never fed upstream posts from
+## local users. It may have a misconfigured moderators file, may have
+## trouble with its own uplink, whatever.
+# server = just.pull.from.this
+# dontpost = 1
