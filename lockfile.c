@@ -134,7 +134,7 @@ lock_is_stale(
     }
 
     /* okay, we can see if there's still a process with that pid active */
-    if (kill(npid, 0) && errno == ESRCH) {
+    if (kill((pid_t)npid, 0) && errno == ESRCH) {
 	/* no such process, good */
 	if (!unlink(name)) {
 	    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
