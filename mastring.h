@@ -22,7 +22,7 @@ typedef struct mastr mastr;
 /*@only@*/ mastr *mastr_new(long);
 /*@only@*/ mastr *mastr_newstr(const char *);
 int mastr_cpy(mastr *, const char *);
-int mastr_cat(mastr *, /*@unique@*/ const char *);
+int mastr_cat(mastr *, /*@observer@*/ const char *);
 int mastr_vcat(mastr *, ...);
 int mastr_resizekeep(mastr *, long);
 int mastr_resizekill(mastr *, long);

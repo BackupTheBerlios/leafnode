@@ -73,7 +73,7 @@ cuttab(const char *in, int field)
      number of elements, negated if there was a remainder in the string.
 */
 int
-strnsplit(char **a /** pre-allocated destination array to hold substrings */ ,
+strnsplit(/*@out@*/ char **a /** pre-allocated destination array to hold substrings */ ,
 	  const char *const in /* input string to split */ ,
 	  const char *sep
 		    /** string of delimiter characters, but \b note:

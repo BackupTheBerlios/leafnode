@@ -1,5 +1,39 @@
 2002-01-08  Matthias Andree  <matthias.andree@gmx.de>
 
+	=== RELEASE 2.0b8_ma9rc1 ===
+	* texpire.c: Make program splint -weak clean, defining some
+	variables static.
+
+	* critmem.h: Fix the lclint comments that indent broke.
+	* nntputil.c: Fix the lclint comments that indent broke.
+	* artutil.c: Fix the lclint comments that indent broke.
+	* xoverutil.c: API change for xover retrieval: most functions now
+	take an additional parameter, require_messageidlink, to skip
+	messages without a proper link in message.id (these are broken
+	anyways).  Bugfix: don't abort if the new .overview is empty.
+
+	* ugid.h: Include Ralf Wildenhues' lclint annotations.
+	* ugid_ggetbyuname.c: Include Ralf Wildenhues' lclint annotations.
+	* texpire.c: Track getxover API change.  Drop relink, was too
+	inefficient.  Fix the spool rehashing bug that ate Mike Castle's
+	news spool. Please apologize.
+
+	* nntpd.c: Track getxover API change.
+	* newsq.c: Next round of Ralf Wildenhues' correctness patches.
+	* miscutil.c: Include Ralf Wildenhues' lclint annotations.  Fix
+	memory leak (Ralf Wildenhues).
+
+	* leafnode.h: Include Ralf Wildenhues' lclint annotations.  Track
+	getxover/xgetxover API change: addition of require_messageidlink.
+	* getline.h: Include Ralf Wildenhues' lclint annotations.
+	* getline.c: Include Ralf Wildenhues' lclint annotations.
+	* format_ulong.c: Include Ralf Wildenhues' lclint annotations.
+	* format.h: Include Ralf Wildenhues' lclint annotations.
+	* critmem.h: Include Ralf Wildenhues' lclint annotations.
+	* configure.ac: Bump version to 2.0b8_ma9rc1.
+	* artutil.c: Next round of Ralf Wildenhues' correctness patches.
+	* applyfilter.c: Track getxover API change.
+
 	=== RELEASE 2.0b8_ma9.4pre ===
 	* Makefile.am: Move leafnode-version to bindir.
 	* activutil.c: Back out lold initialization.

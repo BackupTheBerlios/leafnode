@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.22 2002/01/08 16:38:14 emma Exp $ */
+/* $Id: leafnode.h,v 1.23 2002/01/08 17:42:18 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -147,7 +147,7 @@ extern "C" {
 		 size_t);
 
 /* converts a message-id to a file name, the return value points to static storage  */
-    /*@dependent@*/ char *lookup(const char *msgid);
+    /*@dependent@*/ char *lookup(/*@null@*/ const char *msgid);
 
 /* handling of misc. lines */
     char *getaline(FILE * f);	/* reads one line, regardless of length,
@@ -283,7 +283,7 @@ extern "C" {
  */
     int store(const char *filename, int, /*@null@*/ const struct filterlist *);
     int store_stream(FILE * stream, int, /*@null@*/ const struct filterlist *,
-		     long);
+		     ssize_t);
     /*@observer@*/ const char *store_err(int);
 
 /*
@@ -355,7 +355,7 @@ extern "C" {
  * global variables from config file. These are defined in configutil.c
  */
     struct expire_entry {
-	int xtime;
+	time_t xtime;
 	struct expire_entry *next;
 	char *group;
     };
@@ -491,7 +491,7 @@ extern "C" {
 						   of digits and "-" */
 
     char *cuttab(const char *in, int field);	/* break tab-separated field */
-    int strnsplit(char **array, const char *in, const char *sep, int maxelem);	/* Perl-like, split
+    int strnsplit(/*@out@*/ char **array, const char *in, const char *sep, int maxelem);	/* Perl-like, split
 										   string into substrings */
     void free_strlist(char **hdl /** string array to free */ );	/* free array of strings */
     char *memstrcat(const char *[]);	/* concatenate all strings into new, malloc()ed string */

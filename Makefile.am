@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.5 2002/01/08 05:10:21 emma Exp $
+# $Id: Makefile.am,v 1.6 2002/01/08 17:42:18 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.5 # check-news
 
@@ -253,7 +253,9 @@ install-data-hook:
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp news $$p && chmod 2755 $$p  ; true
 	@echo
-	@echo "Now edit /etc/inetd.conf to start $(DESTDIR)$(SBINDIR)/leafnode"
+	@echo "*** DO MAKE SURE THAT YOU RUN texpire -r IF YOU HAVE ARTICLES IN THE SPOOL ***"
+	@echo
+	@echo "Then edit /etc/inetd.conf to start $(DESTDIR)$(SBINDIR)/leafnode"
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
 
 uninstall-local:

@@ -398,7 +398,7 @@ isinteresting(const char *groupname)
 
 /* no good but this server isn't going to be scalable so shut up */
 char *
-lookup(const char *msgid)
+lookup(/*@null@*/ const char *msgid)
 {
     static char *name = NULL;
     static unsigned int namelen = 0;

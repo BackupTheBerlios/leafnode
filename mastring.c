@@ -90,7 +90,7 @@ mastr_cpy(mastr * m, const char *s)
 }
 
 int
-mastr_cat(mastr * m, /*@unique@*/ const char *s)
+mastr_cat(mastr * m, /*@observer@*/ const char *const s)
 {
     long li = strlen(s);
 

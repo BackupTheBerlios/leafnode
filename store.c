@@ -102,7 +102,7 @@ int
 store_stream(FILE * in /** input file */ ,
 	     int nntpmode /** if 1, unescape . and use . as end marker */ ,
 	     const struct filterlist *f /** filters or NULL */ ,
-	     long maxbytes /** maximum byte count, -1 == unlimited */ )
+	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */ )
 {
     int rc = -1;		/* first, assume something went wrong */
     mastr *tmpfn = mastr_new(4095l);
@@ -126,7 +126,7 @@ store_stream(FILE * in /** input file */ ,
     ssize_t s;
     mastr *ln = mastr_new(4095l);	/* line buffer */
 
-    mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", 0);
+    (void)mastr_vcat(tmpfn, spooldir, "/temp.files/store_XXXXXXXXXX", 0);
 
     /* check for OOM */
     if (!head) {
@@ -149,8 +149,8 @@ store_stream(FILE * in /** input file */ ,
     tmpstream = fdopen(tmpfd, "w+");
     if (!tmpstream) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "cannot fdopen(%d): %m", tmpfd);
-	log_close(tmpfd);
-	log_unlink(mastr_str(tmpfn));
+	(void)log_close(tmpfd);
+	(void)log_unlink(mastr_str(tmpfn));
 	mastr_delete(tmpfn);
 	mastr_delete(head);
 	mastr_delete(ln);
@@ -179,8 +179,8 @@ store_stream(FILE * in /** input file */ ,
 	}
 	if (f) {
 	    /* save headers for filter */
-	    mastr_cat(head, line);
-	    mastr_cat(head, LLS);
+	    (void)mastr_cat(head, line);
+	    (void)mastr_cat(head, LLS);
 	}
 	if (c_date < 2 && strisprefix(line, "Date:"))
 	    ++c_date;
@@ -237,9 +237,9 @@ store_stream(FILE * in /** input file */ ,
 	BAIL(-3, "More or less than one Subject header found");
     if (c_path != 1)
 	BAIL(-3, "More or less than one Path header found");
-    if (!mid)
+    if (NULL == mid)
 	BAIL(-3, "No Message-ID header found");
-    if (!ngs)
+    if (NULL == ngs)
 	BAIL(-3, "No Newsgroups header found");
 
     /* check if we already have the article */
@@ -428,7 +428,7 @@ store(const char *name, int nntpmode,
 {
     FILE *i = fopen(name, "r");
     if (i) {
-	int rc = store_stream(i, nntpmode, f, -1l);
+	int rc = store_stream(i, nntpmode, f, (ssize_t)-1);
 	(void)fclose(i);
 	return rc;
     } else {
