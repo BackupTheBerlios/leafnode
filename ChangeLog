@@ -1,5 +1,20 @@
+2004-02-26  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c, leafnode-2/fetchnews.c: getaline -> mgetaline for
+	all NNTP-related reads, to fix undetected timeouts.  rename
+	_ignore_answer to ignore_answer.
+
+2004-02-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* TODO, leafnode-2/TODO: Clarify two items after preliminary
+	discussion with Jörg Dietrich. Subject to further change!
+
 2004-02-17  Matthias Andree <matthias.andree@gmx.de>
 
+	* .cvsignore, leafnode-2/.cvsignore: Add semantic.cache per hynek's
+	request.
+	* NEWS, leafnode-2/NEWS: update
+	* ChangeLog, leafnode-2/ChangeLog: update
 	* TODO: posting vs. approved
 	* fetchnews.c, grouplist.c, grouplist.h, leafnode.h, miscutil.c,
 	nntpd.c, texpire.c: Stringlist reformation patch. stringlists now
