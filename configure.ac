@@ -5,7 +5,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0b8_ma10pre1])
 AC_PREREQ(2.52)
-AC_REVISION($Revision: 1.11 $)
+AC_REVISION($Revision: 1.12 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AM_CONFIG_HEADER(config.h)
 dnl AM_MAINTAINER_MODE
@@ -257,14 +257,12 @@ fi
 
 dnl Checks for library functions.
 AC_FUNC_CHOWN
-AC_FUNC_FORK
-AC_FUNC_LSTAT
-AC_FUNC_MALLOC
+AC_FUNC_FORK dnl checks whether fork() is just a stub
+dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
 dnl AC_FUNC_MKTIME
 AC_FUNC_SETVBUF_REVERSED
-AC_FUNC_STAT
 AC_FUNC_STRFTIME
-AC_FUNC_UTIME_NULL
+dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul mkstemp setgid setuid snprintf vsnprintf getaddrinfo])
