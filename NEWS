@@ -2,6 +2,10 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20040920a:
+- Feature: texpire offers an "-a" option to expire article based
+  (as leafnode-1 did) rather than thread-based.
+
 20040920a: Changes since 20040916a:
 - Bugfix: 20040916a broke article retrieval for many newsreaders.
   Reported by Robert Clark and Jack Raats.

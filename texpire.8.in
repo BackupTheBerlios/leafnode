@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: texpire.8.in,v 1.9 2004/09/12 12:11:59 emma Exp $
+.\" $Id: texpire.8.in,v 1.10 2004/09/28 22:27:21 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -49,6 +49,9 @@ Read configuration from an alternate config file instead of
 .I -f
 Expire will look at the arrival time of the articles rather than at the
 access time. Expiry will still be thread-based.
+.TP
+.I -a
+Expire individual articles rather than threads.
 .TP
 .I -n
 Dry run mode. In this mode, texpire will not delete anything, it will

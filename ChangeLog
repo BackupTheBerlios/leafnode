@@ -1,3 +1,8 @@
+2004-09-28  Matthias Andree <matthias.andree@gmx.de>
+
+	* texpire.8.in, texpire.c: Add texpire -a option to expire
+	article-based rather than thread-based.
+
 2004-09-20  Matthias Andree <matthias.andree@gmx.de>
 
 	= snapshot 20040920a =

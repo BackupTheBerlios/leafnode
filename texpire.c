@@ -64,7 +64,8 @@ See README for restrictions on the use of this software.
 
 static int dryrun = 0;		/* do not delete articles */
 static int use_atime = 1;	/* look for atime on articles to expire */
-static int repair_spool = 0;
+static int repair_spool = 0;	/* repair mode */
+static int expire_threads = 1;	/* if whole threads are blocked from expiry */
 
 static char gdir[LN_PATH_MAX];		/* name of current group directory */
 static unsigned long deleted, kept;
@@ -408,11 +409,16 @@ remove_newer(struct thread *threadlist, time_t expire)
 		    && S_ISREG(st.st_mode)
 		    && ((use_atime ? st.st_atime : st.st_mtime)
 			> expire)) {
-		    /* a newer article was found, disconnect from
-		       threadlist.  we later free() from hashtab[] */
-		    t->subthread = NULL;
-		    break;
-		    /* no need to look further */
+		    if (expire_threads) {
+			/* a newer article was found, disconnect from
+			   threadlist.  we later free() from hashtab[] */
+			t->subthread = NULL;
+			/* no need to look further */
+			break;
+		    } else {
+			/* prevent this article from expiry */
+			r->artno = 0;
+		    }
 		}
 	    }
 	}
@@ -1015,7 +1021,7 @@ main(int argc, char **argv)
     if (!initvars(argv[0], 0))
 	init_failed(myname);
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "frn")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "afnr")) != -1) {
 	if (parseopt(myname, option, optarg, &conffile))
 	    continue;
 	switch (option) {
@@ -1027,6 +1033,9 @@ main(int argc, char **argv)
 	    break;
 	case 'n':
 	    dryrun = 1;
+	    break;
+	case 'a':
+	    expire_threads = 0;
 	    break;
 	default:
 	    usage();
