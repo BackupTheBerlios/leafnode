@@ -21,8 +21,7 @@ sub ls($ ) {
 	      HTTP::Date::time2iso($st->ctime), " ",
 	      HTTP::Date::time2iso($st->mtime), " ",
 	      HTTP::Date::time2iso($st->atime), " ",
-		$st->nlink, " ",
-		sprintf("%8d", $st->size), " ", $f, "\n";
+		sprintf("%3d %8d", $st->nlink, $st->size), " ", $f, "\n";
 	} else {
 	    warn "$f: $!";
 	}
