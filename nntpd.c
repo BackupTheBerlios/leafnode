@@ -66,43 +66,49 @@
 #define P_ACCEPTED	281
 
 static char *generateMessageID(void);
-static FILE *fopenart(const struct newsgroup *group, const char *,
+static /*@dependent@*/ /*@null@*/ FILE *fopenart(/*@null@*/ const struct newsgroup *group, const char *,
 		      unsigned long *);
-static FILE *buildpseudoart(const char *grp);
-static FILE *fopenpseudoart(const struct newsgroup *group, const char *arg,
+static /*@dependent@*/ /*@null@*/ FILE *buildpseudoart(const char *grp);
+static /*@dependent@*/ /*@null@*/ FILE *fopenpseudoart(const struct newsgroup *group, const char *arg,
 			    const unsigned long article_num);
 static void list(struct newsgroup *ng, int what, char *pattern);
 static void main_loop(void);	/* main program loop */
-static void doarticle(const struct newsgroup *group, const char *arg, int what,
+static void doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 		      unsigned long *);
-static struct newsgroup *dogroup(const char *, unsigned long *);
+static /*@null@*/ /*@dependent@*/ struct newsgroup *
+dogroup(const char *, unsigned long *);
 static void dohelp(void);
 static void domode(const char *arg);
-static void domove(const struct newsgroup *group, int, unsigned long *);
+static void domove(/*@null@*/ const struct newsgroup *group, int, unsigned long *);
 static void dolist(char *p);
 static void donewgroups(const char *);
 static void donewnews(char *);
 static void dopost(void);
-static void doxhdr(const struct newsgroup *group, const char *,
+static void doxhdr(/*@null@*/ const struct newsgroup *group, const char *,
 		   unsigned long artno);
-static void doxpat(const struct newsgroup *group, const char *,
+static void doxpat(/*@null@*/ const struct newsgroup *group, const char *,
 		   unsigned long artno);
-static void doxover(const struct newsgroup *group, const char *, unsigned long);
-static void doselectedheader(const struct newsgroup *, const char *,
+static void doxover(/*@null@*/ const struct newsgroup *group, const char *, unsigned long);
+static void doselectedheader(/*@null@*/ const struct newsgroup *, const char *,
 			     const char *, struct stringlist *,
 			     unsigned long *);
-static struct newsgroup *dolistgroup(struct newsgroup *group, const char *,
+static /*@null@*/ /*@dependent@*/ struct newsgroup *
+dolistgroup(/*@null@*/ struct newsgroup *group, const char *,
 				     unsigned long *);
 static int markinterest(const struct newsgroup *);
-static int allowposting(void);
+
+static /*@null@*/ /*@only@*/ char *NOPOSTING;
+				/* ok-to-print version of getenv("NOPOSTING") */
+static int allowposting(void)
+    /*@globals undef NOPOSTING@*/;
 static int isauthorized(void);
 static void doauthinfo(char *arg);
-static int dorange(const char *arg,
-		   unsigned long *a, unsigned long *b,
+static int dorange(/*@null@*/ const char *arg,
+		   /*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
 		   unsigned long artno, unsigned long lo, unsigned long hi);
 
 static const struct newsgroup *xovergroup;	/* FIXME */
-static struct stringlist *users = NULL;	/* FIXME */
+/*@null@*/ static struct stringlist *users = NULL;	/* FIXME */
 				/* users allowed to use the server */
 int debug = 0;
 static int authflag = 0;	/* TRUE if authenticated */
@@ -122,11 +128,11 @@ nntpprintf(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    (void)vsnprintf(buffer, sizeof(buffer), fmt, args);
     if (debugmode & DEBUG_IO)
 	ln_log(LNLOG_SDEBUG, LNLOG_CALL, ">%s", buffer);
     printf("%s\r\n", buffer);
-    fflush(stdout);
+    (void)fflush(stdout);
     va_end(args);
 }
 
@@ -148,13 +154,13 @@ main_loop(void)
 	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "< %s", cmd);
 
-	n = strlen(cmd);
+	n = (int)strlen(cmd);
 	if (n == 0)
 	    continue;		/* necessary for netscape to be quiet */
 	else if (n > MAXLINELENGTH) {
 	    /* ignore attempts at buffer overflow */
 	    nntpprintf("500 Dazed and confused");
-	    fflush(stdout);
+	    (void)fflush(stdout);
 	    continue;
 	}
 	cmd = critstrdup(cmd, "main_loop");
@@ -170,7 +176,7 @@ main_loop(void)
 	while (cmd[n])
 	    n++;
 	n--;
-	while (isspace((unsigned char)cmd[n]))
+	while (n>=0 && isspace((unsigned char)cmd[n]))
 	    cmd[n--] = '\0';
 	if (!strcasecmp(cmd, "quit")) {
 	    nntpprintf("205 Always happy to serve!");
@@ -289,7 +295,7 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
 	    }
 	    fprintf(pseudoart, "%s\n", cl);
 	}
-	fclose(f);
+	(void)fclose(f);
     } else {
 	if (pseudofile)
 	    ln_log(LNLOG_SERR, LNLOG_CTOP,
@@ -323,7 +329,7 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
 
 /** build and return an open FILE stream to pseudoart in group, may
  * return NULL. */
-/*@null@*/ static FILE *
+/*@null@*/ /*@dependent@*/ static FILE *
 buildpseudoart(const char *grp)
 {
     FILE *f;
@@ -350,7 +356,7 @@ buildpseudoart(const char *grp)
 }
 
 /* open a pseudo art */
-/*@null@*/ static FILE *
+/*@null@*/ /*@dependent@*/ static FILE *
 fopenpseudoart(const struct newsgroup *group, const char *arg,
 	       const unsigned long article_num)
 {
@@ -390,8 +396,8 @@ ispseudogroup(const char *group)
 }
 
 /* open an article by number or message-id */
-/*@null@*/ static FILE *
-fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
+/*@null@*/ /*@dependent@*/ static FILE *
+fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long *artno)
 /* FIXME: when may artno be touched? */
 {
     unsigned long int a;
@@ -403,7 +409,7 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
     f = NULL;
     t = NULL;
     a = strtoul(arg, &t, 10);
-    if (a && t && !*t && group) {
+    if (a && t && !*t && group != NULL) {
 	if (ispseudogroup(group->name)) {
 	    f = fopenpseudoart(group, arg, a);
 	} else {
@@ -431,8 +437,8 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
     /* do not return articles with zero size (these have been truncated by
      * store.c after a write error) */
     if (f && (fstat(fileno(f), &st) || st.st_size == 0)) {
-	fclose(f);
-	f = 0;
+	(void)fclose(f);
+	f = NULL;
     }
 
     return f;
@@ -465,22 +471,27 @@ markdownload(const struct newsgroup *group, const char *msgid)
 
 static int
 allowposting(void)
+    /*@globals undef NOPOSTING@*/
 {
-    static int initialized;
-    static char *NOPOSTING;
+    char *s;
+    static int initialized = 0;
     static int allowpost = 1;
 
     /* read NOPOSTING from environment if true */
     if (!initialized) {
-	NOPOSTING = getenv("NOPOSTING");
-	if (NOPOSTING) {
+	s = getenv("NOPOSTING");
+	if (s) {
 	    char *p;
+	    NOPOSTING = critstrdup(s, "allowposting");
 	    for (p = NOPOSTING; *p; p++) {
 		if (iscntrl((unsigned char)*p))
 		    *p = '_';
 	    }
 	    allowpost = 0;
+	} else {
+	    NOPOSTING = NULL;
 	}
+	initialized = 1;
     }
     return allowpost;
 }
@@ -488,12 +499,12 @@ allowposting(void)
 /* display an article or somesuch */
 /* DOARTICLE */
 static void
-doarticle(const struct newsgroup *group, const char *arg, int what,
+doarticle(/*@null@*/ const struct newsgroup *group, const char *arg, int what,
 	  unsigned long *artno)
 {
     FILE *f;
     char *p = NULL;
-    char *q = NULL;
+    /*@dependent@*/ char *q = NULL;
     unsigned long localartno;
     char *localmsgid = NULL;
     char s[PATH_MAX + 1];	/* FIXME */
@@ -571,19 +582,19 @@ doarticle(const struct newsgroup *group, const char *arg, int what,
     }
 
     if (what == 3)
-	printf("\r\n");		/* empty separator line */
+	fputs("\r\n", stdout);		/* empty separator line */
 
     if (what & 1) {
 	if (delaybody && *s != '\n') {
 	    if (!markdownload(group, localmsgid)) {
-		printf("\r\n\r\n"
+		fputs( "\r\n\r\n"
 		       "\t[Leafnode:]\r\n"
 		       "\t[This message has already been "
-		       "marked for download.]\r\n");
+		       "marked for download.]\r\n", stdout);
 	    } else {
 		printf("\r\n\r\n"
 		       "\t[Leafnode:]\r\n"
-		       "\t[Message %ld of %s]\r\n"
+		       "\t[Message %lu of %s]\r\n"
 		       "\t[has been marked for download.]\r\n",
 		       localartno, group->name);
 	    }
@@ -592,15 +603,18 @@ doarticle(const struct newsgroup *group, const char *arg, int what,
 		p = s;
 		if ((p = strchr(p, '\n')))
 		    *p = '\0';
-		printf("%s%s\r\n", *s == '.' ? "." : "", s);
+		if (*s == '.')
+		  putc('.', stdout);	/* escape . */
+		fputs(s, stdout);
+		fputs("\r\n", stdout);
 	    }
 	}
     }
 
     if (what)
-	printf(".\r\n");
+	fputs(".\r\n", stdout);
 
-    fclose(f);
+    (void)fclose(f);
 
     free(localmsgid);
     return;			/* FIXME: OF COURSE there were no errors */
@@ -667,7 +681,7 @@ markinterest(const struct newsgroup *group)
 }
 
 /* change to group - note no checks on group name */
-static struct newsgroup *
+static /*@null@*/ /*@dependent@*/ struct newsgroup *
 dogroup(const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
@@ -752,7 +766,7 @@ dogroup(const char *arg, unsigned long *artno)
 		   set g->first to 1? */
 	    }
 	} else {		/* group directory is not present */
-	    g->first = g->last = g->count = ispseudogroup(g->name) ? 1 : 0;
+	    g->first = g->last = g->count = ispseudogroup(g->name) ? 1ul : 0ul;
 	}
 	nntpprintf("211 %lu %lu %lu %s group selected",
 		   g->count, g->first, g->last, g->name);
@@ -812,7 +826,7 @@ domode(const char *arg)
 }
 
 static void
-domove(const struct newsgroup *group, int by, unsigned long *artno)
+domove(/*@null@*/ const struct newsgroup *group, int by, unsigned long *artno)
 {
     char *msgid;
     char s[PATH_MAX + 1];	/* FIXME */
@@ -884,22 +898,22 @@ dolist(char *oarg)
 
     if (!strcasecmp(arg, "extensions")) {
 	nntpprintf("202 extensions supported follow");
-	printf(" OVER\r\n" " PAT\r\n" " LISTGROUP\r\n");
+	fputs(" OVER\r\n" " PAT\r\n" " LISTGROUP\r\n", stdout);
 	if (authentication)
 	    printf(" AUTHINFO USER\r\n");
-	printf(".\r\n");
+	fputs(".\r\n", stdout);
     } else if (!strcasecmp(arg, "overview.fmt")) {
 	nntpprintf("215 information follows");
-	printf("Subject:\r\n"
+	fputs("Subject:\r\n"
 	       "From:\r\n"
 	       "Date:\r\n"
 	       "Message-ID:\r\n"
 	       "References:\r\n"
-	       "Bytes:\r\n" "Lines:\r\n" "Xref:full\r\n" ".\r\n");
+	       "Bytes:\r\n" "Lines:\r\n" "Xref:full\r\n" ".\r\n", stdout);
     } else if (!strcasecmp(arg, "active.times")) {
 	nntpprintf("215 Placeholder - Leafnode will fetch groups on demand");
-	printf("news.announce.newusers 42 tale@uunet.uu.net\r\n"
-	       "news.answers 42 tale@uunet.uu.net\r\n" ".\r\n");
+	fputs("news.announce.newusers 42 tale@uunet.uu.net\r\n"
+	       "news.answers 42 tale@uunet.uu.net\r\n" ".\r\n", stdout);
     } else {
 	rereadactive();
 	if (!active) {
@@ -918,7 +932,7 @@ dolist(char *oarg)
 		    list(active, 0, arg);
 		}
 	    }
-	    printf(".\r\n");
+	    fputs(".\r\n", stdout);
 	} else if (str_isprefix(arg, "newsgroups")) {
 	    nntpprintf("215 Descriptions in form \"group description\".");
 	    if (active) {
@@ -932,7 +946,7 @@ dolist(char *oarg)
 		    list(active, 1, arg);
 		}
 	    }
-	    printf(".\r\n");
+	    fputs(".\r\n", stdout);
 	} else {
 	    nntpprintf("503 Syntax error");
 	}
@@ -1032,7 +1046,7 @@ donewnews(char *arg)
     d = opendir(s);
     if (!d) {
 	ln_log(LNLOG_SERR, LNLOG_CTOP, "Unable to open directory %s: %m", s);
-	printf(".\r\n");
+	fputs(".\r\n", stdout);
 	return;
     }
     while ((de = readdir(d))) {
@@ -1091,7 +1105,7 @@ donewgroups(const char *arg)
 	    printf("%s %lu %lu y\r\n", ng->name, ng->first, ng->last);
 	ng++;
     }
-    printf(".\r\n");
+    fputs(".\r\n", stdout);
 }
 
 /* next bit is copied from INN 1.4 and modified("broken") by agulbra
@@ -1524,7 +1538,7 @@ dopost(void)
 }
 
 void
-doxhdr(const struct newsgroup *group, const char *arg, unsigned long artno)
+doxhdr(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
     /* NOTE: XPAT is not to change the current article pointer, thus,
        we're using call by value here */
@@ -1547,7 +1561,7 @@ doxhdr(const struct newsgroup *group, const char *arg, unsigned long artno)
 }
 
 void
-doxpat(const struct newsgroup *group, const char *arg, unsigned long artno)
+doxpat(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
     /* NOTE: XPAT is not to change the current article pointer, thus,
        we're using call by value here */
@@ -1572,7 +1586,7 @@ doxpat(const struct newsgroup *group, const char *arg, unsigned long artno)
  * argument, every header is listed.
  */
 void
-doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
+doselectedheader(/*@null@*/ const struct newsgroup *group /** current newsgroup */ ,
 		 const char *hd /** header to extract */ ,
 		 const char *messages /** message range */ ,
 		 struct stringlist *patterns /** pattern */ ,
@@ -1606,7 +1620,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	l = fgetheader(f, header, 1);
 	if (!l || !(*l)) {
 	    nntpprintf("221 No such header: %s", hd);
-	    printf(".\r\n");
+	    fputs(".\r\n", stdout);
 	    fclose(f);
 	    free(header);
 	    return;
@@ -1621,9 +1635,10 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	    }
 	    if (!ap) {		/* doesn't match any pattern */
 		nntpprintf("221 %s matches follow:", hd);
-		printf(".\r\n");
+		fputs(".\r\n", stdout);
 		fclose(f);
 		free(header);
+		free(l);
 		return;
 	    }
 	}
@@ -1631,6 +1646,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	printf("%s %s\r\n.\r\n", messages, l ? l : "");
 	fclose(f);
 	free(header);
+	free(l);
 	return;
     }
 
@@ -1662,7 +1678,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 
 	if (patterns) {		/* placeholder matches pseudogroup never */
 	    nntpprintf("221 %s header matches follow:", hd);
-	    printf(".\r\n");
+	    fputs(".\r\n", stdout);
 	    free(header);
 	    return;
 	}
@@ -1671,14 +1687,14 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	    if (!strcasecmp(header, "Newsgroups:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s\r\n", group->name);
-		printf(".\r\n");
+		fputs(".\r\n", stdout);
 	    } else if (!strcasecmp(header, "Path:")) {
 		nntpprintf("221 First line of %s pseudo-header follows:", hd);
 		printf("1 %s!not-for-mail\r\n", owndn ? owndn : fqdn);
-		printf(".\r\n");
+		fputs(".\r\n", stdout);
 	    } else {
 		nntpprintf("221 No such header: %s", hd);
-		printf(".\r\n");
+		fputs(".\r\n", stdout);
 	    }
 	    free(header);
 	    return;
@@ -1700,7 +1716,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	    printf("1 %d\r\n", 1024);	/* just a guess */
 	else if (OVfield == 6)	/* Lines */
 	    printf("1 %d\r\n", 22);	/* FIXME: from buildpseudoart() */
-	printf(".\r\n");
+	fputs(".\r\n", stdout);
 	free(header);
 	return;
     }
@@ -1763,6 +1779,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 
 		if (patterns) {
 		    ap = patterns;
+		    if (!t) continue;
 		    while (ap) {
 			if (!ngmatch((const char *)&(ap->string), t))
 			    break;
@@ -1782,7 +1799,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	}
     } else {
 	nntpprintf
-	    ("221 %s header %s(from article files) for postings %lu-%lu:",
+	    ("221 %s header %s (from article files) for postings %lu-%lu:",
 	     hd, patterns ? "matches " : "", a, b);
 	for (c = a; c <= b; c++) {
 	    char s[64];
@@ -1809,7 +1826,7 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
 	    }
 	}
     }
-    printf(".\r\n");
+    fputs(".\r\n", stdout);
     free(header);
     return;
 }
@@ -1822,8 +1839,8 @@ doselectedheader(const struct newsgroup *group /** current newsgroup */ ,
  *  - 0 if no articles are found (this is printed)
  */
 static int
-dorange(const char *arg,
-	unsigned long *a, unsigned long *b,
+dorange(/*@null@*/ const char *arg,
+	/*@out@*/ unsigned long *a, /*@out@*/ unsigned long *b,
 	unsigned long artno, unsigned long lo, unsigned long hi)
 {
     int i;
@@ -1854,7 +1871,7 @@ dorange(const char *arg,
 
 /** implement XOVER command. */
 void
-doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
+doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long artno)
 {
     unsigned long a, b, art;
     long int idx;
@@ -1904,7 +1921,7 @@ doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
 	    }
 	}
 	if (flag)
-	    printf(".\r\n");
+	    fputs(".\r\n", stdout);
 	else
 	    nntpprintf("420 No articles in specified range.");
     } else {
@@ -1921,12 +1938,12 @@ doxover(const struct newsgroup *group, const char *arg, unsigned long artno)
 		   b, group->name,
 		   owndn ? owndn : fqdn, rfctime(), group->name,
 		   owndn ? owndn : fqdn);
-	printf(".\r\n");
+	fputs(".\r\n", stdout);
     }
 }
 
-struct newsgroup *
-dolistgroup(struct newsgroup *group, const char *arg, unsigned long *artno)
+/*@null@*/ /*@dependent@*/ struct newsgroup *
+dolistgroup(/*@null@*/ struct newsgroup *group, const char *arg, unsigned long *artno)
 {
     struct newsgroup *g;
     int emptygroup = FALSE;
@@ -2031,14 +2048,14 @@ static int
 doauth_file(char *const cmd, char *const val)
 				/*@modifies *val@*/
 {
-    static char *user = NULL;
+    static /*@only@*/ char *user = NULL;
 
     if (0 == strcasecmp(cmd, "user")) {
 	char *t;
 
 	if (user)
 	    free(user);
-	user = malloc(strlen(val) + 2);
+	user = critmalloc(strlen(val) + 2, "doauth_file");
 	t = mastrcpy(user, val);
 	*t++ = ':';
 	*t = '\0';
@@ -2077,6 +2094,7 @@ doauth_file(char *const cmd, char *const val)
 
 void
 doauthinfo(char *arg)
+    /*@modifies *arg@*/
 {				/* we nuke away the password, no const here! */
     char *cmd;
     char *param;
@@ -2167,7 +2185,7 @@ dummy(int unused)
     (void)unused;
 }
 
-int
+static int
 mysetfbuf(FILE * f, char *buf, size_t size)
 {
 #ifdef SETVBUF_REVERSED
@@ -2272,14 +2290,18 @@ main(int argc, char **argv)
     }
     signal(SIGCHLD, dummy);	/* SIG_IGN would cause ECHILD on wait, so we use
 				   our own no-op dummy */
-    printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
-	   201 - allowposting(), version, owndn ? owndn : fqdn,
-	   allowposting()? "" : " (No posting.)",
-	   allowposting()? "" : getenv("NOPOSTING"));
-    fflush(stdout);
-    rereadactive();		/* print banner first, so while the client command
-				   is in transit, we read the active file. should speed things up by 2
-				   round trips for clients. */
+    {
+	int allow = allowposting();
+	printf("%03d Leafnode NNTP daemon, version %s at %s%s %s\r\n",
+	       201 - allowposting(), version, owndn ? owndn : fqdn,
+	       allow ? "" : " (No posting.)",
+	       allow ? "" : NOPOSTING);
+    }
+    (void)fflush(stdout);
+    rereadactive();		/* print banner first, so while the
+				   client command is in transit, we read
+				   the active file. should speed things
+				   up by 2 round trips for clients. */
     main_loop();
     freexover();
     freeactive(active);
