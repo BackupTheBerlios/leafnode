@@ -20,17 +20,21 @@
 #endif
 
 #include <unistd.h>
+#include <sysexits.h>
 
 static void
 usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "newsq -V:\n"
+	    "newsq -V\n"
 	    "    print version on stderr and exit\n"
-	    "newsq [-D] message-id\n"
-	    "    -D: switch on debugmode\n"
-	    "See also the leafnode homepage at http://www.leafnode.org/\n");
+	    "newsq\n"
+	    "    print queues\n"
+	    "newsq -c\n"
+	    "    exit %d on error, %d if out.going queue has articles, %d if not.\n"
+	    "See also the leafnode homepage at http://www.leafnode.org/\n",
+	    EXIT_FAILURE, EXIT_SUCCESS, EX_UNAVAILABLE);
 }
 
 static long
@@ -95,7 +99,7 @@ show_queue(const char *s)
 int
 main(int argc, char **argv)
 {
-    int option;
+    int option, check = 0;
     int ret = 0;
     long c;
     mastr *s = mastr_new(LN_PATH_MAX);
@@ -104,15 +108,32 @@ main(int argc, char **argv)
     if (!initvars(argv[0], 0))
 	init_failed(myname);
 
-    while ((option = getopt(argc, argv, GLOBALOPTS)) != -1) {
-	if (!parseopt(myname, option, optarg, NULL)) {
-	    usage();
-	    exit(EXIT_FAILURE);
+    while ((option = getopt(argc, argv, GLOBALOPTS "ch")) != -1) {
+	if (parseopt(myname, option, optarg, NULL))
+	    continue;
+	switch(option) {
+	    case 'c':
+		check = 1;
+		break;
+	    case 'h':
+		usage();
+		exit(EXIT_SUCCESS);
+	    default:
+		usage();
+		exit(EXIT_FAILURE);
 	}
     }
 
     if (!init_post())
 	init_failed(myname);
+
+    if (check) {
+	unsigned long count;
+	char **list = spooldirlist_prefix("out.going", DIRLIST_NONDOT, &count);
+	if (!list) exit(EXIT_FAILURE);
+	free_dirlist(list);
+	exit(count ? EXIT_SUCCESS : EX_UNAVAILABLE);
+    }
 
     printf("Articles awaiting post to upstream servers:\n"
 	   "-------------------------------------------\n");

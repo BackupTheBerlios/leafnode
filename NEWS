@@ -1,3 +1,8 @@
+Changes since 20040122a:
+- Feature: newsq -c now checks the queue if there are articles to post.
+  Exits 0 if there are, EX_UNAVAILABLE if there are not, EXIT_FAILURE on
+  error.
+
 20040122a: Changes since 20040119a:
 - Feature: applyfilter -C message-ID [...] now cancels articles
   with given Message-ID.
