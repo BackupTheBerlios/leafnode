@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.in,v 1.12 2001/11/29 17:48:29 emma Exp $
+# $Id: Makefile.in,v 1.13 2001/12/14 03:43:33 emma Exp $
 
 VERSION = @PACKAGE_VERSION@
 
@@ -117,6 +117,7 @@ SRCFILES = \
 	log_fsync.c \
 	log_rename.c \
 	log_unlink.c \
+	mailto.c \
 	masock_sa2addr.c \
 	masock_sa2name.c \
 	mastrcpy.c \
@@ -189,6 +190,7 @@ LIBFILES = \
 	log_fsync.o \
 	log_rename.o \
 	log_unlink.o \
+	mailto.o \
 	masock_sa2addr.o \
 	masock_sa2name.o \
 	mastrcpy.o \
@@ -352,6 +354,7 @@ config.c: Makefile
 	@echo >>.$@ "const char *GZIP = \"@GZIP@\";"
 	@echo >>.$@ "const char *BZIP2 = \"@BZIP2@\";"
 	@echo >>.$@ "const char *CAT = \"@CAT@\";"
+	@echo >>.$@ "const char *DEFAULTMTA = \"@DEFAULTMTA@\";"
 	@echo >>.$@ "const char *compileinfo = \"*** leafnode @PACKAGE_VERSION@ ***\ncompile date: `env - PATH=/bin:/usr/bin TZ=GMT date`\ncompile machine: `uname -a`\nCC=$(CC)\\nCPPFLAGS=$(CPPFLAGS)\\nCFLAGS=$(CFLAGS)\\nCPP=$(CPP)\\nCXX=$(CXX)\\nCXXFLAGS=$(CXXFLAGS)\\nLDFLAGS=$(LDFLAGS)\\nLIBS=$(LIBS)\\nAR=$(AR)\\nARFLAGS=$(ARFLAGS)\";"
 	if test -f $@ && cmp >/dev/null .$@ $@ && rm .$@ ; then touch $@ ; else mv .$@ $@ ; fi
 
