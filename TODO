@@ -138,6 +138,9 @@ Matthias:
 2.2 also run feedincoming on exit of programs that lock (after they free
     the lock)
 
+2.2 what happens if a dupe is rejected by an upstream server - should we
+    delete it from our leafnode server? tolerate in local groups?
+
 2.2 do not store cancel and perhaps other control messages locally?
 
 2.2 cancelwatch (send mail to user if a posting he sent is cancelled)
@@ -185,7 +188,10 @@ Matthias:
 
 3.3 authentication interface:
     Use Bruce Günter's credential validation module?
-    Use Courier's authdaemon?
+    Use Courier's auth-library?
+
+3.3 add client-specific fixups, such as declaring character sets,
+    re-encoding subject and so on?
 
 3.3 ACLs (possibly including identd) or regexp to prevent groups from
     being shown (mind ARTICLE <message@id> and check against Xref or
