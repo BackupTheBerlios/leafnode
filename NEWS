@@ -1,7 +1,10 @@
-XXX: Changes since 20030728a:
+20030731a: Changes since 20030728a:
 - Bugfix: applyfilter removes filtered articles from the spool at large.
 - Bugfix: applyfilter unfolds headers before applying filters. Reported
   by Reiner Steib.
+- Bugfix: restore -f, -r and -n command line options for texpire.
+  Reported by Michael Frotscher.
+- Documentation: enhance filters.example. Courtesy of Reiner Steib.
 
 20030728a: Changes since 20030716a:
 - Bugfix: unfold header before applying filters. Reported by Reiner

@@ -1,3 +1,11 @@
+2003-07-31  Matthias Andree <matthias.andree@gmx.de>
+
+	= snapshot 20030731a =
+	* filters.example: Fix typo.  
+	* filters.example: Merge Reiner Steib's filter examples.  
+	* texpire.c: Reinstate command line options -f, -r and -n. Reported
+	by Michael Frotscher.  
+
 2003-07-29  Matthias Andree <matthias.andree@gmx.de>
 
 	* TODO: update 
