@@ -1522,9 +1522,14 @@ postarticles(const struct serverlist *cursrv)
 				/* FIXME: don't fail here */
 			    }
 			} else {
+			    int dup = 0;
 			    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				   "Posting %s", *y);
-			    if (post_FILE(f, &line) || strncmp(line, "441 435 ", 8) == 0) {
+			    
+			    if (post_FILE(f, &line) || (dup = strncmp(line, "441 435 ", 8) == 0)) {
+				if (dup)
+				    ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
+					    "Duplicate article %s, treating as success.", *y);
 				char *ngs = fgetheader(f, "Newsgroups:", 1);
 				if (ngs != NULL) {
 				    char *mod = checkstatus(ngs, 'm');
