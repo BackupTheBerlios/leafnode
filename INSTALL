@@ -18,7 +18,10 @@
    the warning:
      /fetchnews.c: In function `nntpactive':
      /fetchnews.c:1062: warning: `%y' yields only last 2 digits of year
+
    Don't worry about it.
+   There have been reports that SGI IRIX' make doesn't work. If so, use
+   gmake (GNU make) instead. It may ship with IRIX, on the freeware CD.
 
 3. Create a "news" user if you don't have one.
 
@@ -71,7 +74,7 @@
 nntp    stream  tcp     nowait  news    /usr/sbin/tcpd /usr/local/sbin/leafnode
 
    This starts leafnode for all connections on the nntp port, subject to
-   /etc/hosts/allow and /etc/hosts.deny screening.  If you don't have
+   /etc/hosts.allow and /etc/hosts.deny screening.  If you don't have
    /usr/sbin/tcpd you might use this line instead:
 
 nntp    stream  tcp     nowait  news    /usr/local/sbin/leafnode
