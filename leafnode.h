@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.25 2002/01/11 03:20:07 emma Exp $ */
+/* $Id: leafnode.h,v 1.26 2002/01/14 01:53:19 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -166,7 +166,7 @@ extern "C" {
     int chdirgroup(const char *group, int creatdir);
 
 /* is the group an interesting one? */
-    int isinteresting(const char *groupname);
+    int is_interesting(const char *groupname);
     void checkinteresting(void);
 
 /*
@@ -199,8 +199,8 @@ extern "C" {
  */
     void insertlocal(const char *name);
     void readlocalgroups(void);
-    int islocalgroup(const char *groupname);
-    int islocal(const char *grouplist);
+    int is_localgroup(const char *groupname);
+    int is_alllocal(const char *grouplist);
     extern struct newsgroup *active;
     void freelocal(void);
 
@@ -492,11 +492,10 @@ extern "C" {
 						   of digits and "-" */
 
     char *cuttab(const char *in, int field);	/* break tab-separated field */
-    int strnsplit(/*@out@*/ char **array, const char *in, const char *sep, int maxelem);	/* Perl-like, split
+    int str_nsplit(/*@out@*/ char **array, const char *in, const char *sep, int maxelem);	/* Perl-like, split
 										   string into substrings */
     void free_strlist(char **hdl /** string array to free */ );	/* free array of strings */
-    char *memstrcat(const char *[]);	/* concatenate all strings into new, malloc()ed string */
-    int strisprefix(const char *string, const char *prefix);	/* strncasecmp variant */
+    int str_isprefix(const char *string, const char *prefix);	/* strncasecmp variant */
 
 /* from dirutil.c */
 /* open directory, relative to spooldir, log problems */
@@ -556,15 +555,15 @@ extern "C" {
 #endif
 
 /* sort.c */
-    void _sort(void *base, size_t nmemb, size_t size,
+    void my_sort(void *base, size_t nmemb, size_t size,
 	       int (*compar) (const void *, const void *),
 	       const char *f, unsigned long l);
 
-#define sort(a,b,c,d) _sort(a,b,c,d,__FILE__,__LINE__)
+#define sort(a,b,c,d) my_sort(a,b,c,d,__FILE__,__LINE__)
 
 #ifndef HAVE_MERGESORT
     int mergesort(void *base, size_t nmemb, size_t size,
-		  int (*compar) (const void *, const void *));
+		  int (*cmp) (const void *, const void *));
 #endif
 
 /* parserange.c */

@@ -73,7 +73,7 @@ cuttab(const char *in, int field)
      number of elements, negated if there was a remainder in the string.
 */
 int
-strnsplit(/*@out@*/ char **a /** pre-allocated destination array to hold substrings */ ,
+str_nsplit(/*@out@*/ char **a /** pre-allocated destination array to hold substrings */ ,
 	  const char *const in /* input string to split */ ,
 	  const char *sep
 		    /** string of delimiter characters, but \b note:
@@ -128,7 +128,7 @@ free_strlist(char **hdl /** string array to free */ )
  * - false otherwise 
  */
 int
-strisprefix(const char *string, const char *prefix)
+str_isprefix(const char *string, const char *prefix)
 {
     return !strncasecmp(string, prefix, strlen(prefix));
 }
@@ -148,7 +148,7 @@ main(int argc, char **argv)
 	return 1;
     }
 
-    x = y = strnsplit(argv[1], argv[2], 20);
+    x = y = str_nsplit(argv[1], argv[2], 20);
     for (n = 0; *x; n++, x++) {
 	printf("%2d: %s\n", n, *x);
 	free(*x);

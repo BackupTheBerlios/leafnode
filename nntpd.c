@@ -387,7 +387,7 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
 static int
 ispseudogroup(const char *group)
 {
-    return (!chdirgroup(group, FALSE) && !islocalgroup(group));
+    return (!chdirgroup(group, FALSE) && !is_localgroup(group));
 }
 
 /* open an article by number or message-id */
@@ -409,7 +409,7 @@ fopenart(const struct newsgroup *group, const char *arg, unsigned long *artno)
 	    f = fopenpseudoart(group, arg, a);
 	} else {
 	    f = fopen(arg, "r");
-	    if (!f && (!islocalgroup(group->name)))
+	    if (!f && (!is_localgroup(group->name)))
 		f = fopenpseudoart(group, arg, a);
 	}
 
@@ -619,7 +619,7 @@ markinterest(const struct newsgroup *group)
     FILE *f;
     mastr *s;
 
-    if (islocalgroup(group->name))
+    if (is_localgroup(group->name))
 	return 0;		/* local groups don't have to be marked */
 
     not_yet_interesting = 0;
@@ -680,7 +680,7 @@ dogroup(const char *arg, unsigned long *artno)
     if (g) {
 	freexover();
 	xovergroup = 0;
-	if (isinteresting(g->name))
+	if (is_interesting(g->name))
 	    markinterest(g);
 	if (chdirgroup(g->name, FALSE)) {
 	    maybegetxover(g);
@@ -904,7 +904,7 @@ dolist(char *oarg)
 	if (!active) {
 	    ln_log_so(LNLOG_SERR, LNLOG_CTOP,
 		      "503 Group information file does not exist!");
-	} else if (!*arg || strisprefix(arg, "active")) {
+	} else if (!*arg || str_isprefix(arg, "active")) {
 	    nntpprintf("215 Newsgroups in form \"group high low flags\".");
 	    if (active) {
 		if (!*arg || strlen(arg) == 6)
@@ -919,7 +919,7 @@ dolist(char *oarg)
 		}
 	    }
 	    printf(".\r\n");
-	} else if (strisprefix(arg, "newsgroups")) {
+	} else if (str_isprefix(arg, "newsgroups")) {
 	    nntpprintf("215 Descriptions in form \"group description\".");
 	    if (active) {
 		if (strlen(arg) == 10)
@@ -1152,7 +1152,7 @@ validate_newsgroups(const char *n)
 {
     char *t;
 
-    if (strisprefix(n, "Newsgroups:")) {
+    if (str_isprefix(n, "Newsgroups:")) {
 	n += 11;
 	/* skip separating whitespace */
 	n += strspn(n, WHITESPACE);
@@ -1227,21 +1227,21 @@ dopost(void)
 	    break;
 	}
 
-	if (strisprefix(line, "From:")) {
+	if (str_isprefix(line, "From:")) {
 	    if (havefrom)
 		err = TRUE;
 	    else
 		havefrom = TRUE;
 	}
 
-	if (strisprefix(line, "Path:")) {
+	if (str_isprefix(line, "Path:")) {
 	    if (havepath)
 		err = TRUE;
 	    else
 		havepath = TRUE;
 	}
 
-	if (strisprefix(line, "Message-ID:")) {
+	if (str_isprefix(line, "Message-ID:")) {
 	    if (havemessageid)
 		err = TRUE;
 	    else {
@@ -1257,14 +1257,14 @@ dopost(void)
 	    }
 	}
 
-	if (strisprefix(line, "Subject:")) {
+	if (str_isprefix(line, "Subject:")) {
 	    if (havesubject)
 		err = TRUE;
 	    else
 		havesubject = TRUE;
 	}
 
-	if (strisprefix(line, "Newsgroups:")) {
+	if (str_isprefix(line, "Newsgroups:")) {
 	    if (havenewsgroups)
 		err = TRUE;
 	    else {
@@ -1275,7 +1275,7 @@ dopost(void)
 	    }
 	}
 
-	if (strisprefix(line, "Date:")) {
+	if (str_isprefix(line, "Date:")) {
 	    if (havedate)
 		err = TRUE;
 	    else
@@ -1407,7 +1407,7 @@ dopost(void)
 	if ((modgroup = checkstatus(groups, 'm'))) {
 	    /* Post to a moderated group */
 	    moderator = getmoderator(modgroup);
-	    if (!moderator && islocal(modgroup)) {
+	    if (!moderator && is_alllocal(modgroup)) {
 		ln_log(LNLOG_SERR, LNLOG_CTOP,
 		       "Did not find moderator address for local moderated "
 		       "group %s", modgroup);
@@ -1422,7 +1422,7 @@ dopost(void)
 	    approved = getheader(inname, "Approved:");
 	}
 
-	if (!moderator && !islocal(groups)) {
+	if (!moderator && !is_alllocal(groups)) {
 	    /* also posted to external groups or moderated group with
 	       unknown moderator, store into out.going */
 	    char s[PATH_MAX + 1];	/* FIXME: overflow possible */
@@ -1475,7 +1475,7 @@ dopost(void)
 	    free(approved);
 
 	ln_log(LNLOG_SINFO, LNLOG_CTOP, "%s POST %s %s",
-	       islocal(groups) ? "LOCAL" : "UPSTREAM", mid, groups);
+	       is_alllocal(groups) ? "LOCAL" : "UPSTREAM", mid, groups);
 
 	switch (fork()) {
 	case -1:
@@ -1951,7 +1951,7 @@ dolistgroup(struct newsgroup *group, const char *arg, unsigned long *artno)
 	/* group has not been visited before */
 	markinterest(group);
     } else if ((xovergroup != group) && !getxover(1)) {
-	if (isinteresting(g->name)) {
+	if (is_interesting(g->name)) {
 	    /* group has already been marked as interesting but is empty */
 	    emptygroup = TRUE;
 	}

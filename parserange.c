@@ -30,7 +30,7 @@ parserange(const char *in /** input string */ , unsigned long *from,
 
     if (!in)
 	return RANGE_ERR;
-    i = strnsplit(a, in, "-", sizeof(a) / sizeof(a[0]));
+    i = str_nsplit(a, in, "-", sizeof(a) / sizeof(a[0]));
     if (i < 0 || i > 2)
 	return RANGE_ERR;
 

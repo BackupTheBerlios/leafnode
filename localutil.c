@@ -145,7 +145,7 @@ readlocalgroups(void)
  * find whether a group is indeed a local one
  */
 int
-islocalgroup(const char *groupname)
+is_localgroup(const char *groupname)
 {
     struct localgroup *a;
     int c;
@@ -169,7 +169,7 @@ islocalgroup(const char *groupname)
  * find whether a comma-separated list of groups contains only local ones
  */
 int
-islocal(const char *grouplist)
+is_alllocal(const char *grouplist)
 {
     char *p, *q, *g;
     int retval = TRUE;		/* assume that all groups are local */
@@ -181,7 +181,7 @@ islocal(const char *grouplist)
 	q = strchr(p, ',');
 	if (q)
 	    *q++ = '\0';
-	if (!islocalgroup(p))
+	if (!is_localgroup(p))
 	    retval = FALSE;
 	p = q;
     } while (p && *p && retval);

@@ -55,7 +55,7 @@ mgetheader(
 	abort();
     }
 
-    if (strisprefix(buf, hdr)) {
+    if (str_isprefix(buf, hdr)) {
 	p = buf;
     } else {
 	hunt = mastr_new(strlen(hdr) + 1);

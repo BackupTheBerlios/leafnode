@@ -418,10 +418,10 @@ freeinteresting(void)
  * touching the file.
  */
 int
-isinteresting(const char *groupname)
+is_interesting(const char *groupname)
 {
     /* Local groups are always interesting. At least for the server :-) */
-    if (islocalgroup(groupname))
+    if (is_localgroup(groupname))
 	return TRUE;
 
     critinitinteresting();	/* does not return in case of trouble */

@@ -15,7 +15,7 @@ cmphook(const void *a, const void *b)
 }
 
 void
-_sort(void *base, size_t nmemb, size_t size,
+my_sort(void *base, size_t nmemb, size_t size,
       int (*compar) (const void *, const void *),
       const char *file, unsigned long line)
 {

@@ -491,7 +491,7 @@ doxover(struct stringlist **stufftoget,
 	char *newsgroups = NULL;
 	int freenewsgroups = 0;
 
-	if (abs(strnsplit(xover, l, "\t", sizeof(xover) / sizeof(xover[0]))) <
+	if (abs(str_nsplit(xover, l, "\t", sizeof(xover) / sizeof(xover[0]))) <
 	    8) {
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP,
 		   "read broken xover line, too few fields: \"%s\", skipping",
@@ -519,7 +519,7 @@ doxover(struct stringlist **stufftoget,
 	    newsgroups = groupname;
 	} else {
 	    /* have Xref: header field, check if it contains Xref: */
-	    if (strisprefix(p, "Xref:")) {
+	    if (str_isprefix(p, "Xref:")) {
 		/* something here, but it's no Xref: header */
 		newsgroups = groupname;
 	    }
@@ -812,7 +812,7 @@ getgroup(struct newsgroup *g, unsigned long first)
     /* lots of plausibility tests */
     if (!g)
 	return first;
-    if (!isinteresting(g->name))
+    if (!is_interesting(g->name))
 	return 0;
     groupfetched = 0;
     groupkilled = 0;
@@ -1058,7 +1058,7 @@ nntpactive(void)
 	    /* see if the newsgroup is interesting.  if it is, and we
 	       don't have it in groupinfo, figure water marks */
 	    /* FIXME: save high water mark in .last.posting? */
-	    if (isinteresting(l)
+	    if (is_interesting(l)
 		&& (forceactive || !(active && findgroup(l)))
 		&& chdirgroup(l, FALSE)) {
 		first = ULONG_MAX;

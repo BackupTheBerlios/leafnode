@@ -839,7 +839,7 @@ dogroup(struct newsgroup *g, time_t expire)
     if (!kept) {
 	if (unlink(".overview") < 0)
 	    ln_log(LNLOG_SERR, LNLOG_CGROUP, "unlink %s/.overview: %m", gdir);
-	if (!chdir("..") && (isinteresting(g->name) == 0)) {
+	if (!chdir("..") && (is_interesting(g->name) == 0)) {
 	    /* delete directory and empty parent directories */
 	    while (rmdir(gdir) == 0) {
 		if (!getcwd(gdir, PATH_MAX)) {

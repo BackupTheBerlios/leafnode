@@ -382,7 +382,7 @@ readactive(void)
 	g->name = critstrdup(p, "readactive");
 	if (g->first == 0)
 	    g->first = 1;	/* pseudoarticle */
-	if (g->last == 0 && !islocalgroup(g->name))
+	if (g->last == 0 && !is_localgroup(g->name))
 	    g->last = 1;
 	g->count = 0;
 	p = r;

@@ -182,19 +182,19 @@ store_stream(FILE * in /** input file */ ,
 	    (void)mastr_cat(head, line);
 	    (void)mastr_cat(head, LLS);
 	}
-	if (c_date < 2 && strisprefix(line, "Date:"))
+	if (c_date < 2 && str_isprefix(line, "Date:"))
 	    ++c_date;
-	if (c_from < 2 && strisprefix(line, "From:"))
+	if (c_from < 2 && str_isprefix(line, "From:"))
 	    ++c_from;
-	if (c_subject < 2 && strisprefix(line, "Subject:"))
+	if (c_subject < 2 && str_isprefix(line, "Subject:"))
 	    ++c_subject;
-	if (c_path < 2 && strisprefix(line, "Path:"))
+	if (c_path < 2 && str_isprefix(line, "Path:"))
 	    ++c_path;
 
-	if (strisprefix(line, "Xref:"))
+	if (str_isprefix(line, "Xref:"))
 	    continue;
 
-	if (strisprefix(line, "Message-ID:")) {
+	if (str_isprefix(line, "Message-ID:")) {
 	    const char *p = line + 11;
 	    if (mid)
 		BAIL(-3, "more than one Message-ID header found");
@@ -202,7 +202,7 @@ store_stream(FILE * in /** input file */ ,
 	    mid = critstrdup(p, "store");
 	}
 
-	if (strisprefix(line, "Newsgroups:")) {
+	if (str_isprefix(line, "Newsgroups:")) {
 	    const char *p = line + 11;
 	    if (ngs) {
 		BAIL(-3, "more than one Newsgroups header found");
@@ -211,14 +211,14 @@ store_stream(FILE * in /** input file */ ,
 	    ngs = critstrdup(p, "store");
 	}
 
-	if (strisprefix(line, "Supersedes:")) {
+	if (str_isprefix(line, "Supersedes:")) {
 	    supersede_cancel(line + 11, "Supersede", "Superseded");
 	}
 
-	if (strisprefix(line, "Control:")) {
+	if (str_isprefix(line, "Control:")) {
 	    const char *p = line + 8;
 	    SKIPLWS(p);
-	    if (strisprefix(p, "cancel") && isspace((unsigned char)p[6]))
+	    if (str_isprefix(p, "cancel") && isspace((unsigned char)p[6]))
 		supersede_cancel(p + 7, "Cancel", "Cancelled");
 	}
 
@@ -270,7 +270,7 @@ store_stream(FILE * in /** input file */ ,
     /* parse ngs */
     for (;;) {
 	nglist = critmalloc(nglistlen * sizeof(char *), "store");
-	if (strnsplit(nglist, ngs, ",", nglistlen) >= 0)
+	if (str_nsplit(nglist, ngs, ",", nglistlen) >= 0)
 	    break;
 	/* retry with doubled size */
 	free_strlist(nglist);
@@ -293,7 +293,7 @@ store_stream(FILE * in /** input file */ ,
 	if ((q = strstr(mastr_str(xref), name))
 	    && isspace((unsigned char)*(q - 1)))
 	    continue;		/* skip if duplicate */
-	if (create_all_links || isinteresting(name) || islocal(name)) {
+	if (create_all_links || is_interesting(name) || is_alllocal(name)) {
 	    g = findgroup(name);
 	    if (g) {
 		int ls = 0;
