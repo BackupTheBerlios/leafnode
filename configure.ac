@@ -4,9 +4,9 @@ dnl written by Matthias Andree, 2002
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20031009a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20031012a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.69 $)
+AC_REVISION($Revision: 1.70 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -36,7 +36,7 @@ if test "x$GCC" = xyes
 then
   echo "void dummy(void);" >configure-dummy.c
   echo "void dummy(void) {}" >>configure-dummy.c
-  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -Wunreachable-code -ggdb -fno-common ; do
+  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -ggdb -fno-common ; do
     $CC $i $ac_cv_prog_gcc_flags -c configure-dummy.c >/dev/null 2>&1 && 
     ac_cv_prog_gcc_flags="$ac_cv_prog_gcc_flags $i"
   done
