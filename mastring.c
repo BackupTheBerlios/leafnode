@@ -267,7 +267,7 @@ mastr_getln(mastr * m, FILE * f,
 
     for (;;) {
 	r = _getline(buf,
-		     (size_t)(maxbytes >= 0 ? min(bufsiz, maxbytes) : bufsiz),
+		     (size_t)(maxbytes > 0 ? min(bufsiz, maxbytes) : bufsiz),
 		     f);
 	if (r < 0)
 	    return r;
