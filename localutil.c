@@ -14,6 +14,7 @@
 #include "ln_log.h"
 #include "mastring.h"
 #include "activutil.h"
+#include "redblack.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -26,13 +27,7 @@
 #include <dmalloc.h>
 #endif
 
-struct localgroup {
-    char *name;
-    /*@null@*/ struct localgroup *left;
-    /*@null@*/ struct localgroup *right;
-};
-
-/*@null@*/ struct localgroup *local = NULL;
+/*@null@*/ struct rbtree *local = NULL;
 
 /*
  * for searching purposes, local group names are sorted into a tree
@@ -40,44 +35,33 @@ struct localgroup {
  * The function is taken from insertgroup() of leafnode-1.9.7 and
  * somewhat modified.
  */
+
+static int rbcmp(const void *p1, const void *p2, const void *config)
+{
+    (void)config;
+    return strcasecmp(p1, p2);
+}
+
 void
 insertlocal(const char *name)
 {
-    struct localgroup **a;
-    int c;
+    char *c;
 
+    /* lazy initialization of local */
+    if (NULL == local) local = rbinit(rbcmp, NULL);
+
+    /* is the name acceptable */
     if (!validate_groupname(name)) return;
 
-    a = &local;
-    while (a) {
-	if (*a) {
-	    c = strcasecmp((*a)->name, name);
-	    if (c < 0)
-		a = &((*a)->left);
-	    else if (c > 0)
-		a = &((*a)->right);
-	    else {
-		/* already read */
-		return;
-	    }
-	} else {
-	    /* create new entry */
-	    *a = (struct localgroup *)critmalloc(sizeof(struct localgroup),
-						 "Building list of local groups");
-	    if (!*a)
-		return;
-	    (*a)->left = NULL;
-	    (*a)->right = NULL;
-	    (*a)->name = critstrdup(name, "insertlocal");
-	    if (!(*a)->name) {
-		ln_log(LNLOG_SERR, LNLOG_CGROUP,
-		       "Not sufficient memory for newsgroup %s", name);
-		free(*a);
-		*a = NULL;
-		return;
-	    }
-	    return;
-	}
+    /* return if item in the tree */
+    if (rbfind(name, local)) return;
+
+    c = critstrdup(name, "insertlocal");
+    if (NULL == rbsearch(c, local)) {
+	/* could not add */
+	 ln_log(LNLOG_SERR, LNLOG_CTOP,
+		 "rbsearch(%s) failed", c);
+	 exit(EXIT_FAILURE);
     }
 }
 
@@ -94,7 +78,7 @@ insertlocal(const char *name)
  * has therefore at the moment not been attempted.
  *
  * The format of the file containing the local groups is
- * news.group.name[tab]status char[tab]Description
+ * news.group.name[tab]status[tab]Description
  */
 void
 readlocalgroups(void)
@@ -155,22 +139,7 @@ readlocalgroups(void)
 int
 is_localgroup(const char *groupname)
 {
-    struct localgroup *a;
-    int c;
-
-    a = local;
-    c = 1;
-    while (a) {
-	c = strcasecmp(a->name, groupname);
-	if (c < 0) {
-	    a = a->left;
-	} else if (c > 0) {
-	    a = a->right;
-	} else {
-	    return TRUE;
-	}
-    }
-    return FALSE;
+    return rbfind(groupname, local) ? TRUE : FALSE;
 }
 
 /*
@@ -223,25 +192,11 @@ is_anylocal(const char *grouplist)
     return retval;
 }
 
-static void
-free_tree(/*@only@*/ struct localgroup *lg)
-{
-    if (!lg)
-	return;
-    if (lg->left)
-	free_tree(lg->left);
-    if (lg->right)
-	free_tree(lg->right);
-    if (lg->name)
-	free(lg->name);
-    free(lg);
-}
-
 void
 freelocal(void)
 {
     if (local) {
-	free_tree(local);
-	local = 0;
+	freegrouplist(local);
+	local = NULL;
     }
 }
