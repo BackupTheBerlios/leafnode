@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.76 2002/09/30 01:31:28 emma Exp $ */
+/* $Id: leafnode.h,v 1.77 2002/10/23 15:39:46 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -672,9 +672,6 @@ extern "C" {
 
 /* writes.c */
     ssize_t writes(int fd, const char *string);
-
-/* mailto.c */
-    int mailto(const char *address, int fd);
 
 /* gmtoff.c */
     time_t gmtoff(const time_t);
