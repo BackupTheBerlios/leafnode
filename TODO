@@ -30,22 +30,13 @@ urgence:
     action = kill
     and I've just seen an article crossposted to 8 groups...
 
-1.1 put conditional #include <dmalloc.h> into each file
-
 1.1 fix posting issues, introduce per-server queues?
-
-1.1 do not log without debug/verbose mode (cron should not send mail
-    when everything goes smoothly)
 
 1.1 out.going: "Nur, wenn ich fetchnews aufrufe, ohne Online zu
     sein, geht das Posting verschütt. Ohne Fehlermeldung." Ivo Schwalbe,
     <51nig9.kv.ln@abu.ivos.de>
     NOTE: only worked around, not fixed.
     TODO: only delete articles successfully posted
-
-1.1 leafnode may store newly fetched articles into the gaps if groupinfo
-    is not current. groupinfo may be out of date after a crash, fix
-    watermarks.
 
 1.1 tin claims "no articles" for all local groups.
     IN: 2002-01-06
@@ -233,6 +224,15 @@ urgence:
 
 ========================================================================
 FIXED ITEMS:
+
+2002-02-04 leafnode may store newly fetched articles into the gaps if groupinfo
+           is not current. groupinfo may be out of date after a crash, fix
+           watermarks.
+
+2002-02-04 put conditional #include <dmalloc.h> into each file
+
+2002-02-03 do not log without debug/verbose mode (cron should not send mail
+	   when everything goes smoothly)
 
 2002-01-07 1.1 article can be given out in spite of missing message.id
            file - a missing message.id file/link hints to spool
