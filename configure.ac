@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040129a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.89 $)
+AC_REVISION($Revision: 1.90 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -29,10 +29,19 @@ AC_PATH_PROG(BZIP2,bzip2,false)
 AC_PATH_PROG(SED,sed,false)
 AC_PATH_PROG(DEFAULTMTA,sendmail,/usr/sbin/sendmail,/usr/sbin:/usr/lib:/usr/etc)
 
+if test "$GCC" = yes ; then
+    AC_MSG_CHECKING([if $CC is really Intel C++])
+    case "`$CC -V 2>&1`" in
+	[[iI][nN][tT][eE][lL]]*)	ICC=yes ;;
+	*)			ICC=no ;;
+    esac
+    AC_MSG_RESULT($ICC)
+fi
+
 dnl If we're using gcc, enable some warnings
 AC_CACHE_CHECK(for additional compiler options, ac_cv_prog_gcc_flags, [
 ac_cv_prog_gcc_flags=""
-if test "x$GCC" = xyes
+if test "x$GCC" = xyes && test "$ICC" = no
 then
   echo "void dummy(void);" >configure-dummy.c
   echo "void dummy(void) {}" >>configure-dummy.c
@@ -233,7 +242,10 @@ dnl Checks for library functions.
 AC_FUNC_CHOWN
 AC_FUNC_FORK dnl checks whether fork() is just a stub
 dnl AC_FUNC_MKTIME
+if test "$ICC" != yes
+then
 AC_FUNC_SETVBUF_REVERSED
+fi
 AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
