@@ -243,7 +243,8 @@ supersede_cancel(
 	    if (q)
 		*q++ = '\0';
 	    if (unlink(p)) {
-		ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+		ln_log(errno == ENOENT ? LNLOG_SNOTICE : LNLOG_SERR,
+		       LNLOG_CARTICLE,
 		       "%s: failed to unlink %s:%s: %m", action, r, p);
 	    } else {
 		ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
