@@ -5,8 +5,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040326a])
-AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.97 $)
+AC_PREREQ(2.59)
+AC_REVISION($Revision: 1.98 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -57,7 +57,7 @@ AC_SUBST(CFLAGS)
 
 dnl check which user to use
 AC_MSG_CHECKING(runas-user)
-AC_ARG_ENABLE(runas-user, AC_HELP_STRING([--enable-runas-user=USER],[user (news)]),
+AC_ARG_ENABLE(runas-user, AS_HELP_STRING(--enable-runas-user=USER,user (news)),
   :,
   enableval=news
 )
@@ -146,7 +146,7 @@ else
 fi
 
 AC_MSG_CHECKING(spooldir)
-AC_ARG_ENABLE(spooldir, AC_HELP_STRING([--enable-spooldir=DIR],[news spool directory (/var/spool/news)]),
+AC_ARG_ENABLE(spooldir, AS_HELP_STRING(--enable-spooldir=DIR,news spool directory (/var/spool/news)),
   if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi
@@ -289,10 +289,10 @@ if test $ac_cv_func_setsockopt = no; then
   AC_CHECK_LIB(socket, setsockopt)
 fi
 
-AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop)
+AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop strcasestr)
 
 dnl Check whether the system has IPv6
-AC_ARG_ENABLE(IPv6, AC_HELP_STRING([--disable-IPv6],[disable IPv6 support (autodetect)]),
+AC_ARG_ENABLE(IPv6, AS_HELP_STRING(--disable-IPv6,disable IPv6 support (autodetect)),
     IPV6=$enableval ,
     IPV6=auto)
 
@@ -328,7 +328,7 @@ AC_SUBST(PCRE_DEFINES)
 # Check for PAM
 PAM_MSG="no"
 AC_ARG_WITH(pam,
-	    AS_HELP_STRING([--with-pam],[[build with PAM support [no]]]),
+	    AS_HELP_STRING([--with-pam],[build with PAM support [no]]),
         [
                 if test "x$withval" != "xno" ; then
                         if test "x$ac_cv_header_security_pam_appl_h" != "xyes" ; then
