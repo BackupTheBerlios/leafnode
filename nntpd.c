@@ -371,8 +371,7 @@ fopenpseudoart(const struct newsgroup *group, const char *arg,
     ln_log(LNLOG_SDEBUG, LNLOG_CGROUP,
 	   "fopenpseudoart %s: first %lu last %lu artno %lu",
 	   group->name, group->first, group->last, article_num);
-    if (article_num && article_num == group->first &&
-	group->first >= group->last) {
+    if (article_num && article_num == group->first) {
 	f = buildpseudoart(group->name);
     } else if (!article_num) {
 	if (!strncmp(arg, "<leafnode:placeholder:", 22)) {
