@@ -126,6 +126,13 @@ expire = 20
 ## If you have multiple servers, but do not want the overviews for the
 ## same group fetched several times, enable this.  fetchnews will then
 ## skip all groups it has successfully downloaded once.
+##
+## WARNING: The "last article fetched from this group" pointer is only
+## updated for the server that is actually queried. When the 'first'
+## server for a group is dysfunctional, the next that carries this group
+## may have "missed" some thousand articles, especially so with
+## high-traffic groups such as de.rec.fotografie. Use "initialfetch" and
+## "maxfetch" to limit the impact of a failure of the 'first' server.
 # only_fetch_once = 1
 
 ############################################
