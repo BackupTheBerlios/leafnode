@@ -80,11 +80,6 @@ See
 .BR leafnode (8)
 for the list of other files affected.
 
-.SH NOTES
-.B Texpire
-is thread-based, not article-based.  That means it will only delete an
-article if the whole thread it is in has not been accessed within the
-given expiry period (through the expire and groupexpire parameters).
 .SH BUGS
 .PP
 .B Texpire
