@@ -1,6 +1,6 @@
 # -*- makefile -*-
 # @configure_input@
-# $Id: Makefile.am,v 1.46 2003/05/05 21:30:54 emma Exp $
+# $Id: Makefile.am,v 1.47 2003/07/06 21:20:34 emma Exp $
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
@@ -122,6 +122,8 @@ liblnutil_a_SOURCES	= \
 	nfswrite.c \
 	nntputil.c \
 	parserange.c \
+	pcrewrap.c \
+	pcrewrap.h \
 	putaline.c \
 	queues.c \
 	redblack.c \
