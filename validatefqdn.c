@@ -46,16 +46,16 @@
 /** Check the supplied FQDN for validity.
  * \return 0 if invalid, 1 if valid
  */
-int is_validfqdn(const char *fqdn) {
+int is_validfqdn(const char *f) {
     if (/* reject unqualified names */
-	!strchr(fqdn, '.')
+	!strchr(f, '.')
 	/* Red Hat list the FQDN on the same line as localhost, thus,
 	 * the qualification returns two "localhost*" aliases */
-	|| 0 == strncasecmp(fqdn, "localhost", 9)
+	|| 0 == strncasecmp(f, "localhost", 9)
 	/* protect against broken hosts or DNS */
-	|| 0 == strncmp(fqdn, "127.0.0.", 8)
+	|| 0 == strncmp(f, "127.0.0.", 8)
 	/* SuSE default hostname on some installs is linux.local */
-	|| 0 == strcasecmp(fqdn, "linux.local")
+	|| 0 == strcasecmp(f, "linux.local")
 	)
     {
 	return 0;
