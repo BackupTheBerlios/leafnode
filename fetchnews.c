@@ -1304,6 +1304,7 @@ processupstream(const char *server, const int port, time_t lastrun)
 	fclose(f);
 	s = server_info(spooldir, server, port, "~");
 	(void)log_rename(s, oldfile);
+	free(s);
     }
     free(oldfile);
     freelist(ngs);
