@@ -1,4 +1,4 @@
-/* $Id: leafnode.h,v 1.19 2002/01/06 01:06:54 emma Exp $ */
+/* $Id: leafnode.h,v 1.20 2002/01/07 21:24:50 emma Exp $ */
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
@@ -183,7 +183,7 @@ extern "C" {
     };
 
     void insertgroup(const char *name, const char status, long unsigned first,
-		     long unsigned last, int date, const char *desc);
+		     long unsigned last, time_t date, const char *desc);
     void changegroupdesc(const char *groupname, char *desc);
     void mergegroups(void);
     struct newsgroup *findgroup(const char *name);	/* active must be read */
@@ -321,6 +321,8 @@ extern "C" {
     long findxover(unsigned long article);
 
     /* find index number for an article, return -1 on error */
+    int maybegetxover(struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
+    int xgetxover(struct newsgroup *g);	/* set xoverinfo, return 0 on error, nonzero else, fill in water marks */
     int getxover(void);		/* set xoverinfo, return 0 on error, nonzero else */
     void fixxover(void);	/* repair all .overview files */
     void gfixxover(const char *g);	/* repair .overview in groups g */
@@ -487,22 +489,25 @@ extern "C" {
 
 /* from dirutil.c */
 /* open directory, relative to spooldir, log problems */
-    DIR *open_spooldir(const char *);
+    /*@dependent@*/ /*@null@*/ DIR *open_spooldir(const char *);
 /* read directory into a list of strings */
-    char **dirlist(const char *name, int (*)(const char *), long unsigned *);
+    /*@null@*/ /*@only@*/ char **
+      dirlist(const char *name, int (*)(const char *), /*@null@*/ long unsigned *);
 /* dito, prefixing the directory name */
-    char **dirlist_prefix(const char *name, int (*)(const char *),
-			  long unsigned *);
+    /*@null@*/ /*@only@*/ char **
+      dirlist_prefix(const char *name, int (*)(const char *),
+			  /*@null@*/ long unsigned *);
 /* dito, relative to the spool directory */
-    char **spooldirlist_prefix(const char *name, int (*)(const char *),
-			       long unsigned *);
+    /*@null@*/ /*@only@*/ char **
+      spooldirlist_prefix(const char *name, int (*)(const char *),
+			       /*@null@*/ long unsigned *);
 /* filters for dirlist */
     int DIRLIST_ALL(const char *x);
     int DIRLIST_NONDOT(const char *x);
     int DIRLIST_ALLNUM(const char *x);
 
 /* free string list */
-    void free_dirlist(char **);
+    void free_dirlist(/*@null@*/ /*@only@*/ char **);
 
 /* from fopen_reg.c */
     FILE *fopen_reg(const char *path, const char *m);
