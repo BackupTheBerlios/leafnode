@@ -1,5 +1,10 @@
 2001-12-20  Matthias Andree  <matthias.andree@gmx.de>
 
+	* configure.in: Bump version.
+	* nntpd.c: Revert the pseudoarticle artno magic, it was evil and
+	broke regular HEAD/LAST/ARTICLE/BODY commands.
+	* filterutil.c: Fix more memory leaks.
+
 	=== RELEASE 2.0b8_ma8rc3 ===
 	* store.c: Fix brown-paperbag-bug in store.c which ALWAYS
 	segfaulted.
