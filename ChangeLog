@@ -1,3 +1,37 @@
+2002-07-22  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* getwatermarks.c, nntpd.c: Work around for not shown pseudo
+	article.  This should be fixed once and for all, but isn't yet.
+	* TODO: Update.
+	* fetchnews.c: Typo in usage message.
+
+2002-07-18  Matthias Andree <matthias.andree@gmx.de>
+
+	* Doxyfile: regenerated with doxywizard 1.2.17
+
+2002-07-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* fetchnews.c: Change cannot stat .../:active.read message.
+	LNLOG_SDEBUG and additional explanation for ENOENT case which is
+	expected.
+	* NEWS: [no log message]
+
+2002-07-16  Ralf Wildenhues <ralf.wildenhues@gmx.de>
+
+	* nntpd.c: Unconditionally query markgroup in case of an empty
+	article; improve message.  Before, an article crossposted to a
+	delaybody and a non-delaybody group could be marked in the latter,
+	causing it not to be downloaded at all.
+
+2002-07-16  Matthias Andree <matthias.andree@gmx.de>
+
+	* draft-ietf-nntpext-base-15.txt, draft-ietf-usefor-article-07.txt:
+	Add current IETF drafts for convenience.
+	* configure.ac: Check if gai_strerror() is present and can be
+	linked against. If not, disable IPv6 support. Reported by Leopold
+	Tötsch <lt@toetsch.at>.
+	* nntpd.c: Reflect rejected Message-ID in 441 message.
+
 2002-07-15  Matthias Andree <matthias.andree@gmx.de>
 
 	* configure.ac: bump version 
