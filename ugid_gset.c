@@ -1,4 +1,9 @@
+#include "config.h"
+#include <sys/types.h>
 #include <unistd.h>
+#if HAVE_GRP_H
+# include <grp.h>
+#endif
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
