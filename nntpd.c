@@ -1443,6 +1443,35 @@ dopost(void)
 	    }
 	}
 
+	if (filter) {
+	    char *t, *u = critstrdup(groups, "dopost");
+	    int fd;
+	    char *l;
+	    size_t lsize = MAXHEADERSIZE + 1;
+	    l = (char *)critmalloc(lsize, "Space for article");
+
+	    /* read header */
+	    fd = open(inname, O_RDONLY);
+	    if (fd < 0 || readheaders(fd, inname, &l, &lsize, "\r\n\r\n") < 0) {
+		nntpprintf("441 internal error.");
+		free(u);
+		log_unlink(inname, 0);
+		goto cleanup;
+	    }
+
+	    /* apply filter for all newsgroups found in turn */
+	    for (t = strtok(u, ", "); t; t = strtok(NULL, ", ")) {
+		struct filterlist *fi = selectfilter(t);
+		if (killfilter(fi, l)) {
+		    nntpprintf("441 Article rejected by filter.");
+		    log_unlink(inname, 0);
+		    free(u);
+		    goto cleanup;
+		}
+	    }
+	    free(u);
+	}
+
 	/* check if we can obtain the MID or if the article is duplicate */
 	switch(msgid_allocate(inname, mid)) {
 	    case 1:
@@ -2502,6 +2531,12 @@ main(int argc, char **argv)
     }
     if (conffile)
 	free(conffile);
+
+    if (filterfile && !readfilter(filterfile)) {
+	ln_log_so(LNLOG_SERR, LNLOG_CTOP,
+		  "503 Server misconfiguration: cannot read filter file.");
+	exit(EXIT_FAILURE);
+    }
 
     if (!init_post())
 	init_failed(myname);
