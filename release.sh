@@ -24,6 +24,10 @@ cp -p NEWS TODO UPDATING $dest/
 if test ! -e leafnode-$vers.tar.bz2.asc -o ! leafnode-$vers.tar.bz2.asc -nt leafnode-$vers.tar.bz2 ; then
     ( cd $dest ; gpg -ba --sign leafnode-$vers.tar.bz2 )
 fi
+( 
+  echo "    MA `date +%Y-%m-%d` leafnode $vers"
+  cat $dest/RELEASE
+) >$dest/RELEASE.new && mv $dest/RELEASE.new $dest/RELEASE
 vim $dest/RELEASE
 vim $dest/HEADER.html
 fi
