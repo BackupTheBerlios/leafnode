@@ -2372,11 +2372,11 @@ main(int argc, char **argv)
 
     /* SIG_IGN would cause ECHILD on wait, so we use our own no-op dummy */
     {
-	struct sigaction sa;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_handler=dummy;
-	sa.sa_flags=SA_RESTART | SA_NOCLDSTOP;
-	sigaction(SIGCHLD, &sa, NULL);
+	struct sigaction sact;
+	sigemptyset(&sact.sa_mask);
+	sact.sa_handler=dummy;
+	sact.sa_flags=SA_RESTART | SA_NOCLDSTOP;
+	sigaction(SIGCHLD, &sact, NULL);
     }
 
     {
