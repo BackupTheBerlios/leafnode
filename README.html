@@ -10,7 +10,7 @@
 format. Do not file bug reports against section numbering or references within
 this document.
 
-<P>Version ID of this document: $Id: README.html,v 1.23 2003/03/13 00:08:40 emma Exp $
+<P>Version ID of this document: $Id: README.html,v 1.24 2003/07/10 22:58:59 emma Exp $
 
 <h3 align=center>Table of Contents</h3>
 
@@ -329,6 +329,22 @@ leafnode: 192.168.0.4: setenv NOPOSTING "You may only read."
 
 The contents of this variable are printed at the end of the banner, with
 control characters (as per iscntrl(3)) replaced by an underscore.
+
+<LI><I>(optional)</I>
+If you want to allow clients read access to local or global subscribed
+groups, but do not want to allow them to subscribe to new groups, you can
+set the NOSUBSCRIBE environment variable. When this variable is set, a
+client will never see a pseudo article. For example, if clients from
+127.0.0.1 and 192.168.0.42 may subscribe new groups, and all other
+192.168.0.* hosts may read the existing groups but not subscribe to new
+groups, put this into /etc/hosts.allow (this assumes libwrap/tcpd
+have been compiled with -DPROCESS_OPTIONS):
+
+<pre>
+leafnode: 127.0.0.1 192.168.0.42: ALLOW
+leafnode: 192.168.0.0/24: setenv NOSUBSCRIBE 1
+leafnode: ALL: DENY
+</pre>
 
 <LI>Run fetchnews. The first run will take some time since fetchnews reads
 a list of all newsgroups from your upstream server. In the worst case,

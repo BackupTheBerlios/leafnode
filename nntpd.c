@@ -104,6 +104,7 @@ static /*@null@*/ /*@only@*/ char *NOPOSTING;
 				/* ok-to-print version of getenv("NOPOSTING") */
 static int allowposting(void)
     /*@globals undef NOPOSTING@*/;
+static int allowsubscribe(void);
 static int isauthorized(void);
 static void doauthinfo(char *arg)
     /*@modifies arg@*/;
@@ -403,6 +404,9 @@ is_pseudogroup(const char *group)
     /* local is never pseudo */
     if (is_localgroup(group)) return FALSE;
 
+    /* when the client cannot subscribe, no group will be pseudo */
+    if (!allowsubscribe()) return FALSE;
+
 #if 0
     /* interesting is never pseudo */
     if (is_interesting(group)) return FALSE;
@@ -450,7 +454,8 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	markinterest(group->name);	/* FIXME: check error */
 	/* else try message-id lookup */
     } else if (arg && *arg == '<') {
-	if (!strncmp(arg, "<leafnode:placeholder:", 22)) {
+	if (0 == strncmp(arg, "<leafnode:placeholder:", 22) && allowsubscribe())
+	{
 	    f = fopenpseudoart(group, arg, 0);
 	} else {
 	    f = fopen(lookup(arg), "r");
@@ -460,7 +465,7 @@ fopenart(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned lon
 	(void)chdirgroup(group->name, FALSE);
 	sprintf(s, "%lu", *artno);
 	f = fopen(s, "r");
-	if (!f)
+	if (!f && allowsubscribe())
 	    f = fopenpseudoart(group, s, *artno);
 	/* warning: f may be NULL */
 	markinterest(group->name);	/* FIXME: check error */
@@ -581,11 +586,11 @@ allowposting(void)
     /*@globals undef NOPOSTING@*/
 {
     char *s;
-    static int initialized = 0;
-    static int allowpost = 1;
+    static int allowpost = 0; /* 0: uninitialized, 1: can post,
+				 2: cannot post */
 
     /* read NOPOSTING from environment if true */
-    if (!initialized) {
+    if (!allowpost) {
 	s = getenv("NOPOSTING");
 	if (s) {
 	    char *p;
@@ -594,14 +599,29 @@ allowposting(void)
 		if (iscntrl((unsigned char)*p))
 		    *p = '_';
 	    }
-	    allowpost = 0;
+	    allowpost = 2;
 	} else {
 	    NOPOSTING = NULL;
+	    allowpost = 1;
 	}
-	initialized = 1;
     }
-    return allowpost;
+    return 2 - allowpost;
 }
+
+static int
+allowsubscribe(void)
+{
+    char *s;
+    static int allowsubs; /* 0: uninitialized, 1: can subscribe,
+			     2: cannot subscribe */
+    if (!allowsubs) {
+	s = getenv("NOSUBSCRIBE");
+	allowsubs = (s != 0 ? 2 : 1);
+    }
+    return 2 - allowsubs;
+}
+
+
 
 /* display an article or somesuch */
 /* DOARTICLE */
@@ -752,7 +772,7 @@ markinterest(const char *group)
 	not_yet_interesting = 1;
     }
 
-    if (not_yet_interesting) {
+    if (not_yet_interesting && allowsubscribe()) {
 	f = fopen(mastr_str(s), "w");
 	if (f) {
 	    if (fclose(f)) {

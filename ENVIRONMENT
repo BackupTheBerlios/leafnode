@@ -12,8 +12,15 @@ STOP_AT_MESSAGEID
 	store the corresponding article.
 
 NOPOSTING
-	if set, the client cannot post, and its contents are output,
-	with control characters replaced by underscores
+	If this variable is set, the client cannot post.
+	The contents of this variable are appended to the greeting
+	banner.
+
+NOSUBSCRIBE
+	If set, the client cannot subscribe to new newsgroups.
 
 TZ
 	time zone variable
+
+
+ vim:tw=79 com=bf\:* ts=8 sts=8 sw=8 ai:
