@@ -6,7 +6,7 @@
 .\" Use, modification and distribution is allowed without limitation,
 .\" warranty, or liability of any kind.
 .\"
-.\" $Id: leafnode.8.in,v 1.21 2004/01/29 11:09:37 emma Exp $
+.\" $Id: leafnode.8.in,v 1.22 2004/02/27 01:23:02 emma Exp $
 .\"
 .\" hilit19 is stupid: "
 .SH NAME
@@ -246,14 +246,23 @@ comfortable and hence not fully documented, although it works.
 .PP
 .B GENERAL OPTIONAL PARAMETERS
 .TP
-authenticate = internal
-Require that NNTP clients authenticate themselves. If set, leafnode
-expects a file @sysconfdir@/leafnode/users which lists users and their
-passwords. The file has one line per user, with the user name (which
-cannot contain spaces), then a colon (:), then the crypt(3) encrypted
-password.
-
-To generate these lines, you can use the Perl program
+authenticate = METHOD
+Require that NNTP clients authenticate themselves.
+.IP
+If METHOD is \fBpam\fR (on systems that support PAM), leafnode expects to
+authenticate and check an account, the service name is "leafnode".
+BEWARE: Allowing users to log in with their regular system password is a
+security risk because the password is sent in clear text! You had better
+do this only for users who cannot log in (where the "shell" field in
+passwd is a statically linked /sbin/nologin, for instance).
+.IP
+If METHOD is \fBinternal\fR, leafnode expects a file
+@sysconfdir@/leafnode/users which lists users and their passwords. The
+file has one line per user, with the user name (which cannot contain
+spaces), then a colon (:), then the crypt(3) encrypted password.
+.IP
+To generate these lines, you can either use Apache's htpasswd(8) command
+if it's installed or use the simple Perl program
 .IR tools/make_pass.pl ,
 for example, if you want to add a user
 .I enigma

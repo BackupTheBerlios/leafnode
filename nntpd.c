@@ -51,6 +51,12 @@
 #include <sys/time.h>
 #include <utime.h>
 
+#ifdef USE_PAM
+#ifdef HAVE_SECURITY_PAM_APPL_H
+#include <security/pam_appl.h>
+#endif
+#endif
+
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -2078,6 +2084,88 @@ isauthorized(void)
     return FALSE;
 }
 
+#ifdef USE_PAM
+static int
+ln_conv(int num_msg, const struct pam_message **msg, struct pam_response  **resp, void *app_data_ptr)
+{
+    struct pam_response *reply;
+
+    if (num_msg != 1)
+	return PAM_CONV_ERR;
+
+    reply = (struct pam_response *) critmalloc(sizeof(struct pam_response), "conv");
+
+    reply->resp_retcode = 0;
+    reply->resp = critstrdup(app_data_ptr, "conv");
+	
+    *resp = reply;
+
+    return PAM_SUCCESS;
+}
+
+
+static int
+doauth_pam(char *const cmd, char *const val)
+				/*@modifies *val@*/
+{
+    static /*@only@*/ char *user = NULL;
+
+    if (0 == strcasecmp(cmd, "user")) {
+	if (user)
+	    free(user);
+
+	user = critstrdup(val, "doauth_pam");
+	memset(val, 0x55, strlen(val));
+	return P_CONTINUE;
+    }
+
+    if (0 == strcasecmp(cmd, "pass")) {
+	pam_handle_t *pamh = NULL;
+        int retval;
+	struct pam_conv conv;
+
+	conv.conv = ln_conv;
+	conv.appdata_ptr = val;
+
+	if (!user) {
+	    return P_REJECTED;
+	}
+
+        retval = pam_start("leafnode", user, &conv, &pamh);
+
+        if (retval == PAM_SUCCESS) {
+	    retval = pam_authenticate(pamh, 0);
+
+	    if (retval == PAM_SUCCESS) {
+		retval = pam_acct_mgmt(pamh, 0);
+
+		if (pam_end(pamh, retval) != PAM_SUCCESS) { 
+		    pamh = NULL;
+		    ln_log(LNLOG_SERR, LNLOG_CTOP,
+			   "cannot release PAM-handle.");
+		    exit(1);
+		}
+		
+		if (retval == PAM_SUCCESS)
+		    return P_ACCEPTED;
+		else {
+		    ln_log(LNLOG_SINFO, LNLOG_CTOP, "account-verify failed for %s: %s", user, pam_strerror(pamh, retval));
+		    return P_REJECTED;
+		}
+	    } else {
+		ln_log(LNLOG_SINFO, LNLOG_CTOP, "authentification for %s failed: %s", user, pam_strerror(pamh, retval));
+		return P_REJECTED;
+	    }
+
+	} else
+	    ln_log(LNLOG_SERR, LNLOG_CTOP, "pam_start failed: %s", pam_strerror(pamh, retval));	
+    }
+
+    memset(val, 0x55, strlen(val));
+    return P_SYNTAX_ERROR;
+}
+#endif
+
 static int
 doauth_file(char *const cmd, char *const val)
 				/*@modifies *val@*/
@@ -2133,8 +2221,9 @@ doauthinfo(char *arg)
     char *cmd;
     char *param;
     int result = 0;
+    static unsigned int sleeptime = 3;	/* sleep this many seconds after auth failure */
 
-    if (!authentication) {
+    if (authentication < AM_FILE && authentication > AM_MAX) {
 	result = P_NOT_SUPPORTED;
 	goto done;
     }
@@ -2157,6 +2246,11 @@ doauthinfo(char *arg)
     SKIPLWS(param);
 
     switch (authentication) {
+#ifdef USE_PAM
+    case AM_PAM:
+	result = doauth_pam(cmd, param);
+	break;
+#endif
     case AM_FILE:
 	result = doauth_file(cmd, param);
 	break;
@@ -2175,6 +2269,8 @@ doauthinfo(char *arg)
 	nntpprintf("%d More authentication required", result);
 	break;
     case P_REJECTED:
+	sleep(sleeptime);
+	sleeptime += sleeptime;
 	nntpprintf("%d Authentication rejected", result);
 	authflag = 0;
 	break;
@@ -2185,6 +2281,7 @@ doauthinfo(char *arg)
 	nntpprintf("%d Authentication not supported", result);
 	break;
     default:
+	sleep(sleeptime);
 	nntpprintf("%d This should not happen: %d", P_SYNTAX_ERROR, result);
 	break;
     }				/* switch */
@@ -2434,7 +2531,7 @@ main(int argc, char **argv)
     }
 
 /* #endif */
-    if (authentication && readpasswd() > 0) {
+    if (authentication == AM_FILE && readpasswd() > 0) {
 	ln_log_so(LNLOG_SNOTICE, LNLOG_CTOP,
 		  "503 Exiting, unable to read user list: %m");
 	exit(EXIT_FAILURE);

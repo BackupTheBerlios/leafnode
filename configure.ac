@@ -6,7 +6,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
 AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20040206a])
 AC_PREREQ(2.57)
-AC_REVISION($Revision: 1.91 $)
+AC_REVISION($Revision: 1.92 $)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
 dnl AM_MAINTAINER_MODE
@@ -99,7 +99,7 @@ AC_HEADER_STDBOOL
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
-AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h stdint.h inttypes.h])
+AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h stdint.h inttypes.h security/pam_appl.h])
 
 dnl Check whether all necessary include files are there
 AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -239,6 +239,9 @@ AC_SUBST(PCRELIB)
 AC_SUBST(LINKPCRELIB)
 
 dnl Checks for library functions.
+AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_SELECT_ARGTYPES
+AC_FUNC_UTIME_NULL
 AC_FUNC_CHOWN
 AC_FUNC_FORK dnl checks whether fork() is just a stub
 dnl AC_FUNC_MKTIME
@@ -250,7 +253,7 @@ AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror])
+AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd gethostbyaddr gethostbyname getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
 dnl THESE ARE DISABLED AND UNNEEDED, no malloc(0) calls possible
 dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
 dnl AC_FUNC_REALLOC dnl checks whether realloc(0) works
@@ -322,6 +325,26 @@ test ".$cf_cv_good_bcopy" = ".yes" && \
 
 AC_SUBST(PCRE_DEFINES)
 
+# Check for PAM
+PAM_MSG="no"
+AC_ARG_WITH(pam,
+	    AS_HELP_STRING([--with-pam],[[build with PAM support [no]]]),
+        [
+                if test "x$withval" != "xno" ; then
+                        if test "x$ac_cv_header_security_pam_appl_h" != "xyes" ; then
+                                AC_MSG_ERROR([PAM headers not found])
+                        fi
+
+                        AC_CHECK_LIB(dl, dlopen, , )
+                        AC_CHECK_LIB(pam, pam_authenticate, , AC_MSG_ERROR([*** libpam missing]))
+
+                        PAM_MSG="yes"
+
+                        AC_DEFINE(USE_PAM, [], [Use pam])
+                 fi
+        ]
+)
+
 if test x$silent != xyes ; then
     echo
     echo "=== configuration summary: ("NONE" is ok here and means the default) ==="
@@ -330,6 +353,7 @@ if test x$silent != xyes ; then
     printf "spooldir:    " ; eval echo "$SPOOLDIR"
     printf "RUNAS_USER:  " ; eval echo "$RUNAS_USER"
     printf "RUNAS_GROUP: " ; eval echo "$RUNAS_GROUP"
+    printf "With PAM:    " ;      echo "$PAM_MSG"
     echo
 fi
 

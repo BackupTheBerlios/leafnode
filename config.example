@@ -9,9 +9,12 @@
 expire = 20
 
 ## If you want your users to authenticate themselves, you can uncomment
-## the following line. See README for information on how to define users
-## and passwords. Currently, leafnode uses its own crypt(3)-encrypted
-## password file.
+## the following line and modify it if needed.
+## Supported: internal - See README for information on how to define
+##                       users and passwords.
+##            pam      - on systems that support PAM
+##                       BEWARE: PAM has security risks when used to
+##                       authenticate against system passwords
 # authenticate = internal
 
 ## To aid in debugging, here is a switch. Sum up the debug info you

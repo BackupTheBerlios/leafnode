@@ -254,10 +254,20 @@ readconfig(/*@null@*/ const char *configfile)
 				   "config: hostname is %s", value);
 		    break;
 		case CP_AUTH:
-		    authentication = AM_FILE;
+		    if (strcasecmp(value, "internal") == 0) {
+			authentication = AM_FILE;
+#ifdef USE_PAM
+		    } else if (strcasecmp(value, "pam") == 0) {
+			authentication = AM_PAM;
+#endif
+		    } else {
+			ln_log_sys(LNLOG_SERR, LNLOG_CTOP,
+				   "config: unknown authentication method: %s", value);
+			break;
+		    }
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
-				   "authentication method: %d", authentication);
+				   "config: authentication method: %d", authentication);
 		    break;
 		case CP_DELAY:
 		    delaybody = strtol(value, NULL, 10);
