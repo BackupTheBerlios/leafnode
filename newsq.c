@@ -27,12 +27,13 @@ usage(void)
 {
     fprintf(stderr,
 	    "Usage:\n"
-	    "newsq [OPTIONS] [-c]\n"
+	    "newsq [OPTIONS] [-cf]\n"
 	    "options are:\n"
 	    GLOBALOPTLONGHELP
 	    "    -c             - exit with code %d on error,\n"
 	    "                     exit with code %d if out.going queue has articles\n"
 	    "                     exit with code %d if out.going queue is empty.\n"
+	    "    -f             - print queue of articles to be fetched in delaybody mode\n"
 	    "    -h             - print short usage help like this\n",
 	    EXIT_FAILURE, EXIT_SUCCESS, EX_UNAVAILABLE);
 }
@@ -101,7 +102,7 @@ show_queue(const char *s)
 int
 main(int argc, char **argv)
 {
-    int option, check = 0;
+    int option, check = 0, delayed = 0;
     int ret = 0;
     long c;
     mastr *s = mastr_new(LN_PATH_MAX);
@@ -110,12 +111,15 @@ main(int argc, char **argv)
     if (!initvars(argv[0], 0))
 	init_failed(myname);
 
-    while ((option = getopt(argc, argv, GLOBALOPTS "ch")) != -1) {
+    while ((option = getopt(argc, argv, GLOBALOPTS "cfh")) != -1) {
 	if (parseopt(myname, option, optarg, NULL))
 	    continue;
 	switch(option) {
 	    case 'c':
 		check = 1;
+		break;
+	    case 'f':
+		delayed = 1;
 		break;
 	    case 'h':
 		usage();
@@ -135,6 +139,52 @@ main(int argc, char **argv)
 	if (!list) exit(EXIT_FAILURE);
 	free_dirlist(list);
 	exit(count ? EXIT_SUCCESS : EX_UNAVAILABLE);
+    }
+
+    if (delayed) {
+	RBLIST *r;
+	const char *i;
+	mastr *fname = mastr_new(LN_PATH_MAX);
+
+	if (!initinteresting() || !(r = openinteresting())) {
+	    fprintf(stderr, "error: Cannot read interesting.groups directory: %s",
+		    strerror(errno));
+	    mastr_delete(fname);
+	    exit(EXIT_FAILURE);
+	}
+
+	while ((i = readinteresting(r))) {
+	    FILE *f;
+	    char *l;
+
+	    (void)mastr_clear(fname);
+	    (void)mastr_vcat(fname, spooldir, "/interesting.groups/", i,  NULL);
+	    if (!(f = fopen(mastr_str(fname), "r"))) {
+		fprintf(stderr,
+			"error: Cannot open %s for reading: %s", mastr_str(fname),
+			strerror(errno));
+		continue;
+	    }
+	    while ((l = getaline(f))) {
+		char *fi[4];
+
+		if (str_nsplit(fi, l, " ", COUNT_OF(fi)) < 2) {
+		    /* skip malformatted line */
+		    fprintf(stderr,
+			    "warning: skipping malformatted "
+			    "interesting.groups/%s line \"%s\"",
+			    i, l);
+		    continue;
+		}
+
+		printf("%s:%s %s\n", i, fi[1], fi[0]);
+	    }
+	    fclose(f);
+	}
+	mastr_delete(fname);
+
+	closeinteresting(r);
+	exit(EXIT_SUCCESS);
     }
 
     printf("Articles awaiting post to upstream servers:\n"

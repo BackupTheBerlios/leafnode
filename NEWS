@@ -2,7 +2,9 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050324a:
+20050412a: Changes since 20050324a:
+- Feature: newsq -f will list the article bodies to be fetched in
+  delaybody mode. Suggested by Cory C. Albrecht.
 - Packaging: Drop obsolete README_FIRST file from .spec file to unwedge build.
   Reported by William Hooper.
 

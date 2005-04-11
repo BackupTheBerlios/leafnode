@@ -58,9 +58,6 @@ Ralfs TODO:
 
 Matthias:
 
-* Cory C. Albrecht: let newsq print articles to be retrieved in
-  delaybody mode. (2004-08-29)
-
 * line 1605 fetchnews.c (if active && ...) needs to be fixed. The whole
   process may need to be split in phases 1-obtain group lists, 2-post,
   3-fetch.
@@ -279,6 +276,10 @@ little. Suggested by Daniel Fraga <fraga@myrealbox.com>.
 
 ========================================================================
 FIXED ITEMS:
+
+2005-04-12 Matthias Andree
+	   newsq -f lists articles to be retrieved in delaybody mode.
+	   Suggested by Cory C. Albrecht.
 
 2004-02-27 Hynek Schlawack
 	   make PAM aware (Solaris, Linux, FreeBSD) to get rid of crypt
