@@ -186,7 +186,7 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
 		"\n"
 		"If you do not understand this, please talk to your newsmaster.\n"
 		"\n"
-		"Leafnode can be found at http://www.leafnode.org/\n\n",
+		"Leafnode can be found at http://leafnode.sourceforge.net/\n\n",
 		groupname);
     }
 }
