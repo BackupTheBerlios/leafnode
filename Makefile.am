@@ -13,9 +13,11 @@ man_MANS = \
 	checkgroups.8 \
 	filterfile.5 \
 	fetchnews.8 \
+	leafnode-version.1 \
 	leafnode.8 \
 	newsq.1 \
 	rnews.8 \
+	sendbatch.1 \
 	texpire.8 \
 	$(GENERATED_MANS)
 

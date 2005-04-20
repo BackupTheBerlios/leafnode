@@ -1,0 +1,50 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH SENDBATCH 1 "@VERSION@"
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n> insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+sendbatch \- primitive UUCP batcher
+.SH SYNOPSIS
+.B sendbatch [-zZb] [source]
+.SH DESCRIPTION
+This manual page documents briefly the
+.B sendbatch
+bash script.
+.P
+.B sendbatch
+is a
+.BR bash (1)
+script, which acts as a primitive UUCP batcher.
+It adds #! rnews line, optionally compresses and prepends the
+proper unbatcher line, and finally hands the articles over to
+uux.
+.SH OPTIONS
+.TP
+.B -z
+build "gunbatch" (gzip)
+.TP
+.B -Z
+build "cunbatch" (compress)
+.TP
+.B -b
+build "bunbatch" (bzip2) (default)
+.SH SEE ALSO
+.BR leafnode (8),
+.BR rnews (8),
+.BR bash (1)
+
+.SH AUTHOR
+This manual page was written by Matej Cepl <matej@ceplovi.cz>,
+for the Debian GNU/Linux system (but may be used by others).

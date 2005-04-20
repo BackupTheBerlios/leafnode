@@ -2,6 +2,10 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050412a:
+- Documentation: new manual pages leafnode-version(1) and sendbatch(1),
+  courtesy of Matěj Cepl of Debian.
+
 20050412a: Changes since 20050324a:
 - Feature: newsq -f will list the article bodies to be fetched in
   delaybody mode. Suggested by Cory C. Albrecht.

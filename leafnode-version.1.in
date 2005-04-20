@@ -1,0 +1,39 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH LEAFNODE-VERSION 1 "@VERSION@"
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n> insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+
+.SH NAME
+leafnode-version \- prints out version of
+.BR leafnode (8)
+and some other information about the news configuration.
+
+.SH SYNOPSIS
+.B leafnode-version
+
+.SH DESCRIPTION
+.B leafnode-version
+prints out version of
+.BR leafnode (8)
+, the name of the current machine, some important directories as
+understood by leafnode, availability of IPv6 support, which MTA
+and which version of
+.BR pcre (3)
+are being used.
+.SH OPTIONS
+None.
+.SH AUTHOR
+This manual page was written by Matej Cepl <matej@ceplovi.cz>,
+for the Debian GNU/Linux system (but may be used by others).
