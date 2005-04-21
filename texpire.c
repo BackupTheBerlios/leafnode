@@ -770,7 +770,8 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 
     /* skip empty groups */
     if (!chdirgroup(n, FALSE)) {
-	g->first = g->last + 1;
+	if (g)
+	    g->first = g->last + 1;
 	return;
     }
 

@@ -3,6 +3,8 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20050412a:
+- Bugfix: texpire can crash for some spool states (on incomplete
+  groupinfo), reported by John Carlyle-Clarke.
 - Documentation: new manual pages leafnode-version(1) and sendbatch(1),
   courtesy of Matěj Cepl of Debian.
 
