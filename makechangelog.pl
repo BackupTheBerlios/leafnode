@@ -4,7 +4,7 @@ use strict;
 use HTTP::Date;
 
 my $re = '\S+\s+\S+\s+\d+\s+\d+:\d+:\d+\s+\S+\s+\d+\s+';
-my $cmd = "darcs changes -v";
+my $cmd = "darcs changes -v -s";
 open F, "-|", "$cmd" or die "cannot run $cmd: $!";
 my $o = '';
 while(<F>) {
