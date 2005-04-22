@@ -1003,7 +1003,7 @@
 2004-02-18  Matthias Andree <matthias.andree@gmx.de>
 
 	* TODO, leafnode-2/TODO: Clarify two items after preliminary
-	discussion with Jörg Dietrich. Subject to further change!
+	discussion with JÃ¶rg Dietrich. Subject to further change!
 
 2004-02-17  Matthias Andree <matthias.andree@gmx.de>
 
@@ -1222,7 +1222,7 @@
 
 	* nntpd.c: LIST NEWSGROUPS/LIST ACTIVE crashed (NULL dereference)
 	when a non-wildcard pattern requested a non-existent group.  Patch
-	by Hans-Jürgen Ficker.
+	by Hans-JÃ¼rgen Ficker.
 
 2004-01-13  Ralf Wildenhues <ralf.wildenhues@gmx.de>
 
