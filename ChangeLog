@@ -1,3 +1,52 @@
+2005-04-22  Matthias Andree <matthias.andree@gmx.de>
+  * Fix UTF-8.
+
+    M ./ChangeLog -2 +2
+
+  * Add -s option to darcs changes.
+
+    M ./makechangelog.pl -1 +1
+
+2005-04-21  Matthias Andree <matthias.andree@gmx.de>
+  * Fix segfault on g == NULL in doexpiregroup().
+
+    M ./NEWS +2
+    M ./texpire.c -1 +2
+
+2005-04-20  Matthias Andree <matthias.andree@gmx.de>
+  * Fix two national characters.
+
+    M ./CREDITS -2 +2
+
+  * Add Matěj Cepl's sendbatch(1)/leafnode-version(1) manual pages.
+
+    M ./CREDITS +1
+    M ./Makefile.am +2
+    M ./NEWS +4
+    M ./configure.ac -1 +2
+    A ./leafnode-version.1.in
+    A ./sendbatch.1.in
+
+2005-04-17  Matthias Andree <matthias.andree@gmx.de>
+  * Ditch obsolete comments about recovery.
+
+    M ./README.html -12
+
+  * Update web addresses
+
+    M ./AUTHORS -2 +1
+    M ./README.html -3 +5
+    M ./nntpd.c -1 +1
+
+2005-04-12  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20050412a
+
+
+  * snapshot leafnode-2.0.0.alpha20050412a
+
+    M ./ChangeLog +37
+    M ./configure.ac -1 +1
+
 2005-04-12  Matthias Andree <matthias.andree@gmx.de>
   * Add newsq -f mode.
 

@@ -2,7 +2,7 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050412a:
+20050422a: Changes since 20050412a:
 - Bugfix: texpire can crash for some spool states (on incomplete
   groupinfo), reported by John Carlyle-Clarke.
 - Documentation: new manual pages leafnode-version(1) and sendbatch(1),
