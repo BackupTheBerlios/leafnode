@@ -380,6 +380,11 @@ ismsgidonserver(char *msgid)
 
 /**
  * Get a single article and apply filters.
+ *
+ * XXX FIXME: do we want a "reconnect to current server and continue"
+ * state when we're out of synch? We'd need to track if we're making
+ * progress so we don't loop on the same b0rked article for instance.
+ *
  * \return
  *  - -2: server disconnected or OS error in store, abort the fetch
  *  - -1: did not get a 22X reply, continue the fetch
@@ -392,7 +397,7 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
     int delayflg)
 {
     char *l;
-    int reply = 0;
+    int reply = 0, argcount;
 
     l = mgetaline(nntpin);
     if (!l) {
@@ -401,10 +406,11 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
 	return -2;
     }
 
-    if ((sscanf(l, "%3d %lu", &reply, artno) != 2) || (reply / 10 != 22)) {
+    if (((argcount = sscanf(l, "%3d %lu", &reply, artno)) < 2)
+	    || (reply / 10 != 22)) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
-	       "Wrong reply to ARTICLE command: %s", l);
-	if (reply / 100 == 5)
+	       "Wrong reply to ARTICLE command: \"%s\"", l);
+	if (argcount < 2 || reply / 100 == 5)
 	    return -2;		/* fatal error */
 	return -1;
     }
@@ -712,7 +718,7 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
     if (!parsegroupreply((const char **)&t, &u, &h, &window, last)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse reply to GROUP %s: \"%s\"",
 		cursrv->name, g->name, l);
-	return 0;
+	return -2;
     }
 
     if (u != 211) {
@@ -1115,6 +1121,7 @@ getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 /**
  * fetch all articles for that group.
  * \return
+ * - -2 to abort fetch from current server
  * - 0 for error or if group is unavailable
  * - otherwise last article number in that group
  */
@@ -1176,6 +1183,8 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 	return first;
     case -1:
 	return 0;
+    case -2:
+	return -2;
     default:
 	break;
     }
@@ -1585,6 +1594,7 @@ processupstream(struct serverlist *cursrv, const char *const server,
     RBLIST *r = NULL;			/* interesting groups pointer */
     struct rbtree *upstream;		/* upstream water marks */
     int rc = 0;				/* return value */
+    int fault = 0;			/* if we skip the rest of the groups */
 
     /* read info */
     oldfile = server_info(spooldir, server, port, "");
@@ -1649,16 +1659,18 @@ processupstream(struct serverlist *cursrv, const char *const server,
 	    /* we still want this group */
 
 	    g = findgroup(ng, active, -1);
-            if (!g) {
-                if (!forceactive && (debugmode & DEBUG_ACTIVE))
-                    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
-                            "%s not found in groupinfo file", ng);
-            }
+	    if (!g) {
+		if (!forceactive && (debugmode & DEBUG_ACTIVE))
+		    ln_log(LNLOG_SINFO, LNLOG_CGROUP,
+			    "%s not found in groupinfo file", ng);
+	    }
 
-	    newserver = getgroup(cursrv, g, from);
+	    if (fault == 0)
+		newserver = getgroup(cursrv, g, from);
+	    else
+		newserver = 0;
 	    if (newserver == (unsigned long)-2) { /* fatal */
-		/* FIXME: write back all other upstream entries, return */
-		goto out;
+		fault = 1;
 	    }
 	    /* write back as good info as we have, drop if no real info */
 	    if (newserver != 0) {
@@ -1694,7 +1706,7 @@ out:
 
     free(newfile);
     free(oldfile);
-    return rc;
+    return fault ? 0 : rc;
 }
 
 /**

@@ -2,6 +2,11 @@ KNOWN BUGS:
 * Valgrind-2.1.X will interfere with writeactive, break fchmod. Use 2.0.
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050422a:
+- Stability: If getting a non-text reply in response to ARTICLE, leave
+  current server alone on the assumption we're out of synch and proceed
+  to next.
+
 20050422a: Changes since 20050412a:
 - Bugfix: texpire can crash for some spool states (on incomplete
   groupinfo), reported by John Carlyle-Clarke.
