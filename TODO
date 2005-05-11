@@ -56,6 +56,22 @@ Ralfs TODO:
   remote control messages (christophe Raverdy <craverdy@teaser.fr>
   2002-12-05 leafnode-list)
 
+Nikolaus Rath, debian bug #307685, 2005-05-04:
+| It would be very nice to be able to specify individual timeout_short
+| and timeout_long values for specific groups, as it is possible for
+| expiry times with groupexpire.
+|
+| Reason: My low-traffic *.announce and *.info groups are permanently
+| unsubscribed because there is sometimes no traffic for more than
+| timeout_long days. I don't read them if there is no traffic -> leafnode
+| thinks that they should be unsubscribed.
+|
+MA: It might be best to rework the configuration parser towards Apache
+style, where we have contexts that allow the user to specify otherwise
+global options specifically for a group or upstream server, by putting
+it into a bracketed part (Perhaps also similar to isc-dhcpd 3
+configuration).
+
 Matthias:
 
 * line 1605 fetchnews.c (if active && ...) needs to be fixed. The whole
