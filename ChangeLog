@@ -1,3 +1,20 @@
+2005-05-14  Matthias Andree <matthias.andree@gmx.de>
+  * Fix empty upstream group detection.
+
+    M ./NEWS +2
+    M ./fetchnews.c -1 +3
+
+2005-05-11  Matthias Andree <matthias.andree@gmx.de>
+  * Record Debian wishlist #307685, Nikolaus Rath, 2005-05-04.
+
+    M ./TODO +16
+
+2005-05-10  Matthias Andree <matthias.andree@gmx.de>
+  * Give up on current server quicker if we go out of synch.
+
+    M ./NEWS +5
+    M ./fetchnews.c -14 +26
+
 2005-04-22  Matthias Andree <matthias.andree@gmx.de>
   * Fix UTF-8.
 
