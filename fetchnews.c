@@ -715,6 +715,7 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
     }
 
     t = l;
+    /*                               input nnn   #   first   last */
     if (!parsegroupreply((const char **)&t, &u, &h, &window, last)) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse reply to GROUP %s: \"%s\"",
 		cursrv->name, g->name, l);
@@ -727,7 +728,8 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
 	return 0;
     }
 
-    if (*last == 0) {		/* group available but no articles on server */
+    if (h == 0 || window > *last) {
+	/* group available but no articles on server */
 	*first = 0;
 	return 0;
     }

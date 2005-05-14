@@ -6,6 +6,8 @@ Changes since 20050422a:
 - Stability: If getting a non-text reply in response to ARTICLE, leave
   current server alone on the assumption we're out of synch and proceed
   to next.
+- Bugfix: fetchnews now properly detects an empty upstream group.
+  Reported by John Carlyle-Clarke.
 
 20050422a: Changes since 20050412a:
 - Bugfix: texpire can crash for some spool states (on incomplete
