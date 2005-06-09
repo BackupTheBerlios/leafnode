@@ -21,6 +21,10 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
+SECURITY:
+1.1	Add timeouts to ALL network reading functions (CAN-2005-1911),
+	for instance store_stream!
+
 Ralfs TODO:
 	* dirutil.c: should dirlist_core set count in error case?  This
 	  could break xgetxover and maybe other places.
