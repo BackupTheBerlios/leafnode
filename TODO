@@ -25,6 +25,9 @@ SECURITY:
 1.1	Add timeouts to ALL network reading functions (CAN-2005-1911),
 	for instance store_stream!
 
+	Add a reader that aborts after maximum latency or when falling
+	below a minimum speed threshold.
+
 Ralfs TODO:
 	* dirutil.c: should dirlist_core set count in error case?  This
 	  could break xgetxover and maybe other places.
@@ -55,6 +58,8 @@ Ralfs TODO:
 
 * forward port leafnode-1 STAT blacklisting code? Or go for real posting
   stuff?
+
+* program filters for OUTGOING (Sourceforge RFE 1244705)
 
 * make sure filters or some other mechanism can allow local, but block
   remote control messages (christophe Raverdy <craverdy@teaser.fr>
