@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20050514a:
+- Bugfix: fetchnews now presents an error message to the user if the
+  greeting banner code isn't 200 or 201. Reported by Werner Partner.
+
 20050514a: Changes since 20050422a:
 - Stability: If getting a non-text reply in response to ARTICLE, leave
   current server alone on the assumption we're out of synch and proceed

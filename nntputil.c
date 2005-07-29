@@ -413,6 +413,15 @@ nntpconnect(const struct serverlist *upstream)
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 	       "%s: connected (%d), banner: \"%s\"",
 	       upstream->name, reply, line ? line : "(none)");
+    } else {
+	ln_log(LNLOG_SERR, LNLOG_CSERVER,
+		"%s: Server didn't want to talk to us, reply code %d",
+		upstream->name, reply);
+	if (line)
+	    ln_log(LNLOG_SERR, LNLOG_CSERVER,
+		    "%s: \"%s\"", upstream->name, line);
+	nntpdisconnect();
+	return 0;
     }
 
     if (line && strstr(line, "NewsCache")) {
