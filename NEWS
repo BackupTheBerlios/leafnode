@@ -2,6 +2,9 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20050514a:
+- Bugfix: if getting the group returns "skip to next server", don't
+  write a bogus article mark of 2^32-2 or 2^64-2 into the server's
+  article mark file. Observed by Dietrich Schaffer.
 - Bugfix: fetchnews now presents an error message to the user if the
   greeting banner code isn't 200 or 201. Reported by Werner Partner.
 

@@ -1667,12 +1667,15 @@ processupstream(struct serverlist *cursrv, const char *const server,
 			    "%s not found in groupinfo file", ng);
 	    }
 
+	    /* newserver == 0 means we'll be writing back the "from"
+	     * article mark, to retry next run */
 	    if (fault == 0)
 		newserver = getgroup(cursrv, g, from);
 	    else
 		newserver = 0;
-	    if (newserver == (unsigned long)-2) { /* fatal */
+	    if (newserver == (unsigned long)-2) { /* "fatal" from getgroup */
 		fault = 1;
+		newserver = 0;
 	    }
 	    /* write back as good info as we have, drop if no real info */
 	    if (newserver != 0) {
