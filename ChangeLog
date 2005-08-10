@@ -1,4 +1,44 @@
+2005-08-10  Matthias Andree <matthias.andree@gmx.de>
+  * Robustness: map article no.s that are error codes to 1.
+
+    M ./fetchnews.c -1 +8
+
+  * fix "-2" in server's group/article no file
+
+    M ./NEWS +3
+    M ./fetchnews.c -1 +4
+
+2005-07-29  Matthias Andree <matthias.andree@gmx.de>
+  * Propagate error greeting banners from servers to the user.
+
+    M ./NEWS +4
+    M ./nntputil.c +9
+
+2005-07-27  Matthias Andree <matthias.andree@gmx.de>
+  * Add Sourceforge RFE 1244705
+
+    M ./TODO +5
+
+2005-06-09  Matthias Andree <matthias.andree@gmx.de>
+  * Add CAN-2005-1911.
+
+    M ./TODO +4
+
+2005-05-17  Matthias Andree <matthias.andree@gmx.de>
+  * Drop valgrind notice, 2.4.0 is fine %-)
+
+    M ./NEWS -1
+
 2005-05-14  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20050514a
+
+
+  * snapshot leafnode-2.0.0.alpha20050514a
+
+    M ./ChangeLog +17
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
   * Fix empty upstream group detection.
 
     M ./NEWS +2
