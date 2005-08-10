@@ -688,6 +688,7 @@ parsegroupreply(const char **s, unsigned long *code, unsigned long *number,
  * -  0 for error
  * -  1 for success
  * - -1 if group is not available at all
+ * - -2 for a fatal error on current server (skip to next)
  */
 static int
 getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
@@ -717,7 +718,7 @@ getfirstlast(struct serverlist *cursrv, struct newsgroup *g, unsigned
     t = l;
     /*                               input nnn   #   first   last */
     if (!parsegroupreply((const char **)&t, &u, &h, &window, last)) {
-	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse reply to GROUP %s: \"%s\"",
+	ln_log(LNLOG_SERR, LNLOG_CGROUP, "%s: cannot parse reply to \"GROUP %s\": \"%s\"",
 		cursrv->name, g->name, l);
 	return -2;
     }
@@ -1649,6 +1650,12 @@ processupstream(struct serverlist *cursrv, const char *const server,
 	    continue;			/* FIXME: why? */
 
 	from = get_old_watermark(ng, upstream);
+	/* map our own error codes to 1, in case a buggy version of
+	 * fetchnews wrote a bogus watermark that actually was an error
+	 * code. XXX FIXME: we should return error out of band. */
+	if (from == (unsigned long)-1
+		|| from == (unsigned long)-2)
+	    from = 1;
 
 	donethisgroup = (const char *)rbfind(ng, done_groups);
 
