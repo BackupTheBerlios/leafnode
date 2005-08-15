@@ -293,8 +293,9 @@ install-data-hook:
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
 	@echo
-	@echo "### IF you are upgrading to a version newer than 20040326a"
+	@echo "### If you are upgrading to a version newer than 20040326a"
 	@echo "### for the first time, run: chmod -R o= $(DESTDIR)$(SPOOLDIR)"
+	@echo "### Note this command may take a long time to run."
 	@echo
 	@echo "Then edit /etc/inetd.conf to start $(DESTDIR)$(sbindir)/leafnode"
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
