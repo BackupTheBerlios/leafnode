@@ -1,3 +1,14 @@
+* FEATURES
+
+local newsgroups
+
+newsgroup specific filters and filtering per size
+
+* READING
+
+[Incompat] leafnode-2 does not offer direct access to the spool
+directory any more.  Use NNTP instead.
+
 * POSTING
 
 leafnode-2 doesn't care for out.going file permissions when posting, it
