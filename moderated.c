@@ -47,6 +47,8 @@ getmoderator(const char *group)
 	if (wildmat(group, line)) {
 	    char *x;
 	    if ((x = strstr(p, "%s"))) {
+		/* expand %s in moderator address by group name with dots
+		 * replaced by dashes */
 		char *g = critstrdup(group, "getmoderator");
 		char *t;
 		for (t = g; *t; t++)
@@ -57,6 +59,7 @@ getmoderator(const char *group)
 		snprintf(address, sizeof address, "%s%s%s", p, g, x + 2);
 		free(g);
 	    } else {
+		/* no %s? Just copy verbatim */
 		(void)mastrncpy(address, p, sizeof address);
 	    }
 	    fclose(f);
