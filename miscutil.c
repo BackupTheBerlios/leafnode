@@ -272,7 +272,7 @@ parseopt(const char *progname, int option,
 	    verbose++;
 	    return TRUE;
 	case 'e':
-	    ln_log_stderronly ^= 1;
+	    ln_log_stderronly |= 1;
 	    return TRUE;
 	case 'D':
 	    if (opta && *opta)
