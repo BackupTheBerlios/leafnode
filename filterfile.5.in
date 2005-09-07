@@ -59,22 +59,23 @@ one pattern/action pair. It is valid until the next newsgroups parameter
 turns up.
 
 .PP
-The
-.BR pattern
-.BR to
-.BR recognize
+The \fBpattern\fP to recognize
 can be one of the following:
 .TP
 pattern = [!]\fIPCRE\fR
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
-a separate manual page (
-.BR pcre (3)).
+a separate manual page (\fBpcre\fR(3)).
+.sp
+Note that the right hand side follows the same quoting conventions as
+leafnode's main configuration file - the double quote (") is special!
+.sp
 If you want to negate a part of the pattern, use a negative assertion,
 try (untested):
-
+.sp
+.ti +4
 pattern = ^Subject:(?!.*bad weather.*)$
-
+.sp
 Be very careful when using the | operator. Make sure you use parentheses
 to tell PCRE which part you want matched. "^Subject: Jens|Jan" is
 different from "^Subject: (Jens|Jan)" -- the former matches either
