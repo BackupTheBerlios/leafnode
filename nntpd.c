@@ -2535,7 +2535,9 @@ main(int argc, char **argv)
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
 	if (!parseopt(myname, option, optarg, &conffile)) {
-	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
+	    if (option != ':') {
+		ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
+	    }
 	    exit(EXIT_FAILURE);
 	}
 	if (option == 'e') {
