@@ -179,15 +179,15 @@ fprintpseudobody(FILE * pseudoart, const char *groupname)
 		"the newsgroup %s when fetchnews is run\n"
 		"the next time. If you'll look into this group a little later, you\n"
 		"will see real articles.\n"
-		"\n"
+		"\n", groupname);
+	fprintf(pseudoart,
 		"If you see articles in groups you do not read, that is almost\n"
 		"always because of cross-posting.  These articles do not occupy any\n"
 		"more space - they are hard-linked into each newsgroup directory.\n"
 		"\n"
 		"If you do not understand this, please talk to your newsmaster.\n"
 		"\n"
-		"Leafnode can be found at http://leafnode.sourceforge.net/\n\n",
-		groupname);
+		"Leafnode can be found at http://leafnode.sourceforge.net/\n\n");
     }
 }
 
