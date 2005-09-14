@@ -34,7 +34,7 @@ static void log_status(int status) {
 }
 
 /** mailto - mail a file to address. Expects fd to be a readable file
- * descriptor. \return 0 for success, -1 for error
+ * descriptor. \return 0 for success, negative integer for error
  * WARNING: This function expects that SIGCHLD is _NOT_ set to SIG_IGN,
  * it will mail away the file but report it failed otherwise!
  */
