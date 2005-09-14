@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050810a:
+20050914a: Changes since 20050810a:
 - Bugfix: Make -e actually work.
   SourceForge Bug #1248682, reported by Bodo Eggert.
 - Logging: successful mail to moderator now logged at INFO priority,
