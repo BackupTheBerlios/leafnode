@@ -2516,6 +2516,7 @@ main(int argc, char **argv)
     char *buf = (char *)critmalloc(bufsize, "main");
     char *conffile = NULL;
     const char *const myname = "leafnode";
+    int logstderr = 0;
 
 #ifdef HAVE_IPV6
     struct sockaddr_in6 sa, peer;
@@ -2529,23 +2530,28 @@ main(int argc, char **argv)
     mysetfbuf(stdout, buf, bufsize);
 
     ln_log_open(myname);
-    if (!initvars(argv[0], 1))
+    if (!initvars(argv[0], argc > 1 && argv[1] && 0 == strcmp(argv[1], "-e")))
 	init_failed(myname);
-
-    /* have stderr discarded */
-    se = freopen("/dev/null", "w+", stderr);
-    if (!se) {
-	ln_log_so(LNLOG_SERR, LNLOG_CTOP,
-		  "503 Failure: cannot open /dev/null: %m");
-	exit(EXIT_FAILURE);
-    }
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
 	if (!parseopt(myname, option, optarg, &conffile)) {
 	    ln_log(LNLOG_SWARNING, LNLOG_CTOP, "Unknown option %c", option);
 	    exit(EXIT_FAILURE);
 	}
+	if (option == 'e') {
+	    logstderr = 1;
+	}
 	verbose = 0;		/* overwrite verbose logging */
+    }
+
+    if (!logstderr) {
+	/* have stderr discarded */
+	se = freopen("/dev/null", "w+", stderr);
+	if (!se) {
+	    ln_log_so(LNLOG_SERR, LNLOG_CTOP,
+		    "503 Failure: cannot open /dev/null: %m");
+	    exit(EXIT_FAILURE);
+	}
     }
 
     if (readconfig(conffile)) {

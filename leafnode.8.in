@@ -11,7 +11,7 @@
 leafnode \- NNTP server for small (dialup) sites
 
 .SH SYNOPSIS
-.B leafnode [-d spooldir] [-D debugmode] [-e] [-F configfile] [-v [...]]
+.B leafnode [-e] [-d spooldir] [-D debugmode] [-F configfile] [-v [...]]
 .br
 .B leafnode -V
 
@@ -56,6 +56,11 @@ for a detailed description of how to set this parameter.
 Redirect logging from syslog to the standard error channel (stderr).
 This is useful for debugging and when using service supervisors such as
 Gerrit Pape's \fIrunit\fR or Daniel J. Bernstein's \fIdaemontools\fR.
+.PP
+\fBNote:\fP This option must be the first option for the \fBleafnode\fP
+program and it must not be merged with other options if you want to log
+initialization errors on stderr, too. Other programs such as
+\fBfetchnews\fP or \fBtexpire\fP do not need this.
 .TP
 .I -F configfile
 Read configuration from an alternative file instead of @sysconfdir@/config.
