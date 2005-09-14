@@ -1543,10 +1543,14 @@ dopost(void)
 		    nntpprintf("503 file open error caught at %s:%lu", __FILE__,
 			    (unsigned long)__LINE__);
 		} else {
-		    if (mailto(moderator, fd)) {
+		    int mrc = mailto(moderator, fd);
+		    if (mrc) {
+			ln_log(LNLOG_SERR, LNLOG_CARTICLE,
+				"message %s, ID <%s>: mailing to moderator <%s> failed (error #%d)", inname,
+				mid, moderator, mrc);
 			nntpprintf("503 posting to moderator <%s> failed: %m", moderator);
 		    } else {
-			ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE,
+			ln_log(LNLOG_SINFO, LNLOG_CARTICLE,
 				"message %s, ID <%s> mailed to moderator <%s>", inname,
 				mid, moderator);
 			nntpprintf("240 Article mailed to moderator <%s>", moderator);

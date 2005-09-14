@@ -2,6 +2,8 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20050810a:
+- Logging: successful mail to moderator now logged at INFO priority,
+  problems logged at ERROR priority (used to be DEBUG for both).
 - Bugfix: let -e set (rather than toggle) stderr logging.
 - Documentation: the filterfile(5) manual now mentions that the pattern=
   line follows the same quoting conventions as the main leafnode file.
