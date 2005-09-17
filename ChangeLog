@@ -1,3 +1,72 @@
+2005-09-14  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20050914a
+
+  * Bump version to 2.0.0.alpha20050914a
+
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
+  * Split overlong strings for C89 compliance.
+
+    M ./nntpd.c -3 +3
+
+  * don't log Unknown option for missing argument.
+
+    M ./nntpd.c -1 +3
+
+  * fix leafnode -e, sf.net bug 1248682
+
+    M ./NEWS +2
+    M ./leafnode.8.in -1 +6
+    M ./nntpd.c -9 +15
+
+  * Properly log mailto() result.
+
+    M ./NEWS +2
+    M ./nntpd.c -2 +6
+
+  * Fix documentation of return value of mailto().
+
+    M ./mailto.c -1 +1
+
+2005-09-07  Matthias Andree <matthias.andree@gmx.de>
+  * set (rather than toggle) -e stderr logging
+
+    M ./NEWS +1
+    M ./miscutil.c -1 +1
+
+  * Mention that patterns understand quoting.
+
+    M ./NEWS +4
+
+  * Mention that patterns understand quoting.
+
+    M ./filterfile.5.in -8 +9
+
+2005-09-03  Matthias Andree <matthias.andree@gmx.de>
+  * comment %s expansion in moderator address.
+
+    M ./moderated.c +3
+
+2005-08-15  Matthias Andree <matthias.andree@gmx.de>
+  * update
+
+    M ./CHANGES-FROM-LEAFNODE-1 +11
+
+  * Add note that chmod -R on the spool can take a long time.
+
+    M ./Makefile.am -1 +2
+
+2005-08-10  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20050810a
+
+
+  * snapshot 20050810a.
+
+    M ./ChangeLog +40
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
 2005-08-10  Matthias Andree <matthias.andree@gmx.de>
   * Robustness: map article no.s that are error codes to 1.
 
