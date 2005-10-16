@@ -176,7 +176,7 @@ server = news.hiof.no
 ## Determine how you want to feed your own posts to the upstream.
 ## Available types are NNTP (the default), UUCP (not yet implemented),
 ## NONE (do not feed posts to this server -- formerly known as
-## separate "dontpost" option)
+## separate "dontpost" or "nopost" options)
 # feedtype = NNTP
 
 ## Standard news servers run on port 119. If your newsserver doesn't, comment

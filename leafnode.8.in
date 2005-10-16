@@ -271,9 +271,6 @@ still fall back to XOVER if you also want to use filters in a group or
 if you work with "delaybody" set (because in these cases it will always
 be faster to use XOVER).
 .TP
-dontpost = 1
-Set this if you do not want postings to be sent to this server.
-.TP
 only_groups_pcre = PCRE
 This parameter lists the Perl-compatible regular expression of groups
 that are fetched or posted to this server. The PCRE is automatically
