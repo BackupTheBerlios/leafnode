@@ -1,0 +1,234 @@
+\documentclass[10pt,english,a5paper]{article}
+\usepackage{babel}
+\usepackage[nohead,margin=.5in]{geometry}
+
+\begin{document}
+\author{Dr.\ Cornelius Krasel, Matthias Andree}
+\title{Leafnode FAQ}
+\date{2005--10--02}
+\maketitle
+\tableofcontents
+\section{Introduction}
+
+This document contains answers to some commonly encountered problems.
+
+A good way to approach communication problems with leafnode is to switch
+on the debugmode. This is done by putting \verb"debugmode = 4095" into the
+leafnode configuration file and then turning on the logging of the
+\verb"debug" priority for the facility \verb"news" in /etc/syslogd.conf. Be warned that the leafnode programs write a lot of information to
+this channel.
+To turn on logging, do the following:
+
+\begin{enumerate}
+
+    \item Put into /etc/syslogd.conf a line which looks like the one below:
+\begin{verbatim}
+news.debug /var/log/news.debug
+\end{verbatim}
+    It is mandatory that the two fields be separated by a tab, not spaces.
+
+\item Become root and restart the syslog daemon:
+    \begin{verbatim}
+kill -HUP `cat /var/run/syslog*.pid`
+\end{verbatim}
+    \end{enumerate}
+
+%%%%%%%%%%
+
+\section{Questions and Answers}
+
+\subsection{I want to change my upstream server}
+
+    I have never done this myself, but leafnode should have no problems
+    with it. Assuming that your new server is called
+    ``new.upstream.example'' and your old server
+    ``old.upstream.example'', I
+    recommend following the procedure outlined below:
+
+    \begin{enumerate}
+	\item Add the following lines to your config file:
+
+	    \begin{verbatim}
+server = new.upstream.example
+maxfetch = 100
+\end{verbatim}
+       If you have already another maxfetch defined, reduce it
+       temporarily.
+   \item Run fetchnews
+   \item Remove
+       \begin{verbatim}
+server = old.upstream.example
+\end{verbatim}
+       and delete the ``maxfetch'' line that was introduced in step 1.
+       \end{enumerate}
+
+       \subsection{I cannot connect to my newsserver}
+
+    Most likely your setup is incorrect. This can have several reasons.
+
+    \begin{itemize}
+	\item inetd is not running. Check with
+	    \begin{verbatim}
+ps ax | grep inetd
+\end{verbatim}
+       inetd should be running once.
+
+   \item inetd is running, but the entry in /etc/inetd.conf is incorrect.
+
+       \begin{itemize}
+	   \item The nntp entry is not recognized.
+            Run \verb"inetd -d" as root (finish with Ctrl-C). You should get
+            exactly one line starting like this:
+	    \begin{verbatim}
+ADD : nntp proto=tcp, ...
+\end{verbatim}
+            If this is not the case, the syntax of your entry in
+            /etc/inetd.conf is incorrect. Compare it with some other
+            entries. Most notably, it should not contain any leading
+            spaces.
+
+	\item The nntp entry is recognized, but leafnode is not found or
+            has wrong permissions\@.
+
+            Inetd will log attempts to invoke leafnode in some logfile,
+            usually /var/log/syslog or /var/log/messages (the exact name
+            depends on the setup of your /etc/syslog.conf). If an error
+            occurs when invoking leafnode, you can find out there what
+            exactly happened.
+
+	\item inetd is running and the entry in /etc/inetd.conf is correct, but
+       the tcpd denies access to the server (in /var/log/messages you
+       will find something like ``leafnode: connection refused from\dots{}'').
+       Check the entries in /etc/hosts.allow and /etc/hosts.deny. An
+       example for a correct entry is given in the INSTALL file.
+
+   \item Another badly configured news server is already running on your
+       machine. Switch it off.
+       \end{itemize}
+       \end{itemize}
+
+   You can test your setup by opening a telnet connection to your
+   newsserver. This is done by doing \verb"telnet localhost 119". You should
+   get back something like
+
+   \begin{verbatim}
+200 Leafnode NNTP Daemon, version xx running at yy
+\end{verbatim}
+
+   where xx is the version number and yy your hostname. Type \verb"quit" after
+   seeing this message. If you don't get any connection at all or
+   something different, check through the points above.
+
+
+\subsection{tin complains about a missing file ``/var/lib/news/active''}
+
+   Either you have started the wrong version of tin (the one which tries
+   to read news directly from the spool) or your groupinfo file is
+   corrupt.
+
+   In the first case, simply invoke tin with the \verb+-r+ flag: \verb"tin -r". If
+   this does not help, try to rebuild the groupinfo file by starting
+   fetchnews with the \verb+-f+ flag.
+
+   \subsection{fetchnews does not fetch any articles}
+
+   Here are the two most common occurences which cause this error:
+   \begin{itemize}
+       \item Your groupinfo file is corrupt. Restart fetchnews with the -f
+       parameter.
+   \item /var/spool/news may have the wrong permissions. /var/spool/news
+       and all its subdirectories should be drwxrwsr-x and owned by user
+       and group news.
+       \end{itemize}
+
+\subsection{When fetching articles, the connection is interrupted by
+the pppd}
+
+   The article which causes the interruption contains three plus signs
+   (``+++'') which is interpreted by a subset of modems as the beginning of
+   a command. You can either change the command introduction sequence or
+   switch off the command completely. Consult the instructions of your
+   modem to find out how this is done.
+
+\subsection{leafnode generates incorrect/incomplete message IDs}
+
+   First you should check whether it is indeed Leafnode which generates
+   the message~ID\@. Leafnode will not touch any message IDs generated by
+   newsreaders (many of which generate message IDs themselves). A message
+   ID that is generated by leafnode has the following general appearance:
+   \verb+<local-part.ln@host-name>+
+
+   The local-part is generated by Leafnode and you cannot influence it.
+   For host-name, Leafnode tries to figure out the name of your computer
+   by calling gethostname(2) and using the return value for a
+   gethostbyname(3) call. Therefore, if you set the name of your computer
+   correctly (using hostname(1) and domainname(1)) you should also get
+   correct message IDs.
+
+   If you don't want to change the name of your machine, you can change
+   the part of the Message-ID behind the @ sign by putting
+   \begin{verbatim}
+hostname = my.correct.hostname.example
+\end{verbatim} in your config file.
+   For more information, see the leafnode(8) man page.
+
+\subsection{fetchnews has problems retrieving new newsgroups}
+
+   Maybe your upstream server supports neither the
+   ``XGTITLE~news.group.name'' nor the
+   ``LIST~NEWSGROUPS~news.group.name'' command. In
+   this case, add \verb"nodesc" to your server entry as described in
+   leafnode(8) and the config.example file.
+
+\subsection{texpire does not expire articles}
+
+   Run texpire with the -f parameter. This will expire articles somewhat
+   earlier because the time of last access on the files will be ignored.
+   If you have an urgent need to free some space in your spool directory,
+   reduce the expiry time in the config file and re-run texpire -f.
+
+\subsection{When running leafnode in ``delaybody'' mode, I can only
+view the headers}
+
+   This is a problem of newsreaders that cache articles, among them
+   Netscape, Outlook Express GNOME Pan and KNode, not a problem of Leafnode.
+
+   These programs store read articles in the cache and (for some odd
+   reason) refuse to reload an article that has been already read.
+
+   Try switching the cache off, clearing the cache, or use a different
+   newsreader.
+
+\subsection{I want to switch off the automatic unsubscription from
+newsgroups}
+
+   Run fetchnews with the -n parameter.
+
+\subsection{How do I move the spool to another hard disk?}
+
+This operation is only supported with leafnode-2.
+
+\textbf{It is important that the hard links remain intact.}
+
+The rest of the paragraph assumes that you wish to copy the spool from
+/var/spool/news to /mnt/spool/news and that you are logged in as the
+root or news user.
+
+If you are on a GNU system, it's simple: you can just use GNU cp like this:
+\begin{verbatim}
+cp -ax /var/spool/news /mnt/spool/news
+\end{verbatim}
+
+If you have rsync installed, you can use (the trailing slashes ``/'' are
+important):
+\begin{verbatim}
+rsync -aLx /var/spool/news/ /mnt/spool/news/
+\end{verbatim}
+
+If you have another cp variant than GNU, but as on a POSIX (``UNIX'')
+system, you'd use instead:
+\begin{verbatim}
+( cd /var/spool/news && tar cf - . ) \
+| (cd /mnt/spool/news && tar xpf -)
+\end{verbatim}
+   \end{document}

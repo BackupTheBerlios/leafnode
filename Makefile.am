@@ -202,7 +202,9 @@ EXTRA_DIST = \
 	DEBUGGING \
 	Doxyfile \
 	ENVIRONMENT \
-	FAQ \
+	FAQ.tex \
+	FAQ.html \
+	FAQ.css \
 	genconfigdefs.awk genconfigparam_data.awk \
 	leafnode.spec \
 	leafnode.spec.in \
@@ -229,6 +231,14 @@ config_paths.h: Makefile
 	echo >>$@ '#define BZIP2 ((const char *)"$(BZIP2)")' \
 	|| { rm -f $@ ; false ; }
 
+FAQ.css FAQ.html: FAQ.tex
+	( tmp="`mktemp -d`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
+	htlatex.sh FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
+
+FAQ.pdf: FAQ.tex
+	pdflatex $(srcdir)/FAQ.tex
+	pdflatex $(srcdir)/FAQ.tex
+
 # special rule to prevent recursion on liblnutil.a
 amiroot_SOURCES		= amiroot.c
 amiroot_LDADD 		=
@@ -249,6 +259,8 @@ newsq_SOURCES		= newsq.c
 leafnode_version_SOURCES= leafnode-version.c
 t_getwatermarks_SOURCES	= t.getwatermarks.c
 t_mgetheader_SOURCES=	  t.mgetheader.c
+
+CLEANFILES = FAQ.aux FAQ.log FAQ.toc
 
 DISTCLEANFILES = $(BUILT_SOURCES) README $(GENERATED_MANS) \
 	config.table.sorted

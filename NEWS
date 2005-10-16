@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+20051002a: Changes since 20050914a:
+- Documentation: Revise FAQ (now in HTML and PDF formats), add information
+  about copying the spool.
+
 20050914a: Changes since 20050810a:
 - Bugfix: Make -e actually work.
   SourceForge Bug #1248682, reported by Bodo Eggert.
