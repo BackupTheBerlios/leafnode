@@ -5,7 +5,7 @@ KNOWN BUGS:
 - Documentation: Revise FAQ (now in HTML and PDF formats), add information
   about copying the spool.
 - Documentation: remove dontpost from manual page, no longer supported.
-  (Users should use feedtype=none instead.) Found by "Roi".
+  (Users should use feedtype=none instead.) Found by Roi Dayan.
 - Documentation: config.example now uses the .example TLD or 2nd level
   domain for all "server =" lines.
 
