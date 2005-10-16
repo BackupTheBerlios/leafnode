@@ -166,7 +166,8 @@ expire = 20
 
 ## This is the NNTP server leafnode fetches its news from.
 ## You need read and post access to it. Mandatory.
-server = news.hiof.no
+## Of course, you need to change this to YOUR server
+server = news.example.org
 
 ## I have free access to my news server. If you don't have, comment out
 ## the following two lines and change them accordingly. Optional.
@@ -186,7 +187,7 @@ server = news.hiof.no
 ## This is another news server which stores some groups that are not
 ## available on the first one. You can define username, password and port
 ## for each server separately.
-# server = sex.and.warez.com
+# server = password.protected.example
 # username = xenu
 # password = secret
 
@@ -195,13 +196,13 @@ server = news.hiof.no
 ## download newsgroups descriptions when getting new newsgroups. This is
 ## achieved by putting "nodesc = 1" somewhere behind the server
 ## line.
-# server = broken.upstream.server
+# server = broken.upstream.example
 # nodesc = 1
 
 ## You can suppress all group listing commands on a server, for example
 ## if the server has way too many groups and you use it as fast
 ## supplement.
-# server = some.upstream.server
+# server = some.upstream.example
 # noactive = 1
 
 ## And this is a news server you only want to post to, but never
@@ -215,7 +216,7 @@ server = news.hiof.no
 ## The default is 30 seconds and is applies for each of the addresses of
 ## the server, so if the server has three IPs, the timeout will be
 ## three times this value!
-# server = really.slow.snail
+# server = really.slow.snail.example
 # timeout = 60
 
 ## This shows how a server is configured that only has specific news
@@ -227,7 +228,7 @@ server = news.hiof.no
 ## Yet another server which either does not understand the XOVER commands
 ## correctly or performs better on XHDR.   fetchnews will still fall back
 ## to using XOVER if you use delaybody mode or filtering.
-# server = dont.like.xover
+# server = dont.like.xover.example
 # usexhdr = 1
 
 ## Set this if your server does not offer the groups, but forwards

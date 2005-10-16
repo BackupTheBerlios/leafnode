@@ -6,6 +6,8 @@ KNOWN BUGS:
   about copying the spool.
 - Documentation: remove dontpost from manual page, no longer supported.
   (Users should use feedtype=none instead.) Found by "Roi".
+- Documentation: config.example now uses the .example TLD or 2nd level
+  domain for all "server =" lines.
 
 20050914a: Changes since 20050810a:
 - Bugfix: Make -e actually work.
