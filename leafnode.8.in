@@ -288,6 +288,9 @@ servers in your configuration file, and only one of them may list the
 hierarchy that needs to be routed to a specific server. This is not very
 comfortable and hence not fully documented, although it works.
 
+Note that you need to reload the active file (-f) for this option to
+have an immediate effect.
+
 .PP
 .B GENERAL OPTIONAL PARAMETERS
 .TP
