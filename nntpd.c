@@ -918,16 +918,14 @@ dodate(void)
 }
 
 static time_t
-parsedate_newnews(const struct stringlisthead *l, const int gmt)
+parsedate_newnews(const char *date_str, const char *time_str, const int gmt)
 {
     struct tm timearray;
-    const struct stringlistnode *n = l->head;
     time_t age;
     long a, b;
 
-    if (stringlistlen(l) < 2) return (time_t)-1;
     memset(&timearray, 0, sizeof(timearray));
-    a = strtol(n->string, NULL, 10);
+    a = strtol(date_str, NULL, 10);
     /* NEWNEWS/NEWGROUPS dates may have the form YYMMDD or YYYYMMDD.
      * Distinguish between the two */
     b = a / 10000;
@@ -949,7 +947,7 @@ parsedate_newnews(const struct stringlisthead *l, const int gmt)
     }
     timearray.tm_mon = (a % 10000 / 100) - 1;
     timearray.tm_mday = a % 100;
-    a = strtol(n->next->string, NULL, 10);
+    a = strtol(time_str, NULL, 10);
     timearray.tm_hour = a / 10000;
     timearray.tm_min = a % 10000 / 100;
     timearray.tm_sec = a % 100;
@@ -967,22 +965,26 @@ parsedate_newnews(const struct stringlisthead *l, const int gmt)
 }
 
 static time_t
-donew_common(const struct stringlisthead *l)
+donew_common(const struct stringlisthead *l, int newnews)
 {
     struct stringlistnode *n;
+    int newnews_len;
     int gmt, len;
     time_t age;
 
-    if (!l || (len = stringlistlen(l)) < 2) {
+    newnews_len = 2;
+    if (newnews) newnews_len++;
+    if (!l || (len = stringlistlen(l)) < newnews_len) {
 	nntpprintf("502 Syntax error");
 	return -1;
     }
 
     n = l->head;
+    if (newnews) n = n->next;
 
-    gmt = (len >= 3 && !strcasecmp(n->next->next->string, "gmt"));
+    gmt = (len >= (newnews_len+1) && !strcasecmp(n->next->next->string, "gmt"));
 
-    age = parsedate_newnews(l, gmt);
+    age = parsedate_newnews(n->string, n->next->string, gmt);
     if (age == (time_t)-1) {
 	nntpprintf("502 Syntax error");
 	return -1;
@@ -1005,7 +1007,7 @@ donewnews(char *arg)
 	nntpprintf("502 Syntax error.");
 	return;
     }
-    age = donew_common(l);
+    age = donew_common(l, 1);
     if (age == (time_t)-1) {
 	freelist(l);
 	return;
@@ -1048,9 +1050,14 @@ donewnews(char *arg)
 				free(x);
 			    } else {
 				/* FIXME: cannot find message ID in XOVER */
+				ln_log(LNLOG_SERR, LNLOG_CTOP,
+					"Cannot find Message-ID in XOVER for %s",
+					nga->d_name);
 			    }
 			} else {
 			    /* FIXME: cannot find XOVER for article */
+			    ln_log(LNLOG_SERR, LNLOG_CTOP,
+				    "Cannot find XOVER record for %s", nga->d_name);
 			}
 		    }		/* too old */
 		}		/* if not a number, not an article */
@@ -1073,7 +1080,7 @@ donewgroups(const char *arg)
     time_t age;
     struct newsgroup *ng;
 
-    age = donew_common(l);
+    age = donew_common(l, 0);
     if (age == (time_t)-1) {
 	freelist(l);
 	return;

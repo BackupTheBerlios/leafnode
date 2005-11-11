@@ -1,7 +1,9 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-20051002a: Changes since 20050914a:
+Changes since 20050914a:
+- Bugfix: parse NEWNEWS and NEWGROUPS command properly.
+  Patch by Niels Baggesen.
 - Documentation: Revise FAQ (now in HTML and PDF formats), add information
   about copying the spool.
 - Documentation: remove dontpost from manual page, no longer supported.
