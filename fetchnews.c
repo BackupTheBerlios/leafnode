@@ -2042,8 +2042,10 @@ main(int argc, char **argv)
     struct sigaction sa;
     static int forceactive;	/* if 1, reread complete active file */
     struct serverlist *current_server;
+#ifdef COMPILE_BROKEN
     unsigned long articles;
     char **x;
+#endif
 
     forceactive = 0;
     verbose = 0;
