@@ -1,3 +1,47 @@
+2005-11-11  Matthias Andree <matthias.andree@gmx.de>
+  * fix NEWNEWS/NEWGROUPS parsing. Patch by Niels Baggesen.
+
+    M ./NEWS -1 +3
+    M ./nntpd.c -11 +18
+
+  * Fix compile warnings. Patch by Niels Baggesen.
+
+    M ./CREDITS +1
+    M ./fetchnews.c +2
+
+2005-11-10  Matthias Andree <matthias.andree@gmx.de>
+  * Mention only_groups_pcre requires fetchnews -f
+
+    M ./leafnode.8.in +3
+
+2005-10-16  Matthias Andree <matthias.andree@gmx.de>
+  * Use full name of Roy Dayan's.
+
+    M ./NEWS -1 +1
+
+  * Use official .example or .example.TLD in 'server =' lines.
+
+    M ./NEWS +2
+    M ./config.example -6 +7
+
+  * Remove dontpost from manual. Fround by "Roi".
+
+    M ./NEWS +2
+    M ./config.example -1 +1
+    M ./leafnode.8.in -3
+
+  * FAQ revised and switched into HTML/PDF formats.
+
+    R ./FAQ
+    A ./FAQ.tex
+    M ./Makefile.am -1 +13
+    M ./NEWS +4
+
+2005-09-17  Matthias Andree <matthias.andree@gmx.de>
+  * Update.
+
+    M ./ChangeLog +69
+
 2005-09-14  Matthias Andree <matthias.andree@gmx.de>
   tagged leafnode-2-0-0-alpha20050914a
 

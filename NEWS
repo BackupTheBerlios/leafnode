@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20050914a:
+20051113a: Changes since 20050914a:
 - Bugfix: parse NEWNEWS and NEWGROUPS command properly.
   Patch by Niels Baggesen.
 - Documentation: Revise FAQ (now in HTML and PDF formats), add information
