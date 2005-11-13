@@ -288,7 +288,7 @@ main(int argc, char *argv[])
     char *conffile = NULL;
     const char *const myname = "rnews";
 
-    ln_log_open(argv[0]);
+    ln_log_open(myname);
     if (!initvars(argv[0], 0))
 	init_failed(myname);
 
