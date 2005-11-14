@@ -205,6 +205,7 @@ EXTRA_DIST = \
 	FAQ.tex \
 	FAQ.html \
 	FAQ.css \
+	FAQ.pdf \
 	genconfigdefs.awk genconfigparam_data.awk \
 	leafnode.spec \
 	leafnode.spec.in \

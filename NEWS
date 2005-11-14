@@ -4,6 +4,7 @@ KNOWN BUGS:
 Changes since 20051113a:
 - Change: let rnews call itself just "rnews" rather than echoing its
   path, for consistency with other programs.  Patch by Niels Baggesen.
+- Documentation: Ship pre-built FAQ.pdf in the tarball.
 
 20051113a: Changes since 20050914a:
 - Bugfix: parse NEWNEWS and NEWGROUPS command properly.
