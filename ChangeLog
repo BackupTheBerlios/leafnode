@@ -1,3 +1,45 @@
+2005-11-15  Matthias Andree <matthias.andree@gmx.de>
+  * Bump version to 2.0.0.alpha20051115a.
+
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
+  * properly discard body of article if it has no valid newsgroups
+
+    M ./NEWS +3
+    M ./fetchnews.c +1
+    M ./store.c -1 +5
+
+  * Reformat documentation.
+
+    M ./store.c -2 +3
+
+2005-11-14  Matthias Andree <matthias.andree@gmx.de>
+  * Fix RPM build after FAQ -> FAQ.{pdf|html|css} change
+
+    M ./NEWS +1
+    M ./leafnode.spec.in -3 +3
+
+  * ship FAQ.pdf
+
+    M ./Makefile.am +1
+    M ./NEWS +1
+
+2005-11-13  Matthias Andree <matthias.andree@gmx.de>
+  * Omit rnews path from its program name. Patch by Niels Baggesen.
+
+    M ./NEWS +4
+    M ./rnews.c -1 +1
+
+  tagged leafnode-2-0-0-alpha20051113a
+
+
+  * Update for 20051113a.
+
+    M ./ChangeLog +44
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
 2005-11-11  Matthias Andree <matthias.andree@gmx.de>
   * fix NEWNEWS/NEWGROUPS parsing. Patch by Niels Baggesen.
 
