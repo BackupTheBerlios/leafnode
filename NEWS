@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20051113a:
+20051115a: Changes since 20051113a:
 - Change: let rnews call itself just "rnews" rather than echoing its
   path, for consistency with other programs.  Patch by Niels Baggesen.
 - Documentation: Ship pre-built FAQ.pdf in the tarball.
