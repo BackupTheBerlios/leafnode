@@ -6,6 +6,9 @@ Changes since 20051113a:
   path, for consistency with other programs.  Patch by Niels Baggesen.
 - Documentation: Ship pre-built FAQ.pdf in the tarball.
 - Bugfix: RPM build was broken after FAQ revision. Reported by Attila H.
+- Bugfix: When an article (control article for instance) is not stored
+  because it has no valid groups, properly read and discard message
+  body. Reported by Patric Mueller.
 
 20051113a: Changes since 20050914a:
 - Bugfix: parse NEWNEWS and NEWGROUPS command properly.

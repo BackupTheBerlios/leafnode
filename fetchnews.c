@@ -417,6 +417,7 @@ getarticle(/*@null@*/ struct filterlist *filtlst, unsigned long *artno,
 
     switch (store_stream(nntpin, 1, (filtermode & FM_HEAD ? filtlst : NULL),
 			 -1, delayflg)) {
+    case 2: /* no valid newsgroups */
     case 1: /* killfilter */
     case -2: /* duplicate */
 	groupkilled++;

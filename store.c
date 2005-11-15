@@ -77,6 +77,9 @@ store_err(int i)
 	return "malformatted";
     case 1:
 	return "killed by filter";
+    case 2:
+	/* FIXME: might be other reasons, too */
+	return "no valid newsgroups";
     default:
 	return "unknown";
     }
@@ -93,6 +96,7 @@ store_err(int i)
  * - -3 if required header missing or duplicate
  * - -4 if short read or data leftover (with maxbytes)
  * -  1 if article killed by filter
+ * -  2 if article dropped by other reason (no valid newsgroups)
  */
 int
 store_stream(FILE * in /** input file */ ,
@@ -408,7 +412,7 @@ store_stream(FILE * in /** input file */ ,
 	}
     }
     if (mastr_str(xref)[0] == '\0')
-	BAIL(0, "no valid newsgroups");
+	BAIL(2, "no valid newsgroups");
     if (fputs("Xref: ", tmpstream) == EOF)
 	BAIL(-1, "write error");
     if (fputs(fqdn, tmpstream) == EOF)
