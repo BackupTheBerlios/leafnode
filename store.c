@@ -99,10 +99,11 @@ store_stream(FILE * in /** input file */ ,
 	     int nntpmode /** if 1, unescape . and use . as end marker */ ,
 	     const struct filterlist *f /** filters or NULL */ ,
 	     ssize_t maxbytes /** maximum byte count, -1 == unlimited */,
-	     int delayflg /** delayed download, 0 == no, full article,
+	     int delayflg /** delayed download,
+			    0 == no, full article,
 			    1 == yes, pseudo head
 			    2 == yes, full article
-			    3 == no, but articles is from in.coming
+			    3 == no, but article is from in.coming
 			         and we have a message.id link */
 	)
 {
