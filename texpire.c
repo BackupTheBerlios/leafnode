@@ -899,11 +899,10 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 }
 
 static int
-expiregroups(void)
+expiregroups(struct stringlisthead *l)
 {
     struct newsgroup *g;
     struct stringlistnode *t;
-    struct stringlisthead *l = get_grouplist();
     time_t expire;
 
     if (!l) {
@@ -1099,7 +1098,7 @@ main(int argc, char **argv)
 	    }
 
 	    /* actual main loop */
-	    expiregroups();
+	    expiregroups(get_grouplist());
 	    expiremsgid();
 	    break;
 	case TEM_cancel:
