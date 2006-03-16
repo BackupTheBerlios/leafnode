@@ -899,7 +899,7 @@ doexpiregroup(struct newsgroup *g, const char *n, time_t expire)
 }
 
 static int
-expiregroups(struct stringlisthead *l)
+expiregroups(const struct stringlisthead *l)
 {
     struct newsgroup *g;
     struct stringlistnode *t;
@@ -917,7 +917,6 @@ expiregroups(struct stringlisthead *l)
 	expire = lookup_expire(t->string);
 	doexpiregroup(g, t->string, expire);
     }
-    freelist(l);
     return TRUE;
 }
 
@@ -1097,9 +1096,27 @@ main(int argc, char **argv)
 		exit(2);
 	    }
 
+	    {
+	    /* generate group list */
+		struct stringlisthead *g;
+
+		if (optind < argc) {
+		    /* options remain, treat as group names */
+		    g = NULL;
+		    initlist(&g);
+		    while (optind < argc) {
+			appendtolist(g, argv[optind]);
+			++optind;
+		    }
+		} else {
+		    g = get_grouplist();
+		}
+
 	    /* actual main loop */
-	    expiregroups(get_grouplist());
+	    expiregroups(g);
+	    freelist(g);
 	    expiremsgid();
+	    }
 	    break;
 	case TEM_cancel:
 	    while(optind < argc) {

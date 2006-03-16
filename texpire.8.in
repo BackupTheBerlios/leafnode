@@ -11,7 +11,9 @@
 texpire \- delete old news article threads
 
 .SH SYNOPSIS
-.B texpire [GLOBAL OPTIONS] [-afnr] [-C message.id [...]]
+.B texpire [GLOBAL OPTIONS] [-afnr] [group.name [...]]
+.br
+.B texpire [GLOBAL OPTIONS] [-n] -C message.id [...]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -55,6 +57,10 @@ Repair and migrate mode. In this mode, texpire tries to save as much of the news
 spool as it can. This mode MUST be used when upgrading to a leafnode
 version which has a different hash function for messageid than the
 version previously installed. If in doubt, use -r after an update.
+.PP
+If further arguments are found on the command line, but -C (cancel mode,
+see above) is not given, the arguments are treated as group names and
+only the given groups are expired. By default, all groups are expired.
 
 .SH FILES
 .I @sysconfdir@/config.example
@@ -75,6 +81,7 @@ apart, because the required memory depends on the difference between
 lowest and highest article number in that group.
 
 .SH AUTHOR
+.na
 Written by Arnt Gulbrandsen <agulbra@troll.no> and copyright 1995
 Troll Tech AS, Postboks 6133 Etterstad, 0602 Oslo, Norway, fax +47
 22646949.
@@ -87,7 +94,8 @@ Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
 .PP
 Written and Copyright 2003 by Jörg Dietrich <joerg@dietrich.net>.
 .PP
-Written and Copyright 1999 - 2005 by Matthias Andree <matthias.andree@gmx.de>.
+Written and Copyright 1999 - 2006 by Matthias Andree <matthias.andree@gmx.de>.
+.ad
 
 .SH SEE ALSO
 .BR tcpd (8),
