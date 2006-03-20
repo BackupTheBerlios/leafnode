@@ -13,6 +13,7 @@ Changes since 20051115a:
 - Bugfix: When an article (control article for instance) is not stored
   because it has no valid groups, properly read and discard message
   body. Reported by Patric Mueller.
+- FAQ: rsync must be used with -H option (not -L).
 
 20051113a: Changes since 20050914a:
 - Bugfix: parse NEWNEWS and NEWGROUPS command properly.
