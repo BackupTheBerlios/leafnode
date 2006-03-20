@@ -237,8 +237,8 @@ FAQ.css FAQ.html: FAQ.tex
 	htlatex.sh FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
 
 FAQ.pdf: FAQ.tex
-	pdflatex $(srcdir)/FAQ.tex
-	pdflatex $(srcdir)/FAQ.tex
+	pdflatex $(srcdir)/FAQ.tex && pdflatex $(srcdir)/FAQ.tex || { rm -f FAQ.pdf ; exit 1 ; }
+#	pdfopt FAQ.pdf FAQ.tmp.pdf && mv FAQ.tmp.pdf FAQ.pdf || { rm -f FAQ.pdf ; exit 1 ; }
 
 # special rule to prevent recursion on liblnutil.a
 amiroot_SOURCES		= amiroot.c
