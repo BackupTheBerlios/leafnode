@@ -1,9 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20051115a:
+20060321a: Changes since 20051115a:
 - Feature: if group names are mentioned on the texpire command line
   (which must not contain -C), expire only said groups.
+- Documentation: corrected rsync instructions in the FAQ.
 
 20051115a: Changes since 20051113a:
 - Change: let rnews call itself just "rnews" rather than echoing its

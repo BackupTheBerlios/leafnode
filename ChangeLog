@@ -1,4 +1,50 @@
+2006-03-20  Matthias Andree <matthias.andree@gmx.de>
+  * fix rsync option (use -H to keep hard links)
+
+    M ./FAQ.tex -1 +1
+    M ./NEWS +1
+
+  * make space non-breaking
+
+    M ./FAQ.tex -1 +1
+
+  * tex4ht doesn't cope with pdftex option, remove it
+
+    M ./FAQ.tex -1 +1
+
+  * Tweak PDF generation.
+
+    M ./FAQ.tex +7
+    M ./Makefile.am -2 +2
+
+  * fix typo, as -> are
+
+    M ./FAQ.tex -1 +1
+
+2006-03-16  Matthias Andree <matthias.andree@gmx.de>
+  * Allow expiring a subset of grups.
+
+    M ./NEWS +4
+    M ./texpire.8.in -2 +10
+    M ./texpire.c -3 +20
+
+2006-03-03  Matthias Andree <matthias.andree@gmx.de>
+  * Call expiregroup with group list.
+
+    M ./texpire.c -3 +2
+
 2005-11-15  Matthias Andree <matthias.andree@gmx.de>
+  * Drop -v option from nail command to suppress a worthless DSN.
+
+    M ./release.sh -1 +1
+
+  tagged leafnode-2-0-0-alpha20051115a
+
+
+  * Update for 2.0.0.alpha20051115a snapshot.
+
+    M ./ChangeLog +42
+
   * Bump version to 2.0.0.alpha20051115a.
 
     M ./NEWS -1 +1
