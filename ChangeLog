@@ -1,3 +1,44 @@
+2006-04-24  Matthias Andree <matthias.andree@gmx.de>
+  * fix typos in comments
+
+    M ./activutil.c -2 +2
+    M ./nntpd.c -1 +1
+
+  * donew_common() rereads active files
+  This makes changes to group.info or local.groups visible immediately for
+  NEWGROUPS or NEWNEWS commands.
+
+    M ./NEWS +3
+    M ./nntpd.c +2
+
+  * TODO item: combine regexps with boolean operations?
+
+    M ./TODO +1
+
+  * differentiate between "cannot connect" and "timeout connecting"
+
+    M ./NEWS +2
+    M ./nntputil.c -3 +5
+
+  * watch st_dev field on active files, too
+
+    M ./NEWS +5
+    M ./activutil.c -2 +6
+
+  * typo: special -> specific
+
+    M ./README.html -1 +1
+
+2006-03-21  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20060321a
+
+
+  * Snapshot 2.0.0.alpha20060321a
+
+    M ./ChangeLog +46
+    M ./NEWS -1 +2
+    M ./configure.ac -1 +1
+
 2006-03-20  Matthias Andree <matthias.andree@gmx.de>
   * fix rsync option (use -H to keep hard links)
 
