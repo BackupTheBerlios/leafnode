@@ -466,8 +466,8 @@ readactive(void)
     }
 
     /*
-     * Scanning this group list is fairly expensinve and is done twice
-     * so we mmap the file for speed. 
+     * Scanning this group list is fairly expensive and is done twice
+     * so we mmap the file for speed.
      */
     if ( stat(mastr_str(s), &stat_buf) == -1 ) {
         ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "could not pre-determine size of %s: %m", mastr_str(s));

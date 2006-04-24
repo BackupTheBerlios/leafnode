@@ -2655,6 +2655,6 @@ main(int argc, char **argv)
     (void)fclose(stdout);
     free(buf);
     sleep(3); /* defer program exit to avoid recycling process IDs
-		 from colling file names */
+		 from colliding file names */
     exit(0);
 }
