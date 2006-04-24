@@ -5,6 +5,8 @@ Changes since 20060321a:
 - Bugfix: re-read group.info or local.groups also if the st_dev field
   changes (because st_dev,st_ino uniquely identify files, rather than
   st_ino alone).
+- Feature: differentiate between "cannot connect" and "timeout
+  connecting".
 
 20060321a: Changes since 20051115a:
 - Feature: if group names are mentioned on the texpire command line

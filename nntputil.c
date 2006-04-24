@@ -218,12 +218,14 @@ any_connect(const int family, const int socktype, const int protocol,
 	(void)sigaction(SIGALRM, &sact, NULL);
 	errno = e;
 	if (r < 0) {
-	    if (errno == EINTR && caught_alrm)
+	    if (errno == EINTR && caught_alrm) {
 		ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot connect: timeout");
-	    else
+		*errcause = "timeout connecting";
+	    } else {
 		ln_log(LNLOG_SINFO, LNLOG_CSERVER, "  cannot connect: %m");
+		*errcause = "cannot connect";
+	    }
 	    (void)close(sock);
-	    *errcause = "cannot connect";
 	    errno = e;
 	    sock = -1;
 	} else {
