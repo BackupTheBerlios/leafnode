@@ -5,6 +5,9 @@ Changes since 20060321a:
 - Bugfix: re-read group.info or local.groups also if the st_dev field
   changes (because st_dev,st_ino uniquely identify files, rather than
   st_ino alone).
+- Bugfix: changes to local.groups or active file are now listed in
+  newnews and newgroups immediately, not just after some commands (such
+  as LIST) or a server restart.
 - Feature: differentiate between "cannot connect" and "timeout
   connecting".
 

@@ -990,6 +990,8 @@ donew_common(const struct stringlisthead *l, int newnews)
 	return -1;
     }
 
+    rereadactive();
+
     return age;
 }
 
