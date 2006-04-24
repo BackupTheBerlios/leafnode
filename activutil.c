@@ -35,8 +35,10 @@ static size_t oldactivesize = 0;
 ssize_t activesize = 0;
 static time_t activetime = 0;
 static ino_t activeinode = 0;
+static dev_t activedev = 0;
 static time_t localmtime = 0;
 static ino_t localinode = 0;
+static dev_t localdev = 0;
 
 struct newsgroup /*@null@*/ *active  = NULL;
 struct newsgroup /*@null@*/ *oldactive  = NULL;
@@ -613,11 +615,11 @@ rereadactive(void)
 
 
     if (!reread && (st1.st_mtime > activetime
-		|| st1.st_ino != activeinode))
+		|| st1.st_ino != activeinode || st1.st_dev != activedev))
 	reread = 1;
 
     if (!reread && stat2 && (st2.st_mtime > localmtime
-		|| st2.st_ino != localinode))
+		|| st2.st_ino != localinode || st2.st_dev != localdev))
 	reread = 1;
 
     if (reread) {
@@ -627,9 +629,11 @@ rereadactive(void)
 	readlocalgroups();
 	activetime = st1.st_mtime;
 	activeinode = st1.st_ino;
+	activedev = st1.st_dev;
 	if (stat2) {
 	    localmtime = st2.st_mtime;
 	    localinode = st2.st_ino;
+	    localdev = st2.st_dev;
 	}
     }
     free(s1);
