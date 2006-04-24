@@ -105,6 +105,7 @@ Matthias:
   with MID #3. Next time fetchnews runs, MID #3 has no Supersedes for
   #2, failing to remove #1 upstream.
 
+* combine regexps with boolean operations?
 
 * store group lists (active file) per server and merge them into a DB?
 
