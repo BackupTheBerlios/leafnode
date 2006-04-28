@@ -43,6 +43,16 @@
 #include "validatefqdn.h"
 #include "ln_log.h"
 
+static int strcasecmpsuffix(const char *string, const char *suffix)
+{
+    size_t lin = strlen(string);
+    size_t lsu = strlen(suffix);
+
+    if (lsu > lin) return -1;
+
+    return strcasecmp(string + lin - lsu, suffix);
+}
+
 /** Check the supplied FQDN for validity.
  * \return 0 if invalid, 1 if valid
  */
@@ -53,9 +63,21 @@ int is_validfqdn(const char *f) {
 	 * the qualification returns two "localhost*" aliases */
 	|| 0 == strncasecmp(f, "localhost", 9)
 	/* protect against broken hosts or DNS */
-	|| 0 == strncmp(f, "127.0.0.", 8)
-	/* SuSE default hostname on some installs is linux.local */
 	|| 0 == strcasecmp(f, "linux.local")
+	/* protect against broken hosts or DNS */
+	|| 0 == strncmp(fqdn, "127.", 4)
+	/* kill RFC 2606 second- and top-level domains
+	 * and other junk */
+	|| 0 == strcasecmpsuffix(fqdn, "example.org")
+	|| 0 == strcasecmpsuffix(fqdn, "example.com")
+	|| 0 == strcasecmpsuffix(fqdn, "example.net")
+	|| 0 == strcasecmpsuffix(fqdn, ".example")
+	|| 0 == strcasecmpsuffix(fqdn, ".invalid")
+	|| 0 == strcasecmpsuffix(fqdn, ".local")
+	|| 0 == strcasecmpsuffix(fqdn, ".localdomain")
+	|| 0 == strcasecmpsuffix(fqdn, ".localhost")
+	|| 0 == strcasecmpsuffix(fqdn, ".test")
+	|| 0 == strcasecmpsuffix(fqdn, ".site")
 	)
     {
 	return 0;

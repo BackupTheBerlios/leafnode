@@ -1,6 +1,9 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20060424a:
+- Forward port fqdn validation list from upcoming leafnode 1.11.6.
+
 20060424a: Changes since 20060321a:
 - Bugfix: re-read group.info or local.groups also if the st_dev field
   changes (because st_dev,st_ino uniquely identify files, rather than
