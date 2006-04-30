@@ -9,27 +9,27 @@ builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
 vers=`perl -n -l -e 'if (/AM_INIT_AUTOMAKE\(.*,\[?([^]]*)\]?\)/) { print "$1\n"; last; }' configure.ac`
 if [ x$QUICK != xquick ] ;then
-UPLOAD=yes
-if echo "$vers" | grep -E "devel|rc" ; then UPLOAD=no ; fi
-echo "test if make works"
-(cd $builddir && make -s)
-echo "release for leafnode $vers"
-(cd $builddir && make -s dist)
-cp -p $builddir/leafnode-$vers.tar.bz2 $dest/
-#cp -p leafnode-$vers.lsm $dest/
-cp -p $builddir/README $dest/leafnode-readme.txt
-#cp -p FAQ.{xml,html,txt,pdf} $dest/
-cp -p ChangeLog $dest/ChangeLog.txt
-cp -p TODO $dest/
-cp -p NEWS $dest/NEWS.txt
-if test ! -e leafnode-$vers.tar.bz2.asc -o ! leafnode-$vers.tar.bz2.asc -nt leafnode-$vers.tar.bz2 ; then
+  UPLOAD=yes
+  if echo "$vers" | grep -E "devel|rc" ; then UPLOAD=no ; fi
+  echo "test if make works"
+  (cd $builddir && make -s)
+  echo "release for leafnode $vers"
+  (cd $builddir && make -s dist)
+  cp -p $builddir/leafnode-$vers.tar.bz2 $dest/
+  #cp -p leafnode-$vers.lsm $dest/
+  cp -p $builddir/README $dest/leafnode-readme.txt
+  #cp -p FAQ.{xml,html,txt,pdf} $dest/
+  cp -p ChangeLog $dest/ChangeLog.txt
+  cp -p TODO $dest/
+  cp -p NEWS $dest/NEWS.txt
+  if test ! -e leafnode-$vers.tar.bz2.asc -o ! leafnode-$vers.tar.bz2.asc -nt leafnode-$vers.tar.bz2 ; then
     ( cd $dest ; gpg -ba --sign leafnode-$vers.tar.bz2 )
-fi
-( 
-  echo "   MA `date +%Y-%m-%d` leafnode $vers"
-  cat $dest/RELEASE
-) >$dest/RELEASE.new && mv $dest/RELEASE.new $dest/RELEASE
-vim $dest/RELEASE
+  fi
+  ( 
+    echo "   MA `date +%Y-%m-%d` leafnode $vers"
+    cat $dest/RELEASE
+  ) >$dest/RELEASE.new && mv $dest/RELEASE.new $dest/RELEASE
+  vim $dest/RELEASE
 fi
 perl addpatches.pl
 vim $dest/HEADER.html
