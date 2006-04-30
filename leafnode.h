@@ -128,10 +128,6 @@ typedef int bool;
 typedef unsigned int socklen_t;
 #endif
 
-#ifndef HAVE_SNPRINTF
-int snprintf(char *str, size_t n, const char *format, ...);
-#endif
-
 #ifndef HAVE_VSNPRINTF
 int vsnprintf(char *str, size_t n, const char *format, va_list ap);
 #endif
