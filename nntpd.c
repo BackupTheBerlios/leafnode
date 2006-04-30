@@ -2033,8 +2033,8 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 }
 
 static int strnum_comp(const void *p1, const void *p2) {
-    char *const *s1 = p1;
-    char *const *s2 = p2;
+    char *const *s1 = (char * const*) p1;
+    char *const *s2 = (char * const*) p2;
     unsigned long u1, u2;
     if (!get_ulong(*s1, &u1)) return 0;
     if (!get_ulong(*s2, &u2)) return 0;

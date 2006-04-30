@@ -478,7 +478,7 @@ readactive(void)
     }
     filesize = stat_buf.st_size;
 
-    mmap_ptr = mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0 );
+    mmap_ptr = (char *)mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0 );
     close(fd); /* close the file, not needed after it has be mapped to memory. */
     if (mmap_ptr == MAP_FAILED) {
         ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "Could not memory map file %s: %m", mastr_str(s));

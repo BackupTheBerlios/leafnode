@@ -92,7 +92,7 @@ getabufferedline(const char *s /** buffer to read from */,
         }
         size = len + 1;
 
-        buf = malloc(size);
+        buf = (char *)malloc(size);
         if (buf == NULL) {
             return 0;
         }
