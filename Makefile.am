@@ -233,7 +233,7 @@ config_paths.h: Makefile
 	|| { rm -f $@ ; false ; }
 
 FAQ.css FAQ.html: FAQ.tex
-	( tmp="`mktemp -d`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
+	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-FAQ.XXXXXXXXXX`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
 	htlatex.sh FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
 
 FAQ.pdf: FAQ.tex
