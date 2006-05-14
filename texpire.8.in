@@ -13,7 +13,7 @@ texpire \- delete old news article threads
 .SH SYNOPSIS
 .B texpire [GLOBAL OPTIONS] [-afnr] [group.name [...]]
 .br
-.B texpire [GLOBAL OPTIONS] [-n] -C message.id [...]
+.B texpire [GLOBAL OPTIONS] [-n] -C '<message.id>' [...]
 
 .SH DESCRIPTION
 .B Leafnode
@@ -34,7 +34,7 @@ rehashes the spool after updates of leafnode.
 For a description of the \fBGLOBAL OPTIONS\fR, see
 .BR leafnode (8).
 .TP
-.I -C messageid [...]
+.I -C '<message.id>' [...]
 Cancel mode: This will attempt to remove the articles with
 given Message-ID numbers from the spool. Note that the Message-ID must
 be given with angle brackets; remember to use single quotes to protect
