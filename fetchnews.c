@@ -2051,7 +2051,7 @@ main(int argc, char **argv)
     forceactive = 0;
     verbose = 0;
     ln_log_open(myname);
-    if (!initvars(argv[0], 0))
+    if (!initvars(argv[0]))
 	init_failed(myname);
 
     starttime = time(NULL);
@@ -2067,7 +2067,7 @@ main(int argc, char **argv)
     if (conffile)
 	free(conffile);
 
-    if (!init_post())
+    if (!init_post(0))
 	init_failed(myname);
 
     if (!servers) {

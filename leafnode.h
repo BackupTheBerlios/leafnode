@@ -154,8 +154,8 @@ int mkstemp(char *);
 #define LASTPOSTING ".last.posting"
 
 /* initialize global variables */
-int initvars(const char *const progname, int logtostdout);
-int init_post(void);
+int initvars(const char *const progname);
+int init_post(int logtostdout);
 /*@noreturn@*/ void init_failed(const char *);
 
 /* get configuration file */

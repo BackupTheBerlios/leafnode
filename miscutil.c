@@ -112,7 +112,7 @@ whoami(void)
  */
 /*@-globstate@*/
 int
-initvars(const char *const progname, int logtostdout)
+initvars(const char *const progname)
 {
     mode_t oum;
 
@@ -124,7 +124,6 @@ initvars(const char *const progname, int logtostdout)
     (void)umask((mode_t)07 | oum);
 
     whoami();
-    validatefqdn(logtostdout);
 
     /* spooldir may be changed later by parseopt: */
     spooldir = critstrdup(def_spooldir, "initvars");
@@ -142,11 +141,13 @@ init_failed(const char *progname) {
 }
 
 int
-init_post(void) {
+init_post(int logtostdout) {
     uid_t ui;
     gid_t gi;
     struct mydir const *md = &dirs[0];
     mastr *l = mastr_new(LN_PATH_MAX);
+
+    validatefqdn(logtostdout);
 
     mastr_vcat(l, spooldir, "/leaf.node/lock.file", NULL);
     lockfile=critstrdup(mastr_str(l), "init_post");

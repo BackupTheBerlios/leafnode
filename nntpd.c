@@ -2026,7 +2026,7 @@ doxover(/*@null@*/ const struct newsgroup *group, const char *arg, unsigned long
 		   "Xref: %s %s:%lu",
 		   group->first, group->name,
 		   owndn ? owndn : fqdn, rfctime(), group->name,
-		   owndn ? owndn : fqdn, fqdn, group->name,
+		   owndn ? owndn : fqdn, owndn ? owndn : fqdn, group->name,
 		   group->first);
 	fputs(".\r\n", stdout);
     }
@@ -2539,7 +2539,7 @@ main(int argc, char **argv)
     mysetfbuf(stdout, buf, bufsize);
 
     ln_log_open(myname);
-    if (!initvars(argv[0], argc > 1 && argv[1] && 0 == strcmp(argv[1], "-e")))
+    if (!initvars(argv[0]))
 	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
@@ -2579,7 +2579,7 @@ main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    if (!init_post())
+    if (!init_post(argc > 1 && argv[1] && 0 == strcmp(argv[1], "-e")))
 	init_failed(myname);
 
     verbose = 0;

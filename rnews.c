@@ -289,7 +289,7 @@ main(int argc, char *argv[])
     const char *const myname = "rnews";
 
     ln_log_open(myname);
-    if (!initvars(argv[0], 0))
+    if (!initvars(argv[0]))
 	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "")) != -1) {
@@ -317,7 +317,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    if (!init_post())
+    if (!init_post(0))
 	init_failed(myname);
 
     umask((mode_t) 077);

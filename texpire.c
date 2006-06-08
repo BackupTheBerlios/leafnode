@@ -1022,7 +1022,7 @@ main(int argc, char **argv)
 
     ln_log_open(myname);
 
-    if (!initvars(argv[0], 0))
+    if (!initvars(argv[0]))
 	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "aCfnr")) != -1) {
@@ -1059,7 +1059,7 @@ main(int argc, char **argv)
     if (conffile)
 	free(conffile);
 
-    if (!init_post())
+    if (!init_post(0))
 	init_failed(myname);
 
     if (attempt_lock(LOCKWAIT)) {

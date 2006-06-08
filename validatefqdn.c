@@ -89,7 +89,7 @@ void
 validatefqdn(int logtostdout)
 {
     /* kill bogus fqdn */
-    if (!is_validfqdn(fqdn)) {
+    if (!is_validfqdn(owndn ? owndn : fqdn)) {
 	const char *const fmt =
 	    "\nLeafnode must have a fully-qualified domain name,\n"
 	    "not just \"%s\".\nEdit your /etc/hosts file to add "
@@ -99,8 +99,8 @@ validatefqdn(int logtostdout)
 		       "Have its administrator fix the configuration. "
 		       "More detail is in the logs.\r\n");
 	}
-	ln_log(LNLOG_SCRIT, LNLOG_CTOP, fmt, fqdn);	/* Flawfinder: ignore */
-	fprintf(stderr, fmt, fqdn);	/* Flawfinder: ignore */
+	ln_log(LNLOG_SCRIT, LNLOG_CTOP, fmt, owndn ? owndn : fqdn);	/* Flawfinder: ignore */
+	fprintf(stderr, fmt, owndn ? owndn : fqdn);	/* Flawfinder: ignore */
 	abort();
 	exit(127);
     }
