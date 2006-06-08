@@ -198,7 +198,7 @@ main(int argc, char *argv[])
     savedir=open(".", O_RDONLY);
 
     ln_log_open(myname);
-    if (!initvars(argv[0])) {
+    if (!initvars(argv[0], 0)) {
 	fprintf(stderr, "%s: cannot initialize\n", argv[0]);
 	exit(EXIT_FAILURE);
     }
@@ -241,7 +241,7 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
     }
 
-    if (!init_post(0))
+    if (!init_post())
 	init_failed(myname);
 
     if (attempt_lock(LOCKWAIT)) {

@@ -108,7 +108,7 @@ main(int argc, char **argv)
     mastr *s = mastr_new(LN_PATH_MAX);
     const char *const myname = "newsq";
 
-    if (!initvars(argv[0]))
+    if (!initvars(argv[0], 0))
 	init_failed(myname);
 
     while ((option = getopt(argc, argv, GLOBALOPTS "cfh")) != -1) {
@@ -130,7 +130,7 @@ main(int argc, char **argv)
 	}
     }
 
-    if (!init_post(0))
+    if (!init_post())
 	init_failed(myname);
 
     if (check) {

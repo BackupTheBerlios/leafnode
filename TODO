@@ -1,7 +1,14 @@
  -*- mode: text; coding: iso-8859-15; -*- :vim:set ai:
  ----------------------------------------------------------------------
-		   Leafnode 2.0b8_ma branch TODO list
+		   Leafnode 2.0.0.alpha branch TODO list
  ----------------------------------------------------------------------
+
+
+NEW:
+
+- when attempt_lock() fails with invalid FQDN, its callers report
+  lockfile existed (which is untrue).
+
 
 
 NOTE: issues fixes in the current, possibly unreleased _ma versions, but

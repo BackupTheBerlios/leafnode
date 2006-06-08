@@ -1,9 +1,15 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+20060608b: Changes since 20060608a:
+- Revert Bugfix from 20060608a for the nonce, since some parts of
+  leafnode (lock file generation for instance) rely on the actual FQDN,
+  causing more subtle failures (reported by Troy Piggins).
+  Let's better fail up front.
+
 20060608a: Changes since 20060428a:
 - Bugfix: Make hostname=foo.example.org override broken local DNS
-  configuration. Reported by Troy Piggins.
+  configuration. Reported by Troy Piggins. [Reverted on 20060609.]
 - Documentation: texpire -C now shows angle brackets and quotes around
   the message-ID.
 
