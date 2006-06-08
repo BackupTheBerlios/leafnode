@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20060428a:
+20060608a: Changes since 20060428a:
 - Bugfix: Make hostname=foo.example.org override broken local DNS
   configuration. Reported by Troy Piggins.
 - Documentation: texpire -C now shows angle brackets and quotes around
