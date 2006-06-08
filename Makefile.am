@@ -206,6 +206,10 @@ EXTRA_DIST = \
 	FAQ.html \
 	FAQ.css \
 	FAQ.pdf \
+	README-FQDN.tex \
+	README-FQDN.html \
+	README-FQDN.css \
+	README-FQDN.pdf \
 	genconfigdefs.awk genconfigparam_data.awk \
 	leafnode.spec \
 	leafnode.spec.in \
@@ -236,9 +240,15 @@ FAQ.css FAQ.html: FAQ.tex
 	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-FAQ.XXXXXXXXXX`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
 	htlatex.sh FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
 
+README-FQDN.css README-FQDN.html: README-FQDN.tex
+	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-README-FQDN.XXXXXXXXXX`" && cp $(srcdir)/README-FQDN.tex $$tmp && cd $$tmp && \
+	htlatex.sh README-FQDN.tex && cd - && cp $$tmp/README-FQDN.html $$tmp/README-FQDN.css . && rm -rf $$tmp)
+
 FAQ.pdf: FAQ.tex
 	pdflatex $(srcdir)/FAQ.tex && pdflatex $(srcdir)/FAQ.tex || { rm -f FAQ.pdf ; exit 1 ; }
-#	pdfopt FAQ.pdf FAQ.tmp.pdf && mv FAQ.tmp.pdf FAQ.pdf || { rm -f FAQ.pdf ; exit 1 ; }
+
+README-FQDN.pdf: README-FQDN.tex
+	pdflatex $(srcdir)/README-FQDN.tex && pdflatex $(srcdir)/README-FQDN.tex || { rm -f README-FQDN.pdf ; exit 1 ; }
 
 # special rule to prevent recursion on liblnutil.a
 amiroot_SOURCES		= amiroot.c
@@ -261,7 +271,8 @@ leafnode_version_SOURCES= leafnode-version.c
 t_getwatermarks_SOURCES	= t.getwatermarks.c
 t_mgetheader_SOURCES=	  t.mgetheader.c
 
-CLEANFILES = FAQ.aux FAQ.log FAQ.toc
+CLEANFILES = FAQ.aux FAQ.log FAQ.toc \
+	     README-FQDN.aux README-FQDN.log README-FQDN.toc
 
 DISTCLEANFILES = $(BUILT_SOURCES) README $(GENERATED_MANS) \
 	config.table.sorted

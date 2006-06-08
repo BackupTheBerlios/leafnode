@@ -6,6 +6,10 @@ KNOWN BUGS:
   leafnode (lock file generation for instance) rely on the actual FQDN,
   causing more subtle failures (reported by Troy Piggins).
   Let's better fail up front.
+- Documentation: Adapt the README-FQDN from leafnode 1, and convert the
+  source to LaTeX to use the same workflow as for the FAQ.
+  Comments, Questions, Amendmends are solicited, send them to the
+  leafnode-list or to Matthias Andree.
 
 20060608a: Changes since 20060428a:
 - Bugfix: Make hostname=foo.example.org override broken local DNS

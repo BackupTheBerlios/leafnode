@@ -1,0 +1,243 @@
+\documentclass[10pt,english,a5paper]{article}
+\usepackage{babel}
+\usepackage[nohead,margin=.5in]{geometry}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{mathptmx}
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+
+\renewcommand{\labelitemi}{+}
+
+\begin{document}
+\author{Dipl.-Ing. Matthias Andree}
+\title{A Fully-Qualified Domain Name \\ for Leafnode}
+\date{2006--06--09}
+\maketitle
+\tableofcontents
+
+\section*{Purpose of this document}
+
+This document will introduce you to the Message-ID and FQDN requirements
+in leafnode that are sometimes difficult, and help you out.
+
+\section{Introduction}
+
+The leafnode news server needs a unique fully-qualified domain name (or
+host name, FQDN or FQHN for short) to work properly. It is used by
+leafnode to generate the \emph{Message-ID} and generate lock files.
+
+This Message-ID is a short snippet of text in the header of
+every message (mail or news). It is not usually visible in your software
+unless you choose ``display all headers'' or ``display raw'' or ``display
+source''.
+
+The Message-ID looks roughly like a strange E-Mail address,
+it might be, for instance, \verb+<12345.67890@host.example.com>+.  It consists of two
+parts. Left of the @ is the ``local'' part, right of the ``@'' is the domain
+part. The local part of the Message-ID is different for different pieces
+of mail or news, while the domain part of the mail address is constant.
+The domain part is usually the name of the host that generated the
+Message-ID: your computer's name when you are sending mail or posting
+news.
+
+Whenever a news server is offered a new news article for redistribution,
+it looks at the Message-ID to determine if it already has the article,
+to avoid double work, and to avoid that new articles run in circles.
+
+Therefore, each message sent, mail or news, must have a \textbf{unique}
+Message-ID\@. If the Message-ID is not unique, because you use the same
+host name as somebody else, and you and the other person write an
+article at the same time, the article that arrives later will be
+considered a \textit{duplicate} or \textit{Message-ID collision} and be discarded by
+the server - and as messages take a few seconds from one end of the
+world to another, two servers at different ends of the net may see the
+messages arrive in reverse order.
+
+Leafnode will tell you if the Message-ID of the article it is about to
+post is already in use upstream. This may happen in regular operation if
+your leafnode is posting to several upstream servers that forward their
+articles to each other, or in cases of actual collisions.
+
+In order to avoid collisions of users on different computers, each
+computers must use a \textbf{unique} host name (with domain).
+
+Note that \textbf{this requirement is not specific to leafnode}, but
+a general requirement for all computers with Internet access. Any mail or
+news software might otherwise suffer from collisions. Collisions are
+less harmful in mail, but are general difficult to see at all, because
+the duplicate messages disappear silently, and no message is coming back
+to tell you another message was lost if it was considered a duplicate.
+
+\section{Obtaining a unique fully-qualified domain name}
+
+There are several ways to obtain one. When you have got yours, see
+section~\ref{configure}.
+
+\begin{description}
+
+\item[If you have a domain registered:]
+
+Assume you are the rightful owner of \verb+example.com+. You can now reserve
+any subdomain you wish, say \verb+mid.example.com+, and a host name for your
+leafnode computer, say, \verb+abacus.mid.example.com+, or for a friend. How you
+track that only one machine has the same name at the same time, is up to
+you. Writing \textit{gave abacus.mid.example.com to Joe at 2002-07-11}
+on a sheet of paper is sufficient - if you can find this sheet later on.
+
+Again: This host name \textbf{need not} be entered into your DNS data base,
+just make sure only one computer uses this name at the same time.
+
+    \item[Use a dynamic DNS service:] services such as \verb+dyndns.org+
+	offer your own domain name for free. You can also set up your
+	computer to have a domain name map to your IP upon dialup,
+	although this is not a requirement for leafnode.
+
+\item[If you have an account at \texttt{news.individual.de} or
+    \texttt{news.individual.net}:]
+
+\verb+news.individual.de+ has a special namespace of which a unique FQDN
+is assigned for each user. It is based on your user ID\@. To find it out, type in your shell:
+
+\begin{verbatim}
+ telnet news.individual.de 119
+\end{verbatim}
+
+ (wait until connected)
+
+\begin{verbatim}
+ authinfo user sixpack
+ authinfo pass joe
+ quit
+\end{verbatim}
+
+Replace ``sixpack'' and ``joe'' by your login and password. After the
+``authinfo pass'' line, you should see a line that reads:
+
+\begin{verbatim}
+ 281 Authentication accepted. (UID=00000)
+\end{verbatim}
+
+If you get a 481 line, please retry, you may have mistyped your user
+name or password. Correcting these lines with Backspace or Delete may
+also lead to failed logins. Retry with careful typing so that you do not
+need to correct your input.
+
+The server would have printed your user ID where my example shows 00000.
+
+Your hostname then is \verb+ID-00000.user.uni-berlin.de+. \textit{Do make sure to
+replace} the number in \verb+ID-00000+ by the number the server told you in the
+UID= line.
+
+\item[Specific providers:] \begin{description}
+
+\item[{T-Online}] customers, your hostname is
+    \verb+NNNNN.dialin.t-online.de+, where
+\verb+NNNNN+ is your T-Online number. If your T-Online number contains your
+telephone number, you can contact the T-Online support to have a new
+T-Online number assigned. I'm unaware if they charge you for this
+change.
+
+\end{description}
+
+\item[Ask your network administrator or your Internet service provider.]
+
+Your local network administrator can assign you a domain to use for
+Message-IDs.
+
+Your Internet service provider may have reserved a special sub domain for
+the sole purpose of letting users create their own unique Message-IDs.
+
+\end{description}
+
+\subsection{When leafnode ignores your host name}
+
+Well, it is probably the default name or domain that your OS vendor
+chose, like ``localhost.localdomain''. As such, it is not unique, but used
+on many computers, and can therefore cause collisions and in severe
+cases make your articles disappear.
+
+\subsection{Why localhost.ANYTHING will not work}
+
+Many sites run resolvers that are based on ISC BIND code. And many sites
+configure their name servers so that they will resolve localhost.example.com.
+Therefore, localhost.example.com will not designate a single computer,
+but any computer that has ``localhost'' as a name. These resolvers are
+problematic because they will first see the domain as unqualified and
+append the domain or searchlist, so assuming that your domain is
+example.com, these resolvers will try localhost.example.com first, which
+will resolve to 127.0.0.1 at many sites.
+
+{\small
+It is usually a mistake to add localhost to the name server for a
+domain, the clients had better be fixed instead. As a workaround,
+removing all domain and searchlist lines from \texttt{/etc/resolv.conf} will
+usually work at the expense of not being able to use short names unless
+they are listed in \texttt{/etc/hosts}.}
+
+\section{Configuring the fully-qualified domain name\label{configure}}
+\subsection{System-wide}
+
+Preferably, the host name is entered into your system configuration so
+that it is available globally, to your mailers and news readers should
+they desire to create a FQDN\@.
+
+How exactly the hostname is configured, depends on your system, it is
+usually a two-step approach, but your system installation/configuration
+software may simplify things for you.
+
+\begin{enumerate}
+    \item Configure the bare hostname. Every system has its own favorite
+	configurator, but you'll find this in the index. SuSE Linux 8.0
+	and newer read the hostname from the file
+	\texttt{/etc/HOSTNAME}. FreeBSD 4 and newer reads it from the
+	\texttt{hostname} variable in \texttt{/etc/rc.conf}.
+
+    \item On many systems, you will have to put the fully qualified host
+	name into \texttt{/etc/hosts}, too, so the system can find out
+	the full name with domain if given just its bare name without a
+	domain. (On networked systems, using NIS, DNS or LDAP is also
+	feasible if the client is configured to use the respective
+	system to resolve host names.) Usually, a computer that is to
+	resolve a hostname will look at \texttt{/etc/hosts} first and
+	then at DNS\@.
+\end{enumerate}
+
+An \texttt{/etc/hosts} line might look like this:
+
+\begin{verbatim}
+ 192.168.0.1 abacus.mid.example.com abacus oldname
+\end{verbatim}
+
+Keep the original name of the computer as an alias in case you
+configured some other software to use the old name.
+
+\subsection{Local to leafnode}
+
+You can also write a line like
+
+\begin{verbatim}
+ hostname = abacus.mid.example.com
+\end{verbatim}
+
+into your \texttt{/etc/leafnode/config}. But this is a special case, for
+when leafnode is running either on a multi-homed host or leafnode's
+notion of the host's FQDN should be overridden. 
+
+This may not be sufficient to make leafnode working, because lock files
+must use the real hostname, not one assigned by a random news service.
+
+\subsection{Should I configure the FQDN system-wide or local to
+leafnode?}
+
+You should configure the FQDN system-wide. Your news reader may generate
+a Message-ID itself, and it is not aware of leafnode's configuration and
+will generate an invalid Message-ID -- leafnode will then reject the
+posting because the Message-ID is invalid.
+
+\section{Author, Copyright}
+
+This document was written and is (C) Copyright 2002, 2003, 2004, 2006
+by Matthias Andree. This document can be copied verbatim.
+
+\end{document}
