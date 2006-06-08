@@ -1,3 +1,91 @@
+2006-06-08  Matthias Andree <matthias.andree@gmx.de>
+  * Bump version.
+
+    M ./configure.ac -1 +1
+
+  * Add README-FQDN.
+
+    M ./Makefile.am -2 +13
+    M ./NEWS +4
+    A ./README-FQDN.tex
+
+  * Revert Bugfix from 20060608a for the nonce, does more harm than good.
+
+    M ./NEWS -1 +7
+    M ./TODO -1 +8
+    M ./applyfilter.c -2 +2
+    M ./checkgroups.c -2 +2
+    M ./fetchnews.c -2 +2
+    M ./leafnode.h -2 +2
+    M ./miscutil.c -4 +3
+    M ./newsq.c -2 +2
+    M ./nntpd.c -3 +3
+    M ./rnews.c -2 +2
+    M ./texpire.c -2 +2
+    M ./validatefqdn.c -3 +3
+
+  tagged leafnode-2-0-0-alpha20060608a
+
+
+  * Bump version to 20060608a.
+
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
+  * Bugfix: hostname=n.m overrides b0rked local DNS.
+
+    M ./NEWS +2
+    M ./applyfilter.c -2 +2
+    M ./checkgroups.c -2 +2
+    M ./fetchnews.c -2 +2
+    M ./leafnode.h -2 +2
+    M ./miscutil.c -3 +4
+    M ./newsq.c -2 +2
+    M ./nntpd.c -3 +3
+    M ./rnews.c -2 +2
+    M ./texpire.c -2 +2
+    M ./validatefqdn.c -3 +3
+
+2006-05-14  Matthias Andree <matthias.andree@gmx.de>
+  * texpire -C now shows angle brackets and quotes around the MID.
+
+    M ./NEWS +4
+    M ./texpire.8.in -2 +2
+
+2006-05-06  Matthias Andree <matthias.andree@gmx.de>
+  * Make mktemp -d more portable (FreeBSD).
+
+    M ./Makefile.am -1 +1
+
+2006-04-30  Matthias Andree <matthias.andree@gmx.de>
+  * re-indent release.sh
+
+    M ./release.sh -20 +20
+
+  * Drop obsolete snprintf declaration.
+
+    M ./leafnode.h -4
+
+2006-04-30  matthias.andree@gmx.de
+  * Add a few casts to make the code valid C++.
+
+    M ./activutil.c -1 +1
+    M ./getaline.c -1 +1
+    M ./nntpd.c -2 +2
+
+2006-04-28  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20060428a
+
+
+  * Bump version.
+
+    M ./NEWS -1 +1
+
+  * Snapshot 2.0.0.alpha20060428a.
+
+    M ./ChangeLog +15
+    M ./configure.ac -1 +1
+
 2006-04-28  Matthias Andree <matthias.andree@gmx.de>
   * Forward port fqdn validation list from upcoming leafnode 1.11.6 (RFC-2606 and other crap.)
 
