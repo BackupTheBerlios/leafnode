@@ -114,7 +114,6 @@ main(int argc, char *argv[])
 
     /* lock */
     if (attempt_lock(LOCKWAIT)) {
-	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
     rereadactive();		/* read groupinfo file */

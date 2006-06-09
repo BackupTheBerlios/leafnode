@@ -1063,7 +1063,7 @@ main(int argc, char **argv)
 	init_failed(myname);
 
     if (attempt_lock(LOCKWAIT)) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "%s: lockfile %s exists, abort\n",
+	ln_log_sys(LNLOG_SERR, LNLOG_CTOP, "%s: lockfile %s exists, abort\n",
 		argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }

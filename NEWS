@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20060608b:
+- Bugfix: Do not report "lock file exists" if locking failed for other
+  reasons than a pre-existing lock. Found by Troy Piggins.
+
 20060608b: Changes since 20060608a:
 - Revert Bugfix from 20060608a for the nonce, since some parts of
   leafnode (lock file generation for instance) rely on the actual FQDN,

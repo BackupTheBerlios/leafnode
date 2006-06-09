@@ -2124,8 +2124,6 @@ main(int argc, char **argv)
 	}
     } else {
 	if (attempt_lock(LOCKWAIT)) {
-	    fprintf(stderr, "%s: lockfile %s exists, abort\n",
-		    myname, lockfile);
 	    exit(EXIT_FAILURE);
 	}
 

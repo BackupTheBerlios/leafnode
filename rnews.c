@@ -323,7 +323,6 @@ main(int argc, char *argv[])
     umask((mode_t) 077);
 
     if (attempt_lock(LOCKWAIT)) {
-	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
 

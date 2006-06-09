@@ -313,6 +313,9 @@ attempt_lock(
     free(l2);
     free(pid);
 
+    if (!have_lock)
+	fprintf(stderr, "lockfile %s exists, abort\n", lockfile);
+
     /* mind the return logic */
     return have_lock ? 0 : 1;
 }

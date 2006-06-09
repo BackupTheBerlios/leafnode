@@ -245,7 +245,6 @@ main(int argc, char *argv[])
 	init_failed(myname);
 
     if (attempt_lock(LOCKWAIT)) {
-	fprintf(stderr, "%s: lockfile %s exists, abort\n", argv[0], lockfile);
 	exit(EXIT_FAILURE);
     }
 
