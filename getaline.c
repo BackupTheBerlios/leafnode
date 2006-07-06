@@ -2,7 +2,7 @@
  * Fetch a single line from a stdio stream, arbitrary length.
  * \date 2000 - 2002
  * 
- *  Copyright(C) 2000 - 2002 Matthias Andree <matthias.andree@gmx.de> 
+ *  Copyright(C) 2000-2002,2004,2006 Matthias Andree <matthias.andree@gmx.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as
