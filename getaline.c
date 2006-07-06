@@ -85,7 +85,7 @@ getabufferedline(const char *s /** buffer to read from */,
        characters until we get to a newline */
     for (len = 0, t = s + *start; *t != '\n'; t++) { len++; }
 
-    if (size < len) {
+    if (size < len + 1) {
         /* Previous buffer was too small, realloc a bigger one. */
         if (buf) {
             free(buf);

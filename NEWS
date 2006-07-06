@@ -2,6 +2,7 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20060608b:
+- Security Bugfix: Fix off-by-one error in getabufferedline().
 - Bugfix: Do not report "lock file exists" if locking failed for other
   reasons than a pre-existing lock. Found by Troy Piggins.
 
