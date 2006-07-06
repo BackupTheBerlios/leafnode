@@ -98,9 +98,9 @@ getabufferedline(const char *s /** buffer to read from */,
         }
     }
 
-    memcpy(buf, s + *start,  len);
+    memcpy(buf, s + *start, len);
     buf[len] = '\0';            /* unconditionally terminate string,
-                                  possibly overwriting newline */
+                                   possibly overwriting newline */
 
     /* now see if there are extra chars to skip over. */
     *start += len;
