@@ -83,7 +83,9 @@ getabufferedline(const char *s /** buffer to read from */,
 
     /* first have to find out how big the line will be. Counts the number of
        characters until we get to a newline */
-    for (len = 0, t = s + *start; *t != '\n'; t++) { len++; }
+    for (len = 0, t = s + *start; t < s + length && *t != '\n'; t++) {
+	len++;
+    }
 
     if (size < len + 1) {
         /* Previous buffer was too small, realloc a bigger one. */

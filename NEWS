@@ -3,6 +3,8 @@ KNOWN BUGS:
 |
 Changes since 20060608b:
 - Security Bugfix: Fix off-by-one error in getabufferedline().
+- Bugfix: On corrupted active files without line breaks, avoid reading
+  past the end of the file.
 - Bugfix: Do not report "lock file exists" if locking failed for other
   reasons than a pre-existing lock. Found by Troy Piggins.
 
