@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20060608b:
+20060706a: Changes since 20060608b:
 - Security Bugfix: Fix off-by-one error in getabufferedline().
 - Bugfix: On corrupted active files without line breaks, avoid reading
   past the end of the file.
