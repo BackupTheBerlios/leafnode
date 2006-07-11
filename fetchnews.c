@@ -1353,6 +1353,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	if (nntpreply(cursrv) != 231) {
 	    ln_log(LNLOG_SERR, LNLOG_CSERVER, "Reading new newsgroups failed");
 	    mastr_delete(s);
+	    freelist(groups);
 	    return 1;
 	}
 	while ((l = mgetaline(nntpin)) && (strcmp(l, ".") != 0)) {
@@ -1372,6 +1373,7 @@ nntpactive(struct serverlist *cursrv, int fa)
 	if (!l) {
 	    /* timeout */
 	    mastr_delete(s);
+	    freelist(groups);
 	    return 1;
 	}
 	mergegroups();		/* merge groups into active */

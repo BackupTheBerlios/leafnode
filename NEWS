@@ -4,6 +4,8 @@ KNOWN BUGS:
 Changes since 20060706a:
 - Bugfix: do not leak memory if global configuration parameters that
   read strings are specified more than once. Found by "Stroller".
+- Bugfix: do not leak memory if reading new newsgroups fails or if the
+  list of newsgroups ends prematurely. Found by "Stroller".
 
 20060706a: Changes since 20060608b:
 - Security Bugfix: Fix off-by-one error in getabufferedline().
