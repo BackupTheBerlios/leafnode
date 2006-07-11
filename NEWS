@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20060706a:
+- Bugfix: do not leak memory if global configuration parameters that
+  read strings are specified more than once. Found by "Stroller".
+
 20060706a: Changes since 20060608b:
 - Security Bugfix: Fix off-by-one error in getabufferedline().
 - Bugfix: On corrupted active files without line breaks, avoid reading

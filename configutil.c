@@ -204,6 +204,8 @@ readconfig(/*@null@*/ const char *configfile)
 			       "config: debugmode is %d", debugmode);
 		    break;
 		case CP_MTA:
+		    if (mta)
+			free(mta);
 		    mta = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
@@ -255,18 +257,24 @@ readconfig(/*@null@*/ const char *configfile)
 		    }
 		    break;
 		case CP_FILTFIL:
+		    if (filterfile)
+			free(filterfile);
 		    filterfile = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: filterfile is %s", value);
 		    break;
 		case CP_LOCALGRP:
+		    if (localgroups)
+			free(localgroups);
 		    localgroups = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
 				   "config: localgroups is %s", value);
 		    break;
 		case CP_HOST:
+		    if (owndn)
+			free(owndn);
 		    owndn = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
@@ -455,6 +463,8 @@ readconfig(/*@null@*/ const char *configfile)
 				   "config: initialfetch is %lu", initiallimit);
 		    break;
 		case CP_PSEUDO:
+		    if (pseudofile)
+			free(pseudofile);
 		    pseudofile = critstrdup(value, "readconfig");
 		    if (debugmode & DEBUG_CONFIG)
 			ln_log_sys(LNLOG_SDEBUG, LNLOG_CTOP,
