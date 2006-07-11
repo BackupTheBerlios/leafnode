@@ -384,18 +384,16 @@ readconfig(/*@null@*/ const char *configfile)
 				    critmalloc(sizeof(struct expire_entry),
 					       "parsing groupexpire");
 
-				if (ent) {
-				    ent->group =
-					critstrdup(value, "readconfig");
-				    ent->xtime = days < 0 ? -1 : i;
-				    ent->next = prev;
-				    prev = ent;
-				    if (debugmode & DEBUG_CONFIG)
-					ln_log_sys(LNLOG_SDEBUG,
-						   LNLOG_CTOP,
-						   "config: groupexpire for %s is %ld days",
-						   value, days);
-				}
+				ent->group =
+				    critstrdup(value, "readconfig");
+				ent->xtime = days < 0 ? -1 : i;
+				ent->next = prev;
+				prev = ent;
+				if (debugmode & DEBUG_CONFIG)
+				    ln_log_sys(LNLOG_SDEBUG,
+					    LNLOG_CTOP,
+					    "config: groupexpire for %s is %ld days",
+					    value, days);
 			    }
 			}
 		    }
