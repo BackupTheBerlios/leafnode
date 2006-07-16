@@ -6,11 +6,11 @@ Summary: Leafnode - a leafsite NNTP server (version %version)
 Summary(de): Leafnode - ein offline-Newsserver (Version %version)
 Name: leafnode
 Release: 0
-Copyright: see COPYING
-Group: Applications/News
+License: see COPYING
+Group: Productivity/Networking/News/Servers
 Source: http://mandree.home.pages.de/leafnode/beta/leafnode-%version.tar.bz2
 
-%define prefix      /usr
+%define _prefix     /usr
 %define spooldir    /var/spool/news
 %define confdir     /etc/leafnode
 %define runas_user  news
@@ -23,13 +23,15 @@ Packager: Matthias Andree <matthias.andree@gmx.de>
 Leafnode is a small NNTP server for leaf sites without permanent
 connection to the internet. It supports a subset of NNTP and is able to
 automatically fetch the newsgroups the user reads regularly from the
-newsserver of the ISP.
+newsserver of the ISP and additionally offer local (site-specific)
+groups to a LAN.
 
 %description -l de
 Leafnode ist ein offline-Newsserver, der vor allem für den typischen
 Einzelnutzer-Rechner ohne permanente Internetanbindung geeignet ist.
 Leafnode bezieht automatisch die Newsgroups, die der oder die Nutzer
-regelmäßig lesen, vom Newsserver des Providers.
+regelmäßig lesen, vom Newsserver des Providers. Weiter erlaubt es, lokale
+(Standort-spezifische) Newsgruppen im LAN anzubieten.
 
 %prep
 %setup -q
@@ -58,16 +60,16 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %attr(640,root,news) %confdir/config.example
 %attr(640,root,news) %confdir/filters.example
 %attr(640,root,news) %confdir/uucp
-%attr(755,root,root) %{prefix}/bin/leafnode-version
-%attr(755,root,root) %{prefix}/bin/lsmac.pl
-%attr(755,root,root) %{prefix}/bin/newsq
-%attr(755,root,root) %{prefix}/sbin/applyfilter
-%attr(755,root,root) %{prefix}/sbin/checkgroups
-%attr(755,root,root) %{prefix}/sbin/fetchnews
-%attr(755,root,root) %{prefix}/sbin/leafnode
-%attr(755,root,root) %{prefix}/sbin/rnews
-%attr(755,root,root) %{prefix}/sbin/sendbatch.bash
-%attr(755,root,root) %{prefix}/sbin/texpire
+%attr(755,root,root) %{_prefix}/bin/leafnode-version
+%attr(755,root,root) %{_prefix}/bin/lsmac.pl
+%attr(755,root,root) %{_prefix}/bin/newsq
+%attr(755,root,root) %{_prefix}/sbin/applyfilter
+%attr(755,root,root) %{_prefix}/sbin/checkgroups
+%attr(755,root,root) %{_prefix}/sbin/fetchnews
+%attr(755,root,root) %{_prefix}/sbin/leafnode
+%attr(755,root,root) %{_prefix}/sbin/rnews
+%attr(755,root,root) %{_prefix}/sbin/sendbatch.bash
+%attr(755,root,root) %{_prefix}/sbin/texpire
 %doc %_mandir/man1/*
 %doc %_mandir/man5/*
 %doc %_mandir/man8/*
