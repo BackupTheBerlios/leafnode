@@ -354,7 +354,8 @@ README:	README.html $(LYNX)
 rpm: dist-bzip2 leafnode.spec
 	-ln -s -f `pwd`/leafnode-$(VERSION).tar.bz2 $(RPMSRC)/SOURCES
 	-ln -s -f `pwd`/leafnode.spec $(RPMSRC)/SPECS
-	unset IFS ; env LANG=C LC_MESSAGES=C rpmbuild -ba --target=i486 $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
+	unset IFS ; case `uname -m` in i?86) targ=--target=i486 ;; *) targ= ;; esac ; \
+	env LANG=C LC_MESSAGES=C rpmbuild -ba $$targ $(RPMSRC)/SPECS/leafnode.spec 2>&1 \
 	| grep '^Wrote:' | $(SED) -e 's/^Wrote: //' \
 	| while read r ; do mv -f "$$r" . || exit 1 ; done
 # this target expects a .rsyncs file with lines of this format:
