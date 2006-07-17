@@ -10,7 +10,14 @@ License: see COPYING
 Group: Productivity/Networking/News/Servers
 Source: http://mandree.home.pages.de/leafnode/beta/leafnode-%version.tar.bz2
 
+# Note that recent RPM installs (such as the one on SUSE Linux 10.0)
+# derive their documentation directory (often /usr/share/doc) from
+# _usr, not _prefix.
+
+# for executables, manual pages, configuration:
 %define _prefix     /usr
+# for RPM documentation installed by %doc below:
+%define _usr        /usr
 %define spooldir    /var/spool/news
 %define confdir     /etc/leafnode
 %define runas_user  news
