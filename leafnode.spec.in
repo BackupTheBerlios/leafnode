@@ -16,8 +16,8 @@ Source: http://mandree.home.pages.de/leafnode/beta/leafnode-%version.tar.bz2
 
 # for executables, manual pages, configuration:
 %define _prefix     /usr
-# for RPM documentation installed by %doc below:
-%define _usr        /usr
+# uncomment and adjust for RPM documentation installed by %doc below:
+#%define _usr        /usr
 %define spooldir    /var/spool/news
 %define confdir     /etc/leafnode
 %define runas_user  news
