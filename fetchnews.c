@@ -1139,7 +1139,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
     struct filterlist *f = NULL;
     int x = 0;
     long outstanding = 0;
-    unsigned long last = 0;
+    unsigned long last = 0, u;
     int delaybody_this_group;
     int tryxhdr = 0;
 
@@ -1259,8 +1259,15 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
 
     groupfetched = 0;
     groupkilled = 0;
-    if (getarticles(stufftoget, outstanding, f) == 0) {
-	/* handle error */
+
+    u = getarticles(stufftoget, outstanding, f);
+    freefilter(f);
+    freelist(stufftoget);
+    if (u == 0) {
+	ln_log(LNLOG_SERR, LNLOG_CGROUP,
+		"%s: error fetching, proceeding to next server",
+		g->name);
+	return -2;
     }
     ln_log(LNLOG_SNOTICE, LNLOG_CGROUP,
 	   "%s: %lu articles fetched (to %lu), %lu killed",
@@ -1268,8 +1275,6 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
     globalfetched += groupfetched;
     globalkilled += groupkilled;
 
-    freefilter(f);
-    freelist(stufftoget);
     return last + 1;
 }
 
