@@ -1,4 +1,62 @@
+2006-08-26  Matthias Andree <matthias.andree@gmx.de>
+  * Snapshot 20060826a.
+
+    M ./NEWS -2 +2
+    M ./configure.ac -1 +1
+
+2006-08-15  Matthias Andree <matthias.andree@gmx.de>
+  * Skip to next server after fatal error.
+
+    M ./NEWS +1
+    M ./fetchnews.c -5 +10
+
+  * Handle 423 and other 4XX replies to ARTICLE properly. Reported by Martin Brunzel.
+
+    M ./NEWS +2
+    M ./fetchnews.c -1 +4
+
+2006-08-13  Matthias Andree <matthias.andree@gmx.de>
+  * Document Interrupted system call.
+
+    M ./FAQ.tex +5
+
+2006-07-17  Matthias Andree <matthias.andree@gmx.de>
+  * Mention _usr docs.
+
+    M ./NEWS -1 +2
+
+  * Comment out _usr macro.
+
+    M ./leafnode.spec.in -2 +2
+
+  * Document additional _usr.
+
+    M ./leafnode.spec.in +7
+
+2006-07-16  Matthias Andree <matthias.andree@gmx.de>
+  * Update .spec.in to pass non-standard prefixes to %configure and use License, not Copyright.
+
+    M ./NEWS +4
+
+  * Don't pass --target=i486 on non-X86 machines.
+
+    M ./Makefile.am -1 +2
+
+  * Update .spec.in to pass non-standard prefixes to %configure and use License, not Copyright.
+  Reported by Kevin Bulgrien.
+
+    M ./leafnode.spec.in -15 +17
+
 2006-07-11  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20060711a
+
+
+  * Release 20060711a.
+
+    M ./ChangeLog +61
+    M ./NEWS -1 +1
+    M ./configure.ac -2 +2
+
   * Fix two memory leaks when reading new newsgroups fails. Found by Stroller.
 
     M ./NEWS +2
