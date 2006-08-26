@@ -1,9 +1,9 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20060711a:
+20060826a: Changes since 20060711a:
 - Bugfix: handle 400...499 codes in reply to ARTICLE command properly.
-  Reported by Martin Brunzel.
+  Reported and fix tested by Martin Brunzel.
 - Bugfix: if a fatal fetch error occurs, proceed to next server.
 - Update: the leafnode.spec.in file was updated to fix rpmbuild issues
   and instruct the packager how the %doc-umentation can be relocated.
