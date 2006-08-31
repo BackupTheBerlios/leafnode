@@ -15,6 +15,7 @@ man_MANS = \
 	fetchnews.8 \
 	leafnode-version.1 \
 	leafnode.8 \
+	moderators.5 \
 	newsq.1 \
 	rnews.8 \
 	sendbatch.1 \

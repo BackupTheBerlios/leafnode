@@ -1,6 +1,14 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+20060831a: Changes since 20060826a:
+- Change: an empty mail address in the moderators file means "no
+  moderator set" and causes leafnode to post the article rather than
+  mailing it to the moderator. Useful for gmane when the fallback
+  moderator of ISC is set. Suggested by Matěj Cepl.
+- Change: Support %% for INN compatibility.
+- Documentation: add moderators(5) manual page.
+
 20060826a: Changes since 20060711a:
 - Bugfix: handle 400...499 codes in reply to ARTICLE command properly.
   Reported and fix tested by Martin Brunzel.

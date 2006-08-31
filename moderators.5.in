@@ -1,0 +1,74 @@
+.TH moderators 5 @VERSION@ leafnode Leafnode \" -*- nroff -*-
+.SH NAME
+moderators \- moderator configuration file for fetchnews(8)
+
+.SH DESCRIPTION
+.B Leafnode
+is a USENET package intended for small sites, where there are few
+users and little disk space, but where a large number of groups is
+desired.
+.P
+The moderators file defines which groups are handled by which moderator
+(by mail address).
+.SH SYNTAX
+Leafnode's \fImoderators\fR file format is supposed to be compatible with INN's
+\fBmoderators\fR(5) file format. A \fImoderators\fR file consists of lines, each of
+which can have either of these three formats:
+.IP "Empty lines"
+are ignored. They are useful to structure the file.
+.IP "Comment lines"
+are lines that start with a hash character (#) in the leftmost column.
+These are also ignored and useful to structure and document the file.
+.IP "Moderator lines"
+are of the form
+.nf
+.sp
+pattern:moderator
+.sp
+.fi
+where \fIpattern\fR is a \fBwildmat\fR(5) pattern to match the newsgroup's
+name and \fImoderator\fR the moderator's mail address. The latter can be
+empty, which means that there is no moderator for the group or pattern
+(and fetchnews should post into the group rather than detour the message
+to the moderator). The \fImoderator\fR may contain one %s pattern, which
+will be replaced by the group name with dots (.) converted to dashes
+(-). %% in the \fImoderator\fR will be replaced by %. The behavior for
+other sequences starting with % is undefined.
+.SS Matching
+Patterns will be tried in the order listed in the file, until the first
+match which terminates the search.
+.SH EXAMPLE
+An example says more than thousand words, so here goes a commented one:
+.P
+.nf
+\f[CR]# special moderator, all articles posted for local.special
+# will be mailed to hans@example.com
+local.special:hans@example.com
+
+# egon is moderator for all other local groups:
+local.*:egon+%s@example.net
+# that line means:
+# mail postings for local.test to egon+local-test@example.net
+# mail postings for local.video to egon+local-video@example.net
+#
+# Note: if you put local.special below local.*,
+# local.special would be ignored.
+
+# Post gmane.* articles rather than mailing them,
+# overriding the catchall pattern for isc.org below:
+gmane.*:
+
+## Direct all other public hierarchies to the
+## master moderator database.
+*:%s@moderators.isc.org
+\fP
+.fi
+.SH FILES
+.IP @sysconfdir@/moderators
+.SH AUTHORS
+.IP "Joerg Dietrich"
+wrote the original implementation.
+.IP "Matthias Andree"
+wrote this manual page.
+.SH SEE ALSO
+.BR fetchnews (8).

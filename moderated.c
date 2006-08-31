@@ -14,8 +14,8 @@
 
 /**
  * Takes a group name as argument, returns the moderator's address,
- * NULL in case of error. The returned pointer must be free()ed by
- * the caller. (c) 2001 Joerg Dietrich.
+ * NULL in case of error or no moderator. The returned pointer must be free()ed by
+ * the caller. (c) 2001 Joerg Dietrich, 2006 Matthias Andree.
  */
 /*@null@*/ /*@only@*/ char *
 getmoderator(const char *group)
@@ -45,28 +45,50 @@ getmoderator(const char *group)
 	}
 	*p++ = '\0';
 	if (wildmat(group, line)) {
-	    char *x;
-	    if ((x = strstr(p, "%s"))) {
-		/* expand %s in moderator address by group name with dots
-		 * replaced by dashes */
-		char *g = critstrdup(group, "getmoderator");
-		char *t;
-		for (t = g; *t; t++)
-		    if (*t == '.')
-			*t = '-';
-
-		*x = '\0';
-		snprintf(address, sizeof address, "%s%s%s", p, g, x + 2);
-		free(g);
-	    } else {
-		/* no %s? Just copy verbatim */
-		(void)mastrncpy(address, p, sizeof address);
+	    char *x, *y;
+	    if (p[0] == '\0') {
+		/* empty moderator address means: post instead of
+		 * mailing and leave handling to upstream */
+		goto nomod;
 	    }
+	    for (x = p, y = address; *x; x++) {
+		if (y + 1 >= address + sizeof(address)) {
+overrun:
+		    ln_log(LNLOG_SERR, LNLOG_CTOP, "Buffer overrun while determining moderator. Cowardly pretending there were no moderator.");
+		    goto nomod;
+		}
+		if (*x != '%') {
+		    *y++ = *x;
+		} else {
+		    if (x[1] == '%') {
+			*y++ = *x++;
+		    } else if (x[1] == 's') {
+			/* expand %s in moderator address by group name with dots
+			 * replaced by dashes */
+			char *g, *t;
+			++x;
+			if (y + strlen(group) >= address + sizeof(address))
+			    goto overrun;
+			g = critstrdup(group, "getmoderator");
+			for (t = g; *t; t++)
+			    if (*t == '.')
+				*t = '-';
+
+			memcpy(y, g, strlen(g));
+			y += strlen(g);
+			free(g);
+		    } else {
+			*y++ = *x;
+		    }
+		}
+	    }
+	    *y = '\0';
 	    fclose(f);
 	    mastr_delete(modpath);
 	    return critstrdup(address, "getmoderator");
 	}
     }
+nomod: /* no moderator or error */
     fclose(f);
     mastr_delete(modpath);
     return NULL;
@@ -110,3 +132,15 @@ checkstatus(const char *groups, const char status)
     free(p);
     return NULL;
 }
+
+#ifdef TEST
+int main(int argc, char **argv) {
+    int i;
+    for (i = 1; i < argc; i++) {
+	char *x = getmoderator(argv[i]);
+	printf("moderator for %s: %s\n", argv[i], x ? x : "none");
+	if (x) free(x);
+    }
+    return 0;
+}
+#endif

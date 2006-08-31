@@ -4,7 +4,7 @@ dnl written by Matthias Andree, 2002 - 2006
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20060826a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20060831a])
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
@@ -363,6 +363,6 @@ if test x$silent != xyes ; then
 fi
 
 AC_CONFIG_FILES([Makefile tools/sendbatch.bash leafnode.spec leafnode.8 newsq.1
-applyfilter.8 filterfile.5 fetchnews.8 rnews.8 texpire.8 checkgroups.8
+applyfilter.8 filterfile.5 fetchnews.8 moderators.5 rnews.8 texpire.8 checkgroups.8
 sendbatch.1 leafnode-version.1])
 AC_OUTPUT
