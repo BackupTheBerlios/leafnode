@@ -1,4 +1,17 @@
+2006-08-31  Matthias Andree <matthias.andree@gmx.de>
+  * Add moderators(5). Support %%. Support empty moderator.
+
+    M ./Makefile.am +1
+    M ./NEWS +8
+    M ./configure.ac -2 +2
+    M ./moderated.c -17 +51
+    A ./moderators.5.in
+
 2006-08-26  Matthias Andree <matthias.andree@gmx.de>
+  * Snapshot 20060826a Changelog.
+
+    M ./ChangeLog +58
+
   * Snapshot 20060826a.
 
     M ./NEWS -2 +2
