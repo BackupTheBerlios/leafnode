@@ -122,6 +122,13 @@ Matthias:
 * remind user to install distributor packages before doing a source
   install. Mail from Andreas Kneib <akneib@gmx.net> 2004-05-18.
 
+* add a  maxfetch companion "postings per day" or so that keeps track of
+  when the group was last fetched successfully and limits the posts per
+  interval (to cope with situations where server or client are down for
+  some days and fixed limits don't cut the mustard).
+
+* allow per-group maxfetch configuration; Thufir 2006-09-08
+
 10pre5
 0.0 forward port bug fixes from 1.9.19rc to 1.9.26* (applyfilter done)
 
