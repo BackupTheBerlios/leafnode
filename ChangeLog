@@ -1,3 +1,17 @@
+2006-10-09  Matthias Andree <matthias.andree@gmx.de>
+  * Use config_defs.h for liblnutil.a, but don't distribute it.
+
+    M ./Makefile.am -1 +2
+
+  * Mention precedence for groupexpire.
+
+    M ./leafnode.8.in -1 +2
+
+2006-09-08  Matthias Andree <matthias.andree@gmx.de>
+  * Amend to TODO.
+
+    M ./TODO +7
+
 2006-08-31  Matthias Andree <matthias.andree@gmx.de>
   * Add moderators(5). Support %%. Support empty moderator.
 
