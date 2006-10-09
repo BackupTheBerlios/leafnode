@@ -153,7 +153,8 @@ liblnutil_a_SOURCES	= \
 	xoverutil.c
 nodist_liblnutil_a_SOURCES= \
 	configparam_data.c \
-	config.c
+	config.c \
+	config_defs.h
 
 # PROGRAMS lists the programs to build
 sbin_PROGRAMS = \
