@@ -373,7 +373,8 @@ for the given groups. This value is used by
 You can specify as many groupexpire lines as you like. It is
 possible to specify
 .BR glob (7)-like
-wildcard expressions.
+wildcard expressions. Note that the LAST line given in the configuration
+file takes the highest precedence - put the most specific rules last.
 .TP
 filterfile = @sysconfdir@/filters
 Leafnode can filter the input headers for arbitrary regular expressions.
