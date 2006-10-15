@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+2006XXXXX: Changes since 20061010a:
+- Bugfix: use proper prototype for mastring.h's mastr_cat.
+  Reported by Georg Schwarz.
+
 20061010a: Changes since 20060831a:
 - Documentation: in leafnode(8)'s section on groupexpire, list the
   precedence information. Found by Clemens Fischer.
