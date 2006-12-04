@@ -1,9 +1,11 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-2006XXXXX: Changes since 20061010a:
+20061204a: Changes since 20061010a:
 - Bugfix: use proper prototype for mastring.h's mastr_cat.
   Reported by Georg Schwarz.
+- Bugfix: if none of the upstream articles can be fetched for a certain
+  group, do NOT skip to the next server. Found by Martin Brunzel.
 
 20061010a: Changes since 20060831a:
 - Documentation: in leafnode(8)'s section on groupexpire, list the

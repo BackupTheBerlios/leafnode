@@ -1069,8 +1069,10 @@ chopmid(/*@unique@*/ const char *in)
 
 /**
  * get all articles in a group, with pipelining NNTP commands
+ * \return false for an error that should cause fetchnews to give up on
+ * the current server; true otherwise.
  */
-static unsigned long
+static bool
 getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 	long n /** number of articles to fetch */,
 	/*@null@*/ struct filterlist *f)
@@ -1103,7 +1105,7 @@ getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 	while (advance) {
 	    int res = getarticle(f, &artno_server, 0);
 	    if (res == -2)
-		return 0;	/* disconnected server or store OS error */
+		return FALSE;	/* disconnected server or store OS error */
 	    /* FIXME: add timeout here and force window to 1 if it triggers */
 	    if (p->next) {
 		const char *c;
@@ -1122,7 +1124,7 @@ getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 	    }
 	}
     }
-    return artno_server;
+    return TRUE;
 }
 
 /**
@@ -1139,9 +1141,10 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
     struct filterlist *f = NULL;
     int x = 0;
     long outstanding = 0;
-    unsigned long last = 0, u;
+    unsigned long last = 0;
     int delaybody_this_group;
     int tryxhdr = 0;
+    bool u;
 
     /* lots of plausibility tests */
     if (!g)
@@ -1263,7 +1266,7 @@ getgroup(struct serverlist *cursrv, struct newsgroup *g, unsigned long first)
     u = getarticles(stufftoget, outstanding, f);
     freefilter(f);
     freelist(stufftoget);
-    if (u == 0) {
+    if (u == FALSE) {
 	ln_log(LNLOG_SERR, LNLOG_CGROUP,
 		"%s: error fetching, proceeding to next server",
 		g->name);
