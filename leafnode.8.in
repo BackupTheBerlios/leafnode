@@ -348,6 +348,13 @@ hardlinks for all newsgroups which it can find in the Newsgroups: header.
 This may be of interest if you want to apply a score- or killfile to the
 Xref: line.
 .TP
+no_direct_spool = 0
+If this is set to a nonzero value, leafnode will not store locally
+posted articles directly into its spool, unless they are posted or
+crossposted to local groups. Instead, it will spool such locally
+posted articles only after a later fetchnews run has retrieved the
+freshly posted article from the upstream server.
+.TP
 maxfetch = 1000
 "maxfetch" specifies the maximum number of articles
 .BR fetchnews (8)
