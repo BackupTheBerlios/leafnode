@@ -298,9 +298,9 @@ config_defs.h: $(srcdir)/config.table $(srcdir)/configparam.h genconfigdefs.awk
 	$(AWK) -F, -f $(srcdir)/genconfigdefs.awk \
 	<$(srcdir)/config.table >$@ || { rm -f $@ ; false; }
 
-configparam_data.c: $(srcdir)/config.table b_sortnl genconfigparam_data.awk
+configparam_data.c: $(srcdir)/config.table b_sortnl$(EXEEXT) genconfigparam_data.awk
 	rm -f config.table.sorted
-	./b_sortnl <$(srcdir)/config.table >config.table.sorted
+	./b_sortnl$(EXEEXT) <$(srcdir)/config.table >config.table.sorted
 	$(AWK) -f $(srcdir)/genconfigparam_data.awk <config.table.sorted >$@ \
 	|| { rm -f $@ ; false ; }
 
