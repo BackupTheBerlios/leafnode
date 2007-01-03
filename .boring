@@ -46,3 +46,7 @@ cscope\.out$
 ^tags$
 ^TAGS$
 ^dox$
+^compile$
+^depcomp$
+^missing$
+^install.sh$
