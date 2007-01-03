@@ -7,6 +7,7 @@ Changes since 20070101a:
 20070101a: Changes since 20061204a:
 - Documentation: document no_direct_spool in leafnode(8). Found by
   Reiner Steib.
+- Rebuild configure with autoconf 2.60 (not documented in released tarball).
 
 20061204a: Changes since 20061010a:
 - Bugfix: use proper prototype for mastring.h's mastr_cat.
