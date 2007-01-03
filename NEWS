@@ -1,6 +1,9 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20070101a:
+- Portability: Support compilation on systems with non-empty EXEEXT.
+
 20070101a: Changes since 20061204a:
 - Documentation: document no_direct_spool in leafnode(8). Found by
   Reiner Steib.
