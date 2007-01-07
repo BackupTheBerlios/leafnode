@@ -285,7 +285,6 @@ readfilter(/*@null@*/ const char *filterfilename)
 		if (ngt) free(ngt);
 		ngt = critstrdup(value, "readfilter");
 		if (*value == '!') {
-		    value ++;
 		    invertngs = 1;
 		} else
 		    invertngs = 0;
@@ -293,7 +292,7 @@ readfilter(/*@null@*/ const char *filterfilename)
 	    } else if ((state == RF_WANTPAT || state == RF_WANTNGORPAT) &&
 		    !strcasecmp("pattern", param)) {
 		pcre *re, *ngp;
-		if (!ngt || !(ngp = ln_pcre_compile(ngt, 0, NULL, filterfilename, line))) {
+		if (!ngt || !(ngp = ln_pcre_compile(ngt + invertngs, 0, NULL, filterfilename, line))) {
 		    ln_log(LNLOG_SNOTICE, LNLOG_CTOP,
 			    "No newsgroup for pattern = %s (line %lu) found",
 			    value, line);
@@ -325,7 +324,7 @@ readfilter(/*@null@*/ const char *filterfilename)
 			(!strcasecmp("maxcrosspost", param)))) {
 		pcre *ngp;
 		f = newfilter();
-		if (!(ngp = ln_pcre_compile(ngt, 0, NULL, filterfilename, line))) {
+		if (!(ngp = ln_pcre_compile(ngt + invertngs, 0, NULL, filterfilename, line))) {
 		    rv = FALSE;
 		    continue;
 		}
