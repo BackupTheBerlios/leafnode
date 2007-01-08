@@ -7,12 +7,12 @@ if test "x`darcs whatsnew -s | grep -v '^No changes!'`" != "x" ; then
 fi
 
 a=
-while [ $a != y -a $a != n ]
+while [ "$a" != y -a "$a" != n ]
 do
     printf "Did you update ChangeLog? [y/n] "
     read a
 done
-if [ $a != y ] ; then exit 1 ; fi
+if [ "$a" != y ] ; then exit 1 ; fi
 
 builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
