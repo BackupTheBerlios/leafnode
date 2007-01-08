@@ -1,3 +1,23 @@
+2007-01-08  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20070108a
+
+
+  * Snapshot 20070108a.
+
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
+2007-01-07  Matthias Andree <matthias.andree@gmx.de>
+  * Fix crash when reading filter files with inverted NG matches. Reported by Wolfgang Bauer.
+
+    M ./NEWS +2
+    M ./filterutil.c -3 +2
+
+2007-01-05  Matthias Andree <matthias.andree@gmx.de>
+  * update to first 2007 release
+
+    M ./ChangeLog +50
+
 2007-01-03  Matthias Andree <matthias.andree@gmx.de>
   * Document inadvertent autoconf 2.60 change.
 
