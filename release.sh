@@ -12,7 +12,7 @@ do
     printf "Did you update ChangeLog? [y/n] "
     read a
 done
-if [ "$a" != y ] ; then exit 1 ; fi
+if [ "$a" != y ] ; then echo "Then use makechangelog.pl to generate new entries." ; exit 1 ; fi
 
 builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
