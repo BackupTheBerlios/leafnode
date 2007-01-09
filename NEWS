@@ -2,8 +2,8 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 20070108a: Changes since 20070101a:
-- Bugfix: do not crash when using inverted newsgroup matches.
-  Reported by Wolfgang Bauer.
+- Bugfix: do not crash when using inverted newsgroup[s] = !... matches
+  in filter files.  Reported by Wolfgang Bauer.
 - Portability: Support compilation on systems with non-empty EXEEXT.
 
 20070101a: Changes since 20061204a:
