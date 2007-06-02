@@ -260,19 +260,19 @@ main(int argc, char *argv[])
 		if (savedir >= 0) (void)fchdir(savedir);
 		inf = fopen(argv[optind], "r");
 		if (!inf) {
-		    perror("applyfilter: fopen");
+		    fprintf(stderr, "applyfilter: fopen(\"%s\"): %s\n", argv[optind], strerror(errno));
 		    continue;
 		}
 
 		ng = fgetheader(inf, "Newsgroups:", 1);
 		fclose(inf);
 		if (!ng) {
-		    printf("File %s does not look like a news article, skipping;\nNewsgroups: header is missing.\n", argv[optind]);
+		    printf("File \"%s\" does not look like a news article, skipping;\nNewsgroups: header is missing.\n", argv[optind]);
 		    continue;
 		}
 		g = findgroup(ng, active, -1);
 		if (!g) {
-		    printf("Newsgroups %s not found in active file.\n", ng);
+		    printf("Newsgroup \"%s\" not found in active file.\n", ng);
 		    free(ng);
 		    continue;
 		}
