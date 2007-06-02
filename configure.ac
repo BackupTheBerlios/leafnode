@@ -1,10 +1,10 @@
 dnl autoconf script for leafnode -*- m4 -*-
 dnl written by Cornelius Krasel & Matthias Andree, 1999 - 2001
-dnl written by Matthias Andree, 2002 - 2006
+dnl written by Matthias Andree, 2002 - 2007
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20070108a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20070602a])
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
