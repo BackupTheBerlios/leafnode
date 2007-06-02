@@ -5,7 +5,7 @@
  * Copyright 1999.
  *
  * Modified by Matthias Andree <matthias.andree@gmx.de>
- * Copyright of modifications 2000-2003.
+ * Copyright of modifications 2000 - 2007.
  *
  * See README for restrictions on the use of this software.
  */
