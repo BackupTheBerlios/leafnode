@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20070108a:
+- Bugfix: do not refuse to run in dryrun mode. Reported by Clemens
+  Fischer.
+
 20070108a: Changes since 20070101a:
 - Bugfix: do not crash when using inverted newsgroup[s] = !... matches
   in filter files.  Reported by Wolfgang Bauer.

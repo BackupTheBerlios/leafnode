@@ -222,8 +222,8 @@ main(int argc, char *argv[])
 	}
     }
 
-    if (optind + 1 > argc
-	    || (dryrun)) {
+    if (optind >= argc) {
+	/* no non-option arguments */
 	usage();
 	exit(EXIT_FAILURE);
     }
