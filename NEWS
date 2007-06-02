@@ -2,8 +2,9 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20070108a:
-- Bugfix: do not refuse to run in dryrun mode. Reported by Clemens
-  Fischer.
+- Bugfix: applyfilter no longer refuses to run in dryrun mode.
+  Reported by Clemens Fischer. Broken since 2005-01-05 when
+  applyfilter's -C option was removed.
 - Change: Improve some applyfilter error messages.
 
 20070108a: Changes since 20070101a:
