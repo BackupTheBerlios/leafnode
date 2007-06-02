@@ -1,4 +1,52 @@
+2007-06-02  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20070602a
+
+
+  * Bump version to 20070602a.
+
+    M ./NEWS -1 +1
+    M ./configure.ac -2 +2
+
+  * Bump copyright notice.
+
+    M ./applyfilter.c -1 +1
+
+  * detail regression of applyfilter -n
+
+    M ./NEWS -2 +3
+
+  * Improve some applyfilter error messages.
+
+    M ./NEWS +1
+    M ./applyfilter.c -3 +3
+
+  * applyfilter fix to allow dryrun mode, reported by Clemens Fischer
+
+    M ./NEWS +4
+    M ./applyfilter.c -2 +2
+
+2007-01-09  Matthias Andree <matthias.andree@gmx.de>
+  * Revise change message after Clemens Fischer sought clarification.
+
+    M ./NEWS -2 +2
+
 2007-01-08  Matthias Andree <matthias.andree@gmx.de>
+  * Add a helpful hint.
+
+    M ./release.sh -1 +1
+
+  * Use quotes to make shell happier.
+
+    M ./release.sh -2 +2
+
+  * Ask user if he's updated ChangeLog.
+
+    M ./release.sh +9
+
+  * Update 20070108a Changelog.
+
+    M ./ChangeLog +20
+
   tagged leafnode-2-0-0-alpha20070108a
 
 
