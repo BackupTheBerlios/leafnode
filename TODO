@@ -28,6 +28,11 @@ urgence:
 
 "works correctly, but suboptimal": importance and urgence at least 3.3
 
+
+SOON:
+	- pipeline group description updates
+	- add bogofilter hook
+
 SECURITY:
 1.1	Add timeouts to ALL network reading functions (CAN-2005-1911),
 	for instance store_stream!
