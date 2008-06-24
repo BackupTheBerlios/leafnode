@@ -1920,7 +1920,7 @@ do_server(struct serverlist *cursrv, int forceactive)
 	flag |= f_mustnotshort;
 	switch (cursrv->feedtype) {
 	    case CPFT_NNTP:
-		ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
+		ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 			"%s: feedtype == NNTP.", cursrv->name);
 		if (reply == 200) {
 		    res = postarticles(cursrv);
@@ -1929,7 +1929,7 @@ do_server(struct serverlist *cursrv, int forceactive)
 		}
 		break;
 	    case CPFT_NONE:
-		ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
+		ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 			"%s: not posting, feedtype == none.", cursrv->name);
 		break;
 	    default:
