@@ -1918,7 +1918,7 @@ do_server(struct serverlist *cursrv, int forceactive)
     /* post articles */
     if (action_method & FETCH_POST) {
 	flag |= f_mustnotshort;
-	switch(cursrv->feedtype) {
+	switch (cursrv->feedtype) {
 	    case CPFT_NNTP:
 		if (reply == 200) {
 		    res = postarticles(cursrv);
