@@ -4,7 +4,6 @@
 ^\.boring$
 ^\.deps$
 \.[o158]$
-^\.[^/]
 Makefile$
 Makefile\.in$
 ^aclocal\.m4$
