@@ -1,4 +1,21 @@
 2008-06-24  Matthias Andree <matthias.andree@gmx.de>
+  * drop AC_FUNC_SETVBUF_REVERSED, mysetvbuf* and thereabouts. Obsolete.
+
+    M ./Makefile.am -1
+    M ./configure.ac -4
+    M ./fetchnews.c -2 +1
+    R ./mysetvbuf.c
+    R ./mysetvbuf.h
+    M ./nntpd.c -2 +1
+
+  tagged leafnode-2-0-0-alpha20080624a
+
+
+  * update for 2008 snapshot
+
+    M ./ChangeLog +30
+    M ./NEWS +3
+
   * escalate feedtype logging to INFO severity
 
     M ./fetchnews.c -2 +2
@@ -29,6 +46,10 @@
     M ./TODO +5
 
 2007-06-02  Matthias Andree <matthias.andree@gmx.de>
+  * Update ChangeLog to 20070602a.
+
+    M ./ChangeLog +48
+
   tagged leafnode-2-0-0-alpha20070602a
 
 
@@ -147,6 +168,15 @@
     M ./mastring.h -1 +1
 
 2006-10-09  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20061010a
+
+
+  * Roll up 20061010a.
+
+    M ./ChangeLog +14
+    M ./NEWS +4
+    M ./configure.ac -1 +1
+
   * Use config_defs.h for liblnutil.a, but don't distribute it.
 
     M ./Makefile.am -1 +2
@@ -161,6 +191,10 @@
     M ./TODO +7
 
 2006-08-31  Matthias Andree <matthias.andree@gmx.de>
+  * update changelog for 20060831a
+
+    M ./ChangeLog +13
+
   * Add moderators(5). Support %%. Support empty moderator.
 
     M ./Makefile.am +1
@@ -374,6 +408,9 @@
   * Bump version.
 
     M ./NEWS -1 +1
+
+  tagged leafnode-2-0-0-alpha20060428a
+
 
   * Snapshot 2.0.0.alpha20060428a.
 
@@ -695,6 +732,15 @@
     M ./fetchnews.c -14 +26
 
 2005-04-22  Matthias Andree <matthias.andree@gmx.de>
+  tagged leafnode-2-0-0-alpha20050422a
+
+
+  * snapshot leafnode-2.0.0.alpha20050422a
+
+    M ./ChangeLog +49
+    M ./NEWS -1 +1
+    M ./configure.ac -1 +1
+
   * Fix UTF-8.
 
     M ./ChangeLog -2 +2
