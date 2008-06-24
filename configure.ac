@@ -250,10 +250,6 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_CHOWN
 AC_FUNC_FORK dnl checks whether fork() is just a stub
 dnl AC_FUNC_MKTIME
-if test "$ICC" != yes
-then
-AC_FUNC_SETVBUF_REVERSED
-fi
 AC_FUNC_STRFTIME
 dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF

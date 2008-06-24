@@ -113,7 +113,6 @@ liblnutil_a_SOURCES	= \
 	msgid.h \
 	msgid_hash.c \
 	msgid_sanitize.c \
-	mysetvbuf.h mysetvbuf.c \
 	nfswrite.c \
 	nntputil.c \
 	parserange.c \

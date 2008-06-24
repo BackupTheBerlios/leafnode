@@ -19,7 +19,6 @@
 #include "masock.h"
 #include "msgid.h"
 #include "mailto.h"
-#include "mysetvbuf.h"
 
 /* FIXME: write wrapper for this fellow */
 #ifdef SOCKS
@@ -2387,7 +2386,7 @@ dummy(int unused)
 static inline int
 mysetfbuf(FILE * f, /*@null@*/ /*@exposed@*/ /*@out@*/ char *buf, size_t size)
 {
-    return mysetvbuf(f, buf, _IOFBF, size);
+    return setvbuf(f, buf, _IOFBF, size);
 }
 
 static void
