@@ -1,5 +1,13 @@
 2008-06-24  Matthias Andree <matthias.andree@gmx.de>
-  * drop AC_FUNC_SETVBUF_REVERSED, mysetvbuf* and thereabouts. Obsolete.
+  * further ChangeLog cleanups
+
+    M ./ChangeLog -7 +2
+
+  * add various pieces to ChangeLog
+
+    M ./ChangeLog +46
+
+   * drop AC_FUNC_SETVBUF_REVERSED, mysetvbuf* and thereabouts. Obsolete.
 
     M ./Makefile.am -1
     M ./configure.ac -4
