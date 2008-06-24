@@ -1,3 +1,33 @@
+2008-06-24  Matthias Andree <matthias.andree@gmx.de>
+  * escalate feedtype logging to INFO severity
+
+    M ./fetchnews.c -2 +2
+
+  * Update copyright and version for first 2008 snapshot.
+
+    M ./AUTHORS -1 +1
+    M ./configure.ac -2 +2
+
+  * Run darcs changes without -v to omit hunks from changelog.
+
+    M ./makechangelog.pl -1 +1
+
+  * improve logging around posting articles
+
+    M ./fetchnews.c -3 +7
+
+  * reformat: add blank between switch and parenthesis
+
+    M ./fetchnews.c -1 +1
+
+  * make action_method_seen a boolean variable
+
+    M ./fetchnews.c -1 +1
+
+  * add more TODO items: pipeline group desc updates, add bogofilter hook
+
+    M ./TODO +5
+
 2007-06-02  Matthias Andree <matthias.andree@gmx.de>
   tagged leafnode-2-0-0-alpha20070602a
 
