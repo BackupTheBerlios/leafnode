@@ -1872,7 +1872,7 @@ do_server(struct serverlist *cursrv, int forceactive)
     /* do not try to connect if we don't want to post here in -P mode */
     if (action_method == FETCH_POST
 	    && cursrv -> feedtype != CPFT_NNTP) {
-	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "skipping %s:%hu",
+	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "skipping %s:%hu - feedtype not NNTP",
 		cursrv -> name, cursrv -> port);
 	return 1;
     }
@@ -1920,6 +1920,8 @@ do_server(struct serverlist *cursrv, int forceactive)
 	flag |= f_mustnotshort;
 	switch (cursrv->feedtype) {
 	    case CPFT_NNTP:
+		ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
+			"%s: feedtype == NNTP.", cursrv->name);
 		if (reply == 200) {
 		    res = postarticles(cursrv);
 		    if (res == 0 && rc >= 0)
@@ -1927,11 +1929,13 @@ do_server(struct serverlist *cursrv, int forceactive)
 		}
 		break;
 	    case CPFT_NONE:
+		ln_log(LNLOG_SDEBUG, LNLOG_CSERVER,
+			"%s: not posting, feedtype == none.", cursrv->name);
 		break;
 	    default:
 		ln_log(LNLOG_SCRIT, LNLOG_CTOP,
-			"fatal: feedtype %s not implemented",
-			get_feedtype(cursrv->feedtype));
+			"fatal: %s: feedtype %s not implemented",
+			cursrv->name, get_feedtype(cursrv->feedtype));
 		exit(1);
 	}
     }
