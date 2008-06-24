@@ -188,7 +188,7 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
     char *p;
 
     /* state information */
-    int action_method_seen = 0;	/* BHPR */
+    bool action_method_seen = FALSE;	/* BHPR */
 
     while ((option = getopt(argc, argv, GLOBALOPTS "BfHM:N:nPRS:t:x:")) != -1) {
 	if (parseopt(argv[0], option, optarg, conffile))
