@@ -84,8 +84,7 @@ default unless one of -B -H -M -P is used. See the configuration
 section of leafnode(8) for "delaybody".
 .TP
 .I -S server[:port]
-Only get articles on "server". You can specify this option multiple times
-with different servers if you want to query several servers at once.
+Only get articles from "server".
 .br
 If a server is running its NNTP service not on the standard port, you
 can specify an alternative port by adding a colon and the port number
