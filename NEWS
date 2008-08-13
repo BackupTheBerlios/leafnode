@@ -1,10 +1,6 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20080624a:
-- Documentation: Do not suggest fetchnews's -S option could be specified
-  more than once. Found by Florian E. Teply.
-
 20080624a: Changes since 20070602a:
 - Change: Improve logging of feedtype (when posting).
 
