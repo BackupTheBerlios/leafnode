@@ -1,6 +1,11 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20080624a:
+- Feature/fix: fetchnews -S <server> can now be specified more than once, to
+  query some servers. Patch courtesy of Robert Grimm <rob@robgri.de>.
+  Optional :port syntax not yet supported.
+
 20080624a: Changes since 20070602a:
 - Change: Improve logging of feedtype (when posting).
 

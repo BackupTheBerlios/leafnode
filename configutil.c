@@ -594,10 +594,10 @@ create_server(/*@observer@*/ const char *name, unsigned short port)
     return p;
 }
 
-static void
-freeservers(void)
+void
+freeservers(struct serverlist *s)
 {
-    struct serverlist *p = serverlist;
+    struct serverlist *p = s;
 
     while (p) {
 	struct serverlist *t = p->next;
@@ -613,7 +613,7 @@ freeservers(void)
 	p = t;
     }
 
-    serverlist = servers = 0;
+    s = servers = 0;
 }
 
 static void
@@ -649,7 +649,7 @@ freedelaybody(void)
 void
 freeconfig(void)
 {
-    freeservers();
+    freeservers(serverlist);
     if (owndn) {
 	free(owndn);
 	owndn = NULL;

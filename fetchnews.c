@@ -67,7 +67,7 @@ static const char *action_description[] = {
 
 static struct stringlisthead *msgidlist = NULL;	/* list of Message-IDs to get (specify with -M) */
 static struct stringlisthead *nglist = NULL;	/* newsgroups patterns to fetch */
-static char *only_server = NULL;		/* server name when -S option is given */
+static struct serverlist *only_server = NULL;		/* servers when -S option is given */
 
 static void
 ignore_answer(FILE * f)
@@ -185,6 +185,7 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
     char *p;
+    struct serverlist *sl = NULL;
 
     /* state information */
     bool action_method_seen = FALSE;	/* BHPR */
@@ -209,9 +210,11 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    }
 	    break;
 	case 'S':
-	    if (only_server)
-		free(only_server);
-	    only_server = critstrdup(optarg, "processoptions");
+	    p = critstrdup(optarg, "processoptions");
+	    sl = create_server(p, 0);
+	    sl->next = only_server;
+	    only_server = sl;
+	    free(p);
 	    break;
 	case 'N':
 	    initlist(&nglist);
@@ -2051,14 +2054,14 @@ main(int argc, char **argv)
 {
     int reply;
     char *conffile = NULL;
-    volatile int err;
+    volatile int err = 2;
     volatile int rc = 0;
     volatile int postonly;
     volatile time_t starttime;	/* keep state across setjmp */
     static const char myname[] = "fetchnews";
     struct sigaction sa;
     static int forceactive;	/* if 1, reread complete active file */
-    struct serverlist *current_server;
+    struct serverlist *current_server, *os;
 #ifdef COMPILE_BROKEN
     unsigned long articles;
     char **x;
@@ -2190,8 +2193,14 @@ main(int argc, char **argv)
 	/* time_t lastrun = 0;		/ * FIXME: save state for NEWNEWS */
 
 	current_server = servers;
-	if (only_server && strcasecmp(current_server->name, only_server))
-		continue;
+
+	for (os = only_server; os; os = os->next) {
+	    if (0 ==  strcasecmp(current_server->name, os->name)) {
+		err = do_server(current_server, forceactive);
+		break;
+	    }
+	}
+	if (!only_server)
 	    err = do_server(current_server, forceactive);
 	    if (err == -2) {
 		abort(); /* -2 is undocumented for do_server! */
@@ -2207,6 +2216,10 @@ main(int argc, char **argv)
 	    if (err == 0) {
 		break;	/* no other servers have to be queried */
 	    }
+    }
+    if (err == 2) {
+	ln_log(LNLOG_SERR, LNLOG_CSERVER,
+	       "%s: No matching servers found.", myname);
     }
 
 #ifdef COMPILE_BROKEN
@@ -2274,6 +2287,8 @@ main(int argc, char **argv)
 	unlink(lockfile);
     }
 
+    if (only_server)
+	freeservers(only_server);
     freeoptions();
     freexover();
     freeactive(active);
@@ -2281,7 +2296,5 @@ main(int argc, char **argv)
     freeallfilter(filter);
     freelocal();
     freeconfig();
-    if (only_server)
-	free(only_server);
     exit(rc);
 }

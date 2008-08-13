@@ -472,6 +472,8 @@ struct serverlist {
 /*@only@*/ struct serverlist *
 create_server(/*@observer@*/ const char *name, unsigned short port);
 
+void freeservers(struct serverlist *s);
+
 extern /*@null@*/ struct expire_entry *expire_base;
 
 struct delaybody_entry {
