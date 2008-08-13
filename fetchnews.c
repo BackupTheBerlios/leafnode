@@ -2202,20 +2202,21 @@ main(int argc, char **argv)
 	}
 	if (!only_server)
 	    err = do_server(current_server, forceactive);
-	    if (err == -2) {
-		abort(); /* -2 is undocumented for do_server! */
-		rc = 1;
-		break;
+
+	if (err == -2) {
+	    abort(); /* -2 is undocumented for do_server! */
+	    rc = 1;
+	    break;
+	}
+	if (err == -1 && rc == 0) {
+	    if (forceactive) {
+		error_refetch("could not successfully talk to all servers.");
 	    }
-	    if (err == -1 && rc == 0) {
-		if (forceactive) {
-		    error_refetch("could not successfully talk to all servers.");
-		}
-		rc = 2;
-	    }
-	    if (err == 0) {
-		break;	/* no other servers have to be queried */
-	    }
+	    rc = 2;
+	}
+	if (err == 0) {
+	    break;	/* no other servers have to be queried */
+	}
     }
     if (err == 2) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
