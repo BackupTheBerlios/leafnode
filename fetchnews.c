@@ -183,8 +183,9 @@ usage(void)
 static int
 process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
-    int option;
-    char *p;
+    int option, i;
+    unsigned long portnr = 0;
+    char *p, *s[3];
     struct serverlist *sl = NULL;
 
     /* state information */
@@ -210,8 +211,29 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    }
 	    break;
 	case 'S':
+	    i = 0;
 	    p = critstrdup(optarg, "processoptions");
-	    sl = create_server(p, 0);
+	    if (NULL != (strchr(p, ':'))) {
+		s[i] = strtok(p, ":");
+		while(NULL != s[i]) {
+		    if(i > 1) {
+			usage();
+                	return -1;
+		    }
+		    s[++i] = strtok(NULL, ":");
+		}
+		if(s[1]) { /*  Ignore until ":port" is used */
+		    ;
+		}
+                if(s[0] != p) {
+                    usage();
+                    return -1;
+		}
+		ln_log(LNLOG_SERR, LNLOG_CSERVER,
+            		"fetchnews: port syntax not yet supported.\n"
+			 "\tUsing %s as specified in config", p);
+	    }
+	    sl = create_server(p, portnr);
 	    sl->next = only_server;
 	    only_server = sl;
 	    free(p);
