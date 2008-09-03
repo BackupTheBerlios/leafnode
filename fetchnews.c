@@ -175,6 +175,36 @@ usage(void)
 }
 
 /**
+ * Split and convert port to long if the argument
+ * for the -S option is given as server:port.
+ * Return "port" or -1 in case of errors.
+ */
+static long
+split_serverarg(char *p)
+{
+    char *s[3], *t;
+    long port = 0;
+    int i = 0;
+
+    s[i] = strtok(p, ":");
+    while(s[i]) {
+        if(i > 1)
+            return -1;
+
+        s[++i] = strtok(NULL, ":");
+    }
+    if(s[1]) {
+        port = strtol(s[1], &t, 10);
+	if (*t || t == s[1])
+	    return -1;
+    }
+    if(s[0] != p)
+        return -1;
+
+    return port > 65535 ? -1 : port;
+}
+
+/**
  * parse fetchnews command line
  * \return
  * -  0 for success
@@ -183,8 +213,8 @@ usage(void)
 static int
 process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
-    int option, i;
-    unsigned long portnr = 0;
+    int option;
+    long portnr = 0;
     char *p, *s[3];
     struct serverlist *sl = NULL;
 
@@ -211,27 +241,12 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    }
 	    break;
 	case 'S':
-	    i = 0;
 	    p = critstrdup(optarg, "processoptions");
-	    if (NULL != (strchr(p, ':'))) {
-		s[i] = strtok(p, ":");
-		while(NULL != s[i]) {
-		    if(i > 1) {
-			usage();
-                	return -1;
-		    }
-		    s[++i] = strtok(NULL, ":");
+	    if (strchr(p, ':')) {
+		if((portnr = split_serverarg(p)) < 0) {
+		    usage();
+		    return -1;
 		}
-		if(s[1]) { /*  Ignore until ":port" is used */
-		    ;
-		}
-                if(s[0] != p) {
-                    usage();
-                    return -1;
-		}
-		ln_log(LNLOG_SERR, LNLOG_CSERVER,
-            		"fetchnews: port syntax not yet supported.\n"
-			 "\tUsing %s as specified in config", p);
 	    }
 	    sl = create_server(p, portnr);
 	    sl->next = only_server;
@@ -2218,6 +2233,7 @@ main(int argc, char **argv)
 
 	for (os = only_server; os; os = os->next) {
 	    if (0 ==  strcasecmp(current_server->name, os->name)) {
+		current_server->port = os->port;
 		err = do_server(current_server, forceactive);
 		break;
 	    }
