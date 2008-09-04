@@ -218,7 +218,6 @@ static int
 process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
-    long portnr = 0;
     char *p, *s[3];
     struct serverlist *sl = NULL;
 
@@ -245,17 +244,21 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    }
 	    break;
 	case 'S':
-	    p = critstrdup(optarg, "processoptions");
-	    if (strchr(p, ':')) {
-		if((portnr = split_serverarg(p)) < 0) {
-		    usage();
-		    return -1;
+	    {
+		long portnr = 0;
+
+		p = critstrdup(optarg, "processoptions");
+		if (strchr(p, ':')) {
+		    if ((portnr = split_serverarg(p)) < 0) {
+			usage();
+			return -1;
+		    }
 		}
+		sl = create_server(p, (unsigned short)portnr);
+		sl->next = only_server;
+		only_server = sl;
+		free(p);
 	    }
-	    sl = create_server(p, portnr);
-	    sl->next = only_server;
-	    only_server = sl;
-	    free(p);
 	    break;
 	case 'N':
 	    initlist(&nglist);
