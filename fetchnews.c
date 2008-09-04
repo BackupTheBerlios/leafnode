@@ -186,10 +186,11 @@ usage(void)
 static long
 split_serverarg(char *p, char sep)
 {
-    char *s[3], *t, delim[] = { sep, '\0' };
+    char *s[3], *t, delim[] = { '\0', '\0' };
     long port = 0;
     int i = 0;
 
+    delim[0] = sep;
     if (strchr(p, sep)) {
 	s[i] = strtok(p, delim);
 	while (s[i]) {
