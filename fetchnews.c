@@ -177,7 +177,11 @@ usage(void)
 /**
  * Split and convert port to long if the argument
  * for the -S option is given as server:port.
- * Return "port" or -1 in case of errors.
+ * \return "port" or -1 in case of errors.
+ *
+ * contributed by Robert Grimm
+ *
+ * NOTE: This function modifies its argument (strtok)!
  */
 static long
 split_serverarg(char *p)
