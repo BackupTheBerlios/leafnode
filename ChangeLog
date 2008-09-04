@@ -1,4 +1,72 @@
+2008-09-04  Matthias Andree <matthias.andree@gmx.de>
+  * reduce scope of portno variable
+
+    M ./fetchnews.c -10 +13
+
+  * more documentation for split_serverarg
+
+    M ./fetchnews.c -1 +5
+
+  * formatting: write empty blocks { } and add spaces in control statements
+
+    M ./activutil.c -5 +5
+    M ./fetchnews.c -4 +4
+    M ./mastring.c -2 +2
+    M ./nntpd.c -1 +1
+
+2008-09-03  Robert Grimm <rob@robgri.de>
+  * Allow server:port syntax with fetchnews -S.
+  The given portnumber is used now.
+  Added new function split_serverarg to keep process_options clear.
+
+    M ./fetchnews.c -21 +37
+
+2008-09-01  Robert Grimm <rob@robgri.de>
+  * Allow specification of port number with -S
+  By now the given port is ignored.
+
+    M ./fetchnews.c -3 +25
+
+2008-08-13  matthias.andree@gmx.de
+  * Update Doxyfile for doxygen 1.5.5 (automatic doxygen -u).
+
+    M ./Doxyfile -62 +206
+
+  * Fix indentation to clarify code.
+
+    M ./fetchnews.c -13 +14
+
+  * patch Robert Grimm: support multiple servers with fetchnews -S.
+
+    M ./NEWS +5
+    M ./configutil.c -5 +5
+    M ./fetchnews.c -10 +23
+    M ./leafnode.h +2
+
+  * Revert -S <server> being specified more than once.
+
+    M ./NEWS -4
+    M ./fetchnews.8.in -1 +2
+
+2008-08-10  Matthias Andree <matthias.andree@gmx.de>
+  * Do not suggest fetchnews's -S option could be specified more than once.
+
+    M ./NEWS +4
+    M ./fetchnews.8.in -2 +1
+
 2008-06-24  Matthias Andree <matthias.andree@gmx.de>
+  * do not consider files starting with a dot boring
+
+    M ./.boring -1
+
+  * add rsyncs file
+
+    A ./.rsyncs
+
+  * Update ChangeLog.
+
+    M ./ChangeLog -1 +9
+
   * further ChangeLog cleanups
 
     M ./ChangeLog -7 +2
