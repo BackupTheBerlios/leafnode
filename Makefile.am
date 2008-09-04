@@ -239,11 +239,11 @@ config_paths.h: Makefile
 
 FAQ.css FAQ.html: FAQ.tex
 	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-FAQ.XXXXXXXXXX`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
-	htlatex.sh FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
+	htlatex FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
 
 README-FQDN.css README-FQDN.html: README-FQDN.tex
 	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-README-FQDN.XXXXXXXXXX`" && cp $(srcdir)/README-FQDN.tex $$tmp && cd $$tmp && \
-	htlatex.sh README-FQDN.tex && cd - && cp $$tmp/README-FQDN.html $$tmp/README-FQDN.css . && rm -rf $$tmp)
+	htlatex README-FQDN.tex && cd - && cp $$tmp/README-FQDN.html $$tmp/README-FQDN.css . && rm -rf $$tmp)
 
 FAQ.pdf: FAQ.tex
 	pdflatex $(srcdir)/FAQ.tex && pdflatex $(srcdir)/FAQ.tex || { rm -f FAQ.pdf ; exit 1 ; }
