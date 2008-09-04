@@ -181,30 +181,31 @@ usage(void)
  *
  * contributed by Robert Grimm
  *
- * NOTE: This function modifies its argument (strtok)!
+ * NOTE: This function modifies its first argument (strtok)!
  */
 static long
-split_serverarg(char *p)
+split_serverarg(char *p, char sep)
 {
-    char *s[3], *t;
+    char *s[3], *t, delim[] = { sep, '\0' };
     long port = 0;
     int i = 0;
 
-    s[i] = strtok(p, ":");
-    while (s[i]) {
-        if (i > 1)
-            return -1;
+    if (strchr(p, sep)) {
+	s[i] = strtok(p, delim);
+	while (s[i]) {
+	    if (i > 1)
+	        return -1;
 
-        s[++i] = strtok(NULL, ":");
-    }
-    if (s[1]) {
-        port = strtol(s[1], &t, 10);
-	if (*t || t == s[1])
+	    s[++i] = strtok(NULL, delim);
+	}
+	if (s[1]) {
+	    port = strtol(s[1], &t, 10);
+	    if (*t || t == s[1])
+		return -1;
+	}
+	if (s[0] != p)
 	    return -1;
     }
-    if (s[0] != p)
-        return -1;
-
     return port > 65535 ? -1 : port;
 }
 
@@ -218,7 +219,7 @@ static int
 process_options(int argc, char *argv[], int *forceactive, char **conffile)
 {
     int option;
-    char *p, *s[3];
+    char *p;
     struct serverlist *sl = NULL;
 
     /* state information */
@@ -246,13 +247,12 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	case 'S':
 	    {
 		long portnr = 0;
+		char s = ':';
 
 		p = critstrdup(optarg, "processoptions");
-		if (strchr(p, ':')) {
-		    if ((portnr = split_serverarg(p)) < 0) {
-			usage();
-			return -1;
-		    }
+		if ((portnr = split_serverarg(p, s)) < 0) {
+		    usage();
+		    return -1;
 		}
 		sl = create_server(p, (unsigned short)portnr);
 		sl->next = only_server;
