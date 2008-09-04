@@ -2403,7 +2403,7 @@ main_loop(void)
 
     while (fflush(stdout), (cmd = mgetaline(stdin))) {
 	/* collect possible returned children */
-	while (waitpid(-1, 0, WNOHANG) > 0);
+	while (waitpid(-1, 0, WNOHANG) > 0) { }
 
 	if (debugmode & DEBUG_NNTP && !(debugmode & DEBUG_IO))
 	    ln_log(LNLOG_SDEBUG, LNLOG_CTOP, "<%s", cmd);

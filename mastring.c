@@ -259,7 +259,7 @@ mastr_triml(mastr * m)
 	p++;
     if (p != q) {
 	/*@-whileempty@*/
-	while ((*q++ = *p++));
+	while ((*q++ = *p++)) { }
 	/*@=whileempty@*/
 	m->len -= p - q;
     }
@@ -273,7 +273,7 @@ mastr_trimr(mastr * m)
 	return;
     p = m->dat + m->len;
     /*@-whileempty@*/
-    while (--p >= m->dat && isspace((unsigned char)*p));
+    while (--p >= m->dat && isspace((unsigned char)*p)) { }
     /*@=whileempty@*/
     *++p = '\0';
     m->len = (size_t)(p - m->dat);

@@ -187,18 +187,18 @@ split_serverarg(char *p)
     int i = 0;
 
     s[i] = strtok(p, ":");
-    while(s[i]) {
-        if(i > 1)
+    while (s[i]) {
+        if (i > 1)
             return -1;
 
         s[++i] = strtok(NULL, ":");
     }
-    if(s[1]) {
+    if (s[1]) {
         port = strtol(s[1], &t, 10);
 	if (*t || t == s[1])
 	    return -1;
     }
-    if(s[0] != p)
+    if (s[0] != p)
         return -1;
 
     return port > 65535 ? -1 : port;
