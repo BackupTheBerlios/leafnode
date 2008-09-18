@@ -50,8 +50,10 @@ parameter determines which newsgroup(s) the following patterns should be
 applied to. You can use
 .B PCRE
 expressions as explained in the 
-.BR pcre (3)
-manual page. When prefixed with an exclamation point, the match result
+.BR pcrepattern (3)
+manual page.
+
+When prefixed with an exclamation point, the match result
 is inverted, i. e. the rule applies if the newsgroup name is \fBnot\fR
 matched by the PCRE, useful for "for all newsgroups except... do"-style
 filters. The newsgroup rule is memorized and can be used for more than
@@ -65,7 +67,12 @@ can be one of the following:
 pattern = [!]\fIPCRE\fR
 Filter on any pattern that may occur in a header. Leafnode uses
 Perl-compatible regular expressions (PCRE) which are explained in
-a separate manual page (\fBpcre\fR(3)).
+a separate manual page (\fBpcrepattern\fR(3)).
+.sp
+Note that the patterns are case sensitive. If you want a caseless match,
+you can use (?i) as PCRE option inside the pattern - the \fBPCRE\fR
+manual will tell you more.  Specifically, leafnode compiles the
+\fBPCRE\fR patterns with just the \fBPCRE_MULTILINE\fR option set.
 .sp
 Note that the right hand side follows the same quoting conventions as
 leafnode's main configuration file - the double quote (") is special!
@@ -80,7 +87,8 @@ Be very careful when using the | operator. Make sure you use parentheses
 to tell PCRE which part you want matched. "^Subject: Jens|Jan" is
 different from "^Subject: (Jens|Jan)" -- the former matches either
 "^Subject: Jens" or "Jan", and because these are applied to any header,
-the former PCRE would match on all articles posted in January.
+the former PCRE would also match on all articles posted in January,
+because the "^Subject: " part is missing from the second alternative!
 .TP
 maxage = [days]
 Filter on age of articles in days. Articles that are older are
@@ -188,7 +196,7 @@ designates that an arbitrary number, including zero, of these characters
 may be there) while between "fast" and "money" there must be at least one
 other character (designated by the "?"). For further explanations of
 Perl-compatible regular expressions, see
-.BR pcre (3).
+.BR pcrepattern (3).
 
 .PP
 The second example shows how to avoid articles in a specific newsgroup
@@ -258,5 +266,5 @@ Zusman <ljz@asfast.com>. It was later revised by Matthias Andree.
 .SH SEE ALSO
 .BR leafnode (8),
 .BR fetchnews (8),
-.BR pcre (3),
+.BR pcrepattern (3),
 .BR @sysconfdir@/filters.example .
