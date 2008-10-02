@@ -7,6 +7,12 @@
 ### for details.
 ###
 
+### WARNING:  Do not use this filterfile as is, some filters may kill
+### ========  more postings than desired. It is prudent to start a new
+###           filter file from scratch, possibly copying just this
+### header, and copying just filter examples that you want to adjust.
+
+
 ### the next lines will kill descrambler spam in all groups
 ### d-e-s-c-r-a-m-b-l-e-r or d.e.s.c.r.a.m.b.l.e.r are detected
 newsgroups = .*

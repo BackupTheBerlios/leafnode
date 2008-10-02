@@ -592,5 +592,6 @@ has been paid for by Uninett AS (http://www.uninett.no/).
 .BR checkgroups (8),
 .BR glob (7),
 .BR pcre (3).
-.BR @sysconfdir@/filters.example ,
+.BR @sysconfdir@/filters.example - note that this should not be used as
+is,
 .B "RFC 977"
