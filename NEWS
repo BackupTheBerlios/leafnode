@@ -5,6 +5,10 @@ Changes since 20080904a:
 - Documentation: filterfile(5) now refers to pcrepattern(3) instead of
   pcre(3). It mentions that patterns are case sensitive and (?i) can be
   used for caseless matching.
+- Documentation: the "bad weather" example in filters.example was fixed,
+  and prominent notices added that it's not meant to be used as is were
+  placed in that file, filterfile(5) and leafnode(8).
+  Found and debugged by Manfred Lotz and Robert Grimm.
 
 20080904a: Changes since 20080624a:
 - Feature/fix: fetchnews -S <server> can now be specified more than once, to
