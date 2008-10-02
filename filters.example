@@ -56,8 +56,8 @@ action = kill
 ###
 ### Be very careful when using the | operator, either of the sides will
 ### match, so "^Subject: Jens|Jan" will kill all articles posted in
-### January because it means "^Subject: Jens" or "Jan". Use "^Subject:
-### (Jens|Jan)" instead (don't type the quote marks!)
+### January because it means "^Subject: Jens" or "Jan".
+### Use "^Subject: (Jens|Jan)" instead (don't type the quote marks!)
 newsgroups = .*
 pattern = ^Subject: (AW|WG|Re^\d+):
 action = kill
