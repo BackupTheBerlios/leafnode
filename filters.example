@@ -48,7 +48,7 @@ action = kill
 ### that only applies to the Subject: header:
 ### This ignores all postings about bad weather:
 newsgroups = .*
-pattern = ^Subject:(?!.*bad weather)
+pattern = ^Subject:(?=.*bad weather)
 action = kill
 
 ### this gets you rid of German Outlook national oddities
