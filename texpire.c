@@ -1004,7 +1004,8 @@ usage(void)
 	    "Usage:\n"
 	    "texpire [OPTIONS] [-C message.id [...]]\n"
 	    "options are:\n"
-	    GLOBALOPTLONGHELP
+	    GLOBALOPTLONGHELP);
+    fprintf(stderr,
 	    "    -a             - expire individual articles (earlier) rather than threads\n"
 	    "    -f             - force expire irrespective of access time\n"
 	    "    -n             - dry run mode, do not delete anything\n"

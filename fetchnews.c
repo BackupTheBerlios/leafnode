@@ -146,10 +146,11 @@ usage(void)
     fprintf(stderr, "Usage:\n"
 	    "fetchnews [GLOBAL OPTIONS] [-BfHnPR] [-t #] [-x #] [-S server[:port]]\n"
 	    "          [-N {newsgroup|group.pattern}] [-M message-id]\n"
-	    "options are:\n"
-	    GLOBALOPTLONGHELP
-	    "    -B             - get article bodies in delaybody groups\n");
+	    "options are:\n");
     fprintf(stderr,
+	    GLOBALOPTLONGHELP);
+    fprintf(stderr,
+	    "    -B             - get article bodies in delaybody groups\n"
 	    "    -f             - force reload of groupinfo file\n"
 	    "    -H             - get article headers in delaybody groups\n"
 	    "    -n             - switch off automatic unsubscription of groups\n");

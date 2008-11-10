@@ -37,7 +37,8 @@ usage(void)
     printf("Usage:\n"
 	   "rnews [OPTIONS] [file|directory]\n"
 	   "options are:\n"
-	   GLOBALOPTLONGHELP
+	   GLOBALOPTLONGHELP);
+    printf(
 	   "    file           - import file into news spool\n"
 	   "    directory      - import all files in directory into news spool\n"
 	  );

@@ -42,6 +42,8 @@ usage(void)
 	    "applyfilter [options] object [...]\n"
 	    "options are:\n"
 	    GLOBALOPTLONGHELP
+	    );
+    fprintf(stderr,
 	    "    -c             - check mode, print if filters match files on command line\n"
 	    "    -n             - dry run, do not actually delete anything\n"
 	    );

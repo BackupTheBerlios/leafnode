@@ -29,7 +29,8 @@ usage(void)
 	    "Usage:\n"
 	    "newsq [OPTIONS] [-cf]\n"
 	    "options are:\n"
-	    GLOBALOPTLONGHELP
+	    GLOBALOPTLONGHELP);
+    fprintf(stderr,
 	    "    -c             - exit with code %d on error,\n"
 	    "                     exit with code %d if out.going queue has articles\n"
 	    "                     exit with code %d if out.going queue is empty.\n"
