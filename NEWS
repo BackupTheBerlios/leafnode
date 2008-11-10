@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20080904a:
+20081110a: Changes since 20080904a:
 - Documentation: filterfile(5) now refers to pcrepattern(3) instead of
   pcre(3). It mentions that patterns are case sensitive and (?i) can be
   used for caseless matching.
@@ -10,7 +10,8 @@ Changes since 20080904a:
   placed in that file, filterfile(5) and leafnode(8).
   Found and debugged by Manfred Lotz and Robert Grimm.
 - u_char has been replaced by unsigned char, to fix compilation issues
-  on some issues (MacOS X 10.5).
+  on some systems (MacOS X 10.5). Some longer strings (> 509 chars), in
+  usage notices, have been split, to support older compilers.
 
 20080904a: Changes since 20080624a:
 - Feature/fix: fetchnews -S <server> can now be specified more than once, to

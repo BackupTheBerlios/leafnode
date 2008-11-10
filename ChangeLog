@@ -1,3 +1,85 @@
+2008-11-10  Matthias Andree <matthias.andree@gmx.de>
+  * Add one more host.
+
+    M ./.rsyncs +1
+
+  * u_char -> unsigned char
+
+    M ./NEWS +2
+    M ./arc4random.c -3 +3
+    M ./arc4random.h -1 +1
+    M ./mergesort.c -15 +15
+
+  * Shorten (split) string literals for C90 conformance.
+
+    M ./applyfilter.c +2
+    M ./fetchnews.c -3 +4
+    M ./newsq.c -1 +2
+    M ./rnews.c -1 +2
+    M ./texpire.c -1 +2
+
+2008-11-06  Matthias Andree <matthias.andree@gmx.de>
+  * Record two new tasks: VCS migration and version tag for spooldir
+
+    M ./TODO +5
+
+2008-10-21  Matthias Andree <matthias.andree@gmx.de>
+  * Fix formatting of filters.example.note in leafnode(8).
+
+    M ./leafnode.8.in -3 +3
+
+2008-10-02  Matthias Andree <matthias.andree@gmx.de>
+  * Record recent filters.example fix in NEWS.
+
+    M ./NEWS +4
+
+  * add prominent warnings that filters.example is not intended to be used as is
+
+    M ./filterfile.5.in -1 +2
+    M ./filters.example +6
+    M ./leafnode.8.in -1 +2
+
+  * reformat PCRE alternatives example/warning
+
+    M ./filters.example -2 +2
+
+  * fix filters.example - bad weather had inverted logic
+
+    M ./filters.example -1 +1
+
+2008-09-18  Matthias Andree <matthias.andree@gmx.de>
+  * mention case sensitive matching default of PCRE's, update pcrepattern(3) reference
+
+    M ./NEWS +5
+    M ./filterfile.5.in -6 +14
+
+2008-09-04  Matthias Andree <matthias.andree@gmx.de>
+  * Use constant initializers to make code compile on C89 compilers.
+
+    M ./fetchnews.c -1 +2
+
+2008-09-04  rob@robgri.de
+  * Cleanup
+  Moved check for occurence of ':' in argument to -S to split_serverarg.
+  Make split_serverarg more common.
+  Removed unneeded variable.
+
+    M ./fetchnews.c -21 +21
+
+2008-09-04  Matthias Andree <matthias.andree@gmx.de>
+  * Update tex4ht commands after teTeX -> TeXLive 2007 migration (openSUSE 10.2 -> 11.0)
+
+    M ./Makefile.am -2 +2
+
+  tagged leafnode-2-0-0-alpha20080904a
+
+
+  * snapshot 20080904a
+
+    M ./ChangeLog +68
+    M ./NEWS -2 +3
+    M ./configure.ac -1 +1
+
 2008-09-04  Matthias Andree <matthias.andree@gmx.de>
   * reduce scope of portno variable
 
