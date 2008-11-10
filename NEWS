@@ -9,6 +9,8 @@ Changes since 20080904a:
   and prominent notices added that it's not meant to be used as is were
   placed in that file, filterfile(5) and leafnode(8).
   Found and debugged by Manfred Lotz and Robert Grimm.
+- u_char has been replaced by unsigned char, to fix compilation issues
+  on some issues (MacOS X 10.5).
 
 20080904a: Changes since 20080624a:
 - Feature/fix: fetchnews -S <server> can now be specified more than once, to

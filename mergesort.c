@@ -75,12 +75,12 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #endif
 
 static void setup
-__P((u_char *, u_char *, size_t, size_t, int (*)(const void *, const void *)));
+__P((unsigned char *, u_char *, size_t, size_t, int (*)(const void *, const void *)));
 static void insertionsort
-__P((u_char *, size_t, size_t, int (*)(const void *, const void *)));
+__P((unsigned char *, size_t, size_t, int (*)(const void *, const void *)));
 
 #define ISIZE sizeof(int)
-#define PSIZE sizeof(u_char *)
+#define PSIZE sizeof(unsigned char *)
 #define ICOPY_LIST(src, dst, last)				\
 	do							\
 	*(int*)(void *)dst = *(int*)(void *)src,                \
@@ -107,9 +107,9 @@ __P((u_char *, size_t, size_t, int (*)(const void *, const void *)));
  * boundaries.
  */
 /* Assumption: PSIZE is a power of 2. */
-#define eval(p) ((u_char **)(void *)					\
-	((u_char *)0 +							\
-	    (((u_char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1))))
+#define eval(p) ((unsigned char **)(void *)					\
+	((unsigned char *)0 +							\
+	    (((unsigned char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1))))
 
 /*
  * Arguments are as for qsort.
@@ -122,8 +122,8 @@ mergesort(void *base, size_t nmemb, register size_t size,
     register size_t i;
     size_t big;
     int iflag;
-    register u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
-    u_char *list2, *list1, *p2, *p, *last, **p1;
+    register unsigned char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
+    unsigned char *list2, *list1, *p2, *p, *last, **p1;
 
     if (size < PSIZE / 2) {	/* Pointers must fit into 2 * size. */
 	errno = EINVAL;
@@ -141,10 +141,10 @@ mergesort(void *base, size_t nmemb, register size_t size,
     if (!(size % ISIZE) && !(((char *)base - (char *)0) % ISIZE))
 	iflag = 1;
 
-    if ((list2 = (u_char *) malloc(nmemb * size + PSIZE)) == NULL)
+    if ((list2 = (unsigned char *) malloc(nmemb * size + PSIZE)) == NULL)
 	return (-1);
 
-    list1 = (u_char *) base;
+    list1 = (unsigned char *) base;
     setup(list1, list2, nmemb, size, cmp);
     last = list2 + nmemb * size;
     i = big = 0;
@@ -275,17 +275,17 @@ mergesort(void *base, size_t nmemb, register size_t size,
  * is defined.  Otherwise simple pairwise merging is used.)
  */
 void
-setup(u_char * list1, u_char * list2, size_t n, size_t size,
+setup(unsigned char * list1, u_char * list2, size_t n, size_t size,
       int (*cmp) (const void *, const void *))
 {
     int length, size2, sense;
     size_t i;
-    u_char *f1, *f2, *s, *l2, *last, *p2, tmp;
+    unsigned char *f1, *f2, *s, *l2, *last, *p2, tmp;
 
     size2 = size * 2;
     if (n <= (size_t)5) {
 	insertionsort(list1, n, size, cmp);
-	*eval(list2) = (u_char *) list2 + n * size;
+	*eval(list2) = (unsigned char *) list2 + n * size;
 	return;
     }
     /*
@@ -348,10 +348,10 @@ setup(u_char * list1, u_char * list2, size_t n, size_t size,
  * last 4 elements.
  */
 static void
-insertionsort(u_char * a, size_t n, size_t size,
+insertionsort(unsigned char * a, size_t n, size_t size,
 	      int (*cmp) (const void *, const void *))
 {
-    u_char *ai, *s, *t, *u, tmp;
+    unsigned char *ai, *s, *t, *u, tmp;
     size_t i;
 
     for (ai = a + size; --n >= 1; ai += size)

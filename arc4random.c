@@ -54,7 +54,7 @@ arc4_init(struct arc4_stream *as)
 }
 
 static inline void
-arc4_addrandom(struct arc4_stream *as, u_char * dat, int datlen)
+arc4_addrandom(struct arc4_stream *as, unsigned char * dat, int datlen)
 {
     int n;
     uint8_t si;
@@ -90,7 +90,7 @@ arc4_stir(struct arc4_stream *as)
     /* fd < 0?  Ah, what the heck. We'll just take whatever was on the
      * stack... */
 
-    arc4_addrandom(as, (u_char *)&rdat, sizeof(rdat));
+    arc4_addrandom(as, (unsigned char *)&rdat, sizeof(rdat));
 }
 
 static inline uint8_t
@@ -129,7 +129,7 @@ arc4random_stir(void)
 }
 
 void
-arc4random_addrandom(u_char * dat, int datlen)
+arc4random_addrandom(unsigned char * dat, int datlen)
 {
     if (!rs_initialized)
 	arc4random_stir();
