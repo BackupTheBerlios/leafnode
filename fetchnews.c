@@ -224,6 +224,11 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
     int option;
     char *p;
     struct serverlist *sl = NULL;
+    /** This flag (courtesy of Robert Grimm) becomes true if two
+     * mutually exclusive arguments are encountered on the command line;
+     * it builds upon the assumption that there is only one group of
+     * flags of which only one can be active at any one time.
+     */
     bool excl_arg_seen = FALSE;
 
     /* state information */
