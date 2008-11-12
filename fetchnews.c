@@ -169,6 +169,7 @@ usage(void)
 	    "Setting none of the options\n"
 	    "    -B -H -P -R\n"
             "is equivalent to setting all of them, unless [-M message-id] is used.\n"
+            "Options [-S server] and -f are mutually exclusive.\n"
 	    "Options [-S server], [-M message-id] and [-N newsgroup] may be repeated.\n"
 	    "Articles specified by Message-ID will always be fetched as a whole,\n"
 	    "no matter if they were posted to a delaybody group.\n"
@@ -223,6 +224,7 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
     int option;
     char *p;
     struct serverlist *sl = NULL;
+    bool excl_arg_seen = FALSE;
 
     /* state information */
     bool action_method_seen = FALSE;	/* BHPR */
@@ -250,6 +252,12 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    {
 		long portnr = 0;
 		char s = ':';
+
+		if (excl_arg_seen) { /* -S and -f are mutually exclusive */
+		    usage();
+		    return -1;
+		}
+		excl_arg_seen = TRUE;
 
 		p = critstrdup(optarg, "processoptions");
 		if ((portnr = split_serverarg(p, s)) < 0) {
@@ -281,6 +289,12 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    noexpire = 1;
 	    break;
 	case 'f':
+	    if (excl_arg_seen) { /* -S and -f are mutually exclusive */
+		usage();
+		return -1;
+	    }
+	    excl_arg_seen = TRUE;
+
 	    *forceactive = 1;
 	    break;
 	case 'B':

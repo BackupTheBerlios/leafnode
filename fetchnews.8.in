@@ -44,6 +44,8 @@ section of leafnode(8) for "delaybody".
 .I -f
 Force rereading of whole active file from all upstream servers. This is
 usually occurring only very infrequently because it takes a long time.
+.br
+Can not be used with -S.
 .TP
 .I -H
 Get article headers for groups that are in "delaybody" mode. Done by
@@ -90,6 +92,8 @@ with different servers if you want to query several servers at once.
 If a server is running its NNTP service not on the standard port, you
 can specify an alternative port by adding a colon and the port number
 immediately behind the server name, without any whitespace inbetween.
+.br
+Can not be used with -f.
 .TP
 .I -t number
 Wait this many seconds before fetching next article. This is useful if
