@@ -1,6 +1,10 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20081110a:
+- Bugfix: Make fetchnews's -f and -S options mutually exclusive, to
+  prevent corruption of active file. Patch by Robert Grimm.
+
 20081110a: Changes since 20080904a:
 - Documentation: filterfile(5) now refers to pcrepattern(3) instead of
   pcre(3). It mentions that patterns are case sensitive and (?i) can be
