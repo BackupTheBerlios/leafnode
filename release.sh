@@ -1,10 +1,13 @@
 #! /bin/sh
 
 set -e
-if test "x`darcs whatsnew -s | grep -v '^No changes!'`" != "x" ; then
-    echo "record your changes in darcs first!"
-    exit 1
-fi
+git status
+a=
+while [ "$a" != y -a "$a" != n ] ; do
+    printf "Did you commit all changes (see above)? [y/n] "
+    read a
+done
+if [ "$a" != y ] ; then echo "Then commit first." ; exit 1 ; fi
 
 a=
 while [ "$a" != y -a "$a" != n ]
@@ -12,7 +15,7 @@ do
     printf "Did you update ChangeLog? [y/n] "
     read a
 done
-if [ "$a" != y ] ; then echo "Then use makechangelog.pl to generate new entries." ; exit 1 ; fi
+if [ "$a" != y ] ; then echo "Then use makechangelog.sh to generate new entries." ; exit 1 ; fi
 
 builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
