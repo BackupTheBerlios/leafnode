@@ -31,9 +31,7 @@ urgence:
 
 SOON:
 	- pipeline group description updates
-	- add bogofilter hook
-	- change repo type to Git or Mercurial - whichever has the saner
-	  (and working!) conversion tool from darcs
+	- add bogofilter hook - Clemens has something in the pipe.
 	- record spool version in some file, for instance, to bump it
 	  from v2 to v2.1 (or something similar) when changing the hash
 	  function (à la MoinMoin's upgrade helper)
