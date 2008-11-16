@@ -143,13 +143,13 @@ AM_WITH_DMALLOC
 dnl check where to put the spooldir
 if test "x$localstatedir" = 'x${prefix}/var' \
   -a "(" "x$prefix" = xNONE -o "x$prefix" = "x/usr" ")" ; then
-  SPDIR='/var/spool/news'
+  SPDIR='/var/spool/leafnode'
 else
-  SPDIR="$localstatedir/spool/news"
+  SPDIR="$localstatedir/spool/leafnode"
 fi
 
 AC_MSG_CHECKING(spooldir)
-AC_ARG_ENABLE(spooldir, AS_HELP_STRING(--enable-spooldir=DIR,news spool directory (/var/spool/news)),
+AC_ARG_ENABLE(spooldir, AS_HELP_STRING(--enable-spooldir=DIR,news spool directory (/var/spool/leafnode)),
   if echo "$enableval" | egrep >/dev/null -v '^/' ; then
     AC_MSG_ERROR(you must give an absolute path)
   fi

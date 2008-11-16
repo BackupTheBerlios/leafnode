@@ -15,3 +15,7 @@ leafnode-2 doesn't care for out.going file permissions when posting, it
 receives postings in temp.files and will link them to out.going or
 in.coming only after they've been completely received. Do not modify the
 permissions in out.going.
+
+* SETUP
+
+leafnode-2's default spooldir is now /var/spool/leafnode.

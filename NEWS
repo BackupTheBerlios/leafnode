@@ -2,6 +2,9 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20081110a:
+- Default: the default spool directory is now /var/spool/leafnode.
+  If you'd been using /var/spool/news as the default, you may need to
+  move the spool (renaming the directory is usually sufficient).
 - Bugfix: Make fetchnews's -f and -S options mutually exclusive, to
   prevent corruption of active file. Patch by Robert Grimm.
 
