@@ -12,27 +12,36 @@ rnews \- sort batch files into spool
 .B rnews [GLOBAL OPTIONS] [file|directory]
 
 .SH DESCRIPTION
-.B Leafnode
-is a USENET package intended for small sites, where there are few
-users and little disk space, but where a large number of groups is
-desired.
+\fBLeafnode\fR is a USENET package intended for small sites, where there
+are few users and little disk space, but where a large number of groups
+is desired.
 .PP
-.B Rnews
-is the program that sorts files (possibly received with UUCP) into your newsspool.
-.B Rnews
-can currently take compressed and uncompressed news batches as well as news
-articles.
-.B Rnews will avoid copying the file around and is able to read from a
-stream. To achieve this, it may fork() twice and spawn an external
-decompressor.
-.B Rnews
-expects the news batch either in a file, directory or on stdin. If provided
-with the name of a directory, it will open the directory and sort all files
-inside this directory into the news spool. Rnews will not recursively descend
+\fBRnews\fR is the program that sorts files (possibly received with
+UUCP) into your newsspool. \fBRnews\fR can currently take compressed (see
+below) and uncompressed ("rnews") news batches as well as news
+articles. \fBRnews\fR will avoid copying the file around and is able to
+read from a stream. To achieve this, it may fork() twice and spawn an
+external decompressor.
+
+.SS INPUT
+\fBRnews\fR expects the news batch either in a
+file, directory or on standard input. If provided with the name of a
+directory, it will open the directory and sort all files inside this
+directory into the news spool. Rnews will \fInot\fR recursively descend
 through directories.
 .PP
-.B Rnews
-sets its real and effective uid to "news".
+\fBRnews\fR sets its real and effective uid to "news" (or whatever else
+was configured).
+
+.SS COMPRESSED BATCH FORMATS (UNBATCH)
+.PP
+\fBRnews\fR recognizes cunbatch, gunbatch and zunbatch and will feed
+either through gzip -c -d.
+.PP
+\fBRnews\fR recognizes bunbatch and will feed it through bzip2 -c -d.
+.PP
+These formats are not run-time configurable. To add/change this
+behaviour, it is necessary to modify rnews.c, recompile and reinstall.
 
 .SH OPTIONS
 For a description of the \fBGLOBAL OPTIONS\fR, see
@@ -55,4 +64,5 @@ Written and Copyright 1999 by Cornelius Krasel <krasel@wpxx02.toxi.uni-wuerzburg
 .PP
 Written and Copyright 2002 by Ralf Wildenhues <ralf.wildenhues@gmx.de>.
 .PP
-Written and Copyright 2000 - 2005 by Matthias Andree <matthias.andree@gmx.de>.
+Written and Copyright 2000 - 2005 by Matthias Andree
+<matthias.andree@gmx.de>. Manpage updated in 2008 by Matthias Andree.
