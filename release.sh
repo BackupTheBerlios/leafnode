@@ -1,13 +1,12 @@
 #! /bin/sh
 
 set -e
-git status
-a=
-while [ "$a" != y -a "$a" != n ] ; do
-    printf "Did you commit all changes (see above)? [y/n] "
-    read a
-done
-if [ "$a" != y ] ; then echo "Then commit first." ; exit 1 ; fi
+if git status -a >/dev/null; then
+    git status || :
+    echo
+    echo 'ERROR: Commit changes first!'
+    exit 1
+fi
 
 a=
 while [ "$a" != y -a "$a" != n ]
