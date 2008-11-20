@@ -1,12 +1,17 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20081110a:
+20081120a: Changes since 20081110a:
 - Default: the default spool directory is now /var/spool/leafnode.
   If you'd been using /var/spool/news as the default, you may need to
   move the spool (renaming the directory is usually sufficient).
 - Bugfix: Make fetchnews's -f and -S options mutually exclusive, to
   prevent corruption of active file. Patch by Robert Grimm.
+- Development: the repository was changed to GIT format. This may not be
+  the final decision, but let's try it for a while. http://git.or.gz/
+  Currently, the official repositories are:
+  http://developer.berlios.de/git/?group_id=448
+  http://mandree.home.pages.de/leafnode/leafnode-2.git/
 
 20081110a: Changes since 20080904a:
 - Documentation: filterfile(5) now refers to pcrepattern(3) instead of

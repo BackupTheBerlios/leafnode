@@ -4,7 +4,7 @@ dnl written by Matthias Andree, 2002 - 2008
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20081110a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20081120a])
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
