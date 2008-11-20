@@ -8,7 +8,7 @@ KNOWN BUGS:
 - Bugfix: Make fetchnews's -f and -S options mutually exclusive, to
   prevent corruption of active file. Patch by Robert Grimm.
 - Development: the repository was changed to GIT format. This may not be
-  the final decision, but let's try it for a while. http://git.or.gz/
+  the final decision, but let's try it for a while. http://git.or.cz/
   Currently, the official repositories are:
   http://developer.berlios.de/git/?group_id=448
   http://mandree.home.pages.de/leafnode/leafnode-2.git/
