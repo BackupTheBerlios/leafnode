@@ -1,6 +1,8 @@
 #! /bin/sh
 
 a=0
+echo "===>  Repacking"
+git repack -d
 echo "===>  Pushing to own home directory"
 git push "$HOME"/public_html/leafnode/leafnode-2.git/ || a=1
 echo "===>  Pushing to BerliOS"
