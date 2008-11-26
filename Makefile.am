@@ -314,7 +314,7 @@ install-data-hook:
 	-./amiroot && chown $(RUNAS_USER) $(DESTDIR)$(SPOOLDIR)/leaf.node
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)
 	-./amiroot && chgrp $(RUNAS_GROUP) $(DESTDIR)$(SPOOLDIR)/leaf.node
-	rm -f $(DESTDIR)$(sbindir)/leafnode-version
+	rm -f $(DESTDIR)$(sbindir)/leafnode-version # now in $(bindir)
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
 	@echo
