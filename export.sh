@@ -1,10 +1,12 @@
 #! /bin/sh
 
+owndir="$HOME"/public_html/leafnode/leafnode-2.git/
+
 a=0
-echo "===>  Repacking"
-git repack -d
 echo "===>  Pushing to own home directory"
-git push "$HOME"/public_html/leafnode/leafnode-2.git/ || a=1
+git push "$owndir" || a=1
+echo "===>  Repacking"
+( cd "$owndir" && git repack --max-pack-size=1 && git prune-packed )
 echo "===>  Pushing to BerliOS"
 git push ssh://m-a@git.berlios.de/gitroot/leafnode/ || a=1
 echo "===>  Finished."
