@@ -1,4 +1,74 @@
+2008-12-29  Matthias Andree <matthias.andree@gmx.de>
+
+  * Get ready for plain 20081229a release.
+
+    M	NEWS
+    M	configure.ac
+
+  * Makefile.am: $(SYSCONFDIR) -> $(sysconfdir) - the former is undefined.
+
+    M	Makefile.am
+
+  * Use HEVEA (rather than TeX4ht) for generation.
+    The latter isn't available as FreeBSD port.
+
+    M	Makefile.am
+
+2008-12-18  Matthias Andree <matthias.andree@gmx.de>
+
+  * Properly repack GIT repo; set max. pack size 1 MB.
+
+    M	export.sh
+
+2008-11-27  Matthias Andree <matthias.andree@gmx.de>
+
+  * Document rm -f leafnode-version: moved from $(sbindir) to $(bindir)
+
+    M	Makefile.am
+
+2008-11-25  Matthias Andree <matthias.andree@gmx.de>
+
+  * Run repack before pushing.
+
+    M	export.sh
+
+  * Change authentication logging to server: username "USER"
+    Change: when logging authentication trouble, don't use username@servername
+    format but rather server: username "username", to make output less irritating.
+    (Related support request by Gianni Piccini.)
+
+    M	NEWS
+    M	nntputil.c
+
 2008-11-20  Matthias Andree <matthias.andree@gmx.de>
+
+  * Improve the rnews manual page.
+    Add documentation on understood compressed batch formats.
+    Add subsections (.SS) somewhere and change some .B to \fB...\fR to reduce
+      clutter.
+
+    M	NEWS
+    M	rnews.8.in
+
+  * Add tagging helper script.
+
+    A	tag.sh
+
+  * Fix typo in GIT homepage URL (git.or.cz rather than ...gz).
+
+    M	NEWS
+
+  * Improve changes-to-be-committed check with git status -a.
+
+    M	release.sh
+
+  * Update ChangeLog for release 20081120a.
+
+    M	ChangeLog
+
+  * Fix spacing.
+
+    M	makechangelog.sh
 
   * Release 20081120a.
 
