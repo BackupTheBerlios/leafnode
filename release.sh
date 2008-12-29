@@ -63,7 +63,7 @@ _EOF
 sed '/^$/q;s/^- /+ /' NEWS >>$tmp
 gpg --clearsign $tmp
 
-nail -s "leafnode-$vers snapshot available" \
+mutt -s "leafnode-$vers snapshot available" \
     leafnode-list@dt.e-technik.uni-dortmund.de <$tmp.asc
 rm $tmp $tmp.asc
 trap - 0
