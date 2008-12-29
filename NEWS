@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20081120a:
+20081229a: Changes since 20081120a:
 - Documentation: Improved the rnews(8) manual page.
 - Change: when logging authentication trouble, don't use
   username@servername format but rather server: username "username", to
