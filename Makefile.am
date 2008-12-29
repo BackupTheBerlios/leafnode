@@ -303,7 +303,7 @@ configparam_data.c: $(srcdir)/config.table b_sortnl$(EXEEXT) genconfigparam_data
 
 .PHONY:	update
 update:
-	@./update.sh $(SPOOLDIR) $(SYSCONFDIR) $(SPOOLDIR)/leaf.node/lock.file $(RUNAS_USER) $(RUNAS_GROUP)
+	@./update.sh $(SPOOLDIR) $(sysconfdir) $(SPOOLDIR)/leaf.node/lock.file $(RUNAS_USER) $(RUNAS_GROUP)
 
 install-data-hook:
 	$(INSTALL) -d -m 02770 $(DESTDIR)$(SPOOLDIR)
@@ -325,8 +325,8 @@ install-data-hook:
 	@echo
 
 uninstall-local:
-	-rm -f $(SYSCONFDIR)/config.example
-	-rmdir $(SYSCONFDIR)
+	-rm -f $(sysconfdir)/config.example
+	-rmdir $(sysconfdir)
 	-rm -r $(SPOOLDIR)/leaf.node
 	-rmdir $(SPOOLDIR)/in.coming
 	-rmdir $(SPOOLDIR)/out.going
