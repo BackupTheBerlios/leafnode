@@ -205,11 +205,9 @@ EXTRA_DIST = \
 	ENVIRONMENT \
 	FAQ.tex \
 	FAQ.html \
-	FAQ.css \
 	FAQ.pdf \
 	README-FQDN.tex \
 	README-FQDN.html \
-	README-FQDN.css \
 	README-FQDN.pdf \
 	genconfigdefs.awk genconfigparam_data.awk \
 	leafnode.spec \
@@ -239,11 +237,11 @@ config_paths.h: Makefile
 
 FAQ.css FAQ.html: FAQ.tex
 	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-FAQ.XXXXXXXXXX`" && cp $(srcdir)/FAQ.tex $$tmp && cd $$tmp && \
-	htlatex FAQ.tex && cd - && cp $$tmp/FAQ.html $$tmp/FAQ.css . && rm -rf $$tmp)
+	hevea FAQ.tex && hevea FAQ.tex && cd - && cp $$tmp/FAQ.html . && rm -rf $$tmp)
 
 README-FQDN.css README-FQDN.html: README-FQDN.tex
 	( tmp="`mktemp -d $${TMPDIR-/tmp}/leafnode-README-FQDN.XXXXXXXXXX`" && cp $(srcdir)/README-FQDN.tex $$tmp && cd $$tmp && \
-	htlatex README-FQDN.tex && cd - && cp $$tmp/README-FQDN.html $$tmp/README-FQDN.css . && rm -rf $$tmp)
+	hevea README-FQDN.tex && hevea README-FQDN.tex && cd - && cp $$tmp/README-FQDN.html . && rm -rf $$tmp)
 
 FAQ.pdf: FAQ.tex
 	pdflatex $(srcdir)/FAQ.tex && pdflatex $(srcdir)/FAQ.tex || { rm -f FAQ.pdf ; exit 1 ; }
