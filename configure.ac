@@ -185,7 +185,7 @@ AC_SUBST(sysconfdir)
 dnl check for rpm build dir
 AC_MSG_CHECKING(rpm build dir)
 d=/usr/src/packages
-test -d ${d}/SPECS || d=/usr/src/redhat dnl RedHat
+test -d ${d}/SPECS || d=/usr/src/redhat
 test -d ${d}/SPECS || d=none
 RPMSRC=${d}
 AC_MSG_RESULT(${RPMSRC})
@@ -248,16 +248,13 @@ AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_UTIME_NULL
 AC_FUNC_CHOWN
-AC_FUNC_FORK dnl checks whether fork() is just a stub
+dnl checks whether fork() is just a stub:
+AC_FUNC_FORK
 dnl AC_FUNC_MKTIME
 AC_FUNC_STRFTIME
-dnl AC_FUNC_UTIME_NULL dnl checks whether utime(FILE, NULL) uses current time
 AC_FUNC_VPRINTF
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
-dnl THESE ARE DISABLED AND UNNEEDED, no malloc(0) calls possible
-dnl AC_FUNC_MALLOC dnl checks whether malloc(0) works
-dnl AC_FUNC_REALLOC dnl checks whether realloc(0) works
 
 dnl Check if system vsnprintf works
 AC_CACHE_CHECK([if your system's vsnprintf works],
@@ -268,7 +265,7 @@ AC_RUN_IFELSE([[
 	       ln_cv_working_vsnprintf=no,ln_cv_working_vsnprintf=no))
 
 if test "x$ln_cv_working_vsnprintf" = "xyes" ; then
-	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ `vsnprintf' function.]) dnl `
+	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ 'vsnprintf' function.])
 else
 AC_LIBOBJ(vsnprintf)
 fi
