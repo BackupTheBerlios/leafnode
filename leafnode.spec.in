@@ -80,10 +80,10 @@ cp $RPM_BUILD_ROOT/%confdir/config.example $RPM_BUILD_ROOT/%confdir/config
 %doc %_mandir/man1/*
 %doc %_mandir/man5/*
 %doc %_mandir/man8/*
-%doc ChangeLog AUTHORS COPYING COPYING.LGPL NEWS
-%doc CREDITS DEBUGGING ENVIRONMENT FAQ.pdf INSTALL
-%doc README TODO README-leaf.node  FAQ.html FAQ.css
-%doc README.html DEBUGGING
+%doc AUTHORS CHANGES-FROM-LEAFNODE-1 COPYING COPYING.LGPL
+%doc CREDITS ChangeLog DEBUGGING ENVIRONMENT FAQ.html FAQ.pdf
+%doc INSTALL NEWS README README.html README-FQDN.html README-FQDN.pdf 
+%doc README-leaf.node TODO
 %attr(2755,%{runas_user},%{runas_group}) %spooldir
 
 %clean
