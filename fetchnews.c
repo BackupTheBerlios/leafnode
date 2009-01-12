@@ -224,12 +224,13 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
     int option;
     char *p;
     struct serverlist *sl = NULL;
-    /** This flag (courtesy of Robert Grimm) becomes true if two
+    /** This flags (courtesy of Robert Grimm) become true if two
      * mutually exclusive arguments are encountered on the command line;
      * it builds upon the assumption that there is only one group of
      * flags of which only one can be active at any one time.
      */
-    bool excl_arg_seen = FALSE;
+    bool excl_arg_server = FALSE; /* Option -S server */
+    bool excl_arg_active = FALSE; /* Option -f */
 
     /* state information */
     bool action_method_seen = FALSE;	/* BHPR */
@@ -258,11 +259,11 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 		long portnr = 0;
 		char s = ':';
 
-		if (excl_arg_seen) { /* -S and -f are mutually exclusive */
+		if (excl_arg_active) { /* -S and -f are mutually exclusive */
 		    usage();
 		    return -1;
 		}
-		excl_arg_seen = TRUE;
+		excl_arg_server = TRUE;
 
 		p = critstrdup(optarg, "processoptions");
 		if ((portnr = split_serverarg(p, s)) < 0) {
@@ -294,11 +295,11 @@ process_options(int argc, char *argv[], int *forceactive, char **conffile)
 	    noexpire = 1;
 	    break;
 	case 'f':
-	    if (excl_arg_seen) { /* -S and -f are mutually exclusive */
+	    if (excl_arg_server) { /* -S and -f are mutually exclusive */
 		usage();
 		return -1;
 	    }
-	    excl_arg_seen = TRUE;
+	    excl_arg_active = TRUE;
 
 	    *forceactive = 1;
 	    break;
