@@ -47,7 +47,8 @@ check_date(const struct serverlist *server)
     time_t t, to;
     const int tolerate = 10;
     const int debugmask = DEBUG_NNTP|DEBUG_LOGGING;
-    char *lastline;
+    char *lastline, *tz;
+    const char *const tzvar = "TZ";
 
     putaline(nntpout, "DATE");
     reply = newnntpreply(server, &lastline);
@@ -75,16 +76,24 @@ check_date(const struct serverlist *server)
     tm.tm_year -= 1900;
     tm.tm_mon -= 1;
     tm.tm_isdst = -1; /* let libc figure time zone offset */
+
+    /* mktime assumes local time, so let's sell it a different idea */
+    tz = getenv(tzvar);
+    setenv(tzvar, "UTC", 1);
+    tzset();
     t = mktime(&tm);
+    if (tz)
+        setenv(tzvar, tz, 1);
+    else
+        unsetenv(tzvar);
+    tzset();
+
     if (t == (time_t) - 1) {
 	/* error, ignore */
 	ln_log(LNLOG_SINFO, LNLOG_CSERVER, "check_date: %s: upstream sends unparsable reply "
 		"to DATE, mktime failed. \"%s\"", server->name, lastline);
 	return;
     }
-
-    /* mktime assumes local time zone, compensate */
-    t += gmtoff(t);
 
     if (labs(t - time(&to)) > tolerate * 60) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER, "check_date: %s: clocks of upstream and this computer are more than %d minutes apart. Check your system clock.", server->name, tolerate);
