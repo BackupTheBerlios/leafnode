@@ -450,6 +450,16 @@ nntpconnect(const struct serverlist *upstream)
 	return 0;
     }
 
+    if (reply == 200 && line && strstr(line, "200 newsd news server ready -")) {
+	/* newsd <= 1.44 replaces Message-IDs - we cannot post on those
+	 * servers.*/
+	ln_log(LNLOG_SWARNING, LNLOG_CSERVER,
+		"%s: Server is running newsd, which replaces Message-ID "
+		"headers. newsd is thus prone to dupe floods and must be fixed. "
+		"Refusing to post to this server." , upstream->name);
+	reply = 201;
+    }
+
     if (getsockopt(fileno(nntpout), SOL_SOCKET, SO_SNDBUF,
 		   (char *)&sendbuf, &optlen) == -1) {
 	ln_log(LNLOG_SERR, LNLOG_CSERVER,
