@@ -32,7 +32,7 @@ close F;
 print "last version: $lastver\n";
 my $lastver_save = $lastver;
 @tarballs = grep { $_ gt "$lastver" }
-		map { s/$pat(.*)\.tar\.bz2/$1/; $_; } @tarballs;
+		map { s/\Q$pat\E(.*)\.tar\.bz2/$1/; $_; } @tarballs;
 
 print "newer versions: ", join(" ", @tarballs), "\n";
 my $mostcurrent = $tarballs[$#tarballs];
@@ -51,7 +51,7 @@ my $state = 0;
 open O, ">HEADER.html.new" or die "open: $!";
 while (<F>) {
     if ($state == 0) {
-	s/$lastver_save/$mostcurrent/g;
+	s/\Q$lastver_save\E/$mostcurrent/g;
     }
     print O $_;
     if (/$bookmark/) {
