@@ -1,6 +1,11 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+Changes since 20081229a:
+- Change: refuse posting to newsd servers to prevent dupes, because 
+  newsd replaces Message-IDs. The bug has been known and remained 
+  unfixed to the newsd maintainers for years.
+
 20081229a: Changes since 20081120a:
 - Documentation: Improved the rnews(8) manual page.
 - Change: when logging authentication trouble, don't use
