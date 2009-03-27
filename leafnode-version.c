@@ -18,7 +18,8 @@
 #include "config.h"
 
 int
-main(void)
+main(void) /* if you support arguments some day, please make -v
+	      compatible with leafnode-1. */
 {
     static char env_path[] = "PATH=/bin:/usr/bin";
     /* ------------------------------------------------ */
