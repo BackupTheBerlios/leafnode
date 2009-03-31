@@ -11,7 +11,7 @@ fi
 a=
 while [ "$a" != y -a "$a" != n ]
 do
-    printf "Did you update ChangeLog? [y/n] "
+    printf "Did you update ChangeLog and NEWS? [y/n] "
     read a
 done
 if [ "$a" != y ] ; then echo "Then use makechangelog.sh to generate new entries." ; exit 1 ; fi
