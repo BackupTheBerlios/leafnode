@@ -45,7 +45,7 @@ regelm‰ﬂig lesen, vom Newsserver des Providers. Weiter erlaubt es, lokale
 CFLAGS="$RPM_OPT_FLAGS"
 %configure \
  --enable-spooldir=%spooldir \
- --enable-runas-user=%{runas_user} --with-runas-group=%{runas_group} \
+ --enable-runas-user=%{runas_user} \
  --sysconfdir=%_sysconfdir/leafnode
 
 %build
