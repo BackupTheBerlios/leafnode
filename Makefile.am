@@ -316,11 +316,14 @@ install-data-hook:
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
 	@echo
-	@echo "### If you are upgrading to a version newer than 20040326a"
-	@echo "### for the first time, run: chmod -R o= $(DESTDIR)$(SPOOLDIR)"
+	@echo "### If upgrading from leafnode-1 or a snapshot older than 2002,"
+	@echo "### run $(sbindir)/texpire -r to fix the message.id index."
+	@echo
+	@echo "### If upgrading from a version before 20040326a"
+	@echo "### for the first time, run: chmod -R o= $(SPOOLDIR)"
 	@echo "### Note this command may take a long time to run."
 	@echo
-	@echo "Then edit /etc/inetd.conf to start $(DESTDIR)$(sbindir)/leafnode"
+	@echo "Then edit /etc/inetd.conf to start $(sbindir)/leafnode"
 	@echo "and restart inetd. Also read the instructions on updating in the README file."
 	@echo
 
