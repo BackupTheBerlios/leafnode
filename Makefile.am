@@ -316,8 +316,11 @@ install-data-hook:
 	./amiroot && p=$(DESTDIR)$(bindir)/newsq && chown 0 $$p \
 		&& chgrp $(RUNAS_GROUP) $$p && chmod 2111 $$p  ; true
 	@echo
+	@echo "### If upgrading from leafnode before 1.6,"
+	@echo "### run:  make update"
+	@echo
 	@echo "### If upgrading from leafnode-1 or a snapshot older than 2002,"
-	@echo "### run $(sbindir)/texpire -r to fix the message.id index."
+	@echo "### you must fix the message.id index, run: $(sbindir)/texpire -r"
 	@echo
 	@echo "### If upgrading from a version before 20040326a"
 	@echo "### for the first time, run: chmod -R o= $(SPOOLDIR)"
