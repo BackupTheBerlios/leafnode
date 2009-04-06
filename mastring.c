@@ -1,6 +1,6 @@
 /* mastring.c -- Implement auto-allocating string functions.
  *
- * (C) 2001 - 2003 by Matthias Andree <matthias.andree@gmx.de>
+ * (C) 2001 - 2003, 2009 by Matthias Andree <matthias.andree@gmx.de>
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -326,6 +326,8 @@ void mastr_unfold(mastr *m) {
 	    p++;
 	}
     }
+    *q = '\0';
+    m->len = q - m->dat;
 }
 #endif
 
