@@ -34,7 +34,12 @@ then
     exit 1;
 fi
 
-touch ${LOCKFILE}
+rm -f ${LOCKFILE}.$$
+echo $$ >${LOCKFILE}.$$
+hostname >>${LOCKFILE}.$$ || :
+ln ${LOCKFILE}.$$ ${LOCKFILE} || { rm -f ${LOCKFILE}.$$ ; exit 1 ; }
+rm ${LOCKFILE}.$$
+trap "rm ${LOCKFILE}" 0
 
 if [ -f ${LIBDIR}/groupinfo ]
 then
@@ -43,7 +48,6 @@ then
     	echo Re-sorting groupinfo file...
 	mv ${SPOOLDIR}/leaf.node/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
 	sort -f < ${SPOOLDIR}/leaf.node/groupinfo.old > ${SPOOLDIR}/leaf.node/groupinfo
-	rm ${LOCKFILE}
 	echo Done.
 	exit 0;
     fi
@@ -56,21 +60,20 @@ then
     echo Converting groupinfo file ... your old groupinfo file will be in ${SPOOLDIR}/leaf.node/groupinfo.old
     awk '{ printf("%s %d %d 0", $1, $2, $3); for (i = 5; i <= NF; i++) printf(" %s", $i); printf("\n"); }' < ${LIBDIR}/groupinfo | sort -f > ${SPOOLDIR}/leaf.node/groupinfo
     mv ${SPOOLDIR}/leaf.node/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
-    ${SRCDIR}/lsort > ${SPOOLDIR}/leaf.node/groupinfo
+    ${SRCDIR}/lsort > ${SPOOLDIR}/leaf.node/groupinfo || { mv ${SPOOLDIR}/leaf.node/groupinfo.old  ${SPOOLDIR}/leaf.node/groupinfo ; exit 1 ; }
     mv ${LIBDIR}/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
     echo Move other files ...
     find ${LIBDIR} -type f -not -name 'config*' -exec mv '{}' ${SPOOLDIR}/leaf.node/ \;
     chown $RUNAS_USER:$RUNAS_GROUP ${SPOOLDIR}/leaf.node/*
-    chmod 664 ${SPOOLDIR}/leaf.node/*
+    chmod 660 ${SPOOLDIR}/leaf.node/*
     echo Done.
-    rm ${LOCKFILE}
     exit 0
 fi
 
 echo Re-sorting groupinfo file...
 mv ${SPOOLDIR}/leaf.node/groupinfo ${SPOOLDIR}/leaf.node/groupinfo.old
-${SRCDIR}/lsort > ${SPOOLDIR}/leaf.node/groupinfo
+${SRCDIR}/lsort > ${SPOOLDIR}/leaf.node/groupinfo || { mv ${SPOOLDIR}/leaf.node/groupinfo.old  ${SPOOLDIR}/leaf.node/groupinfo ; exit 1 ; }
 echo Done.
-rm ${LOCKFILE}
 chown $RUNAS_USER.$RUNAS_GROUP ${SPOOLDIR}/leaf.node/groupinfo
+chmod 0660 ${SPOOLDIR}/leaf.node/groupinfo
 exit 0
