@@ -36,7 +36,7 @@ main(void)
     FILE *f;
     mastr *path = mastr_new(LN_PATH_MAX);
 
-    (void)mastr_vcat(path, spooldir, "/leaf.node/groupinfo.old", NULL);
+    (void)mastr_vcat(path, def_spooldir, "/leaf.node/groupinfo.old", NULL);
 
     f = fopen(mastr_str(path), "r");
     if (f == NULL) {
