@@ -302,8 +302,8 @@ configparam_data.c: $(srcdir)/config.table b_sortnl$(EXEEXT) genconfigparam_data
 	|| { rm -f $@ ; false ; }
 
 .PHONY:	update
-update:
-	@./update.sh $(SPOOLDIR) $(sysconfdir) $(SPOOLDIR)/leaf.node/lock.file $(RUNAS_USER) $(RUNAS_GROUP)
+update: lsort
+	$(SHELL) "$(top_srcdir)/update.sh" "$(SPOOLDIR)" "$(sysconfdir)" "$(SPOOLDIR)/leaf.node/lock.file" "$(RUNAS_USER)" "$(RUNAS_GROUP)"
 
 install-data-hook:
 	$(INSTALL) -d -m 02770 $(DESTDIR)$(SPOOLDIR)
