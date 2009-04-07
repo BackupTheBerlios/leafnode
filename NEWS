@@ -5,6 +5,27 @@ Changes since 20081229a:
 - Change: refuse posting to newsd servers to prevent dupes, because 
   newsd replaces Message-IDs. The bug has been known and remained 
   unfixed to the newsd maintainers for years.
+- Documentation: the README would show glob, rather than PCRE, matches for
+  filterfile newsgroups in the upgrade instructions.
+- Bugfix: RPM packaging was outdated. (Attila H.)
+- Bugfix: Multiple fetchnews -S server options work again. (Robert Grimm)
+- Bugfix: use tzset() rather than gmtoff() for a UTC-mktime emulation.
+- Workaround: refuse posting to newsd servers (those trash Message-IDs, making
+  leafnode post over and over again).
+- Compability: leafnode-version -v is documented (actually -v is ignored, just
+  to document compatibility with leafnode-1's leafnode-version).
+- Update: Drop obsolete --with-runas-group from RPM spec file.
+- Change: Build ix86 RPMs for i586, rather than i486.
+- Bugfix: update.sh is now executable.
+- Bugfix: update.sh now sets the lock file properly.
+- Bugfix: update.sh now restores the groupinfo file if lsort fails.
+- Bugfix: update.sh now chmods to 0660 for consistency.
+- Bugfix: make update now runs update.sh under $(SHELL) and from
+  $(top_srcdir), to fix builds outside the source directory (VPATH builds).
+- Bugfix: make update now depends on lsort.
+- Bugfix: lsort now finds the groupinfo.old again. (Reported by Adam Funk.)
+- Bugfix: lsort now detects write errors and exits with failure status.
+- Documentation: information printed by make/make update is now updated.
 
 20081229a: Changes since 20081120a:
 - Documentation: Improved the rnews(8) manual page.

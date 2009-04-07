@@ -1,4 +1,147 @@
+2009-04-07  Matthias Andree <matthias.andree@gmx.de>
+
+  * Minor fixes; newsgroups=ng now PCRE based.
+
+    M	README.html
+
+  * Fix formatting of filters.example note.
+
+    M	filterfile.5.in
+
+  * Notify user that make update is only for ancient leafnode <1.6.
+
+    M	Makefile.am
+
+2009-04-06  Matthias Andree <matthias.andree@gmx.de>
+
+  * Complete update instructions.
+
+    M	Makefile.am
+
+  * lsort: Fix error detection and reporting.
+    If open fails, print file path and errno message.
+    Check for write errors, and if there are any, abort writing
+    and exit with EXIT_FAILURE.
+
+    M	lsort.c
+
+  * Makefile: revise upgrade instructions.
+
+    M	Makefile.am
+
+  * make update: run script properly; depend on lsort.
+    Run update.sh with $(SHELL) (in case it's not executable)
+    and from $(top_srcdir) for VPATH builds.
+    Properly escape arguments.
+
+    Make update depends on up-to-date lsort, just in case.
+
+    M	Makefile.am
+
+  * Assorted update.sh fixes.
+    Create lockfile safer and with PID.
+    Restore groupinfo backup if lsort fails.
+    chmod groupinfo and other files to 0660 (not 0664).
+    Use EXIT (0) trap to get rid of lockfile.
+
+    M	update.sh
+
+  * Fix lsort to use def_spooldir (not spooldir).
+    This fixes fallout from this
+    commit e8b618172a32789de6ca4c237b3a1cc65949e253
+    Author: Matthias Andree <matthias.andree@gmx.de>
+    Date:   2004-01-16 18:28:06 +0100
+
+        Drop lockfile. Rename config.c's spooldir to def_spooldir.
+
+    Reported by Adam Funk who found that "make update" no longer worked and
+    complained that it could not open groupinfo.old.
+
+    M	lsort.c
+
+  * Mark update.sh executable.
+
+    M	update.sh
+
+  * Fix mastr_unfold: Insert NUL byte, adjust len.
+
+    M	mastring.c
+
+2009-04-01  Matthias Andree <matthias.andree@gmx.de>
+
+  * Build RPMs for i586 (rather than i486).
+
+    M	Makefile.am
+
+  * Drop obsolete --with-runas-group option from RPM build.
+
+    M	leafnode.spec.in
+
+  * Remind user to update NEWS.
+
+    M	release.sh
+
+2009-03-27  Matthias Andree <matthias.andree@gmx.de>
+
+  * note leafnode-1 support for leafnode-version -v.
+
+    M	leafnode-version.c
+
+2009-03-24  Matthias Andree <matthias.andree@gmx.de>
+
+  * Untested attempt to fix HEADER.html for Perl Regexp metas.
+
+    M	addpatches.pl
+
+  * Merge commit 'origin/master'
+
+  * Refuse posting to newsd, to avoid dupe floods
+    Newsd unconditionally overwrites Message-IDs in posted articles (which
+    is bad practice), so we cannot detect that posting has been successful
+    and also cannot obtain the new Message-ID, so don't post to newsd
+    servers. The upstream, EasySW, has known the bug for years.
+
+    M	NEWS
+    M	nntputil.c
+
+2009-03-09  Matthias Andree <matthias.andree@gmx.de>
+
+  * Don't use gmtoff() for UTC-mktime, but tzset().
+
+    M	fetchnews_check_date.c
+
+2009-01-12  Matthias Andree <matthias.andree@gmx.de>
+
+  * Fix typo in comment.
+
+    M	fetchnews.c
+
+2009-01-12  Robert Grimm <rob@robgri.de>
+
+  * Make multiple use of -S Server work again
+    Signed-off-by: Robert Grimm <rob@robgri.de>
+
+    M	fetchnews.c
+
+2008-12-30  Matthias Andree <matthias.andree@gmx.de>
+
+  * Fix %doc macro list (I forgot to remove FAQ.css), reported by Attila H.
+
+    M	leafnode.spec.in
+
+  * Clean up some dnl macros that ate the trailing LF, breaking RPMSRC tests.
+
+    M	configure.ac
+
 2008-12-29  Matthias Andree <matthias.andree@gmx.de>
+
+  * Use mutt instead of nail.
+
+    M	release.sh
+
+  * Update ChangeLog (after tagging, sorry.)
+
+    M	ChangeLog
 
   * Get ready for plain 20081229a release.
 
