@@ -303,6 +303,10 @@ configparam_data.c: $(srcdir)/config.table b_sortnl$(EXEEXT) genconfigparam_data
 
 .PHONY:	update
 update: lsort
+	@echo
+	@echo "### Note that make update is only needed for updates from very old"
+	@echo "### leafnode versions, namely, < 1.6 (around 1998)."
+	@echo
 	$(SHELL) "$(top_srcdir)/update.sh" "$(SPOOLDIR)" "$(sysconfdir)" "$(SPOOLDIR)/leaf.node/lock.file" "$(RUNAS_USER)" "$(RUNAS_GROUP)"
 
 install-data-hook:
