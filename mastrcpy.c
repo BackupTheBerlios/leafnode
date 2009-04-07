@@ -1,7 +1,8 @@
-/*
- * stccpy.c
- *
- * (C) 2001 by Matthias Andree
+/** \file
+ * \date 2001
+ * \author Matthias Andree
+ * \addtogroup mastring
+ *@{
  */
 
 
@@ -11,7 +12,7 @@
 
 #include "mastring.h"
 
-/* this function is a strcpy reimplementation that returns a pointer 
+/** This function is a strcpy reimplementation that returns a pointer
  * to the NUL byte in the destination string, thus, there's no need for
  * subsequent implicit strlen traversals for strcat */
 char *
@@ -23,3 +24,4 @@ mastrcpy(/*@out@*/ /*@returned@*/ char *dest, const char *src)
     *dest = '\0';
     return dest;
 }
+/*@}*/

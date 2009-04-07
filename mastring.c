@@ -1,6 +1,8 @@
-/* mastring.c -- Implement auto-allocating string functions.
- *
- * (C) 2001 - 2003, 2009 by Matthias Andree <matthias.andree@gmx.de>
+/** \file mastring.c
+ * Implement auto-allocating string functions.
+ */
+
+/* (C) Copyright 2001 - 2003, 2009 by Matthias Andree <matthias.andree@gmx.de>
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -16,6 +18,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ */
+/** \addtogroup mastring
+ *@{
  */
 
 #include <string.h>
@@ -56,6 +61,8 @@ mastr_oom(void)
 #undef min
 #define min(a,b) ((a < b) ? (a) : (b))
 
+/** Create a new empty mastr object with an initial capacity of \a size bytes.
+ \a size must be non-zero. */
 mastr *
 mastr_new(size_t size)
 {
@@ -79,7 +86,8 @@ mastr_new(size_t size)
     return n;
 }
 
-
+/** Create a new mastr object as a copy of \a s.
+    \return mastr object, or NULL if \a s is NULL or memory is insufficient. */
 mastr *
 mastr_newstr(const char *s)
 {
@@ -96,6 +104,10 @@ mastr_newstr(const char *s)
     return n;
 }
 
+/** Copy C string \a s into existing mastr object \a m, resizing it if needed.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_cpy(mastr * m, const char *s)
 {
@@ -114,6 +126,11 @@ mastr_cpy(mastr * m, const char *s)
     return 1;
 }
 
+/** Copy up to \a max characters from C string \a s into existing mastr object
+ * \a m, resizing it if needed.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_ncpy(mastr * m, const char *s, size_t max)
 {
@@ -136,6 +153,11 @@ mastr_ncpy(mastr * m, const char *s, size_t max)
     return 1;
 }
 
+/** Catenate C string \a s to the end of the existing mastr object \a m,
+ * resizing it if needed.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_cat(mastr * m, /*@unique@*/ /*@observer@*/ const char *const s)
 {
@@ -154,6 +176,7 @@ mastr_cat(mastr * m, /*@unique@*/ /*@observer@*/ const char *const s)
     return 1;
 }
 
+/** Clear data in mastr object \a m, maintaining its current capacity. */
 void
 mastr_clear(mastr * m)
 {
@@ -163,6 +186,11 @@ mastr_clear(mastr * m)
     m->dat[0] = '\0';
 }
 
+/** Catenate varargs list to end of existing mastr object \a m, resizing it as
+ * needed. The argument list must end with a NULL.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_vcat(mastr * m, ...)
 {
@@ -198,6 +226,11 @@ mastr_vcat(mastr * m, ...)
     return 1;
 }
 
+/** Resize existing mastr object \a m to new capacity \a l, destroying its
+ * former content.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_resizekill(mastr * m, size_t l)
 {
@@ -218,6 +251,11 @@ mastr_resizekill(mastr * m, size_t l)
     return 1;
 }
 
+/** Resize existing mastr object \a m to new capacity \a l, maintaining its
+ * former content.
+ * \return
+ * - 1 - success
+ * - 0 - failure */
 int
 mastr_resizekeep(mastr * m, size_t l)
 {
@@ -239,6 +277,7 @@ mastr_resizekeep(mastr * m, size_t l)
     return 1;
 }
 
+/** Destroy mastr object \a m, freeing its memory */
 void
 mastr_delete(/*@only@*/ mastr * m)
 {
@@ -248,6 +287,8 @@ mastr_delete(/*@only@*/ mastr * m)
     }
 }
 
+/** Trim (delete) whitespace (as per isspace()) from the beginning of mastr
+ * object \a m. */
 void
 mastr_triml(mastr * m)
 {
@@ -265,6 +306,9 @@ mastr_triml(mastr * m)
     }
 }
 
+/** Trim (delete) whitespace (as per isspace()) from the end of mastr
+ * object \a m. */
+void
 void
 mastr_trimr(mastr * m)
 {
@@ -280,9 +324,10 @@ mastr_trimr(mastr * m)
 }
 
 #if LEAFNODE_VERSION > 1
+/** Read a line from a FILE \a f - optionally length-limited - into mastr \a m. */
 ssize_t
 mastr_getln(mastr * m, FILE * f,
-	    ssize_t maxbytes /** if negative: unlimited */ )
+	    ssize_t maxbytes /** if negative: unlimited */)
 {
     /* FIXME: make this overflow safe, size_t vs. ssize_t. */
     char buf[4096];
@@ -315,6 +360,8 @@ mastr_getln(mastr * m, FILE * f,
     return (ssize_t)(m->len);
 }
 
+/** Perform minimal RFC-5322-style header unfolding on mastr object \a m:
+    Remove LF characters that are immediately followed by whitespace. */
 void mastr_unfold(mastr *m) {
     char *p, *q;
     p = q = m->dat;
@@ -331,7 +378,7 @@ void mastr_unfold(mastr *m) {
 }
 #endif
 
-/* chop off last character of string */
+/** Chop off last character of mastr object \a m. */
 static void
 choplast(mastr * m)
 {
@@ -341,7 +388,7 @@ choplast(mastr * m)
     }
 }
 
-/** chop off trailing LF or CRLF */
+/** Chop off trailing LF or CRLF from mastr object \a m*/
 void
 mastr_chop(mastr * m)
 {
@@ -351,16 +398,17 @@ mastr_chop(mastr * m)
 	choplast(m);
 }
 
-/** return size of buffer */
+/** Return capacity of buffer currently allocated for object \a m*/
 size_t
 mastr_size(mastr * m)
 {
     return m->bufsize - 1;
 }
 
-/** return length of buffer */
+/** Return (used) length of string in mastr object \a m */
 size_t
 mastr_len(mastr * m)
 {
     return m->len;
 }
+/*@}*/
