@@ -267,5 +267,5 @@ Zusman <ljz@asfast.com>. It was later revised by Matthias Andree.
 .BR leafnode (8),
 .BR fetchnews (8),
 .BR pcrepattern (3),
-.BR @sysconfdir@/filters.example - note that this should not be used as
-is.
+.B @sysconfdir@/filters.example
+- note that the latter should not be used as is.
