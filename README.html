@@ -506,8 +506,8 @@ leafnode: ALL: DENY
     for message.id have changed from any former version to
     2.0b8_ma8.</p>
 
-    <p><strong>IMPORTANT:</strong>To fix the "remote" groups, run
-    <kbd>fetchnews -f</kbd> -- it will take some time, because if
+    <p><strong>IMPORTANT:</strong> To fix the "remote" groups, run
+    <kbd>fetchnews -f</kbd> -- it will take some time, because it
     refetches the whole active file, but that's needed anyhow to
     figure the group status (posting allowed/not allowed/moderated
     group).</p>
@@ -547,7 +547,7 @@ leafnode: ALL: DENY
     main configuration file, you should add the following to your
     filter file:</p>
 <pre>
-newsgroups = *
+newsgroups = .*
 maxage = 5
 action = kill
 </pre>
@@ -563,7 +563,7 @@ action = kill
     install". This will re-sort the groupinfo file. The old
     groupinfo file will be stored as groupinfo.old just in case
     something goes wrong. You also have to change your main config
-    file manually as described in the last section.</p>
+    file manually as described in the previous section.</p>
 
     <h3 class="c2">3.4 Update from versions &lt; 1.6</h3>
 
