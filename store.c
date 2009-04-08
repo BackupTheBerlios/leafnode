@@ -382,6 +382,9 @@ store_stream(FILE * in /** input file */ ,
 		    /* ls = !sync_link(tmpfn, nb); */
 		    ls = !link(mastr_str(tmpfn), nb);
 		    if (ls) {
+			if (log_chmod(nb, 0660) < 0) {
+				ls = -1;
+			}
 			/*@innerbreak@*/ break;
 		    }
 		    if (errno == EEXIST) {
