@@ -309,7 +309,6 @@ mastr_triml(mastr * m)
 /** Trim (delete) whitespace (as per isspace()) from the end of mastr
  * object \a m. */
 void
-void
 mastr_trimr(mastr * m)
 {
     char *p;
