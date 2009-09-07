@@ -648,6 +648,9 @@ void mergeactives(struct newsgroup *old, struct newsgroup *newa)
     struct newsgroup *g;
     struct newsgroup *ogrp;
 
+    /* nothing to do? */
+    if (!newa) return;
+
     g = newa;
     while (g->name) {
 	if (old && (ogrp = findgroup(g->name, old, oldactivesize))) {
