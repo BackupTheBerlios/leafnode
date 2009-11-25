@@ -48,7 +48,7 @@ getaline(FILE * f /** file to read from */ )
     if (len && (buf[len - 1] == '\n')) {	/* go back on top of
 						   the newline */
 	--len;
-	if (len && (buf[len - 1] == '\r'))
+	while (len && (buf[len - 1] == '\r'))
 	    /* also delete CR */
 	    --len;
     } else {
