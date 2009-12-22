@@ -30,6 +30,8 @@ Changes since 20081229a:
 - Change: when reading lines, strip arbitrary amounts of contiguous CR
   characters before LF, to work around various issues. Reported by John
   R. Myers.
+- Documentation: Clarify the meaning of expire= in config.example.
+  Forward ported and extended from leafnode-1.
 
 20081229a: Changes since 20081120a:
 - Documentation: Improved the rnews(8) manual page.

@@ -4,8 +4,12 @@
 ##                                                            ##
 ################################################################
 
-## Unread discussion threads will be deleted after this many days if
-## you don't define special expire times. Mandatory.
+## Threads are subject to be expired (removed) by texpire if no article
+## from the thread has been read for <expire> days, unless you define
+## define special expire intervals. Note that texpire arguments can
+## be used to change this to expiring individual articles, or to the
+## number of days since arrival of the article. See the texpire manual page.
+## Mandatory.
 expire = 20
 
 ## If you want your users to authenticate themselves, you can uncomment
