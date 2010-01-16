@@ -218,12 +218,12 @@ example, five days after the thread has last been read, it is deleted by
 .B SERVER-SPECIFIC OPTIONAL PARAMETERS
 .TP
 username = myname
-If any of your news servers requires authentification, you can enter
+If any of your news servers requires authentication, you can enter
 your username on that server here. This field may occur multiple times,
 once after each server definition.
 .TP
 password = mypassword
-If any of your news servers requires authentification, you can enter
+If any of your news servers requires authentication, you can enter
 your password on that server here. This field may occur multiple times,
 once after each server definition.  Since the password is available in clear
 text, it is recommended that you set the rights on the config file as
