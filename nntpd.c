@@ -2223,7 +2223,7 @@ doauth_pam(char *const cmd, char *const val)
 		    return P_REJECTED;
 		}
 	    } else {
-		ln_log(LNLOG_SINFO, LNLOG_CTOP, "authentification for %s failed: %s", user, pam_strerror(pamh, retval));
+		ln_log(LNLOG_SINFO, LNLOG_CTOP, "authentication for %s failed: %s", user, pam_strerror(pamh, retval));
 		return P_REJECTED;
 	    }
 
