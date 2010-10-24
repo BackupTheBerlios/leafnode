@@ -1156,14 +1156,16 @@ getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 	remain = sendbuf;
 	/* stuff pipeline until TCP send buffer is full or window size
 	 * is reached (preload, don't read anything) */
-	while (p && advance < window && (advance == 0 || remain > 100)) {
-	    const char *c;
+	while (p && advance < window) {
+	    const char *c = chopmid(p->string);
+	    if (!(advance == 0 || remain > strlen(c) + 10))
+		break;
 	    fprintf(nntpout, "ARTICLE %s\r\n", c = chopmid(p->string));
 	    remain -= 10 + strlen(c);	/* ARTICLE + SP + CR + LF == 10 characters */
 	    p = p->next;
 	    advance++;
 	    ln_log(LNLOG_SDEBUG, LNLOG_CARTICLE, "sent ARTICLE %s command, "
-		   "in pipe: %ld", c, advance);
+		    "in pipe: %ld", c, advance);
 	    if (throttling)
 		sleep(throttling);
 	}
