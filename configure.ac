@@ -45,7 +45,7 @@ if test "x$GCC" = xyes && test "$ICC" = no
 then
   echo "void dummy(void);" >configure-dummy.c
   echo "void dummy(void) {}" >>configure-dummy.c
-  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -Wformat=2 -ggdb -fno-common -Wsequence-point -Wswitch -Wunused -Wuninitialized -Wundef ; do
+  for i in -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Wmissing-declarations -Wmissing-format-attribute -Wnested-externs -Wformat=2 -ggdb -fno-common -Wsequence-point -Wswitch -Wunused -Wuninitialized -Wundef -Wc++-compat; do
     $CC $i $ac_cv_prog_gcc_flags -c configure-dummy.c >/dev/null 2>&1 && 
     ac_cv_prog_gcc_flags="$ac_cv_prog_gcc_flags $i"
   done
