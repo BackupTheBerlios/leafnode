@@ -1152,7 +1152,7 @@ generateMessageID(void)
 static int
 validate_newsgroups(const char *n)
 {
-    char *t;
+    const char *t;
 
     if (str_isprefix(n, "Newsgroups:")) {
 	n += 11;

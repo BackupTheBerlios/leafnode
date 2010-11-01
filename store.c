@@ -344,14 +344,16 @@ store_stream(FILE * in /** input file */ ,
 	struct newsgroup *g = 0;
 	char *name = *t;
 	char *q;
+	const char *qq;
+
 	SKIPLWS(name);
 	q = name;
 	SKIPWORDNS(q);
 	*q = '\0';
 	/* name now contains the trimmed newsgroup */
-	if ((q = strstr(mastr_str(xref), name))
-	    && isspace((unsigned char)*(q - 1))
-	    && q[strlen(name)] == ':')
+	if ((qq = strstr(mastr_str(xref), name))
+	    && isspace((unsigned char)*(qq - 1))
+	    && qq[strlen(name)] == ':')
 	    continue;		/* skip if duplicate */
 	if ((create_all_links
             || is_interesting(name)

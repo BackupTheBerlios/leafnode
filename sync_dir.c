@@ -33,7 +33,7 @@ int
 sync_parent(const char *in)
 {
     char s[LN_PATH_MAX];
-    char *r;
+    const char *r;
 
     /* copy just the dirname to s */
     if ((r = strrchr(in, '/'))) {
