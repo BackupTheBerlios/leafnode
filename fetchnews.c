@@ -1158,7 +1158,7 @@ getarticles(/*@null@*/ struct stringlisthead *stufftoget,
 	 * is reached (preload, don't read anything) */
 	while (p && advance < window) {
 	    const char *c = chopmid(p->string);
-	    if (!(advance == 0 || remain > strlen(c) + 10))
+	    if (!(advance == 0 || (remain > 0 && (unsigned long)remain > strlen(c) + 10)))
 		break;
 	    fprintf(nntpout, "ARTICLE %s\r\n", c = chopmid(p->string));
 	    remain -= 10 + strlen(c);	/* ARTICLE + SP + CR + LF == 10 characters */
