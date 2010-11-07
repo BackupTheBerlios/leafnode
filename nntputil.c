@@ -174,7 +174,7 @@ nntpreply(const struct serverlist *s)
 }
 
 static int caught_alrm;
-static RETSIGTYPE catch_alrm(int sig) {
+static void catch_alrm(int sig) {
     (void)sig;
     caught_alrm = 1;
 }

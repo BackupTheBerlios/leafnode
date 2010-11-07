@@ -11,8 +11,7 @@
 #include <unistd.h>
 
 static sigjmp_buf to;
-static RETSIGTYPE
-timer(int sig)
+static void timer(int sig)
 {
     (void)sig;
     siglongjmp(to, 1);

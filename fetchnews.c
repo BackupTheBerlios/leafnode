@@ -104,8 +104,7 @@ server_info(const char *spool, const char *server,
     return res;
 }
 
-static RETSIGTYPE
-sigcatch(int signo)
+static void sigcatch(int signo)
 {
     if (signo == SIGINT || signo == SIGTERM) {
 	if (canjump == 0)

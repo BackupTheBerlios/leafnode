@@ -253,7 +253,6 @@ AC_FUNC_FORK
 dnl AC_FUNC_MKTIME
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
 
 dnl Check if system vsnprintf works
