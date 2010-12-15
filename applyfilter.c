@@ -71,13 +71,11 @@ static int applyfilter(const char *name, struct newsgroup *g,
 	unsigned long *kept, unsigned long *deleted)
 {
     static size_t lsize = MAXHEADERSIZE + 1;
-    static char *l;
+    char *l;
     struct stat st;
     int score, fd;
     struct utimbuf u;
     unsigned long n;
-
-    l = (char *)critmalloc(lsize, "Space for article");
 
     if (stat(name, &st)) {
 	ln_log(LNLOG_SNOTICE, LNLOG_CARTICLE,
@@ -96,6 +94,8 @@ static int applyfilter(const char *name, struct newsgroup *g,
 		g->name, name);
 	return 0;
     }
+
+    l = (char *)critmalloc(lsize, "Space for article");
 
     if((fd = open(name, O_RDONLY)) >= 0)
     {
@@ -167,6 +167,9 @@ static int applyfilter(const char *name, struct newsgroup *g,
 	ln_log(LNLOG_SERR, LNLOG_CARTICLE,
 		"could not open file \"%s\" in newsgroup %s\n",
 		name, g->name);
+
+    free(l);
+
     return 0;
 }
 
