@@ -78,6 +78,7 @@ int is_validfqdn(const char *f) {
 	|| 0 == strcasecmpsuffix(fqdn, ".localhost")
 	|| 0 == strcasecmpsuffix(fqdn, ".test")
 	|| 0 == strcasecmpsuffix(fqdn, ".site")
+	|| 0 == strcasecmpsuffix(fqdn, ".fritz.box")
 	)
     {
 	return 0;
