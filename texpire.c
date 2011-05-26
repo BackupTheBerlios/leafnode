@@ -1123,7 +1123,9 @@ main(int argc, char **argv)
 	    while(optind < argc) {
 		if (verbose)
 		    printf("Trying to remove %s...\n", argv[optind]);
-		delete_article(argv[optind], "Remove", "Removed", 1);
+		if (!dryrun) {
+		    delete_article(argv[optind], "Remove", "Removed", 1);
+		}
 		optind++;
 	    }
 	    break;

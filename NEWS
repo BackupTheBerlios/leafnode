@@ -33,6 +33,8 @@ Changes since 20081229a:
 - Documentation: Clarify the meaning of expire= in config.example.
   Forward ported and extended from leafnode-1.
 - Bugfix: plug memory leak in applyfilter(8) found by Paul Brooks.
+- Bugfix: don't delete articles when texpire -n -C MessID is run. Found
+  by Paul Brooks.
 
 20081229a: Changes since 20081120a:
 - Documentation: Improved the rnews(8) manual page.
