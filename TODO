@@ -9,8 +9,6 @@ NEW:
 - when attempt_lock() fails with invalid FQDN, its callers report
   lockfile existed (which is untrue).
 
-
-
 NOTE: issues fixes in the current, possibly unreleased _ma versions, but
 persistent in the offical 2.0b tree, are not listed here.
 
@@ -35,6 +33,10 @@ SOON:
 	- record spool version in some file, for instance, to bump it
 	  from v2 to v2.1 (or something similar) when changing the hash
 	  function (à la MoinMoin's upgrade helper)
+	- support texpire -n -C '<Message-ID:>' properly as suggested
+	  by Paul Brooks in Late May 2011 on the leafnode-list. The
+	  article deletion code does not yet support a dry-run mode we
+	  could leverage though.
 
 SECURITY:
 1.1	Add timeouts to ALL network reading functions (CAN-2005-1911),
