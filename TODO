@@ -37,6 +37,10 @@ SOON:
 	  by Paul Brooks in Late May 2011 on the leafnode-list. The
 	  article deletion code does not yet support a dry-run mode we
 	  could leverage though.
+	- auto-guess right "maxfetch" for newly added groups; do some
+	  binary search or similar across posting dates for newly
+	  started group to avoid excessive logging? (of course not in -x
+	  mode)
 
 SECURITY:
 1.1	Add timeouts to ALL network reading functions (CAN-2005-1911),
