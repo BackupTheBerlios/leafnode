@@ -1,7 +1,7 @@
 #! /bin/sh
 
 set -e
-if git status -a >/dev/null; then
+if ! git diff --quiet ; then
     git status || :
     echo
     echo 'ERROR: Commit changes first!'
