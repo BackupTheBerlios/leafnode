@@ -1,4 +1,209 @@
+2011-08-06  Matthias Andree <matthias.andree@gmx.de>
+
+  * Mark new release.
+
+    M	NEWS
+
+  * Make setgroups() visible on FreeBSD.
+
+    M	ugid.h
+    M	ugid_gset.c
+
+  * Force compiler to C99 mode, ...
+    ...as Solaris refuses to compile SUSv3+ programs with a pre-C99 compiler.
+
+    M	configure.ac
+
+  * #include <stddef.h> for proper NULL definition,
+    to make Solaris happy.
+
+    M	mailto.c
+
+  * Use proper POSIX macro to make Solaris happy.
+
+    M	fopen_reg.c
+
+  * Drop obsolete IPv6 check (IPv6 is mandatory now.)
+
+    M	configure.ac
+
+  * Require SUSv3 and C99.
+
+    M	.gitignore
+    M	Makefile.am
+    M	NEWS
+    M	configure.ac
+    M	fetchnews_check_date.c
+    M	fopen_reg.c
+    D	inet_ntop.c
+    M	leafnode-version.c
+    M	leafnode.h
+    M	ln_log_open.c
+    M	log_fchmod.c
+    M	log_fsync.c
+    M	masock_sa2addr.c
+    M	masock_sa2name.c
+    M	masock_sa2port.c
+    M	miscutil.c
+    D	mkstemp.c
+    M	nfswrite.c
+    M	nntpd.c
+    M	nntputil.c
+    M	sync_dir.c
+    M	system.h
+    M	ugid.h
+    M	ugid_ggetbyuname.c
+    M	ugid_gset.c
+    M	ugid_ugetbyuname.c
+    D	vsnprintf.c
+
+2011-07-24  Matthias Andree <matthias.andree@gmx.de>
+
+  * Add item
+
+    M	TODO
+
+2011-05-05  Matthias Andree <matthias.andree@gmx.de>
+
+  * Block .fritz.box domains.
+
+    M	validatefqdn.c
+
+2011-05-28  Matthias Andree <matthias.andree@gmx.de>
+
+  * Mention texpire -nC missing feature by Paul Brooks Late May 2011 from the list.
+
+    M	TODO
+
+2011-05-27  Matthias Andree <matthias.andree@gmx.de>
+
+  * Bugfix: don't delete articles when texpire -n -C MessID is run.
+    Found by Paul Brooks.
+
+    M	NEWS
+    M	texpire.c
+
+2010-12-15  Matthias Andree <matthias.andree@gmx.de>
+
+  * Mention leak fix in NEWS.
+
+    M	NEWS
+
+  * Plug memory leak in applyfilter().
+    Reported 2010-12-14 by Paul Brooks through the mailing list.
+    Analyzed with valgrind.
+
+    M	applyfilter.c
+
+2010-11-07  Matthias Andree <matthias.andree@gmx.de>
+
+  * Ditch RETSIGTYPE and use void.
+
+    M	configure.ac
+    M	fetchnews.c
+    M	nntpd.c
+    M	nntputil.c
+    M	timeout_getaline.c
+
+2010-11-01  Matthias Andree <matthias.andree@gmx.de>
+
+  * Fix types, fixup for e38d5d8d92fdddfe0d0f574bcce1d1cad7e39371
+
+    M	fetchnews.c
+
+  * Add -Wc++-compat.
+
+    M	configure.ac
+
+  * Make source code C++ compatible.
+
+    M	nntpd.c
+    M	store.c
+    M	sync_dir.c
+
+2010-10-24  Matthias Andree <matthias.andree@gmx.de>
+
+  * Check actual send buffer rather than assuming |MID| < 90 bytes
+    Found by Martin Brunzel.
+
+    M	fetchnews.c
+
+2010-01-26  Robert Grimm <rob@robgri.de>
+
+  * Fix spelling in nntpd.c
+    Signed-off-by: Robert Grimm <rob@robgri.de>
+
+    M	nntpd.c
+
+2010-01-16  Robert Grimm <rob@robgri.de>
+
+  * Fix spelling in leafnode manual page
+    Signed-off-by: Robert Grimm <rob@robgri.de>
+
+    M	leafnode.8.in
+
+2009-12-22  Matthias Andree <matthias.andree@gmx.de>
+
+  * Improve config.example comments for expire=...
+
+    M	NEWS
+    M	config.example
+
+2009-11-26  Matthias Andree <matthias.andree@gmx.de>
+
+  * Skip over arbitrary amount of contiguous CR before LF.
+    Reported by John R. Myers.
+
+    M	NEWS
+    M	getaline.c
+
+2009-10-29  Matthias Andree <matthias.andree@gmx.de>
+
+  * Do not use sizeof() in preprocessor directive.
+
+    M	system.h
+
+2009-09-08  Matthias Andree <matthias.andree@gmx.de>
+
+  * Fix crash if no new active to merge. Reported by Paul Brooks.
+
+    M	activutil.c
+
+2009-05-14  Matthias Andree <matthias.andree@gmx.de>
+
+  * Pack exported dir more aggressively.
+
+    M	export.sh
+
+2009-04-08  Matthias Andree <matthias.andree@gmx.de>
+
+  * Create articles with mode 0660.
+    Reported by Adam Funk.
+
+    M	NEWS
+    M	store.c
+
+  * Fix up double void from commit caae3c5f.
+
+    M	mastring.c
+
+  * Document sort.c.
+
+    M	sort.c
+
 2009-04-07  Matthias Andree <matthias.andree@gmx.de>
+
+  * Document mastring module (Doxygen).
+
+    M	mastrcpy.c
+    M	mastring.c
+    M	mastring.h
+    M	mastrncpy.c
+
+  * Update NEWS/ChangeLog.
+
+    M	ChangeLog
+    M	NEWS
 
   * Minor fixes; newsgroups=ng now PCRE based.
 
