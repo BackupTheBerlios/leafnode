@@ -1,10 +1,6 @@
 #ifndef UGID_H
 #define UGID_H
 
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 600
-#endif
-
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
