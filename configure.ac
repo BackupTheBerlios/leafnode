@@ -228,7 +228,7 @@ AC_CHECK_FUNCS([setgroups])
 
 AC_CHECK_LIB(nsl, gethostent)
 AC_CHECK_LIB(socket, setsockopt)
-AC_REPLACE_FUNCS(arc4random mergesort strcasestr)
+AC_REPLACE_FUNCS(arc4random mergesort strcasestr strlcpy)
 
 dnl The 'pcre' library uses non-standard defines
 test ".$ac_cv_func_strerror" != ".yes" && \

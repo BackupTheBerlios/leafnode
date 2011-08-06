@@ -215,6 +215,7 @@ EXTRA_DIST = \
 	README \
 	README-leaf.node \
 	README.html \
+	strlcpy.3 strlcpy.h strlcpy.c \
 	update.sh \
 	tools/archivefaq.pl \
 	tools/make_pass.pl \
