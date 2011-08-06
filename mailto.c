@@ -3,6 +3,7 @@
  */
 
 #include "leafnode.h"
+#include <stddef.h>
 #include "ln_log.h"
 #include "mailto.h"
 
