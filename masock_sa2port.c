@@ -25,10 +25,9 @@ long
 masock_sa2port(const struct sockaddr *sa)
 {
     switch (sa->sa_family) {
-#ifdef HAVE_IPV6
+	/* XXX FIXME: clean this up */
     case AF_INET6:
 	return ntohs(((const struct sockaddr_in6 *)sa)->sin6_port);
-#endif
     case AF_INET:
 	return ntohs(((const struct sockaddr_in *)sa)->sin_port);
     default:

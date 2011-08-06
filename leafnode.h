@@ -30,37 +30,18 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-#ifdef HAVE_STRINGS_H
 #include <strings.h>
-#endif
 
-#ifdef HAVE_AP_CONFIG_H
-#define AP_CONFIG_H
-#endif
-
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#include <sys/errno.h>
-#else
-extern int errno;
-#endif				/* HAVE_ERRNO_H */
 
 #include <sys/types.h>		/* size_t */
 #include <stdio.h>		/* FILE */
 #include <time.h>		/* time_t */
 #include <stdarg.h>		/* va_list */
 #include <dirent.h>		/* DIR */
-
-#ifndef HAVE_WORKING_FORK
-#define fork() ((pid_t)(-1))
-#endif
 
 /* work around splint not knowing the correct semantics for pcre and other stuff */
 #ifdef __LCLINT__
@@ -69,10 +50,7 @@ extern int errno;
 #include <pcre.h>
 #endif /* not __LCLINT__ */
 
-
-#ifndef __cplusplus
-typedef int bool;
-#endif
+#include <stdbool.h>
 
 /*@constant int LN_PATH_MAX;@*/
 #define LN_PATH_MAX (PATH_MAX + 1)
@@ -123,18 +101,6 @@ typedef int bool;
 	    } \
     } \
 }
-
-#ifndef HAVE_SOCKLEN_T
-typedef unsigned int socklen_t;
-#endif
-
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, size_t n, const char *format, va_list ap);
-#endif
-
-#ifndef HAVE_MKSTEMP
-int mkstemp(char *);
-#endif
 
 /*
  * end of actions due to autoconf
@@ -681,10 +647,6 @@ int safe_mkstemp(char *templ);
 int checkforpostings(void);
 int checkincoming(void);
 int feedincoming(void);
-
-#ifndef HAVE_INET_NTOP
-const char *inet_ntop(int af, const void *s, char *dst, int x);
-#endif
 
 /* sort.c */
 void my_sort(void *base, size_t nmemb, size_t size,

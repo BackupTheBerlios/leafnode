@@ -8,8 +8,10 @@
  * don't remove the disclaimer.
  */
 
-#include <stdio.h>
 #include "leafnode.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -43,11 +45,6 @@ main(void) /* if you support arguments some day, please make -v
     puts(sysconfdir);
     fputs("default spooldir: ", stdout);
     puts(def_spooldir);
-#ifdef HAVE_IPV6
-    puts("IPv6: yes");
-#else
-    puts("IPv6: no");
-#endif
     fputs("default MTA: ", stdout);
     puts(DEFAULTMTA);
     fputs("pcre version: ", stdout);

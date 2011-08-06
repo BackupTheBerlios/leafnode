@@ -14,6 +14,9 @@
  *  write to the Free Software Foundation, Inc., 59 Temple Place, Suite
  *  330, Boston, MA 02111-1307 USA
  */
+
+#define _POSIX_SOURCE 200112L
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -58,11 +61,7 @@ fopen_reg(
 	errno = e;
 	return NULL;
     }
-#ifdef STAT_MACROS_BROKEN
-    if ((st.st_mode & S_IFMT) != S_IFREG) {
-#else
     if (!S_ISREG(st.st_mode)) {
-#endif
 	fclose(f);
 	errno = EINVAL;
 	return NULL;

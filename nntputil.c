@@ -258,7 +258,6 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     const char *errcause;
     int sock;
 
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR)
     /* This stuff supports IPv6 and IPv4 transparently. */
     int err;
 
@@ -294,70 +293,6 @@ tcp_connect(/** host name or address in dotted or colon (IPv6)
     }
 
     return sock;
-#else
-    /* This is legacy IPv4 code. */
-    long port;
-
-    struct hostent *he;
-    struct sockaddr_in s_in;
-
-    char **ha;
-
-    if (address_family != 0 && address_family != AF_INET) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "unsupported address family %d", address_family);
-	return -1;
-    }
-
-    if (0 == get_long(service, &port)) {
-	struct servent *se;
-
-	se = getservbyname(service, "tcp");
-	if (NULL == se) {
-	    port = -1;
-	} else {
-	    port = ntohs(se->s_port);
-	}
-    } else {
-	if (port > 65535)
-	    port = -1;
-    }
-    if (port < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "cannot get port for tcp service %s", service);
-	return -1;
-    }
-
-    he = gethostbyname(nodename);
-    if (!he) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP,
-	       "cannot resolve (gethostbyname) %s: %s",
-	       nodename, my_h_strerror(h_errno));
-	return -1;
-    }
-
-    sock = -1;
-    errcause = "no addresses";
-    errno = 0;
-    for (ha = he->h_addr_list; *ha; ha++) {
-	s_in.sin_family = AF_INET;
-	s_in.sin_port = htons(port);
-	memcpy(&s_in.sin_addr, *ha, he->h_length);
-	sock = any_connect(AF_INET, SOCK_STREAM, IPPROTO_TCP,
-			   (struct sockaddr *)&s_in, sizeof(s_in),
-			   &errcause, timeout);
-	if (sock >= 0)
-	    break;
-    }
-    endhostent();
-
-    if (sock < 0) {
-	ln_log(LNLOG_SERR, LNLOG_CTOP, "connecting to %s:%s: %s: %m",
-	       nodename, service, errcause);
-    }
-
-    return sock;
-#endif
 }
 
 /**

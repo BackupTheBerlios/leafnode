@@ -146,7 +146,6 @@ liblnutil_a_SOURCES	= \
 	validatefqdn.c \
 	validatefqdn.h \
 	version.h \
-	vsnprintf.c \
 	wildmat.c \
 	writes.c \
 	xoverutil.c

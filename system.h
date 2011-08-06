@@ -4,25 +4,10 @@
 #define _GNU_SOURCE 1
 #include "config.h"
 
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
+#include <sys/time.h>
+#include <time.h>
 
-/* want uint32_t */
-#if HAVE_INTTYPES_H
 #include <inttypes.h>
-#elif HAVE_STDINT_H
-#include <stdint.h>
-#else
-#error "I cannot figure how to define uint32_t and uint8_t."
-#endif
 
 #if !defined(HAVE_STRCASESTR)
 extern char *strcasestr(const char *haystack, const char *needle);

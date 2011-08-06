@@ -33,9 +33,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <signal.h>
-#ifndef HAVE_SNPRINTF
 #include <stdarg.h>
-#endif
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -74,6 +72,7 @@ static const struct mydir dirs[] = {
 static void
 whoami(void)
 {
+    const int maxlen = 255;
     struct hostent *he;
     int debugqual = 0;
     char *x;
@@ -82,28 +81,35 @@ whoami(void)
 	&& *x)
 	debugqual = 1;
 
-    if (!gethostname(fqdn, 255) && (he = gethostbyname(fqdn)) != NULL) {
-	fqdn[0] = '\0';
-	strncat(fqdn, he->h_name, 255);
-	if (debugqual) ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-			      "canonical hostname: %s", fqdn);
-	if (!is_validfqdn(fqdn)) {
-	    char **alias;
-	    alias = he->h_aliases;
-	    while (alias && *alias) {
-		if (debugqual) {
-		    ln_log(LNLOG_SDEBUG, LNLOG_CTOP,
-			   "alias for my hostname: %s", *alias);
-		}
-		if (is_validfqdn(*alias)) {
-		    fqdn[0] = '\0';
-		    strncat(fqdn, *alias, 255);
-		    break;
-		} else {
-		    alias++;
+    if (!gethostname(fqdn, maxlen)) {
+	if (debugqual) 
+	    fprintf(stderr, "whoami: hostname = \"%-.*s\"\n", maxlen, fqdn);
+	if ((he = gethostbyname(fqdn)) != NULL) {
+	    fqdn[0] = '\0';
+	    strncat(fqdn, he->h_name, 255);
+	    if (debugqual)
+		/* cannot use ln_log here, we haven't parsed command line or
+		 * configuration file yet, so nothing's set up */
+		fprintf(stderr, "whoami: canonical hostname: \"%s\"\n", fqdn);
+	    if (!is_validfqdn(fqdn)) {
+		char **alias;
+		alias = he->h_aliases;
+		while (alias && *alias) {
+		    if (debugqual) {
+			fprintf(stderr, "whoami: alias for my hostname: \"%s\"\n", *alias);
+		    }
+		    if (is_validfqdn(*alias)) {
+			fqdn[0] = '\0';
+			strncat(fqdn, *alias, 255);
+			break;
+		    } else {
+			alias++;
+		    }
 		}
 	    }
 	}
+    } else {
+	fprintf(stderr, "whoami: gethostname() failed.\n");
     }
 }
 

@@ -45,7 +45,6 @@ masock_sa2name(const struct sockaddr *sa
     char *ret;
 
     switch (sa->sa_family) {
-#ifdef HAVE_IPV6
     case AF_INET6:
 	/* any warnings issued here are the fault of broken system
 	   includes */
@@ -65,7 +64,6 @@ masock_sa2name(const struct sockaddr *sa
 	if (!he)
 	    errno = 0, *h_e = h_errno;
 	break;
-#endif
     case AF_INET:
 	he = gethostbyaddr((const char *)
 			   &((const struct sockaddr_in *)sa)

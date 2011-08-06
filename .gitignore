@@ -53,3 +53,6 @@ depcomp
 missing
 install.sh
 install-sh
+.cproject
+.project
+.settings/

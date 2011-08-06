@@ -1,9 +1,10 @@
+#include "leafnode.h"
+
 #include <string.h>
 #include <ctype.h>
 
 #include "fetchnews.h"
 #include "system.h"
-#include "leafnode.h"
 #include "ln_log.h"
 
 static int

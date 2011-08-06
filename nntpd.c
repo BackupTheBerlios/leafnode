@@ -2160,7 +2160,7 @@ ln_conv(int num_msg, const struct pam_message **msg, struct pam_response  **resp
     reply = (struct pam_response *) critmalloc(sizeof(struct pam_response), "conv");
 
     reply->resp_retcode = 0;
-    reply->resp = critstrdup(app_data_ptr, "conv");
+    reply->resp = critstrdup((const char *)app_data_ptr, "conv");
 	
     *resp = reply;
 
@@ -2525,11 +2525,7 @@ main(int argc, char **argv)
     const char *const myname = "leafnode";
     int logstderr = 0;
 
-#ifdef HAVE_IPV6
-    struct sockaddr_in6 sa, peer;
-#else
-    struct sockaddr_in sa, peer;
-#endif
+    struct sockaddr_storage sa, peer;
 
     /* set buffer */
     fflush(stdout);

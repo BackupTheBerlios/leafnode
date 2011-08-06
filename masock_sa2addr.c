@@ -21,27 +21,20 @@
 /*@null@*/ /*@only@*/ char *
 masock_sa2addr(const struct sockaddr *sa)
 {
-#if defined(HAVE_IPV6) || defined(HAVE_INET_NTOP)
     char buf[4096];
-#endif
     const char *ret;
 
     switch (sa->sa_family) {
-#ifdef HAVE_IPV6
     case AF_INET6:
 	ret = inet_ntop(sa->sa_family,
 			&((const struct sockaddr_in6 *)sa)->sin6_addr,
 			buf, sizeof(buf));
 	break;
-#endif
+	/* XXX FIXME clean this up - no case needed */
     case AF_INET:
-#ifdef HAVE_INET_NTOP
 	ret = inet_ntop(sa->sa_family,
 			&((const struct sockaddr_in *)sa)->sin_addr,
 			buf, sizeof(buf));
-#else
-	ret = inet_ntoa(((const struct sockaddr_in *)sa)->sin_addr);
-#endif
 	break;
     default:
 	errno = EAFNOSUPPORT;

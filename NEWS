@@ -2,6 +2,10 @@ KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
 Changes since 20081229a:
+- Change: leafnode-2 now requires a C99 compiler (or at least the
+  stdbool.h feature) and an operating system compliant to the
+  Single Unix Specification v3 (IEEE Std 1003.1-2001). This removes lots
+  of tests from the code and the configure scripts.
 - Change: refuse posting to newsd servers to prevent dupes, because 
   newsd replaces Message-IDs. The bug has been known and remained 
   unfixed to the newsd maintainers for years.

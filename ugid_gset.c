@@ -1,15 +1,14 @@
+#include "ugid.h"
+
 #include "config.h"
 #include <sys/types.h>
 #include <unistd.h>
-#if HAVE_GRP_H
-# include <grp.h>
-#endif
+#include <grp.h>
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
 #endif
 
-#include "ugid.h"
 int
 gid_set(gid_t gid)
 {

@@ -4,7 +4,7 @@ dnl written by Matthias Andree, 2002 - 2008
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
 AC_CONFIG_SRCDIR([leafnode.h])
-AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20081229a])
+AM_INIT_AUTOMAKE([leafnode],[2.0.0.alpha20110806a])
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR(leafnode.h)
 AC_CONFIG_HEADERS([config.h])
@@ -12,7 +12,7 @@ dnl AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_C_INLINE
-AC_C_VOLATILE
+
 AC_CHECK_TOOL([STRIP],[strip])
 AC_PATH_PROG([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
 AC_PROG_AWK
@@ -96,13 +96,7 @@ fi
 AC_SUBST(RUNAS_GROUP)
 
 dnl Checks for header files.
-AC_HEADER_DIRENT
-AC_HEADER_STAT
-AC_HEADER_STDBOOL
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_HEADER_TIME
-AC_CHECK_HEADERS([crypt.h errno.h fcntl.h limits.h sys/time.h syslog.h string.h strings.h unistd.h arpa/inet.h netdb.h netinet/in.h stddef.h sys/param.h sys/socket.h utime.h stdint.h inttypes.h security/pam_appl.h grp.h])
+AC_CHECK_HEADERS([crypt.h sys/param.h security/pam_appl.h])
 
 dnl Check whether all necessary include files are there
 AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
@@ -112,29 +106,7 @@ AC_CACHE_CHECK(for system include files, cf_cv_sysheaders, AC_COMPILE_IFELSE([AC
 )
 if test "x$cf_cv_sysheaders" = "xno"
 then
-  AC_MSG_ERROR(Kernel sources not installed - unable to continue)
-fi
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_TYPE_UID_T
-AC_TYPE_MODE_T
-AC_TYPE_OFF_T
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_STRUCT_TM
-
-dnl Check whether socklen_t is defined in /usr/include/sys/socket.h
-AC_CACHE_CHECK(for socklen_t,cf_cv_socklen_t, AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/socket.h>]], [[
-    socklen_t fodder;
-    return fodder;]])],[cf_cv_socklen_t="yes"],[cf_cv_socklen_t="no"])
-)
-if test "x$cf_cv_socklen_t" = "xyes"
-then
-  AC_DEFINE(HAVE_SOCKLEN_T, 1,
-	    [Define if your system defines a socklen_t type.])
+  AC_MSG_ERROR(Kernel sources such as sys/types.h not installed - unable to continue)
 fi
 
 dnl check whether to use dmalloc
@@ -244,30 +216,7 @@ AC_SUBST(PCRELIB)
 AC_SUBST(LINKPCRELIB)
 
 dnl Checks for library functions.
-AC_FUNC_CLOSEDIR_VOID
-AC_FUNC_SELECT_ARGTYPES
-AC_FUNC_UTIME_NULL
-AC_FUNC_CHOWN
-dnl checks whether fork() is just a stub:
-AC_FUNC_FORK
-dnl AC_FUNC_MKTIME
-AC_FUNC_STRFTIME
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([alarm dup2 endpwent fchdir ftruncate getcwd getpagesize inet_ntoa memchr memmove memset select strcasecmp strchr strcspn strncasecmp strpbrk strrchr strspn utime gethostname gettext mkdir rmdir socket strerror strstr strtol strtoul setgid setuid getaddrinfo gai_strerror gettimeofday putenv setgroups])
-
-dnl Check if system vsnprintf works
-AC_CACHE_CHECK([if your system's vsnprintf works],
-	       ln_cv_working_vsnprintf,
-AC_RUN_IFELSE([[
-	       `cat $srcdir/xsnprintf.c`
-	       ]], ln_cv_working_vsnprintf=yes,
-	       ln_cv_working_vsnprintf=no,ln_cv_working_vsnprintf=no))
-
-if test "x$ln_cv_working_vsnprintf" = "xyes" ; then
-	       AC_DEFINE(HAVE_VSNPRINTF, 1, [Define to 1 if you have a _working_ 'vsnprintf' function.])
-else
-AC_LIBOBJ(vsnprintf)
-fi
+AC_CHECK_FUNCS([setgroups])
 
 # Whenever both -lsocket and -lnsl are needed, it seems to be always the
 # case that gethostbyname requires -lnsl.  So, check -lnsl first, for it
@@ -276,17 +225,9 @@ fi
 # candidate. So, let's use it below instead of gethostbyname, and see.
 # Stolen from GNU tar 1.12
 
-AC_CHECK_FUNC(gethostent)
-if test $ac_cv_func_gethostent = no; then
-  AC_CHECK_LIB(nsl, gethostent)
-fi
-
-AC_CHECK_FUNC(setsockopt)
-if test $ac_cv_func_setsockopt = no; then
-  AC_CHECK_LIB(socket, setsockopt)
-fi
-
-AC_REPLACE_FUNCS(arc4random mergesort mkstemp inet_ntop strcasestr)
+AC_CHECK_LIB(nsl, gethostent)
+AC_CHECK_LIB(socket, setsockopt)
+AC_REPLACE_FUNCS(arc4random mergesort strcasestr)
 
 dnl Check whether the system has IPv6
 AC_ARG_ENABLE(IPv6, AS_HELP_STRING(--disable-IPv6,disable IPv6 support (autodetect)),

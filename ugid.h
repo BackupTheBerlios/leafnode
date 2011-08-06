@@ -1,5 +1,14 @@
 #ifndef UGID_H
 #define UGID_H
+
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
+#endif
+
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
 #include <sys/types.h>
 extern int uid_ensure(uid_t);
 extern int uid_set(uid_t);

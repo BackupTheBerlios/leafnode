@@ -1,7 +1,10 @@
 /* (C) 2002 by Matthias Andree */
 
+#define _XOPEN_SOURCE 600
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdio.h>
 #include "leafnode.h"
 
 #ifdef WITH_DMALLOC
