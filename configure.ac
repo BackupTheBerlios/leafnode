@@ -17,6 +17,7 @@ AC_CHECK_TOOL([STRIP],[strip])
 AC_PATH_PROG([ID], [id], [false], /usr/xpg4/bin:/usr/bin:/bin)
 AC_PROG_AWK
 AC_PROG_CC
+AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
