@@ -229,30 +229,6 @@ AC_CHECK_LIB(nsl, gethostent)
 AC_CHECK_LIB(socket, setsockopt)
 AC_REPLACE_FUNCS(arc4random mergesort strcasestr)
 
-dnl Check whether the system has IPv6
-AC_ARG_ENABLE(IPv6, AS_HELP_STRING(--disable-IPv6,disable IPv6 support (autodetect)),
-    IPV6=$enableval ,
-    IPV6=auto)
-
-AC_MSG_CHECKING(IPv6 support)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-]], [[struct sockaddr_in6 *a;
-   int b = AF_INET6;
-   void *c = &(a->sin6_addr);
-   char *e = gai_strerror(0);
-   return 0;]])],
-   [ if test "x$IPV6" != "xno" ; then cf_cv_ipv6=yes ; else cf_cv_ipv6=no ; fi],
-   [cf_cv_ipv6=no])
-AC_MSG_RESULT($cf_cv_ipv6)
-if test "x$cf_cv_ipv6" = "xyes"
-then
-  AC_DEFINE(HAVE_IPV6, 1, [If set, enable IPv6.])
-fi
-
 dnl The 'pcre' library uses non-standard defines
 test ".$ac_cv_func_strerror" != ".yes" && \
 test ".$cf_cv_have_sys_errlist" = ".yes" && \
