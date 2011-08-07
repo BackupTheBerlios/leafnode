@@ -15,6 +15,7 @@
 #include "redblack.h"
 #include "validatefqdn.h"
 #include "activutil.h"
+#include "strlcpy.h"
 
 #include <fcntl.h>
 #include <sys/uio.h>
@@ -72,45 +73,51 @@ static const struct mydir dirs[] = {
 static void
 whoami(void)
 {
-    const int maxlen = 255;
-    struct hostent *he;
+    const int maxlen = FQDN_SIZE;
     int debugqual = 0;
     char *x;
+    struct addrinfo hints, *result;
 
     if ((x = getenv("LN_DEBUG_QUALIFICATION")) != NULL
 	&& *x)
 	debugqual = 1;
 
-    if (!gethostname(fqdn, maxlen)) {
-	if (debugqual) 
-	    fprintf(stderr, "whoami: hostname = \"%-.*s\"\n", maxlen, fqdn);
-	if ((he = gethostbyname(fqdn)) != NULL) {
-	    fqdn[0] = '\0';
-	    strncat(fqdn, he->h_name, 255);
-	    if (debugqual)
-		/* cannot use ln_log here, we haven't parsed command line or
-		 * configuration file yet, so nothing's set up */
-		fprintf(stderr, "whoami: canonical hostname: \"%s\"\n", fqdn);
-	    if (!is_validfqdn(fqdn)) {
-		char **alias;
-		alias = he->h_aliases;
-		while (alias && *alias) {
-		    if (debugqual) {
-			fprintf(stderr, "whoami: alias for my hostname: \"%s\"\n", *alias);
-		    }
-		    if (is_validfqdn(*alias)) {
-			fqdn[0] = '\0';
-			strncat(fqdn, *alias, 255);
-			break;
-		    } else {
-			alias++;
-		    }
-		}
-	    }
-	}
-    } else {
+    if (gethostname(fqdn, maxlen) == -1) {
 	fprintf(stderr, "whoami: gethostname() failed.\n");
+	return;
     }
+    fqdn[FQDN_SIZE - 1] = 0; // just to be on the safe side
+
+    /* cannot use ln_log here, we haven't parsed command line or
+     * configuration file yet, so nothing's set up */
+    if (debugqual) 
+	fprintf(stderr, "whoami: hostname = \"%-.*s\"\n", maxlen, fqdn);
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_CANONNAME;
+
+    int gaierr = getaddrinfo(fqdn, NULL, &hints, &result);
+    if (gaierr) {
+	// failed
+	fprintf(stderr, "whoami: getaddrinfo() failed: %s.\n",
+		gai_strerror(gaierr));
+	return;
+    }
+
+    if (result && result->ai_canonname && result->ai_canonname[0]) {
+	strlcpy(fqdn, result->ai_canonname, sizeof(fqdn));
+	if (debugqual)
+	    fprintf(stderr, "whoami: canonical hostname: \"%s\"\n", fqdn);
+
+	if (!is_validfqdn(fqdn))
+	    fprintf(stderr, "whoami: canonical hostname is invalid.\n");
+	
+	// XXX FIXME: hunt down entries?
+	// actually no, since canonical name is supposed to
+	// be in first entry.
+    }
+
+    freeaddrinfo(result);
 }
 
 /*
