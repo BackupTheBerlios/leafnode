@@ -1457,18 +1457,22 @@ nntpactive(struct serverlist *cursrv, int fa)
 	    return 1;
 	}
 	mergegroups();		/* merge groups into active */
-	helpptr = groups->head;
 	if (count && cursrv->descriptions) {
 	    ln_log(LNLOG_SINFO, LNLOG_CSERVER,
 		    "%s: getting new newsgroup descriptions",
 		    cursrv->name);
-	    while (helpptr->next != NULL) {
+	    for (helpptr = groups->head; helpptr->next != NULL; helpptr = helpptr->next) {
 		error = 0;
 		putaline(nntpout, "LIST NEWSGROUPS %s", helpptr->string);
 		reply = nntpreply(cursrv);
 		if (reply == 215) {
 		    l = mgetaline(nntpin);
-		    if (l && *l != '.') {
+		    if (!l) {
+			mastr_delete(s);
+			freelist(groups);
+			return 1;
+		    }
+		    if (*l != '.') {
 			p = l;
 			CUTSKIPWORD(p);
 			changegroupdesc(l, *p ? p : NULL);
@@ -1485,7 +1489,6 @@ nntpactive(struct serverlist *cursrv, int fa)
 			}
 		    }
 		}
-		helpptr = helpptr->next;
 	    }
 	}
 	freelist(groups);
