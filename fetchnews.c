@@ -2328,7 +2328,7 @@ main(int argc, char **argv)
 	    /* read local groups into the new active */
 	    readlocalgroups();
 	    mergeactives(oldactive, active);
-	    free(oldactive);
+	    freeactive(oldactive);
 	}
 	if (writeactive()) {
 	    rc = 1;
