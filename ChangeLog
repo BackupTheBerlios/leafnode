@@ -1,4 +1,38 @@
+2011-08-07  Matthias Andree <matthias.andree@gmx.de>
+
+  * Plug massive memory leak in fetchnews -f mode.
+
+    M	fetchnews.c
+
+  * whoami(): convert to use getaddrinfo().
+
+    M	miscutil.c
+
+  * Pull strlcpy into LIBOBJS again for use in miscutil.c.
+
+    M	Makefile.am
+    M	configure.ac
+    A	strlcpy.3
+    A	strlcpy.c
+    A	strlcpy.h
+
+  * Fix regression: Push branches, too, not just tags.
+
+    M	export.sh
+
 2011-08-06  Matthias Andree <matthias.andree@gmx.de>
+
+  * Push tags, too.
+
+    M	export.sh
+
+  * Support newer Git versions.
+
+    M	release.sh
+
+  * Update ChangeLog.
+
+    M	ChangeLog
 
   * Mark new release.
 

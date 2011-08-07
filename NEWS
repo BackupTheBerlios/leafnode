@@ -1,6 +1,11 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
+20110807a: Changes since 20110806a:
+- Bugfix: plug massive memory leak in fetchnews -f mode
+- Change: use getaddrinfo() rather than gethostbyname() to canonicalize
+  our own hostname.
+
 20110806a: Changes since 20081229a:
 - Change: leafnode-2 now requires a C99 compiler (or at least the
   stdbool.h feature) and an operating system compliant to the
