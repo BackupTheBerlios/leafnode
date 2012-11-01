@@ -1,5 +1,4 @@
 # -*- makefile -*-
-# @configure_input@
 #
 # (C) Copyright 2002 - 2012 by Matthias Andree <matthias.andree@gmx.de>.
 # See COPYING for the license conditions.
