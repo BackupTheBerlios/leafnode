@@ -1,7 +1,7 @@
 KNOWN BUGS:
 * The code sometimes uses timeout_client where it should use a server timeout.
 |
-Changes since 20110807a:
+2.0.0.alpha20121101a: Changes since 20110807a:
 - Bugfix: if reading descriptions of new newsgroups fails, don't update
   "active last updated" time stamp for that server. To solve a problem
   reported by Antoine Levitt.

@@ -18,7 +18,7 @@ if [ "$a" != y ] ; then echo "Then use makechangelog.sh to generate new entries.
 
 builddir=`pwd`/build
 dest=~/public_html/leafnode/beta/
-vers=`perl -n -l -e 'if (/AM_INIT_AUTOMAKE\(.*,\[?([^]]*)\]?\)/) { print "$1\n"; last; }' configure.ac`
+vers=`perl -n -l -e 'if (/AM_INIT_AUTOMAKE\(\[[^]]+\],\[([^],]*)\](,\[.*\])?\)/) { print "$1\n"; last; }' configure.ac`
 if [ x$QUICK != xquick ] ;then
   UPLOAD=yes
   if echo "$vers" | grep -E "devel|rc" ; then UPLOAD=no ; fi

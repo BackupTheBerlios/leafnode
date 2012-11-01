@@ -1,3 +1,31 @@
+2012-11-01  Matthias Andree <matthias.andree@gmx.de>
+
+  * Drop @configure_input@, already part of boilerplate.
+
+    M	Makefile.am
+
+  * Update/Add copyright.
+
+    M	Makefile.am
+    M	configure.ac
+
+  * Replace proper path for leafnode in uninstall instructions.
+
+    M	Makefile.am
+
+2011-08-07  Matthias Andree <matthias.andree@gmx.de>
+
+  * If reading group descriptions fails, don't touch the marker file, so we re-fetch them next time.
+
+    M	NEWS
+    M	fetchnews.c
+
+  * Get ready for next snapshot.
+
+    M	ChangeLog
+    M	NEWS
+    M	configure.ac
+
 2011-08-07  Matthias Andree <matthias.andree@gmx.de>
 
   * Plug massive memory leak in fetchnews -f mode.

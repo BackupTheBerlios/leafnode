@@ -3,7 +3,7 @@
 # (C) Copyright 2002 - 2012 by Matthias Andree <matthias.andree@gmx.de>.
 # See COPYING for the license conditions.
 
-AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
+AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-dist-gzip no-installinfo 1.11 parallel-tests check-news color-tests
 
 sysconf_DATA	= config.example \
 	       filters.example
