@@ -1,5 +1,8 @@
 # -*- makefile -*-
 # @configure_input@
+#
+# (C) Copyright 2002 - 2012 by Matthias Andree <matthias.andree@gmx.de>.
+# See COPYING for the license conditions.
 
 AUTOMAKE_OPTIONS	= foreign dist-bzip2 no-installinfo 1.6 # check-news
 
