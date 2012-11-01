@@ -346,7 +346,7 @@ uninstall-local:
 	-rmdir $(SPOOLDIR)/interesting.groups
 	-rmdir $(SPOOLDIR)/message.id
 	@echo
-	@echo Edit /etc/inetd.conf to remove $(BINDIR)/leafnode and restart inetd
+	@echo "Edit /etc/inetd.conf to remove $(sbindir)/leafnode and restart inetd."
 
 .PHONY:	doxygen
 doxygen:
