@@ -1,8 +1,11 @@
 /** \file masock_sa2name.c
- *  (C) Copyright 2001 by Matthias Andree
+ *  (C) Copyright 2001,2013 by Matthias Andree
  *  \author Matthias Andree
- *  \date 2001
+ *  \year 2001,2013
  */
+
+#define _GNU_SOURCE	// to expose nonstandard members in in.h structures to
+			// fix compilation in strict conformance mode on Linux
 
 #include "masock.h"
 #include "critmem.h"
@@ -31,9 +34,9 @@
  * \return strdup'ed string containing the host name or NULL in case of
  * trouble.
  *
- * \bug Linux glibc has broken IN6_IS_ADDR_* macros that do not cast to
- * const.
- * 
+ * \bug Linux [e]glibc has broken IN6_IS_ADDR_* macros that do not cast to
+ * const and that do not work in strict conformance mode because they
+ * access nonstandard members.
  */
 char *
 masock_sa2name(const struct sockaddr *sa
@@ -45,6 +48,7 @@ masock_sa2name(const struct sockaddr *sa
     char *ret;
 
     switch (sa->sa_family) {
+#ifdef HAVE_IPV6
     case AF_INET6:
 	/* any warnings issued here are the fault of broken system
 	   includes */
@@ -64,6 +68,7 @@ masock_sa2name(const struct sockaddr *sa
 	if (!he)
 	    errno = 0, *h_e = h_errno;
 	break;
+#endif
     case AF_INET:
 	he = gethostbyaddr((const char *)
 			   &((const struct sockaddr_in *)sa)
