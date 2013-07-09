@@ -81,7 +81,7 @@ get_feedtype(enum feedtype t)
 int
 parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
 {
-    char *p;
+    char *p, *start;
     size_t le, len;
     enum modes { plain, quoted } mode = plain;
 
@@ -111,11 +111,16 @@ parse_line(/*@unique@*/ char *l, /*@out@*/ char *param, /*@out@*/ char *value)
 	    break;
     }
 
+    start = value;
     /* read value */
     for (le = 0 ; le < TOKENSIZE - 1 ; le ++) {
 	char c = *p++;
 	if (mode == plain) {
-	    if (c == '#' || c == '\0') { break; }
+	    if (c == '#' || c == '\0') {
+		// strip trailing blanks
+		while(value > start && strchr(" \t", value[-1])) value--;
+		break;
+	    }
 	    if (c == '"') { mode = quoted; continue; }
 	    *value++ = c;
 	} else if (mode == quoted) {
